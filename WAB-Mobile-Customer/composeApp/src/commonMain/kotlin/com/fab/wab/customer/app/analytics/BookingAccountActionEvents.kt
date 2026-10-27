@@ -79,7 +79,7 @@ internal object BookingAccountActionEvents {
         ProfileContract.UiAction.OnGuestSave, is ProfileContract.UiAction.OnPhotoSourceSelect, ProfileContract.UiAction.OnPhotoDelete,
         is ProfileContract.UiAction.OnLanguageSelect, is ProfileContract.UiAction.OnThemeSelect, is ProfileContract.UiAction.OnPushToggle,
         is ProfileContract.UiAction.OnContactChannel, is ProfileContract.UiAction.OnLinkClick, ProfileContract.UiAction.OnLogoutConfirm,
-        ProfileContract.UiAction.OnDeleteAccountConfirm, -> ActionEvent.ByViewModel
+        ProfileContract.UiAction.OnDeleteAccountConfirm, ProfileContract.UiAction.OnOpenSettings, -> ActionEvent.ByViewModel
         ProfileContract.UiAction.OnLoginClick -> ActionEvent.Named(Events.LOGIN_OPEN)
         ProfileContract.UiAction.OnEditGuestClick, ProfileContract.UiAction.OnPhotoClick, ProfileContract.UiAction.OnLanguageClick,
         ProfileContract.UiAction.OnThemeClick, ProfileContract.UiAction.OnContactClick, ProfileContract.UiAction.OnLogoutClick,

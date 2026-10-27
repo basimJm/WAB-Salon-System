@@ -37,6 +37,7 @@ class ContentNavigation(override val navController: NavHostController) : Navigat
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is ContentPageContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+                is ContentPageContract.SideEffect.ShowInfo -> notifications.show(effect.message, style = NotificationStyle.Info)
             }
         }
         ContentPageScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)

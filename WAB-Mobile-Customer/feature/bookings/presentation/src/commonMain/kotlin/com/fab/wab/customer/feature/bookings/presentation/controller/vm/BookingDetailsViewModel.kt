@@ -19,6 +19,10 @@ import com.fab.wab.customer.core.realtime.RealtimeEvents
 import com.fab.wab.customer.core.realtime.RefreshReason
 import com.fab.wab.customer.core.realtime.refreshesFor
 import com.fab.wab.customer.core.ui.external.ExternalActions
+import com.fab.wab.customer.core.ui.external.ExternalApp
+import com.fab.wab.customer.core.ui.external.ExternalOutcome
+import com.fab.wab.customer.core.ui.external.unavailableApp
+import com.fab.wab.customer.designsystem.components.feedback.externalUnavailableText
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.bookings.domain.model.CancellationRule
 import com.fab.wab.customer.feature.bookings.domain.model.cancellationRuleOf
@@ -45,6 +49,7 @@ class BookingDetailsDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val externalText: suspend (ExternalApp) -> String = ::externalUnavailableText,
     val now: () -> Instant = { BusinessTime.nowInstant() },
 )
 
@@ -77,12 +82,19 @@ class BookingDetailsViewModel(
             UiAction.OnRetry -> load()
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnResume -> onResume()
-            UiAction.OnCallClick -> uiState.value.salonPhone?.let { deps.external.dial(it) }
-            UiAction.OnWhatsAppClick -> uiState.value.salonWhatsApp?.let { deps.external.openWhatsApp(it) }
+            UiAction.OnCallClick -> uiState.value.salonPhone?.let { phone -> handOff { dial(phone) } }
+            UiAction.OnWhatsAppClick -> uiState.value.salonWhatsApp?.let { phone -> handOff { openWhatsApp(phone) } }
             UiAction.OnRateClick -> rate()
             UiAction.OnCancelClick -> openCancelDialog()
             UiAction.OnCancelConfirm -> cancel()
             UiAction.OnCancelDismiss -> updateState { copy(cancelDialog = null) }
+        }
+    }
+
+    /** Dialer / WhatsApp; a device without one (simulator) gets a message instead of nothing. */
+    private fun handOff(open: suspend ExternalActions.() -> ExternalOutcome) {
+        scope.launch {
+            deps.external.open().unavailableApp?.let { emitSideEffect(SideEffect.ShowError(deps.externalText(it))) }
         }
     }
 

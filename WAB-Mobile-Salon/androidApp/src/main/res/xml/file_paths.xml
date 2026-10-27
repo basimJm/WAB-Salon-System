@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- FileProvider roots (MER-076): only the camera capture folder in the app cache is shared. -->
+<paths>
+    <cache-path
+        name="camera"
+        path="camera/" />
+</paths>

@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.feature.salon.presentation.controller.contract
 
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.feature.salon.domain.CatalogRequest
 import com.fab.wab.merchant.feature.salon.domain.catalogRequestValid
@@ -21,6 +23,7 @@ sealed interface CatalogRequestsContract {
         val requests: List<CatalogRequest> = emptyList(),
         val form: CatalogRequestForm? = null,
         val sending: Boolean = false,
+        val media: MediaPickUi = MediaPickUi(),
     )
 
     sealed interface UiAction {
@@ -28,6 +31,7 @@ sealed interface CatalogRequestsContract {
         data class OnName(val value: String) : UiAction
         data class OnDescription(val value: String) : UiAction
         data object OnPickImage : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data object OnSend : UiAction
         data object OnDismiss : UiAction
         data object OnRetry : UiAction

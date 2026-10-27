@@ -13,8 +13,6 @@ import com.fab.wab.merchant.core.navigation.NavigatorDelegation
 import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
-import com.fab.wab.merchant.core.ui.permission.AppPermission
-import com.fab.wab.merchant.core.ui.permission.PermissionFlow
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchEditContract
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchOutcome
 import com.fab.wab.merchant.feature.branches.presentation.controller.contract.BranchesContract
@@ -26,13 +24,11 @@ import com.fab.wab.merchant.feature.branches.presentation.resources.branch_done_
 import com.fab.wab.merchant.feature.branches.presentation.resources.branch_done_main
 import com.fab.wab.merchant.feature.branches.presentation.resources.branch_done_offline
 import com.fab.wab.merchant.feature.branches.presentation.resources.branch_done_online
-import com.fab.wab.merchant.feature.branches.presentation.resources.branch_location_blocked
 import com.fab.wab.merchant.feature.branches.presentation.resources.branch_saved
 import com.fab.wab.merchant.feature.branches.presentation.screen.BranchEditScreen
 import com.fab.wab.merchant.feature.branches.presentation.screen.BranchesScreen
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -69,7 +65,6 @@ class BranchesNavigation(override val navController: NavHostController) : Naviga
         val viewModel: BranchEditViewModel = koinViewModel(key = branchId) { parametersOf(branchId) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
-        val permissions = koinInject<PermissionFlow>()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is BranchEditContract.SideEffect.Saved -> {
@@ -78,10 +73,6 @@ class BranchesNavigation(override val navController: NavHostController) : Naviga
                     navigateBack()
                 }
                 is BranchEditContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
-                BranchEditContract.SideEffect.LocationBlocked -> {
-                    notifications.show(getString(Res.string.branch_location_blocked), style = NotificationStyle.Info)
-                    permissions.openSettings(AppPermission.LOCATION)
-                }
             }
         }
         BranchEditScreen(state = state, onAction = viewModel::onEvent, onBack = { navigateBack() })

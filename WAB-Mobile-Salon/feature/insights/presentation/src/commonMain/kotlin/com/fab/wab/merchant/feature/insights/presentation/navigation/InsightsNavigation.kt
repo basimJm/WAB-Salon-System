@@ -13,7 +13,7 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.ui.external.ExternalActions
-import com.fab.wab.merchant.core.ui.external.ExternalLinks
+import com.fab.wab.merchant.designsystem.components.external.rememberExternalHandoff
 import com.fab.wab.merchant.feature.insights.presentation.controller.contract.ReviewsContract
 import com.fab.wab.merchant.feature.insights.presentation.controller.contract.StatisticsContract
 import com.fab.wab.merchant.feature.insights.presentation.controller.vm.ReviewsViewModel
@@ -40,19 +40,16 @@ class InsightsNavigation(override val navController: NavHostController) : Naviga
         val viewModel: ReviewsViewModel = koinViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
-        val external = koinInject<ExternalActions>()
+        val handoff = rememberExternalHandoff(koinInject<ExternalActions>())
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
-                is ReviewsContract.SideEffect.Dial -> external.dial(effect.phone)
-                is ReviewsContract.SideEffect.WhatsAppReport -> external.openUrl(
-                    ExternalLinks.whatsAppMessage(effect.phone, getString(Res.string.reviews_report_message, effect.reviewId)),
-                )
-                is ReviewsContract.SideEffect.EmailReport -> external.openUrl(
-                    ExternalLinks.mailtoMessage(
-                        effect.address,
-                        getString(Res.string.reviews_report_subject),
-                        getString(Res.string.reviews_report_message, effect.reviewId),
-                    ),
+                is ReviewsContract.SideEffect.Dial -> handoff.call(effect.phone)
+                is ReviewsContract.SideEffect.WhatsAppReport ->
+                    handoff.whatsApp(effect.phone, getString(Res.string.reviews_report_message, effect.reviewId))
+                is ReviewsContract.SideEffect.EmailReport -> handoff.emailMessage(
+                    effect.address,
+                    getString(Res.string.reviews_report_subject),
+                    getString(Res.string.reviews_report_message, effect.reviewId),
                 )
                 is ReviewsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }

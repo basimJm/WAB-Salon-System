@@ -6,6 +6,8 @@ import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.ui.media.CropRegion
 import com.fab.wab.merchant.designsystem.components.map.MapPickerAction
 import com.fab.wab.merchant.designsystem.components.map.MapPickerUi
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.ProfileField
@@ -28,6 +30,7 @@ sealed interface SalonProfileContract {
         val cover: UploadItemUi? = null,
         val profile: UploadItemUi? = null,
         val crop: CropRequest? = null,
+        val media: MediaPickUi = MediaPickUi(),
         val map: MapPickerUi? = null,
         val cities: List<City> = emptyList(),
         val areas: List<Area> = emptyList(),
@@ -55,7 +58,9 @@ sealed interface SalonProfileContract {
         data class OnCropConfirm(val region: CropRegion) : UiAction
         data object OnCropCancel : UiAction
         data class OnRetryImage(val target: ProfileImage) : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data object OnOpenMap : UiAction
+        data object OnOpenInMaps : UiAction
         data class OnMap(val action: MapPickerAction) : UiAction
         data object OnCloseMap : UiAction
         data object OnPreview : UiAction
@@ -72,6 +77,6 @@ sealed interface SalonProfileContract {
         data object Saved : SideEffect
         data object NavigateBack : SideEffect
         data class ShowError(val message: String) : SideEffect
-        data object LocationBlocked : SideEffect
+        data class OpenInMaps(val latitude: Double, val longitude: Double, val label: String) : SideEffect
     }
 }

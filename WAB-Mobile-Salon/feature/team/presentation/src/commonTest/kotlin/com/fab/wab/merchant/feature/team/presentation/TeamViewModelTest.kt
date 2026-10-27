@@ -8,6 +8,8 @@ import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
 import com.fab.wab.merchant.core.ui.media.FakeImageCropper
 import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.core.ui.media.PickedImage
@@ -133,6 +135,7 @@ class TeamViewModelTest {
         assertEquals(MemberRole.EMPLOYEE, viewModel.state.first().draft.role)
         viewModel.onEvent(MemberEditContract.UiAction.OnRole(MemberRole.MANAGER))
         viewModel.onEvent(MemberEditContract.UiAction.OnPickPhoto)
+        viewModel.onEvent(MemberEditContract.UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         viewModel.onEvent(MemberEditContract.UiAction.OnCropConfirm(CropRegion.FULL))
         viewModel.onEvent(MemberEditContract.UiAction.OnSave)
         val draft = team.created.single()

@@ -106,7 +106,7 @@ class AllSalonsViewModelTest {
 
     private fun TestScope.viewModel(entry: AllSalonsEntry = AllSalonsEntry()): AllSalonsViewModel {
         val provider = object : DeviceLocationProvider {
-            override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) = onResult(AMMAN)
+            override suspend fun currentLocation(): LocationData? = AMMAN
         }
         val deps = AllSalonsDependencies(
             searchSalons = SearchSalonsUseCase(search),

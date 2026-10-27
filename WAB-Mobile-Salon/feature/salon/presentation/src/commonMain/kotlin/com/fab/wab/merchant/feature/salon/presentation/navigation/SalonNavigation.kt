@@ -14,8 +14,7 @@ import com.fab.wab.merchant.core.navigation.route.Graph
 import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
-import com.fab.wab.merchant.core.ui.permission.AppPermission
-import com.fab.wab.merchant.core.ui.permission.PermissionFlow
+import com.fab.wab.merchant.designsystem.components.external.rememberExternalHandoff
 import com.fab.wab.merchant.feature.salon.domain.HubTile
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.GalleryContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.HoursContract
@@ -36,7 +35,6 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.closure_updated
 import com.fab.wab.merchant.feature.salon.presentation.resources.gallery_deleted
 import com.fab.wab.merchant.feature.salon.presentation.resources.hours_saved
 import com.fab.wab.merchant.feature.salon.presentation.resources.policy_saved
-import com.fab.wab.merchant.feature.salon.presentation.resources.profile_location_blocked
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_saved
 import com.fab.wab.merchant.feature.salon.presentation.screen.GalleryScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.HoursScreen
@@ -97,7 +95,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
         val viewModel: SalonProfileViewModel = koinViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
-        val permissions = koinInject<PermissionFlow>()
+        val handoff = rememberExternalHandoff(koinInject())
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 SalonProfileContract.SideEffect.Saved -> notifications.show(
@@ -106,10 +104,7 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
                 )
                 SalonProfileContract.SideEffect.NavigateBack -> navigateBack()
                 is SalonProfileContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
-                SalonProfileContract.SideEffect.LocationBlocked -> {
-                    notifications.show(getString(Res.string.profile_location_blocked), style = NotificationStyle.Info)
-                    permissions.openSettings(AppPermission.LOCATION)
-                }
+                is SalonProfileContract.SideEffect.OpenInMaps -> handoff.maps(effect.latitude, effect.longitude, effect.label)
             }
         }
         SalonProfileScreen(state = state, onAction = viewModel::onEvent)

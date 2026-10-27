@@ -13,6 +13,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.fab.wab.merchant.app.deeplink.DeepLinkEffect
 import com.fab.wab.merchant.app.dev.MockWorldSwitcher
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
+import com.fab.wab.merchant.app.permission.AlertsPermissionPrompt
 import com.fab.wab.merchant.core.domain.permission.Permission
 import com.fab.wab.merchant.core.domain.permission.PermissionSet
 import com.fab.wab.merchant.core.domain.session.LaunchRoute
@@ -59,6 +60,8 @@ fun MerchantShell(
     }
     DeepLinkEffect(koinInject<DeepLinkStore>(), route, navController)
     MockWorldSwitcher(koinInject())
+    // PRD M10 / §11: notifications (Android 13+) and the overlay explained and asked once signed in.
+    if (route == LaunchRoute.HOME) AlertsPermissionPrompt(answersRequests = permissions.has(Permission.BOOKINGS_RESPOND))
     // PRD M10: the request sheet over any screen, for members who may answer requests.
     if (route == LaunchRoute.HOME && permissions.has(Permission.BOOKINGS_RESPOND)) {
         BookingRequestHost(onOpenDetails = { id -> navController.navigate(Screen.BookingDetails(id)) })

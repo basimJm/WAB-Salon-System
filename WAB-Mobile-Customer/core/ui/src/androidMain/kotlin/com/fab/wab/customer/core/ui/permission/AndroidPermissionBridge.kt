@@ -28,12 +28,18 @@ class AndroidPermissionBridge {
         }
     }
 
-    fun detach() {
+    /**
+     * A recreated Activity (rotation, dark mode, language) registers again under the same key and receives the
+     * answer, so a pending request is only cancelled when the Activity is really finishing.
+     */
+    fun detach(finishing: Boolean) {
         launcher?.unregister()
         launcher = null
-        pending?.cancel()
-        pending = null
         activityRef = null
+        if (finishing) {
+            pending?.cancel()
+            pending = null
+        }
     }
 
     /** Shows the system dialog; returns an empty map when no Activity is attached (nothing can be shown). */

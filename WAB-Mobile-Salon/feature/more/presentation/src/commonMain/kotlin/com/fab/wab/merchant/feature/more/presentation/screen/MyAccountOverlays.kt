@@ -14,6 +14,7 @@ import com.fab.wab.merchant.designsystem.components.form.AppPhoneField
 import com.fab.wab.merchant.designsystem.components.form.CountryUi
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.upload.AppImageCropper
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
 import com.fab.wab.merchant.designsystem.components.upload.CropAspect
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.more.presentation.controller.contract.MyAccountContract.UiAction
@@ -29,6 +30,7 @@ import org.jetbrains.compose.resources.stringResource
 /** Photo cropper (1:1) and the change-phone sheet with its country picker. */
 @Composable
 internal fun AccountOverlays(state: UiState, onAction: (UiAction) -> Unit) {
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
     val spacing = AppTheme.spacing
     state.cropBytes?.let { bytes ->
         AppBottomSheet(onDismiss = { onAction(UiAction.OnCropCancel) }) {

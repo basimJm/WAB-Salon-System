@@ -3,6 +3,8 @@ package com.fab.wab.merchant.feature.more.presentation.controller.contract
 import com.fab.wab.merchant.core.common.FormValidators
 import com.fab.wab.merchant.core.domain.locations.Country
 import com.fab.wab.merchant.core.ui.media.CropRegion
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.more.domain.AccountField
@@ -28,6 +30,7 @@ sealed interface MyAccountContract {
         val photo: UploadItemUi? = null,
         val photoChange: PhotoChange = PhotoChange.Keep,
         val cropBytes: ByteArray? = null,
+        val media: MediaPickUi = MediaPickUi(),
         val showErrors: Boolean = false,
         val saving: Boolean = false,
         val countries: List<Country> = emptyList(),
@@ -52,6 +55,7 @@ sealed interface MyAccountContract {
         data class OnFirstName(val value: String) : UiAction
         data class OnLastName(val value: String) : UiAction
         data object OnPickPhoto : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data class OnCropConfirm(val region: CropRegion) : UiAction
         data object OnCropCancel : UiAction
         data object OnRemovePhoto : UiAction

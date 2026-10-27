@@ -8,6 +8,7 @@ import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res
 import com.fab.wab.customer.designsystem.resources.dialog_auth_confirm
 import com.fab.wab.customer.designsystem.resources.dialog_auth_title
+import com.fab.wab.customer.designsystem.resources.dialog_camera_denied_title
 import com.fab.wab.customer.designsystem.resources.dialog_cancel
 import com.fab.wab.customer.designsystem.resources.dialog_delete_account_confirm
 import com.fab.wab.customer.designsystem.resources.dialog_delete_account_message
@@ -18,6 +19,7 @@ import com.fab.wab.customer.designsystem.resources.dialog_location_denied_title
 import com.fab.wab.customer.designsystem.resources.dialog_location_title
 import com.fab.wab.customer.designsystem.resources.dialog_logout_confirm
 import com.fab.wab.customer.designsystem.resources.dialog_logout_title
+import com.fab.wab.customer.designsystem.resources.dialog_notifications_denied_title
 import com.fab.wab.customer.designsystem.resources.dialog_session_expired_confirm
 import com.fab.wab.customer.designsystem.resources.dialog_session_expired_title
 import com.fab.wab.customer.designsystem.resources.dialog_update_confirm
@@ -33,6 +35,8 @@ enum class GlobalDialogKind {
     OptionalUpdate,
     LocationExplanation,
     LocationDenied,
+    CameraDenied,
+    NotificationsDenied,
     Logout,
     DeleteAccount,
 }
@@ -50,7 +54,9 @@ fun globalDialogSpec(kind: GlobalDialogKind): GlobalDialogSpec = when (kind) {
     GlobalDialogKind.SessionExpired -> GlobalDialogSpec(AppIcons.Info, StatusTone.Warning, false, false)
     GlobalDialogKind.OptionalUpdate -> GlobalDialogSpec(AppIcons.Refresh, StatusTone.Accent, true, true)
     GlobalDialogKind.LocationExplanation -> GlobalDialogSpec(AppIcons.Search, StatusTone.Accent, true, true)
-    GlobalDialogKind.LocationDenied -> GlobalDialogSpec(AppIcons.Info, StatusTone.Warning, true, true)
+    GlobalDialogKind.LocationDenied,
+    GlobalDialogKind.CameraDenied,
+    GlobalDialogKind.NotificationsDenied -> GlobalDialogSpec(AppIcons.Info, StatusTone.Warning, true, true)
     GlobalDialogKind.Logout -> GlobalDialogSpec(AppIcons.Close, StatusTone.Neutral, true, true)
     GlobalDialogKind.DeleteAccount -> GlobalDialogSpec(AppIcons.Error, StatusTone.Danger, true, true)
 }
@@ -71,6 +77,10 @@ private fun textsOf(kind: GlobalDialogKind): GlobalDialogTexts = when (kind) {
     GlobalDialogKind.LocationExplanation -> GlobalDialogTexts(Res.string.dialog_location_title, Res.string.dialog_location_confirm)
     GlobalDialogKind.LocationDenied ->
         GlobalDialogTexts(Res.string.dialog_location_denied_title, Res.string.dialog_location_denied_confirm)
+    GlobalDialogKind.CameraDenied ->
+        GlobalDialogTexts(Res.string.dialog_camera_denied_title, Res.string.dialog_location_denied_confirm)
+    GlobalDialogKind.NotificationsDenied ->
+        GlobalDialogTexts(Res.string.dialog_notifications_denied_title, Res.string.dialog_location_denied_confirm)
     GlobalDialogKind.Logout -> GlobalDialogTexts(Res.string.dialog_logout_title, Res.string.dialog_logout_confirm)
     GlobalDialogKind.DeleteAccount -> GlobalDialogTexts(
         Res.string.dialog_delete_account_title,
