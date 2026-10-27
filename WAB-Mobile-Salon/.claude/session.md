@@ -24,8 +24,8 @@
   - [x] iOS usage strings rewritten for the merchant app in Info.plist + AR/EN `InfoPlist.strings`
   - [ ] Device proof on emulator + simulator — NOT DONE (owner time limit; see Notes)
 - Tests: `MediaPickHandlerTest` (7), `ExternalHandoffTest` (4), `MapPickerLocateTest` (3), `AlertsPermissionViewModelTest` (3), `ExternalLinksTest` (+2), `GalleryViewModelTest` (+1), `SalonProfileViewModelTest` (+1, 1 changed), picking tests of Services/Catalog/MyAccount/Team/Registration updated to the source sheet; `./gradlew testAndroidHostTest` 188 suites / 627 tests / 0 failures, no `w:`; `run_detekt.sh` ok; `policy_checks.py all` ok; `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok. NOT run: `iosApp-Dev` xcodebuild simulator build, iOS K/N tests
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch verification (rules §3.13) on `chore/merchant-integration-perf`: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green; merged release manifest checked (POST_NOTIFICATIONS kept, no CAMERA). DEFERRED: device proof of every hand-off (emulator/simulator were taken by other agents; call + camera need a real iPhone)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together (manifest, AppDelegate push handling, R8/stability config); deviations listed in Loops/Notes.
 - Notes: Stopped at the owner's 25-minute limit (2026-10-27). NOT done: emulator/simulator proof of each feature (the free AVD was already in use by another session), iOS `iosApp-Dev` simulator build, Personal-Team (`iosApp-Personal.entitlements`) launch check — AppDelegate only fails `registerForRemoteNotifications` there (no crash path found in code, not run). Removed dead code: `ImagePicker` port + platform pickers, `PlatformUrlLauncher`. `android.media.ExifInterface` (framework) used, no new library; design-system commonTest gained `kotlinx-coroutines-test` (already in the catalog). Staff have no call action in PRD/design, so none was added. "Open in Maps" has no web fallback (a host literal would need build config).
 ### MER-077 — Performance: R8, Compose, startup (Android + shared)
 - Branch: `perf/mer-077-android-performance`
@@ -38,8 +38,8 @@
   - [x] Startup/ANR: `AppSettings` + `PushTokenProvider` resolved inside the IO coroutine of `AndroidApp.onCreate` (DataStore + Firebase Messaging creation off the main thread)
   - [ ] Gates: host tests, detekt, `assembleDevRelease` + `assembleDevDebug`, iOS framework link — NOT RUN (see Notes)
 - Tests: `CalendarLayoutTest.equalInputsGiveEqualLayout` (new: equal inputs give an equal layout/window, the property the remember keys rely on); `policy_checks.py all` ok; Gradle not run
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch verification (rules §3.13): gates above green incl. devRelease/prodRelease with the Compose stability config. DEFERRED: before/after measurements, narrowing R8 keep rules, app baseline profile
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together (manifest, AppDelegate push handling, R8/stability config); deviations listed in Loops/Notes.
 - Notes: DEVIATIONS — Gradle runs only from the terminal panel (no Java in the sandbox) and the panel hook refused a new tab (6 tabs open by other agents; their tabs were not reused), so no Gradle task, no detekt, no device measurement ran. Not done (time box 25 min): narrowing the broad keep rules (`io.ktor.**`, whole `core.data/network/domain` packages) needs a release run on a device to prove nothing breaks; ProfileInstaller already arrives transitively through androidx.activity (library baseline profiles apply), no app baseline profile (needs a Macrobenchmark module); bookings list / Home / team / finance lists already use `key` + `contentType`.
 ### MER-078 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/mer-078-ios-performance`
@@ -51,8 +51,8 @@
   - [x] Startup: APNs registered once and only when Firebase is configured; `didFailToRegister` logs once, no retry (Personal Team without `aps-environment`); Koin stays synchronous before the first frame (the UI reads it immediately), Firebase `configure` must run on main; realtime socket is not started at launch (`IosBookingRequests.start` only observes the language)
   - [ ] Simulator builds: iosApp-Dev Debug-Dev BUILD SUCCEEDED (composeApp recompiled + `linkDebugFrameworkIosSimulatorArm64`); Release-Dev FAILED before compiling (Gradle `journal-1` cache lock held by a parallel agent's daemon, not a code error); Release-Prod stopped at the 25-min time box; both to re-run
 - Tests: `scripts/ci/tests/test_variants.py` (+5 `IosBuildSettingsTest`); `python3 -m unittest discover -s scripts/ci/tests` 110 OK; `policy_checks.py all` ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch verification (rules §3.13): all four iOS simulator configurations build with the new Xcode/K/N settings; policy variants check enforces them. DEFERRED: launch measurements; Personal Team launch on a real iPhone (owner); parallelRendering is experimental
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together (manifest, AppDelegate push handling, R8/stability config); deviations listed in Loops/Notes.
 - Notes: NOT DONE: Release builds, detekt, Release cold-launch measurement, own simulator run. Image cache = shared code (single Coil `ImageLoader` with default memory + disk cache in `App.kt`), not changed. Local.xcconfig untouched.
 
 ### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
