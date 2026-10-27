@@ -17,11 +17,11 @@
   - [x] K/N runtime: `-Xbinary=appStateTracking=enabled` (no timer GC in the background); `gc` stays the default CMS, `objcDisposeOnMain` stays default (Compose releases UIKit objects on main)
   - [x] `ComposeUIViewController(configure = { parallelRendering = true })` (Compose 1.10.3 API); ProMotion `CADisableMinimumFrameDurationOnPhone` already in Info.plist, verified by the default strict plist check
   - [x] Startup: APNs registered once and only when Firebase is configured; `didFailToRegister` logs once, no retry (Personal Team without `aps-environment`); Koin stays synchronous before the first frame (the UI reads it immediately), Firebase `configure` must run on main; realtime socket is not started at launch (`IosBookingRequests.start` only observes the language)
-  - [ ] Simulator builds: iosApp-Dev Debug-Dev + Release-Dev, iosApp-Prod Release-Prod
+  - [ ] Simulator builds: iosApp-Dev Debug-Dev BUILD SUCCEEDED (composeApp recompiled + `linkDebugFrameworkIosSimulatorArm64`); Release-Dev FAILED before compiling (Gradle `journal-1` cache lock held by a parallel agent's daemon, not a code error); Release-Prod stopped at the 25-min time box; both to re-run
 - Tests: `scripts/ci/tests/test_variants.py` (+5 `IosBuildSettingsTest`); `python3 -m unittest discover -s scripts/ci/tests` 110 OK; `policy_checks.py all` ok
 - Loops: 0/1
 - Review: PENDING
-- Notes: image cache = shared code (single Coil `ImageLoader` with default memory + disk cache in `App.kt`), not changed. Local.xcconfig untouched.
+- Notes: NOT DONE: Release builds, detekt, Release cold-launch measurement, own simulator run. Image cache = shared code (single Coil `ImageLoader` with default memory + disk cache in `App.kt`), not changed. Local.xcconfig untouched.
 
 ### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
 - Branch: `feat/mer-075-contract-1-6`
