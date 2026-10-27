@@ -9,6 +9,20 @@
 
 ## Current task
 
+### CUS-095 — Performance: R8, Compose, baseline profiles (Android + shared)
+- Branch: `perf/cus-095-android-performance`
+- Status: IN PROGRESS (partial: owner time limit 25 min on 2026-10-27)
+- Acceptance criteria (owner request 2026-10-27; skills r8-analyzer, jetpack-compose-performance, android-profiler, anr-audit-and-fix; no PRD/API change):
+  - [ ] Before/after numbers on an emulator (cold start TTID/TTFD, gfxinfo framestats on Home, search, salon details, bookings) — NOT DONE (time)
+  - [x] R8: release (dev + prod) minify + shrinkResources already on with `proguard-android-optimize.txt`, full mode default (AGP 9.1, no `fullMode=false`); broad keeps removed (`io.ktor.**`, `core.network.**`, `core.domain.**`, `feature.**.domain.model.**`); serializer/Companion keeps and generated DTO keeps stay; debug stays unminified
+  - [x] ANR/startup: `AndroidApp.onCreate` no longer resolves the DataStore-backed `AppSettings` + Firebase `PushTokenProvider` on the main thread (resolved inside the IO scope)
+  - [x] Compose: `AppImage` uses one Coil painter + overlays instead of `SubcomposeAsyncImage` (no subcomposition per image in lazy lists; same shimmer → image → fallback look); lazy lists checked: Home, salons paging, salon details already set `key` + `contentType`
+  - [ ] Baseline Profile + Startup Profile module (macrobenchmark), Compose compiler reports — NOT DONE (time)
+- Tests: `ImageOverlayTest` (new, overlay decision)
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
+
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
 - Status: IN PROGRESS (ready for the lead: not pushed, no PR)
@@ -37,14 +51,3 @@
 - Loops: 1/1 — re-checked every fix on the device after the final build: S05 sheet clean after chip removal, no dead "See more" on S07 reviews, single-day closure text, S06 "more" only on overflow, "30%" in S16/S15, staff line hidden, localized cancel reason, Home reloads on AR/EN switch, live badge after token refresh, iOS sign-in with demo customer 2 (was 422); found and fixed during the loop: HomeViewModel over 300 lines, detekt MaxLineLength on plural call sites, a `?.` warning in the provider test
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: fixes stay in their layer (presentation helpers pure + tested, socket retry in core/realtime without a second refresher, single-top in the shared navigator), no hardcoded values (new texts in AR + EN resources, plurals for counts), no contract change; server gaps listed in `docs/E2E_RESULTS.md` instead of client workarounds
 - Notes: DEVIATIONS — not pushed / no PR (lead runs the remote loop); S24 maintenance/force-update and the 5-minute OTP expiry not exercised live (shared stack / time; unit-tested); single-top navigation and the review/service "more" toggles are covered by option/rule tests, not Compose UI tests; `InstallationInfo.UNKNOWN_INSTALLATION` (repository fallback) is still contract-invalid but no longer reachable from the app; iOS only a smoke path (no booking on iOS). Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `iosApp/Configuration/Local.xcconfig`); never committed.
-
-### CUS-090 — Crash fix: decoding failures become `AppError.ParseError`
-- Branch: `fix/cus-090-decode-crash`
-- Status: IN REVIEW
-- Acceptance criteria (owner crash report 2026-10-26; rules §1.7 "failures are AppResult/AppError, never thrown"):
-  - [x] Root cause: Ktor wraps body decoding failures in `io.ktor.serialization.JsonConvertException` (a `ContentConvertException`, not a kotlinx `SerializationException`), so `safeApiCall` let it escape → FATAL on `OTP request` when the hosted dev API (old server) omitted `expiresInSeconds`
-  - [x] `safeApiCall` catches `ContentConvertException` → `AppError.ParseError` (the screen shows its error state instead of crashing)
-  - [x] Regression test: a 200 body missing a required field → `ParseError`; proven to fail without the fix (`JsonConvertException`)
-- Tests: `SafeApiCallTest` (+1, 7 total); `./gradlew :core:network:testAndroidHostTest` green; red without the fix
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, no behaviour change for valid responses. NOTE: the OTP screen will still show an error against the hosted dev API until it runs the new server (main sync after the owner sets the Render env, SRV-154).
