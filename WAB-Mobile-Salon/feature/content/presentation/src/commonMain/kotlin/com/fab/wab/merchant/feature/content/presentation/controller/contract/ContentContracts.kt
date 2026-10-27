@@ -26,6 +26,9 @@ sealed interface ContentPageContract {
 
     sealed interface SideEffect {
         data class ShowError(val message: String) : SideEffect
+
+        /** A call / chat / mail / link could not open on this device (MER-076). */
+        data class ShowInfo(val message: String) : SideEffect
     }
 }
 

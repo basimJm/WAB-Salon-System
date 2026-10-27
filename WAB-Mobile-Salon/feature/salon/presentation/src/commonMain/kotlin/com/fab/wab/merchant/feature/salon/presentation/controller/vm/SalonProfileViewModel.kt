@@ -20,6 +20,8 @@ import com.fab.wab.merchant.core.ui.media.ImageCropper
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.map.MapPickerUi
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.ProfileForm
@@ -56,7 +58,8 @@ class SalonProfileViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
-    private val mapHandler = MapPickerHandler(deps.map, scope, ::readMap, ::writeMap) { emitSideEffect(SideEffect.LocationBlocked) }
+    private val mapHandler = MapPickerHandler(deps.map, scope, ::readMap, ::writeMap)
+    private val media = MediaPickHandler(deps.filePicker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
 
     override fun onStart() {
         load()
@@ -114,6 +117,8 @@ class SalonProfileViewModel(
             }
             UiAction.OnKeepEditing -> updateState { copy(unsavedDialog = false) }
             UiAction.OnRetry -> load()
+            is UiAction.OnMedia -> media.handle(event.action)
+            UiAction.OnOpenInMaps -> openInMaps()
             else -> return false
         }
         return true
@@ -173,10 +178,15 @@ class SalonProfileViewModel(
     }
 
     private fun pick(target: ProfileImage) {
-        scope.launch {
-            val file = deps.filePicker.pickMedia(maxCount = 1, includeVideo = false).firstOrNull() ?: return@launch
-            updateState { copy(crop = CropRequest(target, file.bytes)) }
+        media.open(PHOTO_SOURCES, maxCount = 1) { files ->
+            files.firstOrNull()?.let { file -> updateState { copy(crop = CropRequest(target, file.bytes)) } }
         }
+    }
+
+    private fun openInMaps() {
+        val form = uiState.value.form
+        val point = form.location ?: return
+        emitSideEffect(SideEffect.OpenInMaps(point.latitude, point.longitude, form.name.ifBlank { form.locationText }))
     }
 
     private fun crop(region: CropRegion) {

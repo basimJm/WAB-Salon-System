@@ -1,6 +1,8 @@
 package com.fab.wab.merchant.feature.salon.presentation.controller.contract
 
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.ServiceDraft
@@ -24,6 +26,7 @@ sealed interface ServiceEditContract {
         val saving: Boolean = false,
         val confirmDeactivate: Boolean = false,
         val rejection: UploadRejection? = null,
+        val media: MediaPickUi = MediaPickUi(),
     ) {
         val errors: Set<ServiceField> get() = serviceErrors(draft)
         val visibleErrors: Set<ServiceField> get() = if (showErrors) errors else emptySet()
@@ -38,6 +41,7 @@ sealed interface ServiceEditContract {
         data class OnDescription(val value: String) : UiAction
         data class OnActive(val value: Boolean) : UiAction
         data object OnAddMedia : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data class OnRetryMedia(val id: String) : UiAction
         data class OnRemoveMedia(val id: String) : UiAction
         data object OnSave : UiAction

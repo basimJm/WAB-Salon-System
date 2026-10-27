@@ -1,7 +1,6 @@
 package com.fab.wab.merchant
 
-import platform.Foundation.NSURL
-import platform.UIKit.UIApplication
+import com.fab.wab.merchant.core.ui.external.IosUiKit
 import platform.UIKit.UIDevice
 import platform.posix.exit
 
@@ -17,8 +16,7 @@ actual fun getPlatform(): Platform = IOSPlatform()
 
 actual fun openStoreLink(url: String?) {
     val target = url?.takeIf { it.isNotBlank() } ?: return
-    val nsUrl = NSURL.URLWithString(target) ?: return
-    UIApplication.sharedApplication.openURL(nsUrl)
+    IosUiKit.openNow(target)
 }
 
 actual fun exitApp() {

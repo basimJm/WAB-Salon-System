@@ -21,6 +21,7 @@ data class MapPickerUi(
     val query: String = "",
     val suggestions: List<PlaceSuggestionUi> = emptyList(),
     val error: String? = null,
+    val notice: MapNotice? = null,
 ) {
     val canConfirm: Boolean get() = !resolving && !locating
 }
@@ -32,7 +33,14 @@ sealed interface MapPickerAction {
     data class QueryChanged(val query: String) : MapPickerAction
     data class SuggestionPicked(val id: String) : MapPickerAction
     data object Confirm : MapPickerAction
+
+    /** The notice's button: try again (denied), settings (blocked), location switch (services off). */
+    data object NoticeAction : MapPickerAction
+    data object DismissNotice : MapPickerAction
 }
+
+/** Why "Use my location" did not move the map; shown above the address card with its way out. */
+enum class MapNotice { DENIED, BLOCKED, SERVICES_OFF, NOT_FOUND }
 
 /** Stylized-map drag: degrees moved per pixel (about 1.5 m) so the fallback map can still place a pin. */
 const val STYLIZED_DEGREES_PER_PX = 0.000014

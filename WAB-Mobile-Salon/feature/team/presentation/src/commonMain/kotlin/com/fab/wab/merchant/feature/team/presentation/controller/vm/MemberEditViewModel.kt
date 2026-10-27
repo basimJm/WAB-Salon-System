@@ -24,6 +24,8 @@ import com.fab.wab.merchant.core.ui.media.FilePicker
 import com.fab.wab.merchant.core.ui.media.ImageCropper
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.team.domain.ASSIGNABLE_ROLES
@@ -67,6 +69,8 @@ class MemberEditViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(memberId = memberId), testScope) {
 
+    private val media = MediaPickHandler(deps.picker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
+
     override fun onStart() {
         deps.branchScope.onEach { branches ->
             updateState { copy(branches = branches.branches.filter { it.status != BranchStatus.CLOSED }) }
@@ -97,6 +101,7 @@ class MemberEditViewModel(
     private fun handlePhoto(event: UiAction): Boolean {
         when (event) {
             UiAction.OnPickPhoto -> pickPhoto()
+            is UiAction.OnMedia -> media.handle(event.action)
             is UiAction.OnCropConfirm -> crop(event.region)
             UiAction.OnCropCancel -> updateState { copy(cropBytes = null) }
             UiAction.OnRemovePhoto -> {
@@ -172,9 +177,8 @@ class MemberEditViewModel(
     }
 
     private fun pickPhoto() {
-        scope.launch {
-            val file = deps.picker.pickMedia(maxCount = 1, includeVideo = false).firstOrNull() ?: return@launch
-            updateState { copy(cropBytes = file.bytes) }
+        media.open(PHOTO_SOURCES, maxCount = 1) { files ->
+            files.firstOrNull()?.let { file -> updateState { copy(cropBytes = file.bytes) } }
         }
     }
 

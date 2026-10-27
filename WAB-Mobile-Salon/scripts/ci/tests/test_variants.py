@@ -73,5 +73,47 @@ class VariantsTest(TempProject):
         self.assertIn("workflow does not build 'iosApp-Prod'", messages)
 
 
+def _config_block(name, settings):
+    body = "".join(f"\t\t\t\t{key} = {value};\n" for key, value in settings.items())
+    return (f"\t\tAB /* {name} */ = {{\n\t\t\tisa = XCBuildConfiguration;\n\t\t\tbaseConfigurationReferenceAnchor = X;\n"
+            f"\t\t\tbuildSettings = {{\n{body}\t\t\t}};\n\t\t\tname = {name};\n\t\t}};\n")
+
+
+RELEASE_OK = {"KOTLIN_FRAMEWORK_BUILD_TYPE": "release", "SWIFT_OPTIMIZATION_LEVEL": '"-O"',
+              "SWIFT_COMPILATION_MODE": "wholemodule", "DEAD_CODE_STRIPPING": "YES", "ONLY_ACTIVE_ARCH": "NO"}
+DEBUG_OK = {"KOTLIN_FRAMEWORK_BUILD_TYPE": "debug", "ONLY_ACTIVE_ARCH": "YES", "DEAD_CODE_STRIPPING": "YES"}
+
+
+class IosBuildSettingsTest(unittest.TestCase):
+    """MER-078: release configurations stay optimized, debug ones stay incremental."""
+
+    def check(self, *blocks):
+        return [v.message for v in variants._check_ios_build_settings("".join(blocks))]
+
+    def test_optimized_release_and_debug_pass(self):
+        self.assertEqual(self.check(_config_block("Debug-Dev", DEBUG_OK), _config_block("Release-Prod", RELEASE_OK)), [])
+
+    def test_release_without_optimizations_is_reported(self):
+        unoptimized = {"KOTLIN_FRAMEWORK_BUILD_TYPE": "debug", "SWIFT_COMPILATION_MODE": "wholemodule", "ONLY_ACTIVE_ARCH": "YES"}
+        messages = self.check(_config_block("Release-Dev", unoptimized))
+        self.assertIn("Release-Dev: KOTLIN_FRAMEWORK_BUILD_TYPE must be release, found debug", messages)
+        self.assertIn('Release-Dev: SWIFT_OPTIMIZATION_LEVEL must be "-O", found None', messages)
+        self.assertIn("Release-Dev: DEAD_CODE_STRIPPING must be YES, found None", messages)
+        self.assertIn("Release-Dev: ONLY_ACTIVE_ARCH must be NO, found YES", messages)
+
+    def test_debug_with_release_framework_is_reported(self):
+        messages = self.check(_config_block("Debug-Prod", {**DEBUG_OK, "KOTLIN_FRAMEWORK_BUILD_TYPE": "release"}))
+        self.assertEqual(messages, ["Debug-Prod: KOTLIN_FRAMEWORK_BUILD_TYPE must be debug, found release"])
+
+    def test_target_level_blocks_are_ignored(self):
+        target = "\t\tAB /* Release-Dev */ = {\n\t\t\tisa = XCBuildConfiguration;\n\t\t\tbuildSettings = {\n\t\t\t\tARCHS = arm64;\n\t\t\t};\n\t\t};\n"
+        self.assertEqual(self.check(target), [])
+
+    def test_real_project_passes(self):
+        from pathlib import Path
+        project = Path(__file__).resolve().parents[3] / PBXPROJ
+        self.assertEqual(self.check(project.read_text(encoding="utf-8")), [])
+
+
 if __name__ == "__main__":
     unittest.main()

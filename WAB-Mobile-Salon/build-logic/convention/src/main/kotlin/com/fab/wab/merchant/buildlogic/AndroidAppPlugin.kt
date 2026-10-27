@@ -22,6 +22,7 @@ class AndroidAppPlugin : Plugin<Project> {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.compose")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+            configureComposeStability()
             apply(plugin = "com.google.gms.google-services")
             // Generates the Crashlytics build id; without it the Crashlytics SDK aborts the app at startup.
             apply(plugin = "com.google.firebase.crashlytics")

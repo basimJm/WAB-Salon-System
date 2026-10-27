@@ -17,6 +17,7 @@ class KmpCoreComposePlugin : Plugin<Project> {
             apply(plugin = "com.fab.wab.merchant.core.library")
             apply(plugin = "org.jetbrains.compose")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+            configureComposeStability()
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.commonMain.dependencies {
                     implementation(libs.findLibrary("compose-runtime").get())

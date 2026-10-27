@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.core.ui.permission
 
+import com.fab.wab.merchant.core.ui.external.IosUiKit
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVAuthorizationStatusAuthorized
 import platform.AVFoundation.AVAuthorizationStatusNotDetermined
@@ -11,8 +12,6 @@ import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 import platform.CoreLocation.kCLAuthorizationStatusNotDetermined
-import platform.Foundation.NSURL
-import platform.UIKit.UIApplication
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
@@ -52,7 +51,8 @@ class IosPermissionManager : PermissionManager {
     override fun openLocationServiceSettings() = openSettingsApp()
 
     private fun openSettingsApp() {
-        UIApplication.sharedApplication.openURL(NSURL(string = UIApplicationOpenSettingsURLString))
+        // The one-argument openURL is a no-op since iOS 18; IosUiKit uses open(_:options:completionHandler:).
+        IosUiKit.openNow(UIApplicationOpenSettingsURLString)
     }
 
     private suspend fun notificationStatus(): PermissionStatus = suspendCoroutine { continuation ->

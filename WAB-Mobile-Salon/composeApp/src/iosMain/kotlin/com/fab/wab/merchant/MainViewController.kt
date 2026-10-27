@@ -1,5 +1,6 @@
 package com.fab.wab.merchant
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.app.request.IosBookingRequests
@@ -14,9 +15,17 @@ import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
 
+@OptIn(ExperimentalComposeUiApi::class)
 // Swift calls it as a view controller type (MainViewControllerKt.MainViewController()), so it keeps the UIKit name.
 @Suppress("FunctionNaming")
-fun MainViewController() = ComposeUIViewController {
+fun MainViewController() = ComposeUIViewController(
+    configure = {
+        // MER-078: encode the frame's Metal commands off the main thread (Compose 1.8+), leaving the main thread
+        // to input and composition; Info.plist sets CADisableMinimumFrameDurationOnPhone for 120 Hz ProMotion,
+        // which the strict plist check (default on) verifies.
+        parallelRendering = true
+    },
+) {
     App()
 }
 

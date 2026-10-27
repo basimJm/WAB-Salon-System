@@ -16,6 +16,7 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.ui.external.ExternalActions
+import com.fab.wab.merchant.designsystem.components.external.rememberExternalHandoff
 import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
 import com.fab.wab.merchant.feature.more.presentation.controller.contract.MoreContract
 import com.fab.wab.merchant.feature.more.presentation.controller.contract.MyAccountContract
@@ -44,7 +45,7 @@ class MoreNavigation(override val navController: NavHostController) : Navigator 
     private fun MoreDestination() {
         val viewModel: MoreViewModel = koinViewModel()
         val state by viewModel.state.collectAsStateWithLifecycle()
-        val external = koinInject<ExternalActions>()
+        val handoff = rememberExternalHandoff(koinInject<ExternalActions>())
         val notifications = rememberNotificationManager()
         // Back from the system overlay screen: refresh its status.
         LifecycleResumeEffect(Unit) {
@@ -56,9 +57,9 @@ class MoreNavigation(override val navController: NavHostController) : Navigator 
                 MoreContract.SideEffect.OpenFaq -> navigateTo(Screen.Faq)
                 is MoreContract.SideEffect.OpenContent -> navigateTo(Screen.ContentPage(effect.slug))
                 MoreContract.SideEffect.OpenNotifications -> navigateTo(Screen.Notifications)
-                is MoreContract.SideEffect.Dial -> external.dial(effect.phone)
-                is MoreContract.SideEffect.WhatsApp -> external.openWhatsApp(effect.phone)
-                is MoreContract.SideEffect.Email -> external.email(effect.address)
+                is MoreContract.SideEffect.Dial -> handoff.call(effect.phone)
+                is MoreContract.SideEffect.WhatsApp -> handoff.contactWabWhatsApp(effect.phone)
+                is MoreContract.SideEffect.Email -> handoff.email(effect.address)
                 MoreContract.SideEffect.OpenAccount -> navigateTo(Screen.MyAccount)
                 is MoreContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
