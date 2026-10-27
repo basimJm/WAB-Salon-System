@@ -14,6 +14,7 @@ import { computeBranchMissing } from '../../domain/branches/completeness';
 import { defaultPermissionsFor } from '../../domain/permissions/permissions';
 import { mulDivRound } from '../../utils/money';
 import { demoId } from './random';
+import { addUpload, demoFileKey } from './salons';
 import { emptyDataset, type DemoContext, type DemoDataset } from './types';
 
 const FULL_PERCENT = 100;
@@ -91,6 +92,8 @@ export const buildDemoBranches = (
       // The manager of a women's branch also does brides, so bride bookings work there.
       const brideQualified = source.gender === 'FEMALE' && index === 0;
       const names = DEMO_FIRST_NAMES[source.gender];
+      // Branch staff have a photo like the salon staff (SRV-173); the seed writes the image.
+      const photoKey = demoFileKey('members', `${spec.salon}-${spec.key}-staff${String(index)}`);
       data.Member.push({
         _id: demoId(`member:${spec.salon}:${spec.key}:staff${String(index)}`),
         salonId: source.salonId,
@@ -98,6 +101,7 @@ export const buildDemoBranches = (
         firstName: names[(memberIndex + NAME_OFFSET) % names.length],
         lastName: DEMO_LAST_NAMES[(memberIndex * LAST_NAME_STEP) % DEMO_LAST_NAMES.length],
         phone: phoneOf(ctx.dialCode, memberIndex),
+        photoKey,
         role,
         permissions: defaultPermissionsFor(role),
         active: true,
@@ -114,6 +118,14 @@ export const buildDemoBranches = (
           customersCount: 0,
         },
         createdAt: ctx.now,
+      });
+      addUpload(data, {
+        key: photoKey,
+        purpose: 'MEMBER_PHOTO',
+        ownerType: 'MEMBER',
+        ownerId: demoId(`member:${spec.salon}:owner`),
+        salonId: source.salonId,
+        at: ctx.now,
       });
     }
     const location = { type: 'Point' as const, coordinates: [spec.place.lng, spec.place.lat] };

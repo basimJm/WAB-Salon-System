@@ -109,8 +109,10 @@ const APPLICATION_SPACING_DAYS = 19;
 const PENDING_APPLICATION_DAYS = 2;
 const SUBSCRIPTION_MONTH_DAYS = 30;
 
-const file = (...parts: string[]): string =>
+/** `demo/<parts…>.jpg`: the storage key of a demo file. */
+export const demoFileKey = (...parts: string[]): string =>
   `${[DEMO_FILE_PREFIX, ...parts].join('/')}.${DEMO_IMAGE_EXTENSION}`;
+const file = demoFileKey;
 const daysAgo = (now: Date, days: number): Date => new Date(now.getTime() - days * MS_PER_DAY);
 const phoneOf = (dialCode: string, prefix: string, index: number): string =>
   `${dialCode}${prefix}${String(index).padStart(DEMO_PHONE_INDEX_DIGITS, '0')}`;

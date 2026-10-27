@@ -4,13 +4,16 @@ import { FLAG_ASSET_DIR, FLAG_CONTENT_TYPE, SEED_COUNTRIES } from '../constants/
 import type { StorageProvider } from '../providers/storage/types';
 
 export interface FlagImagesDeps {
-  readonly storage: Pick<StorageProvider, 'write'>;
+  /** With `read`, a flag already stored with the same bytes is not written again. */
+  readonly storage: Pick<StorageProvider, 'write'> & Partial<Pick<StorageProvider, 'read'>>;
   /** The flag file shipped with the server, or `undefined` when there is none. */
   readonly read: (file: string) => Buffer | undefined;
 }
 
 export interface FlagImagesReport {
   readonly uploaded: number;
+  /** Flags already stored with the shipped bytes (left alone). */
+  readonly unchanged: number;
   /** Flag keys without a shipped file (their `flagUrl` stays unresolved until an admin adds one). */
   readonly missing: readonly string[];
 }
@@ -24,18 +27,24 @@ export const readShippedFlag = (file: string): Buffer | undefined => {
 /**
  * Writes the shipped flag image of every seeded country to its `flagKey` through the storage
  * port (public), so `GET /locations/countries` never hands out a URL to a missing object
- * (SRV-172). Rewrites the same keys when run again.
+ * (SRV-172). A flag whose stored bytes differ from the shipped file is written again.
  */
 export const uploadFlagImages = async (
   countries: readonly { readonly flagKey: string }[],
   deps: FlagImagesDeps,
 ): Promise<FlagImagesReport> => {
   let uploaded = 0;
+  let unchanged = 0;
   const missing: string[] = [];
   for (const { flagKey } of countries) {
     const body = deps.read(basename(flagKey));
     if (body === undefined) {
       missing.push(flagKey);
+      continue;
+    }
+    const stored = deps.storage.read === undefined ? null : await deps.storage.read(flagKey);
+    if (stored?.equals(body) === true) {
+      unchanged += 1;
       continue;
     }
     await deps.storage.write({
@@ -46,11 +55,9 @@ export const uploadFlagImages = async (
     });
     uploaded += 1;
   }
-  return { uploaded, missing };
+  return { uploaded, unchanged, missing };
 };
 
 /** The seeded countries' flags from the shipped files (`npm run seed`, `seed:demo-images`). */
-export const uploadSeedFlags = (
-  storage: Pick<StorageProvider, 'write'>,
-): Promise<FlagImagesReport> =>
+export const uploadSeedFlags = (storage: FlagImagesDeps['storage']): Promise<FlagImagesReport> =>
   uploadFlagImages(SEED_COUNTRIES, { storage, read: readShippedFlag });

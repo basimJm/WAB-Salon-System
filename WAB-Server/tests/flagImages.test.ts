@@ -24,7 +24,7 @@ describe('country flag images (SRV-172)', () => {
   it('writes every seeded flag to its key through the real storage SDK (public, SVG type)', async () => {
     const storage = memoryStorage();
     const report = await uploadSeedFlags(storage);
-    expect(report).toEqual({ uploaded: SEED_COUNTRIES.length, missing: [] });
+    expect(report).toEqual({ uploaded: SEED_COUNTRIES.length, unchanged: 0, missing: [] });
     for (const country of SEED_COUNTRIES) {
       const stored = await storage.read(country.flagKey);
       expect(stored?.equals(readShippedFlag(basename(country.flagKey)) ?? Buffer.alloc(0))).toBe(
@@ -51,7 +51,7 @@ describe('country flag images (SRV-172)', () => {
         read: readShippedFlag,
       },
     );
-    expect(report).toEqual({ uploaded: 1, missing: ['flags/zz.svg'] });
+    expect(report).toEqual({ uploaded: 1, unchanged: 0, missing: ['flags/zz.svg'] });
     expect(writes).toEqual([
       { key: 'flags/jo.svg', contentType: FLAG_CONTENT_TYPE, visibility: 'PUBLIC' },
     ]);

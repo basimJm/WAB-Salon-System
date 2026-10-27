@@ -103,7 +103,41 @@ describe('demo images (SRV-171 S4: no seeded URL answers 404)', () => {
       list: () => [],
       read: () => Buffer.alloc(0),
     });
-    expect(report).toEqual({ uploaded: 0, placeholders: 0, placeholdersByPurpose: {} });
+    expect(report).toEqual({
+      uploaded: 0,
+      placeholders: 0,
+      placeholdersByPurpose: {},
+      existing: 0,
+    });
     expect(writes).toHaveLength(0);
+  });
+
+  it('SRV-173: a stored key keeps its image; an owner photo still replaces it', async () => {
+    const { storage, writes } = setup();
+    const noVariants = { generate: () => Promise.resolve({ created: [] }) };
+    const placeholdersOnly = {
+      storage,
+      variants: noVariants,
+      list: () => [],
+      read: () => Buffer.alloc(0),
+    };
+    await uploadDemoImages(targets, Object.values(DEMO_IMAGE_FOLDERS), placeholdersOnly);
+    writes.length = 0;
+    const again = await uploadDemoImages(
+      targets,
+      Object.values(DEMO_IMAGE_FOLDERS),
+      placeholdersOnly,
+    );
+    expect(again).toMatchObject({ uploaded: 0, placeholders: 0, existing: targets.length });
+    expect(writes).toHaveLength(0);
+    const photo = await demoPlaceholderImage();
+    const withPhoto = await uploadDemoImages(targets, Object.values(DEMO_IMAGE_FOLDERS), {
+      storage,
+      variants: noVariants,
+      list: (folder) => (folder === DEMO_IMAGE_FOLDERS.SALON_COVER ? ['cover.jpg'] : []),
+      read: () => photo,
+    });
+    expect(withPhoto).toMatchObject({ uploaded: 1, placeholders: 0, existing: targets.length - 1 });
+    expect(writes.map((w) => w.key)).toEqual(['demo/salons/joury/cover.jpg']);
   });
 });
