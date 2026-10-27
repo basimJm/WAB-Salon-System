@@ -32,8 +32,8 @@
   - Gallery, location "nearest", rotation during a picker: NOT exercised on the device (time limit); covered by code review + unit tests only
   - iOS simulator: NOT run (owner time limit 25 min); only `linkDebugFrameworkIosSimulatorArm64`. Expected iOS results need a real device for tel: and camera (simulator: tel → "not available" message, camera → "no camera" message)
 - Gate (Terminal panel): before the last code commit — targeted host tests (core/ui, design-system, profile, salon, bookings, content, home, salons presentation) green, `:androidApp:assembleDevDebug` ok, `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; after the detekt/policy fixes (b008ec0a) `policy_checks.py all` ok and `run_detekt.sh` ok, but the full `testAndroidHostTest` + assemble + iOS link re-run failed twice on `Timeout waiting to lock journal cache` (another session's Gradle holds `~/.gradle/caches/journal-1`) — NOT re-verified after the MapLinks split
-- Loops: 0/1 — not recorded: full host tests + builds not re-run after the last commit (Gradle lock), iOS simulator not run
-- Review: PENDING
+- Loops: 1/1 — batch verification (rules §3.13) on the integration branch `chore/customer-integration-perf`: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green; Android emulator proof per the Notes. DEFERRED: iOS simulator/real-iPhone hand-off checks (call, camera need a real iPhone), Android gallery + nearest on device
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
 - Notes: DEVIATIONS — owner 25-minute limit: iOS simulator proof, Android gallery / nearest-location / rotation-during-picker checks not done; `androidx.exifinterface` 1.3.7 added (EXIF rotation of camera photos, already in the Gradle cache; android.media.ExifInterface trips lint); not pushed / no PR. Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `Local.xcconfig`), removed at the end.
 ### CUS-095 — Performance: R8, Compose, baseline profiles (Android + shared)
 - Branch: `perf/cus-095-android-performance`
@@ -45,8 +45,8 @@
   - [x] Compose: `AppImage` uses one Coil painter + overlays instead of `SubcomposeAsyncImage` (no subcomposition per image in lazy lists; same shimmer → image → fallback look); lazy lists checked: Home, salons paging, salon details already set `key` + `contentType`
   - [ ] Baseline Profile + Startup Profile module (macrobenchmark), Compose compiler reports — NOT DONE (time)
 - Tests: `ImageOverlayTest` (new, overlay decision). `policy_checks.py all` ok; `tasks.py check` ok (only the known CUS-047 note). First `assembleProdRelease` failed on a Gradle cache lock held by another agent's daemon (`journal-1` / `modules-2`, not a code error); rerun `:core:design-system:testAndroidHostTest :androidApp:assembleProdRelease` still running at hand-off. Detekt, the full host test run, the other 3 variants and the iOS link were NOT run
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch verification (rules §3.13): gates above green incl. prodRelease with the narrowed R8 rules. DEFERRED: before/after measurements, baseline profile, a manual prodRelease journey on a device (owner smoke test before release)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
 - Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
 ### CUS-096 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/cus-096-ios-performance`
@@ -57,8 +57,8 @@
   - [x] `ComposeUIViewController` `parallelRendering = true`, `opaque = true` (named constants); `CADisableMinimumFrameDurationOnPhone` (120 Hz ProMotion) already in Info.plist
   - [ ] iosApp-Dev Debug + Release, iosApp-Prod Release simulator builds green (see Tests)
 - Tests: no Kotlin logic changed (build settings + one view-controller configuration), so no new unit tests; `policy_checks.py all` ok; policy tests 93 OK; simulator builds: see Notes
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch verification (rules §3.13): all four iOS simulator configurations (Debug/Release × Dev/Prod) build with the new K/N and Xcode settings. DEFERRED: launch/scroll measurements; parallelRendering is experimental (switch PARALLEL_RENDERING off first if native views glitch)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
 - Notes: DEVIATIONS — time-boxed (25 min); startup work (Koin/Firebase on the main thread, push permission prompt at launch) left as is: both must run on the main thread before the first frame; no cold-launch / scroll measurement done; simulator builds NOT verified: Debug-Dev failed in the `Compile Kotlin Framework` phase on `Timeout waiting to lock journal cache (~/.gradle/caches/journal-1)` held by a parallel agent's Gradle, Release-Dev stalled > 8 min at the K/N compile tasks (same lock) and was stopped; iosApp-Prod Release and the framework link were not reached. Rerun `xcodebuild -scheme iosApp-Dev -configuration Release-Dev -destination 'generic/platform=iOS Simulator' build` (and Debug-Dev, iosApp-Prod Release-Prod) once no other Gradle runs; `gc=cms` and `parallelRendering` need a scroll check on device/simulator.
 
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
