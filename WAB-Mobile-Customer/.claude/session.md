@@ -18,7 +18,7 @@
   - [x] ANR/startup: `AndroidApp.onCreate` no longer resolves the DataStore-backed `AppSettings` + Firebase `PushTokenProvider` on the main thread (resolved inside the IO scope)
   - [x] Compose: `AppImage` uses one Coil painter + overlays instead of `SubcomposeAsyncImage` (no subcomposition per image in lazy lists; same shimmer → image → fallback look); lazy lists checked: Home, salons paging, salon details already set `key` + `contentType`
   - [ ] Baseline Profile + Startup Profile module (macrobenchmark), Compose compiler reports — NOT DONE (time)
-- Tests: `ImageOverlayTest` (new, overlay decision)
+- Tests: `ImageOverlayTest` (new, overlay decision). `policy_checks.py all` ok; `tasks.py check` ok (only the known CUS-047 note). First `assembleProdRelease` failed on a Gradle cache lock held by another agent's daemon (`journal-1` / `modules-2`, not a code error); rerun `:core:design-system:testAndroidHostTest :androidApp:assembleProdRelease` still running at hand-off. Detekt, the full host test run, the other 3 variants and the iOS link were NOT run
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
