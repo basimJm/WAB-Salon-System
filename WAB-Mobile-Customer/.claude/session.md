@@ -9,7 +9,6 @@
 
 ## Current task
 
-<<<<<<< HEAD
 ### CUS-094 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/cus-094-device-integrations`
 - Status: IN PROGRESS
@@ -49,7 +48,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
-=======
 ### CUS-096 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/cus-096-ios-performance`
 - Status: IN PROGRESS
@@ -62,7 +60,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATIONS — time-boxed (25 min); startup work (Koin/Firebase on the main thread, push permission prompt at launch) left as is: both must run on the main thread before the first frame; no cold-launch / scroll measurement done; simulator builds NOT verified: Debug-Dev failed in the `Compile Kotlin Framework` phase on `Timeout waiting to lock journal cache (~/.gradle/caches/journal-1)` held by a parallel agent's Gradle, Release-Dev stalled > 8 min at the K/N compile tasks (same lock) and was stopped; iosApp-Prod Release and the framework link were not reached. Rerun `xcodebuild -scheme iosApp-Dev -configuration Release-Dev -destination 'generic/platform=iOS Simulator' build` (and Debug-Dev, iosApp-Prod Release-Prod) once no other Gradle runs; `gc=cms` and `parallelRendering` need a scroll check on device/simulator.
->>>>>>> perf/cus-096-ios-performance
 
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
