@@ -10,7 +10,6 @@
 ## Current task
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 ### CUS-094 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/cus-094-device-integrations`
 - Status: IN PROGRESS
@@ -37,7 +36,6 @@
 - Loops: 0/1 — not recorded: full host tests + builds not re-run after the last commit (Gradle lock), iOS simulator not run
 - Review: PENDING
 - Notes: DEVIATIONS — owner 25-minute limit: iOS simulator proof, Android gallery / nearest-location / rotation-during-picker checks not done; `androidx.exifinterface` 1.3.7 added (EXIF rotation of camera photos, already in the Gradle cache; android.media.ExifInterface trips lint); not pushed / no PR. Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `Local.xcconfig`), removed at the end.
-=======
 ### CUS-095 — Performance: R8, Compose, baseline profiles (Android + shared)
 - Branch: `perf/cus-095-android-performance`
 - Status: IN PROGRESS (partial: owner time limit 25 min on 2026-10-27)
@@ -51,7 +49,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
->>>>>>> perf/cus-095-android-performance
 =======
 ### CUS-096 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/cus-096-ios-performance`
