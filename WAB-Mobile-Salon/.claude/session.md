@@ -9,7 +9,6 @@
 
 ## Current task
 
-<<<<<<< HEAD
 ### MER-076 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/mer-076-device-integrations`
 - Status: IN PROGRESS
@@ -42,7 +41,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATIONS — Gradle runs only from the terminal panel (no Java in the sandbox) and the panel hook refused a new tab (6 tabs open by other agents; their tabs were not reused), so no Gradle task, no detekt, no device measurement ran. Not done (time box 25 min): narrowing the broad keep rules (`io.ktor.**`, whole `core.data/network/domain` packages) needs a release run on a device to prove nothing breaks; ProfileInstaller already arrives transitively through androidx.activity (library baseline profiles apply), no app baseline profile (needs a Macrobenchmark module); bookings list / Home / team / finance lists already use `key` + `contentType`.
-=======
 ### MER-078 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/mer-078-ios-performance`
 - Status: IN PROGRESS
@@ -56,7 +54,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: NOT DONE: Release builds, detekt, Release cold-launch measurement, own simulator run. Image cache = shared code (single Coil `ImageLoader` with default memory + disk cache in `App.kt`), not changed. Local.xcconfig untouched.
->>>>>>> perf/mer-078-ios-performance
 
 ### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
 - Branch: `feat/mer-075-contract-1-6`
