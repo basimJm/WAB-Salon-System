@@ -32,6 +32,7 @@ import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
 import com.fab.wab.merchant.designsystem.components.upload.AppImageUploader
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
 import com.fab.wab.merchant.designsystem.components.upload.CropAspect
 import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
@@ -91,6 +92,7 @@ fun CatalogRequestsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: 
         }
     }
     state.form?.let { RequestSheet(it, state.sending, onAction) }
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
 }
 
 @Composable

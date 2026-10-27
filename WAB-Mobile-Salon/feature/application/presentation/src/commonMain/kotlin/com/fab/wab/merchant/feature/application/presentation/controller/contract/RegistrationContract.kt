@@ -3,6 +3,8 @@ package com.fab.wab.merchant.feature.application.presentation.controller.contrac
 import com.fab.wab.merchant.core.domain.locations.Area
 import com.fab.wab.merchant.core.domain.locations.City
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationField
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationInput
 import com.fab.wab.merchant.feature.application.domain.model.SalonGender
@@ -20,6 +22,7 @@ sealed interface RegistrationContract {
         val areas: List<Area> = emptyList(),
         val documents: List<DocumentUpload> = emptyList(),
         val documentRejection: UploadRejection? = null,
+        val media: MediaPickUi = MediaPickUi(),
         val errors: Set<RegistrationField> = emptySet(),
         val showErrors: Boolean = false,
         val submitting: Boolean = false,
@@ -37,6 +40,7 @@ sealed interface RegistrationContract {
         data class OnCitySelect(val index: Int) : UiAction
         data class OnAreaSelect(val index: Int) : UiAction
         data object OnAddDocuments : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data class OnRemoveDocument(val id: String) : UiAction
         data class OnRetryDocument(val id: String) : UiAction
         data object OnTermsToggle : UiAction

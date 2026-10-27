@@ -89,7 +89,7 @@ internal fun fakeMap() = MapPickerController(
         geocoder = ReverseGeocoder { _, _ -> "Mecca St" },
         places = NoPlaces(),
         location = object : DeviceLocationProvider {
-            override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) = onResult(LocationData(32.0, 35.8))
+            override suspend fun currentLocation(): LocationData? = LocationData(32.0, 35.8)
         },
         permissions = PermissionFlow(GrantedPermissions()),
         language = { "ar" },

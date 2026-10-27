@@ -19,6 +19,8 @@ import com.fab.wab.merchant.core.domain.upload.UploadPurpose
 import com.fab.wab.merchant.core.domain.upload.UploadsRepository
 import com.fab.wab.merchant.core.ui.media.CropRegion
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
 import com.fab.wab.merchant.core.ui.media.FakeImageCropper
 import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.core.ui.media.PickedImage
@@ -125,6 +127,7 @@ class MyAccountViewModelTest {
         assertTrue(account.calls.isEmpty())
         viewModel.onEvent(UiAction.OnFirstName("Layla"))
         viewModel.onEvent(UiAction.OnPickPhoto)
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         viewModel.onEvent(UiAction.OnCropConfirm(CropRegion.FULL))
         assertEquals(PhotoChange.Set("MEMBER_PHOTO-key"), viewModel.state.first().photoChange)
         viewModel.onEvent(UiAction.OnSave)

@@ -31,6 +31,7 @@ import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
 import com.fab.wab.merchant.designsystem.components.upload.AppUploadAddTile
 import com.fab.wab.merchant.designsystem.components.upload.AppUploadTile
 import com.fab.wab.merchant.designsystem.components.upload.uploadRejectionText
@@ -91,6 +92,7 @@ fun ServiceEditScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -
         }
     }
     Dialogs(state, onAction)
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
 }
 
 @Composable

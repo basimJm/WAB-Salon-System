@@ -11,6 +11,7 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.ui.external.ExternalActions
+import com.fab.wab.merchant.designsystem.components.external.rememberExternalHandoff
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SubscriptionContract
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SubscriptionViewModel
 import com.fab.wab.merchant.feature.salon.presentation.screen.SubscriptionScreen
@@ -27,12 +28,12 @@ private fun SubscriptionDestination(navigator: Navigator) {
     val viewModel: SubscriptionViewModel = koinViewModel()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val notifications = rememberNotificationManager()
-    val external = koinInject<ExternalActions>()
+    val handoff = rememberExternalHandoff(koinInject<ExternalActions>())
     CollectSideEffect(viewModel.sideEffect) { effect ->
         when (effect) {
-            is SubscriptionContract.SideEffect.Dial -> external.dial(effect.phone)
-            is SubscriptionContract.SideEffect.WhatsApp -> external.openWhatsApp(effect.phone)
-            is SubscriptionContract.SideEffect.Email -> external.email(effect.address)
+            is SubscriptionContract.SideEffect.Dial -> handoff.call(effect.phone)
+            is SubscriptionContract.SideEffect.WhatsApp -> handoff.contactWabWhatsApp(effect.phone)
+            is SubscriptionContract.SideEffect.Email -> handoff.email(effect.address)
             is SubscriptionContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
         }
     }
