@@ -1,3 +1,2 @@
-"NSLocationWhenInUseUsageDescription" = "نحتاج إلى موقعك لعرض الصالونات القريبة منك.";
-"NSLocationAlwaysAndWhenInUseUsageDescription" = "نحتاج إلى موقعك لعرض الصالونات القريبة منك.";
-"NSCameraUsageDescription" = "نحتاج إلى الكاميرا لالتقاط صور لتقييماتك.";
+"NSLocationWhenInUseUsageDescription" = "يستخدم تطبيق WAB موقعك لعرض الصالونات القريبة منك.";
+"NSCameraUsageDescription" = "يستخدم تطبيق WAB الكاميرا لالتقاط صورة ملفك الشخصي.";

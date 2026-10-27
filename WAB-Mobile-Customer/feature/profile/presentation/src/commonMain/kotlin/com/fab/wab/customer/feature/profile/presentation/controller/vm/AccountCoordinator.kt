@@ -4,10 +4,12 @@ import com.fab.wab.customer.core.analytics.AnalyticsAction
 import com.fab.wab.customer.core.analytics.analyticsParams
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.ui.media.ImageSource
+import com.fab.wab.customer.core.ui.media.PickResult
 import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.core.ui.permission.PermissionOutcome
 import com.fab.wab.customer.feature.profile.presentation.analytics.ProfileAnalytics
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.SideEffect
+import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileOverlay
 import com.fab.wab.customer.feature.profile.presentation.controller.contract.ProfileContract.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -38,8 +40,14 @@ internal class AccountCoordinator(
         track(ProfileAnalytics.ACTION_PHOTO, source.name.lowercase())
         update { copy(overlay = null) }
         scope().launch {
-            if (source == ImageSource.CAMERA && deps.permissions.ensure(AppPermission.CAMERA) != PermissionOutcome.Granted) return@launch
-            val picked = deps.imagePicker.pick(source) ?: return@launch
+            if (source == ImageSource.CAMERA && !cameraAllowed()) return@launch
+            val picked = when (val result = deps.imagePicker.pick(source)) {
+                is PickResult.Picked -> result.image
+                else -> {
+                    deps.pickText(result)?.let { effect(SideEffect.ShowError(it)) }
+                    return@launch
+                }
+            }
             update { copy(busy = true) }
             when (val result = deps.uploadAvatar(picked.bytes, picked.contentType)) {
                 is AppResult.Success -> update { copy(busy = false, account = result.data) }
@@ -49,6 +57,19 @@ internal class AccountCoordinator(
                 }
                 AppResult.Loading -> Unit
             }
+        }
+    }
+
+    /** Denied now → say why nothing opened; denied for good → offer the settings app (PRD S21 photo from camera). */
+    private suspend fun cameraAllowed(): Boolean = when (deps.permissions.ensure(AppPermission.CAMERA)) {
+        PermissionOutcome.Granted -> true
+        PermissionOutcome.Denied -> {
+            effect(SideEffect.ShowError(deps.cameraDeniedText()))
+            false
+        }
+        PermissionOutcome.BlockedInSettings -> {
+            update { copy(overlay = ProfileOverlay.PermissionBlocked(AppPermission.CAMERA)) }
+            false
         }
     }
 

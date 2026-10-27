@@ -1,90 +1,118 @@
 package com.fab.wab.customer.core.ui.media
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import com.fab.wab.customer.core.ui.permission.AndroidPermissionBridge
-import java.io.ByteArrayOutputStream
+import androidx.core.content.FileProvider
+import java.io.File
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Activity-bound launchers (attached by MainActivity like [AndroidPermissionBridge]); one request at a time. */
+/**
+ * Activity-bound launchers (attached by MainActivity like the permission bridge); one request at a time.
+ * Gallery = system Photo Picker (no storage permission); camera = the camera app writing a full-size photo into
+ * a FileProvider URI (`TakePicture`; the old `TakePicturePreview` only returned a thumbnail).
+ */
 class AndroidImagePickerBridge {
     private var gallery: ActivityResultLauncher<PickVisualMediaRequest>? = null
-    private var camera: ActivityResultLauncher<Void?>? = null
-    private var pendingUri: CompletableDeferred<Uri?>? = null
-    private var pendingBitmap: CompletableDeferred<Bitmap?>? = null
+    private var camera: ActivityResultLauncher<Uri>? = null
+    private var pendingGallery: CompletableDeferred<Uri?>? = null
+    private var pendingCamera: CompletableDeferred<Boolean>? = null
 
     fun attach(activity: ComponentActivity) {
         gallery = activity.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            pendingUri?.complete(uri)
-            pendingUri = null
+            pendingGallery?.complete(uri)
+            pendingGallery = null
         }
-        camera = activity.registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
-            pendingBitmap?.complete(bitmap)
-            pendingBitmap = null
+        camera = activity.registerForActivityResult(ActivityResultContracts.TakePicture()) { saved ->
+            pendingCamera?.complete(saved)
+            pendingCamera = null
         }
     }
 
-    fun detach() {
+    /** A recreated Activity registers again under the same keys and receives the result; only finishing cancels. */
+    fun detach(finishing: Boolean) {
         gallery?.unregister()
         camera?.unregister()
         gallery = null
         camera = null
-        pendingUri?.cancel()
-        pendingBitmap?.cancel()
+        if (finishing) {
+            pendingGallery?.cancel()
+            pendingCamera?.cancel()
+            pendingGallery = null
+            pendingCamera = null
+        }
     }
 
     suspend fun pickFromGallery(): Uri? {
         val launcher = gallery ?: return null
         val answer = CompletableDeferred<Uri?>()
-        pendingUri = answer
+        pendingGallery = answer
         launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         return answer.await()
     }
 
-    suspend fun takePicture(): Bitmap? {
-        val launcher = camera ?: return null
-        val answer = CompletableDeferred<Bitmap?>()
-        pendingBitmap = answer
-        launcher.launch(null)
+    /** True when the camera app saved a photo into [target]; throws [ActivityNotFoundException] without a camera app. */
+    suspend fun takePicture(target: Uri): Boolean {
+        val launcher = camera ?: return false
+        val answer = CompletableDeferred<Boolean>()
+        pendingCamera = answer
+        try {
+            launcher.launch(target)
+        } catch (error: ActivityNotFoundException) {
+            pendingCamera = null
+            throw error
+        }
         return answer.await()
     }
 }
 
 class AndroidImagePicker(
+    private val context: Context,
     private val bridge: AndroidImagePickerBridge,
-    private val permissions: AndroidPermissionBridge,
 ) : ImagePicker {
 
-    override suspend fun pick(source: ImageSource): PickedImage? {
-        val bitmap = when (source) {
-            ImageSource.GALLERY -> bridge.pickFromGallery()?.let(::decode)
-            ImageSource.CAMERA -> bridge.takePicture()
-        } ?: return null
-        return withContext(Dispatchers.Default) { compress(bitmap) }
+    override suspend fun pick(source: ImageSource): PickResult = when (source) {
+        ImageSource.GALLERY -> bridge.pickFromGallery()?.let { encode(it) } ?: PickResult.Cancelled
+        ImageSource.CAMERA -> capture()
     }
 
-    private fun decode(uri: Uri): Bitmap? {
-        val resolver = permissions.activity?.contentResolver ?: return null
-        return resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
-    }
-
-    private fun compress(bitmap: Bitmap): PickedImage {
-        val max = ImagePickerDefaults.MAX_DIMENSION_PX
-        val scale = minOf(1f, max.toFloat() / maxOf(bitmap.width, bitmap.height))
-        val scaled = if (scale < 1f) {
-            Bitmap.createScaledBitmap(bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
-        } else {
-            bitmap
+    private suspend fun capture(): PickResult {
+        if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) return PickResult.CameraUnavailable
+        val file = withContext(Dispatchers.IO) { photoFile() } ?: return PickResult.Failed
+        val uri = FileProvider.getUriForFile(context, context.packageName + CameraFiles.AUTHORITY_SUFFIX, file)
+        return try {
+            if (bridge.takePicture(uri)) encode(uri) else PickResult.Cancelled
+        } catch (ignored: ActivityNotFoundException) {
+            PickResult.CameraUnavailable
+        } finally {
+            withContext(Dispatchers.IO) { file.delete() }
         }
-        val out = ByteArrayOutputStream()
-        scaled.compress(Bitmap.CompressFormat.JPEG, ImagePickerDefaults.JPEG_QUALITY, out)
-        return PickedImage(out.toByteArray(), ImagePickerDefaults.JPEG_CONTENT_TYPE)
     }
+
+    private fun photoFile(): File? = try {
+        val dir = File(context.cacheDir, CameraFiles.DIRECTORY).apply { mkdirs() }
+        File.createTempFile(CameraFiles.PREFIX, CameraFiles.SUFFIX, dir)
+    } catch (ignored: IOException) {
+        null
+    }
+
+    private suspend fun encode(uri: Uri): PickResult = withContext(Dispatchers.IO) {
+        AndroidImageEncoder.encode(context.contentResolver, uri)?.let { PickResult.Picked(it) } ?: PickResult.Failed
+    }
+}
+
+/** Must match the `<provider>` authority and `res/xml/file_paths.xml` of the app manifest. */
+object CameraFiles {
+    const val AUTHORITY_SUFFIX = ".fileprovider"
+    const val DIRECTORY = "camera"
+    const val PREFIX = "photo_"
+    const val SUFFIX = ".jpg"
 }

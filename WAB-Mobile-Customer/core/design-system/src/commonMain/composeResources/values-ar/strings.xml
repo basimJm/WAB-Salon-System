@@ -113,4 +113,16 @@
     <string name="date_picker_cancel">إلغاء</string>
     <string name="date_picker_title">اختر التاريخ</string>
     <string name="date_picker_none">لم يتم اختيار تاريخ</string>
+    <!-- CUS-094 device hand-offs, photo picking and permission dialogs -->
+    <string name="external_unavailable_dialer">الاتصال غير متاح على هذا الجهاز</string>
+    <string name="external_unavailable_whatsapp">تعذّر فتح واتساب على هذا الجهاز</string>
+    <string name="external_unavailable_maps">لا يوجد تطبيق خرائط على هذا الجهاز</string>
+    <string name="external_unavailable_browser">تعذّر فتح هذا الرابط على هذا الجهاز</string>
+    <string name="external_unavailable_email">لا يوجد تطبيق بريد مُعدّ على هذا الجهاز</string>
+    <string name="external_unavailable_share">المشاركة غير متاحة حالياً</string>
+    <string name="photo_camera_unavailable">لا توجد كاميرا على هذا الجهاز. اختر صورة من المعرض</string>
+    <string name="photo_read_failed">تعذّرت قراءة هذه الصورة. جرّب صورة أخرى</string>
+    <string name="photo_camera_denied">اسمح بالوصول إلى الكاميرا لالتقاط صورة</string>
+    <string name="dialog_camera_denied_title">الوصول إلى الكاميرا متوقف. فعّله من إعدادات الجهاز</string>
+    <string name="dialog_notifications_denied_title">الإشعارات متوقفة. فعّلها من إعدادات الجهاز</string>
 </resources>

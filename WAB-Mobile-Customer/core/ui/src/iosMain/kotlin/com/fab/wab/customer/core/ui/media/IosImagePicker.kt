@@ -1,75 +1,113 @@
 package com.fab.wab.customer.core.ui.media
 
+import com.fab.wab.customer.core.ui.external.IosSystem
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.useContents
-import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.CompletableDeferred
-import platform.CoreGraphics.CGRectMake
-import platform.CoreGraphics.CGSizeMake
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import platform.Foundation.NSData
-import platform.UIKit.UIApplication
-import platform.UIKit.UIGraphicsBeginImageContextWithOptions
-import platform.UIKit.UIGraphicsEndImageContext
-import platform.UIKit.UIGraphicsGetImageFromCurrentImageContext
+import platform.Foundation.NSError
+import platform.PhotosUI.PHPickerConfiguration
+import platform.PhotosUI.PHPickerFilter
+import platform.PhotosUI.PHPickerResult
+import platform.PhotosUI.PHPickerViewController
+import platform.PhotosUI.PHPickerViewControllerDelegateProtocol
 import platform.UIKit.UIImage
-import platform.UIKit.UIImageJPEGRepresentation
 import platform.UIKit.UIImagePickerController
 import platform.UIKit.UIImagePickerControllerDelegateProtocol
 import platform.UIKit.UIImagePickerControllerOriginalImage
 import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UIKit.UINavigationControllerDelegateProtocol
+import platform.UniformTypeIdentifiers.UTTypeImage
 import platform.darwin.NSObject
-import platform.posix.memcpy
 
-/** `UIImagePickerController` over the key window; compresses to JPEG on the device (PRD §3.16). */
-@OptIn(ExperimentalForeignApi::class)
+/**
+ * Gallery = PHPicker (out of process, no photo-library permission); camera = `UIImagePickerController` (needs
+ * `NSCameraUsageDescription`; the simulator has no camera → [PickResult.CameraUnavailable]). Presented from the top
+ * view controller. UIKit holds picker delegates weakly, so [activeDelegate] keeps the current one alive until it
+ * answers (it used to be a local that Kotlin/Native could collect, leaving the picker without a callback).
+ */
 class IosImagePicker : ImagePicker {
+    private var activeDelegate: NSObject? = null
 
-    override suspend fun pick(source: ImageSource): PickedImage? {
-        val root = UIApplication.sharedApplication.keyWindow?.rootViewController ?: return null
-        val type = when (source) {
-            ImageSource.CAMERA -> UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
-            ImageSource.GALLERY -> UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypePhotoLibrary
+    override suspend fun pick(source: ImageSource): PickResult = withContext(Dispatchers.Main) {
+        when (source) {
+            ImageSource.GALLERY -> pickFromLibrary()
+            ImageSource.CAMERA -> takePhoto()
         }
-        if (!UIImagePickerController.isSourceTypeAvailable(type)) return null
+    }
+
+    private suspend fun pickFromLibrary(): PickResult {
+        val top = IosSystem.topViewController() ?: return PickResult.Failed
+        val answer = CompletableDeferred<NSData?>()
+        val config = PHPickerConfiguration().apply {
+            filter = PHPickerFilter.imagesFilter
+            selectionLimit = 1
+        }
+        val picker = PHPickerViewController(configuration = config)
+        val delegate = LibraryDelegate(answer)
+        activeDelegate = delegate
+        picker.delegate = delegate
+        top.presentViewController(picker, animated = true, completion = null)
+        val data = try {
+            answer.await()
+        } finally {
+            activeDelegate = null
+        }
+        return when {
+            delegate.cancelled -> PickResult.Cancelled
+            data == null -> PickResult.Failed
+            else -> encode(UIImage.imageWithData(data))
+        }
+    }
+
+    private suspend fun takePhoto(): PickResult {
+        val type = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
+        if (!UIImagePickerController.isSourceTypeAvailable(type)) return PickResult.CameraUnavailable
+        val top = IosSystem.topViewController() ?: return PickResult.Failed
         val answer = CompletableDeferred<UIImage?>()
-        val delegate = PickerDelegate(answer)
+        val delegate = CameraDelegate(answer)
         val picker = UIImagePickerController().apply {
             sourceType = type
             this.delegate = delegate
         }
-        root.presentViewController(picker, animated = true, completion = null)
-        val image = answer.await()
+        activeDelegate = delegate
+        top.presentViewController(picker, animated = true, completion = null)
+        val image = try {
+            answer.await()
+        } finally {
+            activeDelegate = null
+        }
         picker.dismissViewControllerAnimated(true, completion = null)
-        return image?.let(::compress)
+        return image?.let { encode(it) } ?: PickResult.Cancelled
     }
 
-    private fun compress(image: UIImage): PickedImage? {
-        val max = ImagePickerDefaults.MAX_DIMENSION_PX.toDouble()
-        val width = image.size.useContents { width }
-        val height = image.size.useContents { height }
-        val scale = minOf(1.0, max / maxOf(width, height))
-        val scaled = if (scale < 1.0) resize(image, width * scale, height * scale) else image
-        val quality = ImagePickerDefaults.JPEG_QUALITY / PERCENT
-        val data = UIImageJPEGRepresentation(scaled, quality) ?: return null
-        return PickedImage(data.toByteArray(), ImagePickerDefaults.JPEG_CONTENT_TYPE)
-    }
-
-    private fun resize(image: UIImage, width: Double, height: Double): UIImage {
-        UIGraphicsBeginImageContextWithOptions(CGSizeMake(width, height), false, 1.0)
-        image.drawInRect(CGRectMake(0.0, 0.0, width, height))
-        val result = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return result ?: image
-    }
-
-    private companion object {
-        const val PERCENT = 100.0
+    private suspend fun encode(image: UIImage?): PickResult = withContext(Dispatchers.Default) {
+        image?.let(IosImageEncoder::encode)?.let { PickResult.Picked(it) } ?: PickResult.Failed
     }
 }
 
-private class PickerDelegate(private val answer: CompletableDeferred<UIImage?>) :
+private class LibraryDelegate(private val answer: CompletableDeferred<NSData?>) : NSObject(), PHPickerViewControllerDelegateProtocol {
+    var cancelled = false
+
+    override fun picker(picker: PHPickerViewController, didFinishPicking: List<*>) {
+        // PHPicker never dismisses itself; close it now and load the bytes in the background.
+        picker.dismissViewControllerAnimated(true, completion = null)
+        val result = didFinishPicking.firstOrNull() as? PHPickerResult
+        if (result == null) {
+            cancelled = true
+            answer.complete(null)
+            return
+        }
+        @OptIn(ExperimentalForeignApi::class)
+        val identifier = UTTypeImage.identifier
+        result.itemProvider.loadDataRepresentationForTypeIdentifier(identifier) { data: NSData?, _: NSError? ->
+            answer.complete(data)
+        }
+    }
+}
+
+private class CameraDelegate(private val answer: CompletableDeferred<UIImage?>) :
     NSObject(), UIImagePickerControllerDelegateProtocol, UINavigationControllerDelegateProtocol {
 
     override fun imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo: Map<Any?, *>) {
@@ -79,11 +117,4 @@ private class PickerDelegate(private val answer: CompletableDeferred<UIImage?>) 
     override fun imagePickerControllerDidCancel(picker: UIImagePickerController) {
         answer.complete(null)
     }
-}
-
-@OptIn(ExperimentalForeignApi::class)
-private fun NSData.toByteArray(): ByteArray {
-    val size = length.toInt()
-    if (size == 0) return ByteArray(0)
-    return ByteArray(size).apply { usePinned { memcpy(it.addressOf(0), bytes, length) } }
 }

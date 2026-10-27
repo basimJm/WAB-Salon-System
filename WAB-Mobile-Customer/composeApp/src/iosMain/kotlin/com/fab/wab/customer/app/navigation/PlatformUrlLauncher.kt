@@ -1,14 +1,10 @@
 package com.fab.wab.customer.app.navigation
 
-import platform.Foundation.NSURL
-import platform.UIKit.UIApplication
+import com.fab.wab.customer.core.ui.external.IosSystem
 
 /**
  * iOS implementation of URL launcher.
  */
 actual class PlatformUrlLauncher actual constructor() : UrlLauncher {
-    override fun openUrl(url: String) {
-        val nsUrl = NSURL.URLWithString(url) ?: return
-        UIApplication.sharedApplication.openURL(nsUrl)
-    }
+    override fun openUrl(url: String) = IosSystem.launch(url)
 }

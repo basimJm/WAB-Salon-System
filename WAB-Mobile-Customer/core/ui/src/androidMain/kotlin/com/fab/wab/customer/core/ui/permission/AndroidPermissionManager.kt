@@ -36,8 +36,19 @@ class AndroidPermissionManager(
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
 
-        AppPermission.CAMERA -> listOf(Manifest.permission.CAMERA)
+        // The system camera app takes the photo (`TakePicture`), which needs no permission unless the merged
+        // manifest declares CAMERA; then Android refuses the capture intent until it is granted.
+        AppPermission.CAMERA -> listOf(Manifest.permission.CAMERA).filter(::isDeclared)
     }
+
+    private val declared: Set<String> by lazy {
+        val info = runCatching {
+            context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
+        }.getOrNull()
+        info?.requestedPermissions?.toSet().orEmpty()
+    }
+
+    private fun isDeclared(name: String): Boolean = name in declared
 
     private fun isHeld(name: String): Boolean =
         ContextCompat.checkSelfPermission(context, name) == PackageManager.PERMISSION_GRANTED
@@ -80,7 +91,7 @@ class AndroidPermissionManager(
             else -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts(PACKAGE_URI_SCHEME, context.packageName, null))
         }
-        context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        launch(intent)
     }
 
     override fun isLocationServiceEnabled(): Boolean =
@@ -89,8 +100,15 @@ class AndroidPermissionManager(
             ?: false
 
     override fun openLocationServiceSettings() {
-        context.startActivity(
-            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
+        launch(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+    }
+
+    /** Some OEM builds lack a settings page; falling back to the app details page is better than a crash. */
+    private fun launch(intent: Intent) {
+        val fallback = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            .setData(Uri.fromParts(PACKAGE_URI_SCHEME, context.packageName, null))
+        listOf(intent, fallback).firstOrNull { candidate ->
+            runCatching { context.startActivity(candidate.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess
+        }
     }
 }

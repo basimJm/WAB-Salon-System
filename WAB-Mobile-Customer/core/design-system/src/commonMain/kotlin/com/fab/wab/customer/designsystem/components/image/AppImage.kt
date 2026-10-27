@@ -6,10 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -26,15 +31,33 @@ fun AppImage(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val imageLoader = LocalImageLoader.current
-    SubcomposeAsyncImage(
-        model = url,
-        contentDescription = contentDescription,
-        imageLoader = imageLoader,
-        modifier = modifier,
-        contentScale = contentScale,
-        loading = { AppShimmerBox(Modifier.fillMaxSize()) },
-        error = { AppImageFallback() },
-    )
+    // CUS-095: AsyncImage + plain overlays instead of SubcomposeAsyncImage. Subcomposition per image was the main
+    // cost of scrolling salon/service lists (skill: avoid SubcomposeLayout in lazy items); the look is unchanged.
+    var overlay by remember(url) { mutableStateOf(ImageOverlay.Loading) }
+    Box(modifier = modifier) {
+        AsyncImage(
+            model = url,
+            contentDescription = contentDescription,
+            imageLoader = imageLoader,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = contentScale,
+            onState = { overlay = imageOverlayOf(it) },
+        )
+        when (overlay) {
+            ImageOverlay.Loading -> AppShimmerBox(Modifier.fillMaxSize())
+            ImageOverlay.Fallback -> AppImageFallback()
+            ImageOverlay.None -> Unit
+        }
+    }
+}
+
+/** What is drawn over the image: a shimmer while loading, the fallback on error, nothing once it shows. */
+internal enum class ImageOverlay { None, Loading, Fallback }
+
+internal fun imageOverlayOf(state: AsyncImagePainter.State): ImageOverlay = when (state) {
+    is AsyncImagePainter.State.Success -> ImageOverlay.None
+    is AsyncImagePainter.State.Error -> ImageOverlay.Fallback
+    is AsyncImagePainter.State.Loading, AsyncImagePainter.State.Empty -> ImageOverlay.Loading
 }
 
 /** Muted placeholder used when an image is missing or failed; also the look of tiles without a URL. */
