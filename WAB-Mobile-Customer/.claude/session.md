@@ -9,6 +9,19 @@
 
 ## Current task
 
+### CUS-096 — Performance: iOS release build + Compose iOS settings
+- Branch: `perf/cus-096-ios-performance`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-27 "iOS lags"; no PRD screen; iOS host + K/N framework only):
+  - [x] Release-Dev / Release-Prod: release Kotlin framework (`KOTLIN_FRAMEWORK_BUILD_TYPE = release`, already set; `embedAndSignAppleFrameworkForXcode` honours it), Swift `-O` whole-module, clang `-Os`, dead-code stripping, `ONLY_ACTIVE_ARCH = NO`, dSYM; Debug configs unchanged (fast dev loop)
+  - [x] K/N binary options on every iOS binary: `bundleId` (from `AndroidSdk.NAMESPACE_ROOT`, no literal), `gc=cms` (concurrent marking), `appStateTracking=enabled`
+  - [x] `ComposeUIViewController` `parallelRendering = true`, `opaque = true` (named constants); `CADisableMinimumFrameDurationOnPhone` (120 Hz ProMotion) already in Info.plist
+  - [ ] iosApp-Dev Debug + Release, iosApp-Prod Release simulator builds green (see Tests)
+- Tests: no Kotlin logic changed (build settings + one view-controller configuration), so no new unit tests; `policy_checks.py all` ok; policy tests 93 OK; simulator builds: see Notes
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS — time-boxed (25 min); startup work (Koin/Firebase on the main thread, push permission prompt at launch) left as is: both must run on the main thread before the first frame; no cold-launch / scroll measurement done; simulator builds NOT verified: Debug-Dev failed in the `Compile Kotlin Framework` phase on `Timeout waiting to lock journal cache (~/.gradle/caches/journal-1)` held by a parallel agent's Gradle, Release-Dev stalled > 8 min at the K/N compile tasks (same lock) and was stopped; iosApp-Prod Release and the framework link were not reached. Rerun `xcodebuild -scheme iosApp-Dev -configuration Release-Dev -destination 'generic/platform=iOS Simulator' build` (and Debug-Dev, iosApp-Prod Release-Prod) once no other Gradle runs; `gc=cms` and `parallelRendering` need a scroll check on device/simulator.
+
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
 - Status: IN PROGRESS (ready for the lead: not pushed, no PR)
@@ -37,14 +50,3 @@
 - Loops: 1/1 — re-checked every fix on the device after the final build: S05 sheet clean after chip removal, no dead "See more" on S07 reviews, single-day closure text, S06 "more" only on overflow, "30%" in S16/S15, staff line hidden, localized cancel reason, Home reloads on AR/EN switch, live badge after token refresh, iOS sign-in with demo customer 2 (was 422); found and fixed during the loop: HomeViewModel over 300 lines, detekt MaxLineLength on plural call sites, a `?.` warning in the provider test
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: fixes stay in their layer (presentation helpers pure + tested, socket retry in core/realtime without a second refresher, single-top in the shared navigator), no hardcoded values (new texts in AR + EN resources, plurals for counts), no contract change; server gaps listed in `docs/E2E_RESULTS.md` instead of client workarounds
 - Notes: DEVIATIONS — not pushed / no PR (lead runs the remote loop); S24 maintenance/force-update and the 5-minute OTP expiry not exercised live (shared stack / time; unit-tested); single-top navigation and the review/service "more" toggles are covered by option/rule tests, not Compose UI tests; `InstallationInfo.UNKNOWN_INSTALLATION` (repository fallback) is still contract-invalid but no longer reachable from the app; iOS only a smoke path (no booking on iOS). Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `iosApp/Configuration/Local.xcconfig`); never committed.
-
-### CUS-090 — Crash fix: decoding failures become `AppError.ParseError`
-- Branch: `fix/cus-090-decode-crash`
-- Status: IN REVIEW
-- Acceptance criteria (owner crash report 2026-10-26; rules §1.7 "failures are AppResult/AppError, never thrown"):
-  - [x] Root cause: Ktor wraps body decoding failures in `io.ktor.serialization.JsonConvertException` (a `ContentConvertException`, not a kotlinx `SerializationException`), so `safeApiCall` let it escape → FATAL on `OTP request` when the hosted dev API (old server) omitted `expiresInSeconds`
-  - [x] `safeApiCall` catches `ContentConvertException` → `AppError.ParseError` (the screen shows its error state instead of crashing)
-  - [x] Regression test: a 200 body missing a required field → `ParseError`; proven to fail without the fix (`JsonConvertException`)
-- Tests: `SafeApiCallTest` (+1, 7 total); `./gradlew :core:network:testAndroidHostTest` green; red without the fix
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, no behaviour change for valid responses. NOTE: the OTP screen will still show an error against the hosted dev API until it runs the new server (main sync after the owner sets the Render env, SRV-154).
