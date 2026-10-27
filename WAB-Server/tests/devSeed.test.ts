@@ -1,4 +1,5 @@
 import { createStorage } from '@wab/storage';
+import { Types } from 'mongoose';
 import { DEMO_BRANCHES } from '../src/constants/demoSeed';
 import { FAKE_STORAGE_CDN_BASE_URL } from '../src/constants/providers';
 import { SEED_COUNTRIES } from '../src/constants/referenceData';
@@ -6,6 +7,7 @@ import { UPLOAD_POLICIES } from '../src/constants/uploads';
 import { variantKeys } from '../src/domain/uploads/variants';
 import { ensureDemoBranchStaffPhotos, type DemoStaffPhoto } from '../src/seeds/demo/branchPhotos';
 import { buildDemoBranches } from '../src/seeds/demo/branches';
+import { buildDemoDatasetParts } from '../src/seeds/demo/dataset';
 import type { DemoDoc } from '../src/seeds/demo/types';
 import { isDemoImagePurpose, type DemoImageTarget } from '../src/seeds/demoImages';
 import {
@@ -274,5 +276,22 @@ describe('SEED_DEMO_ON_START runs the full dev seed (never throws)', () => {
     expect(
       await seedDemoOnStart({ config: hostedDev, logger: silent, databaseName: 'wab-dev', seed }),
     ).toBe('seeded');
+  });
+});
+
+describe('base data marker survives admin-made catalog services (found by the real seed:dev run)', () => {
+  it('only demo catalog pictures get upload records, so the last upload stays a demo key', () => {
+    const adminService = {
+      id: new Types.ObjectId(),
+      gender: 'FEMALE' as const,
+      name: { ar: 'admin-ar', en: 'Admin service' },
+      imageKey: 'catalog/admin/picture.png',
+    };
+    const { data } = buildDemoDatasetParts({
+      ...context,
+      catalog: [...context.catalog, adminService],
+    });
+    expect(data.Upload.map((row) => row['key'])).not.toContain(adminService.imageKey);
+    expect(String(data.Upload[data.Upload.length - 1]?.['key'])).toMatch(/^demo\//);
   });
 });
