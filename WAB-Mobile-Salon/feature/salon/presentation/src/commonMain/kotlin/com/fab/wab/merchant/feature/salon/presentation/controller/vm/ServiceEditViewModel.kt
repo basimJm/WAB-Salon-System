@@ -18,8 +18,11 @@ import com.fab.wab.merchant.core.domain.upload.UploadSlot
 import com.fab.wab.merchant.core.domain.upload.acceptUploads
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.media.FilePicker
+import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.ServiceDraft
@@ -61,6 +64,7 @@ class ServiceEditViewModel(
     private val files = mutableMapOf<String, LocalFile>()
     private val keys = mutableMapOf<String, String>()
     private var nextFile = 0
+    private val media = MediaPickHandler(deps.picker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
 
     override fun onStart() {
         load()
@@ -78,6 +82,7 @@ class ServiceEditViewModel(
             is UiAction.OnDescription -> edit { copy(description = event.value.take(ServiceLimits.DESCRIPTION_MAX)) }
             is UiAction.OnActive -> edit { copy(active = event.value) }
             UiAction.OnAddMedia -> addMedia()
+            is UiAction.OnMedia -> media.handle(event.action)
             is UiAction.OnRetryMedia -> files[event.id]?.let { file -> scope.launch { send(file) } }
             is UiAction.OnRemoveMedia -> {
                 files.remove(event.id)
@@ -143,19 +148,19 @@ class ServiceEditViewModel(
     }
 
     private fun addMedia() {
-        scope.launch {
-            val state = uiState.value
-            val free = ServiceLimits.MEDIA_MAX - state.uploads.size
-            if (free <= 0) return@launch
-            val picked = deps.picker.pickMedia(maxCount = free, includeVideo = true).map { file ->
-                LocalFile(MEDIA_PREFIX + nextFile++, file.name, file.bytes, file.contentType, file.durationMs)
-            }
-            val (accepted, refused) = acceptUploads(picked, UploadSlot.MEDIA, free)
-            updateState { copy(rejection = refused.firstOrNull()) }
-            accepted.forEach { file ->
-                files[file.id] = file
-                send(file)
-            }
+        val free = ServiceLimits.MEDIA_MAX - uiState.value.uploads.size
+        media.open(PHOTO_SOURCES, maxCount = free, includeVideo = true) { files -> accept(files, free) }
+    }
+
+    private suspend fun accept(pickedFiles: List<PickedFile>, free: Int) {
+        val picked = pickedFiles.map { file ->
+            LocalFile(MEDIA_PREFIX + nextFile++, file.name, file.bytes, file.contentType, file.durationMs)
+        }
+        val (accepted, refused) = acceptUploads(picked, UploadSlot.MEDIA, free)
+        updateState { copy(rejection = refused.firstOrNull()) }
+        accepted.forEach { file ->
+            files[file.id] = file
+            send(file)
         }
     }
 

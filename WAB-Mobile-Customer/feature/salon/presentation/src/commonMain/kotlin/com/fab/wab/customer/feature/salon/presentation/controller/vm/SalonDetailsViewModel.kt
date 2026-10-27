@@ -13,6 +13,10 @@ import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.ui.external.ExternalActions
+import com.fab.wab.customer.core.ui.external.ExternalApp
+import com.fab.wab.customer.core.ui.external.ExternalOutcome
+import com.fab.wab.customer.core.ui.external.unavailableApp
+import com.fab.wab.customer.designsystem.components.feedback.externalUnavailableText
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.salon.domain.usecase.GetSalonDetailsUseCase
 import com.fab.wab.customer.feature.salon.presentation.analytics.SalonAnalytics
@@ -31,6 +35,7 @@ class SalonDetailsDependencies(
     val analytics: AnalyticsTracker,
     val webBaseUrl: String,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val externalText: suspend (ExternalApp) -> String = ::externalUnavailableText,
 )
 
 /** S07: one request, favorite (auth-gated, optimistic), share with the deep link, maps / call / WhatsApp hand-offs. */
@@ -71,13 +76,20 @@ class SalonDetailsViewModel(
     private fun call() {
         val phone = salon()?.phone ?: return
         track(SalonAnalytics.ACTION_CALL)
-        deps.external.dial(phone)
+        handOff { dial(phone) }
     }
 
     private fun whatsApp() {
         val number = salon()?.whatsapp ?: return
         track(SalonAnalytics.ACTION_WHATSAPP)
-        deps.external.openWhatsApp(number)
+        handOff { openWhatsApp(number) }
+    }
+
+    /** Another app takes over; a device without one (simulator, no maps app) gets a message instead of nothing. */
+    private fun handOff(open: suspend ExternalActions.() -> ExternalOutcome) {
+        scope.launch {
+            deps.external.open().unavailableApp?.let { emitSideEffect(SideEffect.ShowError(deps.externalText(it))) }
+        }
     }
 
     /** Taps that open another screen or sheet. */
@@ -133,14 +145,16 @@ class SalonDetailsViewModel(
     private fun share() {
         val salon = salon() ?: return
         track(SalonAnalytics.ACTION_SHARE)
-        deps.external.share(shareText(salon.name, DeepLinks.salon(deps.webBaseUrl, salon.id)))
+        val text = shareText(salon.name, DeepLinks.salon(deps.webBaseUrl, salon.id))
+        handOff { share(text) }
     }
 
     private fun openMaps() {
         val salon = salon() ?: return
         val location = salon.location ?: return
         track(SalonAnalytics.ACTION_MAPS)
-        deps.external.openMaps(location.latitude, location.longitude, mapsLabel(salon.name, uiState.value.selectedBranch?.name))
+        val label = mapsLabel(salon.name, uiState.value.selectedBranch?.name)
+        handOff { openMaps(location.latitude, location.longitude, label) }
     }
 
     /** Always enabled, even when closed (PRD S07 item 12); guests get the auth dialog. */

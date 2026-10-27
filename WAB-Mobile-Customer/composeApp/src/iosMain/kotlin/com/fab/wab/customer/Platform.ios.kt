@@ -1,7 +1,6 @@
 package com.fab.wab.customer
 
-import platform.Foundation.NSURL
-import platform.UIKit.UIApplication
+import com.fab.wab.customer.core.ui.external.IosSystem
 import platform.UIKit.UIDevice
 import platform.posix.exit
 
@@ -16,9 +15,8 @@ class IOSPlatform : Platform {
 actual fun getPlatform(): Platform = IOSPlatform()
 
 actual fun openStoreLink(url: String?) {
-    val target = url?.takeIf { it.isNotBlank() } ?: return
-    val nsUrl = NSURL.URLWithString(target) ?: return
-    UIApplication.sharedApplication.openURL(nsUrl)
+    // `openURL:` (deprecated) does nothing on iOS 18+; IosSystem uses open(_:options:completionHandler:).
+    url?.takeIf { it.isNotBlank() }?.let(IosSystem::launch)
 }
 
 actual fun exitApp() {

@@ -6,6 +6,19 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
+/**
+ * Kotlin/Native binary options of the iOS framework (CUS-096, iOS smoothness).
+ * - `bundleId`: the framework's bundle id (silences the K/N warning and names the framework in crash reports).
+ * - `gc = cms`: concurrent marking, so the mark phase no longer pauses the main thread (fewer dropped frames while
+ *   scrolling lists that allocate, e.g. image-heavy salon cards).
+ * - `appStateTracking = enabled`: the GC stops its timer-driven collections while the app is in the background.
+ */
+private const val BINARY_OPTION_BUNDLE_ID = "bundleId"
+private const val BINARY_OPTION_GC = "gc"
+private const val GC_CONCURRENT_MARK_SWEEP = "cms"
+private const val BINARY_OPTION_APP_STATE_TRACKING = "appStateTracking"
+private const val APP_STATE_TRACKING_ENABLED = "enabled"
+
 class ComposeAppPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
@@ -21,7 +34,9 @@ class ComposeAppPlugin : Plugin<Project> {
 
                 listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
                     iosTarget.binaries.all {
-                        freeCompilerArgs += listOf("-Xbinary=bundleId=com.fab.wab.customer")
+                        binaryOption(BINARY_OPTION_BUNDLE_ID, AndroidSdk.NAMESPACE_ROOT)
+                        binaryOption(BINARY_OPTION_GC, GC_CONCURRENT_MARK_SWEEP)
+                        binaryOption(BINARY_OPTION_APP_STATE_TRACKING, APP_STATE_TRACKING_ENABLED)
                     }
                     iosTarget.binaries.framework {
                         baseName = "ComposeApp"

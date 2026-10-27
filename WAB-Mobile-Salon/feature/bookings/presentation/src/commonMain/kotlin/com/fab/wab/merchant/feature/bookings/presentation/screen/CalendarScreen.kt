@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
@@ -100,14 +101,22 @@ private fun CalendarBody(state: UiState, onAction: (UiAction) -> Unit) {
         ) { AppLoadingIndicator() }
         state.error != null -> AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
         else -> {
-            val texts = CalendarTexts(timeRange = rangeText(), closed = stringResource(Res.string.calendar_closed_label))
+            val timeRange = rangeText()
+            val closed = stringResource(Res.string.calendar_closed_label)
+            val texts = remember(timeRange, closed) { CalendarTexts(timeRange = timeRange, closed = closed) }
             val days = state.days
-            val columns = if (state.mode == CalendarMode.DAY) {
-                dayColumns(state.date, state.visibleEntries, state.visibleStaff, state.staffFilter, state.own, state.hours, texts)
-            } else {
-                weekColumns(days, days.map { weekDayTitle(it) }, state.visibleEntries, state.staffFilter, state.hours, texts)
+            val titles = days.map { weekDayTitle(it) }
+            val entries = state.visibleEntries
+            val staff = state.visibleStaff
+            // The layout only depends on these inputs; the clock tick (`nowMs`) and sheet flags must not rebuild it.
+            val columns = remember(state.mode, days, titles, entries, staff, state.staffFilter, state.own, state.hours, texts) {
+                if (state.mode == CalendarMode.DAY) {
+                    dayColumns(state.date, entries, staff, state.staffFilter, state.own, state.hours, texts)
+                } else {
+                    weekColumns(days, titles, entries, state.staffFilter, state.hours, texts)
+                }
             }
-            val window = windowFor(days, state.hours, columns)
+            val window = remember(days, state.hours, columns) { windowFor(days, state.hours, columns) }
             val labels = hourLabels(window)
             val onSwipe = { forward: Boolean -> onAction(UiAction.OnPage(forward)) }
             if (state.mode == CalendarMode.DAY) {
@@ -179,10 +188,12 @@ private fun rangeText(): (Instant, Instant) -> String {
     val separator = stringResource(Res.string.calendar_range_separator)
     val am = stringResource(DesignRes.string.time_am)
     val pm = stringResource(DesignRes.string.time_pm)
-    return { start, end ->
-        val from = TimeFormat.instantText(start.toString(), am, pm)?.time.orEmpty()
-        val to = TimeFormat.instantText(end.toString(), am, pm)?.time.orEmpty()
-        from + separator + to
+    return remember(separator, am, pm) {
+        { start, end ->
+            val from = TimeFormat.instantText(start.toString(), am, pm)?.time.orEmpty()
+            val to = TimeFormat.instantText(end.toString(), am, pm)?.time.orEmpty()
+            from + separator + to
+        }
     }
 }
 
@@ -190,9 +201,11 @@ private fun rangeText(): (Instant, Instant) -> String {
 private fun hourLabels(window: TimeWindow): List<String> {
     val am = stringResource(DesignRes.string.time_am)
     val pm = stringResource(DesignRes.string.time_pm)
-    return window.hours.map { minute ->
-        val hour = (minute / MINUTES_PER_HOUR).toString().padStart(HOUR_TEXT_PAD, ZERO)
-        TimeFormat.to12Hour(hour + ON_THE_HOUR, am, pm).orEmpty()
+    return remember(window, am, pm) {
+        window.hours.map { minute ->
+            val hour = (minute / MINUTES_PER_HOUR).toString().padStart(HOUR_TEXT_PAD, ZERO)
+            TimeFormat.to12Hour(hour + ON_THE_HOUR, am, pm).orEmpty()
+        }
     }
 }
 

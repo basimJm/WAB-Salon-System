@@ -43,7 +43,7 @@ class BranchEditViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(branchId = branchId, loading = branchId != null), testScope) {
 
-    private val mapHandler = MapPickerHandler(deps.map, scope, ::readMap, ::writeMap) { emitSideEffect(SideEffect.LocationBlocked) }
+    private val mapHandler = MapPickerHandler(deps.map, scope, ::readMap, ::writeMap)
 
     override fun onStart() {
         load()

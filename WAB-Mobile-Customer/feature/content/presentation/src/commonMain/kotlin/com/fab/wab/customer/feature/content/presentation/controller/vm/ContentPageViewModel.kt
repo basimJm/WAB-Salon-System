@@ -8,6 +8,10 @@ import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.config.AppConfigRepository
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.ui.external.ExternalActions
+import com.fab.wab.customer.core.ui.external.ExternalApp
+import com.fab.wab.customer.core.ui.external.ExternalOutcome
+import com.fab.wab.customer.core.ui.external.unavailableApp
+import com.fab.wab.customer.designsystem.components.feedback.externalUnavailableText
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.content.domain.model.ContentSlugs
 import com.fab.wab.customer.feature.content.domain.usecase.LoadContentPageUseCase
@@ -25,6 +29,7 @@ class ContentPageDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val externalText: suspend (ExternalApp) -> String = ::externalUnavailableText,
 )
 
 /** S23: privacy / terms / about from the server; `contact` shows the config's phone, WhatsApp and email. */
@@ -51,7 +56,7 @@ class ContentPageViewModel(
             UiAction.OnRetry -> if (!uiState.value.isContact) load()
             is UiAction.OnLinkClick -> {
                 track(ContentAnalytics.ACTION_LINK, ContentAnalytics.PARAM_SLUG to slug)
-                deps.external.openUrl(event.url)
+                handOff { openUrl(event.url) }
             }
             is UiAction.OnContactChannel -> contact(event.channel)
         }
@@ -61,9 +66,16 @@ class ContentPageViewModel(
         val info = uiState.value.contact ?: return
         track(ContentAnalytics.ACTION_CONTACT, ContentAnalytics.PARAM_VALUE to channel.name.lowercase())
         when (channel) {
-            ContactChannel.CALL -> deps.external.dial(info.phone)
-            ContactChannel.WHATSAPP -> deps.external.openWhatsApp(info.whatsapp)
-            ContactChannel.EMAIL -> deps.external.email(info.email)
+            ContactChannel.CALL -> handOff { dial(info.phone) }
+            ContactChannel.WHATSAPP -> handOff { openWhatsApp(info.whatsapp) }
+            ContactChannel.EMAIL -> handOff { email(info.email) }
+        }
+    }
+
+    /** Another app takes over; a device without one (simulator, no mail app) gets a message instead of nothing. */
+    private fun handOff(open: suspend ExternalActions.() -> ExternalOutcome) {
+        scope.launch {
+            deps.external.open().unavailableApp?.let { emitSideEffect(SideEffect.ShowError(deps.externalText(it))) }
         }
     }
 

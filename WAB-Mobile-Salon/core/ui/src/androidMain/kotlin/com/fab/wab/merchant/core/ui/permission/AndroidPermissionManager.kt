@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.core.ui.permission
 
 import android.Manifest
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -36,7 +37,9 @@ class AndroidPermissionManager(
             Manifest.permission.ACCESS_COARSE_LOCATION,
         )
 
-        AppPermission.CAMERA -> listOf(Manifest.permission.CAMERA)
+        // Photos are taken by the system camera app (ACTION_IMAGE_CAPTURE), which needs no permission; declaring
+        // CAMERA without holding it would make that intent fail with a SecurityException.
+        AppPermission.CAMERA -> emptyList()
     }
 
     private fun isHeld(name: String): Boolean =
@@ -45,7 +48,7 @@ class AndroidPermissionManager(
     private fun isGranted(permission: AppPermission): Boolean = when (permission) {
         AppPermission.NOTIFICATIONS -> NotificationManagerCompat.from(context).areNotificationsEnabled()
         AppPermission.LOCATION -> manifestPermissions(permission).any(::isHeld)
-        AppPermission.CAMERA -> manifestPermissions(permission).all(::isHeld)
+        AppPermission.CAMERA -> true
     }
 
     private fun canStillAsk(permission: AppPermission): Boolean {
@@ -77,10 +80,20 @@ class AndroidPermissionManager(
             AppPermission.NOTIFICATIONS -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
                 .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
 
-            else -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                .setData(Uri.fromParts(PACKAGE_URI_SCHEME, context.packageName, null))
+            else -> appDetails()
         }
+        if (!start(intent)) start(appDetails())
+    }
+
+    private fun appDetails(): Intent =
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).setData(Uri.fromParts(PACKAGE_URI_SCHEME, context.packageName, null))
+
+    /** Some OEM builds hide a settings screen; the caller falls back to the app details page. */
+    private fun start(intent: Intent): Boolean = try {
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        true
+    } catch (ignored: ActivityNotFoundException) {
+        false
     }
 
     override fun isLocationServiceEnabled(): Boolean =
@@ -89,8 +102,6 @@ class AndroidPermissionManager(
             ?: false
 
     override fun openLocationServiceSettings() {
-        context.startActivity(
-            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-        )
+        if (!start(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))) start(appDetails())
     }
 }

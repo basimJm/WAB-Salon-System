@@ -13,7 +13,8 @@ actual class PlatformUrlLauncher actual constructor() : UrlLauncher {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        context.startActivity(intent)
+        // A device without a browser must not crash the banner tap.
+        runCatching { context.startActivity(intent) }
     }
 }
 

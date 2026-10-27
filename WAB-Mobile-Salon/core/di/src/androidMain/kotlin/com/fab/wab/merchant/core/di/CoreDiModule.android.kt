@@ -9,6 +9,6 @@ import org.koin.core.module.Module
 import org.koin.dsl.module
 
 actual val deviceLocationProviderModule: Module = module {
-    single<DeviceLocationProvider> { DeviceLocationProviderAndroid() }
+    single<DeviceLocationProvider> { DeviceLocationProviderAndroid(get<Context>()) }
     single<ReverseGeocoder> { AndroidReverseGeocoder(get<Context>()) }
 }

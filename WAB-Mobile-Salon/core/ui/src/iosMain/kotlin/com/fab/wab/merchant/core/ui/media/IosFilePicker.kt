@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.core.ui.media
 
+import com.fab.wab.merchant.core.ui.external.IosUiKit
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CompletableDeferred
 import platform.AVFoundation.AVURLAsset
@@ -11,36 +12,81 @@ import platform.PhotosUI.PHPickerConfiguration
 import platform.PhotosUI.PHPickerFilter
 import platform.PhotosUI.PHPickerResult
 import platform.PhotosUI.PHPickerViewController
-import platform.PhotosUI.PHPickerViewControllerDelegateProtocol
-import platform.UIKit.UIApplication
-import platform.UIKit.UIDocumentPickerDelegateProtocol
+import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UIKit.UIDocumentPickerViewController
 import platform.UIKit.UIImage
-import platform.UIKit.UIViewController
+import platform.UIKit.UIImagePickerController
+import platform.UIKit.UIImagePickerControllerSourceType
 import platform.UniformTypeIdentifiers.UTType
 import platform.UniformTypeIdentifiers.UTTypeImage
 import platform.UniformTypeIdentifiers.UTTypeMovie
 import platform.UniformTypeIdentifiers.UTTypePDF
 import platform.darwin.NSObject
 
-/** `UIDocumentPickerViewController` (PDF + images) and `PHPickerViewController` (photos + videos) over the key window. */
+/**
+ * `PHPickerViewController` (photos + videos, no permission), `UIDocumentPickerViewController` (PDF + images) and the
+ * camera (`UIImagePickerController`, after the camera authorization) presented from the top-most controller.
+ *
+ * UIKit keeps picker delegates WEAKLY: the delegate is held in [activeDelegate] until the answer arrives. A local
+ * delegate is not kept alive across the suspension by Kotlin/Native, so it could be collected while the picker is on
+ * screen — the picker then never reports back and the upload button "does nothing".
+ */
 @OptIn(ExperimentalForeignApi::class)
 class IosFilePicker : FilePicker {
+    private var activeDelegate: NSObject? = null
+    private val camera = IosCameraAccess()
 
-    override suspend fun pickDocuments(maxCount: Int): List<PickedFile> {
-        val root = rootController() ?: return emptyList()
+    override val isCameraAvailable: Boolean
+        get() = UIImagePickerController.isSourceTypeAvailable(CAMERA_SOURCE)
+
+    override suspend fun pick(request: PickRequest): PickResult = when (request.source) {
+        MediaSource.CAMERA -> capture()
+        MediaSource.LIBRARY -> pickMedia(request.maxCount, request.includeVideo)
+        MediaSource.FILES -> pickDocuments(request.maxCount)
+    }
+
+    override fun openCameraSettings() = IosUiKit.openNow(UIApplicationOpenSettingsURLString)
+
+    private suspend fun capture(): PickResult = when {
+        !isCameraAvailable -> PickResult.CameraUnavailable
+        !camera.ensureAccess() -> PickResult.CameraBlocked
+        else -> takePhoto()
+    }
+
+    private suspend fun takePhoto(): PickResult {
+        val presenter = IosUiKit.topViewController() ?: return PickResult.Cancelled
+        val answer = CompletableDeferred<UIImage?>()
+        val delegate = CameraDelegate(answer)
+        val picker = UIImagePickerController().apply {
+            sourceType = CAMERA_SOURCE
+            this.delegate = delegate
+        }
+        val image = awaitWith(delegate) {
+            presenter.presentViewController(picker, animated = true, completion = null)
+            answer.await()
+        }
+        picker.dismissViewControllerAnimated(true, completion = null)
+        val encoded = image?.let { IosImageCodec.encode(it, FilePickerDefaults.MAX_IMAGE_DIMENSION_PX) } ?: return PickResult.Cancelled
+        return PickResult.Picked(listOf(PickedFile(FilePickerDefaults.CAMERA_FILE_NAME, encoded.bytes, encoded.contentType)))
+    }
+
+    private suspend fun pickDocuments(maxCount: Int): PickResult {
+        val presenter = IosUiKit.topViewController() ?: return PickResult.Cancelled
         val answer = CompletableDeferred<List<NSURL>>()
         val delegate = DocumentDelegate(answer)
         val picker = UIDocumentPickerViewController(forOpeningContentTypes = listOf(UTTypePDF, UTTypeImage), asCopy = true).apply {
             allowsMultipleSelection = maxCount > 1
             this.delegate = delegate
         }
-        root.presentViewController(picker, animated = true, completion = null)
-        return answer.await().take(maxCount).mapNotNull(::readFile)
+        val urls = awaitWith(delegate) {
+            presenter.presentViewController(picker, animated = true, completion = null)
+            answer.await()
+        }
+        return urls.take(maxCount).mapNotNull(::readFile).toResult()
     }
 
-    override suspend fun pickMedia(maxCount: Int, includeVideo: Boolean): List<PickedFile> {
-        val root = rootController() ?: return emptyList()
+    private suspend fun pickMedia(maxCount: Int, includeVideo: Boolean): PickResult {
+        val presenter = IosUiKit.topViewController() ?: return PickResult.Cancelled
         val configuration = PHPickerConfiguration().apply {
             selectionLimit = maxCount.toLong()
             filter = if (includeVideo) {
@@ -52,10 +98,22 @@ class IosFilePicker : FilePicker {
         val answer = CompletableDeferred<List<PHPickerResult>>()
         val delegate = MediaDelegate(answer)
         val picker = PHPickerViewController(configuration).apply { this.delegate = delegate }
-        root.presentViewController(picker, animated = true, completion = null)
-        val results = answer.await()
+        val results = awaitWith(delegate) {
+            presenter.presentViewController(picker, animated = true, completion = null)
+            answer.await()
+        }
         picker.dismissViewControllerAnimated(true, completion = null)
-        return results.take(maxCount).mapNotNull { loadResult(it) }
+        return results.take(maxCount).mapNotNull { loadResult(it) }.toResult()
+    }
+
+    /** Keeps [delegate] strongly referenced for as long as the picker is on screen. */
+    private suspend fun <T> awaitWith(delegate: NSObject, block: suspend () -> T): T {
+        activeDelegate = delegate
+        return try {
+            block()
+        } finally {
+            if (activeDelegate === delegate) activeDelegate = null
+        }
     }
 
     private suspend fun loadResult(result: PHPickerResult): PickedFile? {
@@ -102,28 +160,12 @@ class IosFilePicker : FilePicker {
         )
     }
 
-    private fun rootController(): UIViewController? = UIApplication.sharedApplication.keyWindow?.rootViewController
+    private fun List<PickedFile>.toResult(): PickResult = if (isEmpty()) PickResult.Cancelled else PickResult.Picked(this)
 
     private companion object {
         const val IMAGE_PREFIX = "image/"
         const val MILLIS_PER_SECOND = 1000.0
-    }
-}
-
-private class DocumentDelegate(private val answer: CompletableDeferred<List<NSURL>>) : NSObject(), UIDocumentPickerDelegateProtocol {
-    override fun documentPicker(controller: UIDocumentPickerViewController, didPickDocumentsAtURLs: List<*>) {
-        answer.complete(didPickDocumentsAtURLs.filterIsInstance<NSURL>())
-    }
-
-    override fun documentPickerWasCancelled(controller: UIDocumentPickerViewController) {
-        answer.complete(emptyList())
-    }
-}
-
-private class MediaDelegate(private val answer: CompletableDeferred<List<PHPickerResult>>) :
-    NSObject(), PHPickerViewControllerDelegateProtocol {
-    override fun picker(picker: PHPickerViewController, didFinishPicking: List<*>) {
-        answer.complete(didFinishPicking.filterIsInstance<PHPickerResult>())
+        val CAMERA_SOURCE = UIImagePickerControllerSourceType.UIImagePickerControllerSourceTypeCamera
     }
 }
 

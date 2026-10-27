@@ -28,6 +28,7 @@ import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvent
 import com.fab.wab.customer.core.realtime.RealtimeEvents
+import com.fab.wab.customer.core.ui.external.ExternalApp
 import com.fab.wab.customer.core.ui.external.FakeExternalActions
 import com.fab.wab.customer.feature.bookings.domain.model.CancellationRule
 import com.fab.wab.customer.feature.bookings.domain.model.RefundOutcome
@@ -111,12 +112,21 @@ class BookingDetailsViewModelTest {
             external = external,
             analytics = NoOpAnalyticsTracker,
             errorText = { "error" },
+            externalText = { app -> "unavailable:$app" },
             now = { Instant.parse(now) },
         )
         val vm = BookingDetailsViewModel("b1", deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm
+    }
+
+    @Test
+    fun callWithoutADialerShowsTheDeviceMessage() = runTest(UnconfinedTestDispatcher()) {
+        external.unavailable = setOf(ExternalApp.DIALER)
+        val vm = viewModel(DetailsBookingsFake(AppResult.Success(detailsBooking(BookingStatus.APPROVED))))
+        vm.onEvent(UiAction.OnCallClick)
+        assertEquals(listOf<SideEffect>(SideEffect.ShowError("unavailable:DIALER")), effects)
     }
 
     @Test

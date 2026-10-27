@@ -7,8 +7,11 @@ import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.domain.upload.UploadLimits
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
 import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.upload.MediaGridMode
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.GalleryItem
 import com.fab.wab.merchant.feature.salon.domain.GalleryRepository
@@ -88,6 +91,7 @@ class GalleryViewModelTest {
         val viewModel = viewModel()
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnAdd)
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         val state = viewModel.state.first()
         assertEquals(
             listOf(GalleryType.IMAGE to "GALLERY_IMAGE-key", GalleryType.VIDEO to "GALLERY_VIDEO-key"),
@@ -101,12 +105,26 @@ class GalleryViewModelTest {
     }
 
     @Test
+    fun addOffersCameraAndLibraryAndUploadsTheCameraPhoto() = runTest(UnconfinedTestDispatcher()) {
+        picker.camera = PickedFile("camera.jpg", byteArrayOf(4), "image/jpeg")
+        val viewModel = viewModel()
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnAdd)
+        assertEquals(PHOTO_SOURCES, viewModel.state.first().media.sources)
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.CAMERA)))
+        assertEquals(listOf("camera:1:false"), picker.requests)
+        assertEquals(listOf(GalleryType.IMAGE to "GALLERY_IMAGE-key"), gallery.added.map { it.first to it.second })
+        assertTrue(viewModel.state.first().media.sources.isEmpty())
+    }
+
+    @Test
     fun failedAddStaysAsRetryCell() = runTest(UnconfinedTestDispatcher()) {
         gallery.addFails = true
         val viewModel = viewModel()
         val effects = effectsOf(viewModel)
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnAdd)
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         val pending = viewModel.state.first().pending
         assertEquals(listOf(UploadStatus.Failed, UploadStatus.Failed), pending.map { it.status })
         assertEquals(SideEffect.ShowError("failed"), effects.last())

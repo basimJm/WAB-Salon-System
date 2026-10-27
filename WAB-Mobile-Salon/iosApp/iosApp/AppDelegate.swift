@@ -21,7 +21,12 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in }
-        application.registerForRemoteNotifications()
+        // MER-078: the APNs token is only used by Firebase Messaging, so without Firebase there is nothing to register.
+        // Registration is attempted once per launch; a failure (no aps-environment on a free Personal Team) is logged
+        // in didFailToRegister and never retried.
+        if firebaseReady {
+            application.registerForRemoteNotifications()
+        }
 
         return true
     }
@@ -32,6 +37,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     ) {
         guard FirebaseApp.app() != nil else { return }
         Messaging.messaging().apnsToken = deviceToken
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        NSLog("Remote notifications unavailable (no retry): %@", error.localizedDescription)
     }
 
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
