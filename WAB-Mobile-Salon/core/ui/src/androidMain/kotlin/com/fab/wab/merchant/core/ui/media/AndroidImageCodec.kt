@@ -2,9 +2,17 @@ package com.fab.wab.merchant.core.ui.media
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import android.media.ExifInterface
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 
-/** Decode (sampled to stay near [maxDimension]), crop, scale and JPEG-encode images on the device. */
+/**
+ * Decode (sampled to stay near [maxDimension]), turn upright, crop, scale and JPEG-encode images on the device.
+ * Camera photos and most library photos are stored sideways with an EXIF orientation tag; the decoded bitmap
+ * ignores it, so it is applied here before cropping (the cropper shows what the user saw in the gallery).
+ */
 internal object AndroidImageCodec {
     fun compress(bytes: ByteArray, maxDimension: Int): PickedImage? = decode(bytes, maxDimension)?.let { encode(it, maxDimension) }
 
@@ -34,9 +42,36 @@ internal object AndroidImageCodec {
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
         var sample = 1
         while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * SAMPLE_STEP) >= maxDimension) sample *= SAMPLE_STEP
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+        val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
+            ?: return null
+        return upright(bitmap, orientationOf(bytes))
+    }
+
+    private fun orientationOf(bytes: ByteArray): Int = try {
+        ExifInterface(ByteArrayInputStream(bytes)).getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+    } catch (ignored: IOException) {
+        ExifInterface.ORIENTATION_NORMAL
+    }
+
+    private fun upright(bitmap: Bitmap, orientation: Int): Bitmap {
+        val matrix = Matrix()
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(QUARTER_TURN)
+            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(HALF_TURN)
+            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(THREE_QUARTER_TURN)
+            ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> matrix.postScale(MIRROR, 1f)
+            ExifInterface.ORIENTATION_FLIP_VERTICAL -> matrix.postScale(1f, MIRROR)
+            ExifInterface.ORIENTATION_TRANSPOSE -> matrix.apply { postRotate(QUARTER_TURN); postScale(MIRROR, 1f) }
+            ExifInterface.ORIENTATION_TRANSVERSE -> matrix.apply { postRotate(THREE_QUARTER_TURN); postScale(MIRROR, 1f) }
+            else -> return bitmap
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
     }
 
     /** `inSampleSize` must be a power of two. */
     private const val SAMPLE_STEP = 2
+    private const val QUARTER_TURN = 90f
+    private const val HALF_TURN = 180f
+    private const val THREE_QUARTER_TURN = 270f
+    private const val MIRROR = -1f
 }

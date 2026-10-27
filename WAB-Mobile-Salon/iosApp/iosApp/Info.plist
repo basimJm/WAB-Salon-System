@@ -17,10 +17,14 @@
 		<string>remote-notification</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to show what is near you.</string>
+	<string>Your location places your salon on the map when you set its address.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need the camera to take photos for your reviews.</string>
+	<string>The camera takes photos of your salon, your team and your license documents.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We use your location to show what is near you.</string>
+	<string>Your location places your salon on the map when you set its address.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>whatsapp</string>
+	</array>
 </dict>
 </plist>
