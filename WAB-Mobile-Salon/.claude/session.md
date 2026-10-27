@@ -9,6 +9,20 @@
 
 ## Current task
 
+### MER-078 — Performance: iOS release build + Compose iOS settings
+- Branch: `perf/mer-078-ios-performance`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-27: the iOS app lags; smooth on Dev/Prod, Debug/Release; iOS only, shared Compose in a parallel task):
+  - [x] Release-Dev/Release-Prod: Kotlin/Native release framework (`KOTLIN_FRAMEWORK_BUILD_TYPE = release`, read by `embedAndSignAppleFrameworkForXcode`), Swift `-O` + whole module, `DEAD_CODE_STRIPPING`, every arch (`ONLY_ACTIVE_ARCH` YES only in Debug), SwiftUI previews off in Release; locked by policy V001 (`_check_ios_build_settings`)
+  - [x] K/N runtime: `-Xbinary=appStateTracking=enabled` (no timer GC in the background); `gc` stays the default CMS, `objcDisposeOnMain` stays default (Compose releases UIKit objects on main)
+  - [x] `ComposeUIViewController(configure = { parallelRendering = true })` (Compose 1.10.3 API); ProMotion `CADisableMinimumFrameDurationOnPhone` already in Info.plist, verified by the default strict plist check
+  - [x] Startup: APNs registered once and only when Firebase is configured; `didFailToRegister` logs once, no retry (Personal Team without `aps-environment`); Koin stays synchronous before the first frame (the UI reads it immediately), Firebase `configure` must run on main; realtime socket is not started at launch (`IosBookingRequests.start` only observes the language)
+  - [ ] Simulator builds: iosApp-Dev Debug-Dev + Release-Dev, iosApp-Prod Release-Prod
+- Tests: `scripts/ci/tests/test_variants.py` (+5 `IosBuildSettingsTest`); `python3 -m unittest discover -s scripts/ci/tests` 110 OK; `policy_checks.py all` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: image cache = shared code (single Coil `ImageLoader` with default memory + disk cache in `App.kt`), not changed. Local.xcconfig untouched.
+
 ### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
 - Branch: `feat/mer-075-contract-1-6`
 - Status: IN REVIEW
@@ -41,21 +55,3 @@
 - Tests: `SurfaceTokensTest` (2: design colours per tone light/dark; opaque fills, 1 dp line < 1.5 dp state border); `GlassTokensTest` removed with the glass code; `./gradlew testAndroidHostTest` 181 suites / 589 tests / 0 failures; `policy_checks.py all` ok; detekt ok (empty baseline); `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok
 - Loops: 1/1 — re-checked each criterion on the emulator (Pixel 8 Pro, local stack; Lamar owner, Khalda employee, Rose owner): AR RTL light + dark, landscape rail, employee 4-tab bar; found and fixed in the loop: invisible request-sheet scrim, hub tiles in one column (design: 2), flat finance card (design: gradient), detekt line lengths
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — change made once in the design system (tokens + one primitive file), screens follow; customer app untouched; no hardcoded values (constants files carry the design CSS). DEVIATIONS: EN LTR checked on auth/OTP only (tab screens toured in Arabic); only Home, Salon hub, Finance, Bookings, Calendar, More compared with the design file side by side (profile/services/team/policies/bank looked at, not measured); previews not re-rendered in the IDE; no iOS simulator run (framework link only).
-
-### MER-073 — OTP screen fixes + every OTP flow tested on the local stack
-- Branch: `fix/mer-073-otp-screen`
-- Branched: (from `origin/merchant` + `origin/main`, already up to date)
-- Status: IN REVIEW
-- Acceptance criteria (owner 2026-10-26 "fix merchant OTP screen and test all flows"; PRD M03 + Customer PRD S13; BUSINESS_DOMAIN §3.1a; `POST /auth/otp/request`, `POST /auth/otp/verify`, `otpToken` in login / application / change phone / payout details; design `WAB Merchant 01 Onboarding.dc.html` `on.otp`):
-  - [x] Layout = merchant design (was the customer S13 copy): `padding:54px 22px 30px` measured from the screen top (status bar included, also login), back pill + centered mode title (`t.modes`: Log in / Register salon / Change number / Confirm bank details), icon per mode (phone / house / bank), title "Enter verification code", bank note (bank details), boxes 56 dp / radius 14 / gap 8 / digit 22 / `margin:28px 0 10px`, flat card cells with the 4 dp focus ring drawn outside (the current cell no longer shrinks), resend `margin-top:18px`; phone shown `+962 7 9123 4567`; content keeps the phone width (≤ 560 dp) in landscape / tablets
-  - [x] Keyboard: the field takes focus + keyboard when a code is waiting, after a wrong code and after each new code; `ImeAction.Done` verifies; autofill `ContentType.SmsOtpCode`
-  - [x] Input: Arabic-Indic / Eastern Arabic-Indic digits accepted; a pasted whole code (WhatsApp "copy code" or a message) replaces the typed digits; after a refused code the next digit starts a new code (was: a full wrong code ignored every key until 6 backspaces)
-  - [x] `OTP_BLOCKED` on verify (5th wrong code) shows the blocked banner with the remaining time (one `otp/request` answers `blockedUntil`, nothing is sent while blocked); was a toast + a resend link that could not work
-  - [x] One code request per OTP screen: `onStart` re-ran on every re-subscription (back from WhatsApp after > 5 s) and, past the 60 s cooldown, sent a NEW code that replaced the one the member had just read
-  - [x] Bank details: the form loads once; coming back from the OTP screen re-ran the load and replaced the typed bank name / holder with the saved ones, so the save failed with `VALIDATION_ERROR` after a spent code
-  - [x] Change-phone sheet: phone field box is LTR (`+962` before the number, as in the design), label/error keep the screen direction (`AppTextField(fieldDirection)`)
-  - [x] All flows on the emulator (Pixel 8 Pro, `emulator-5570`) against the local stack (`OTP_PROVIDER=fake`, code 123456) — results in Notes
-- Tests: `ComponentLogicTest` (+3: Arabic digits, paste, restart after a refused code), `PhoneDisplayTest` (2), `OtpVerifyErrorsTest` (blocked banner + blocked without status), `OtpViewModelTest` (+1 no second request on re-subscription, codes counter), `BankDetailsViewModelTest` (+1 typed details survive the OTP round trip); `:feature:auth:presentation`, `:feature:finance:presentation`, `:feature:more:presentation`, `:core:design-system` host tests green; `policy_checks.py all` ok; detekt ok; `:androidApp:assembleDevDebug` ok
-- Loops: 1/1 — re-checked every criterion on the emulator against the local stack after the last change (sign-in, wrong code, blocked, expiry + resend, register, change phone, bank details, leave + return); found and fixed in the loop: digits ignored after a refused full code, no keyboard after a resend, second code request on re-subscription, bank fields reset by the reload
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — VM state only (no logic in composables), no new contract, texts AR + EN, constants in `AuthDesignConstants`, policy + detekt clean. DEVIATIONS in Notes.
-- Notes: device results (local stack, dev build with a LOCAL `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000` + `DEV_DATA_SOURCE=remote`, and an UNCOMMITTED `android:usesCleartextTraffic="true"` in the debug manifest for http to the host — reverted before commit): sign-in owner Lamar ✔ (wrong code → server "attempts left: 4" line, then right code → Home), sign-in Khalda manager after expiry popup + resend ✔, wrong code ×5 (Khalda employee) → blocked banner 15:02 ✔, resend after 60 s ✔ (new countdown + lifetime), code lifetime 5:00 → expired popup → resend ✔, registration (new number 789777001) → not-linked dialog → REGISTER OTP → M04 form ✔ (application not submitted: needs document uploads), change phone owner → 789555001 ✔ and back to 789000001 ✔, bank details ✔ (saved with the proof after 10 s on the OTP screen), leave to the launcher 70 s and come back keeps the typed digits and sends no new code ✔; AR RTL + EN LTR, landscape with keyboard, font scale 200 % checked. Not exercised on device: paste and Arabic-Indic digits (adb `input text` is ASCII only, no clipboard command) — unit tests only; `OTP_DELIVERY_FAILED` (fake provider never fails). Found outside OTP (task chip): Back on the M10 request sheet leaves an invisible scrim that swallows the next tap.
