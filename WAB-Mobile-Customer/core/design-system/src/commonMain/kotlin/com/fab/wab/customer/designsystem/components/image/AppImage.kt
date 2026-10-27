@@ -5,15 +5,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.Image
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
-import coil3.compose.rememberAsyncImagePainter
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
@@ -30,18 +31,19 @@ fun AppImage(
     contentScale: ContentScale = ContentScale.Crop,
 ) {
     val imageLoader = LocalImageLoader.current
-    // CUS-095: one painter + plain overlays instead of SubcomposeAsyncImage. Subcomposition per image was the main
+    // CUS-095: AsyncImage + plain overlays instead of SubcomposeAsyncImage. Subcomposition per image was the main
     // cost of scrolling salon/service lists (skill: avoid SubcomposeLayout in lazy items); the look is unchanged.
-    val painter = rememberAsyncImagePainter(model = url, imageLoader = imageLoader, contentScale = contentScale)
-    val state by painter.state.collectAsState()
+    var overlay by remember(url) { mutableStateOf(ImageOverlay.Loading) }
     Box(modifier = modifier) {
-        Image(
-            painter = painter,
+        AsyncImage(
+            model = url,
             contentDescription = contentDescription,
+            imageLoader = imageLoader,
             modifier = Modifier.fillMaxSize(),
             contentScale = contentScale,
+            onState = { overlay = imageOverlayOf(it) },
         )
-        when (imageOverlayOf(state)) {
+        when (overlay) {
             ImageOverlay.Loading -> AppShimmerBox(Modifier.fillMaxSize())
             ImageOverlay.Fallback -> AppImageFallback()
             ImageOverlay.None -> Unit
