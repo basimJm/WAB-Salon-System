@@ -22,7 +22,9 @@ actual fun openStoreLink(url: String?) {
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
     val context = KoinPlatform.getKoin().getProperty<Context>("androidContext")
-    context?.startActivity(intent)
+    // No browser or store app on this device: the update screen stays instead of crashing.
+    val opened = runCatching { context?.startActivity(intent) }.isSuccess
+    if (!opened) return
 }
 
 actual fun exitApp() {

@@ -31,4 +31,11 @@
     <string name="request_accepted">تم قبول الحجز</string>
     <string name="request_handled">تمت معالجته من عضو آخر في الفريق</string>
     <string name="request_failed">تعذّر قبول الحجز. افتح التطبيق وحاول مرة أخرى.</string>
+    <string name="alerts_notifications_title">استلم طلبات الحجز في وقتها</string>
+    <string name="alerts_notifications_message">اسمح بالإشعارات لتصلك طلبات الحجز الجديدة والتذكيرات وتنبيهات الصالون حتى عندما يكون التطبيق مغلقاً.</string>
+    <string name="alerts_notifications_allow">السماح بالإشعارات</string>
+    <string name="alerts_overlay_title">اعرض الطلبات فوق التطبيقات الأخرى</string>
+    <string name="alerts_overlay_message">فعّل «الظهور فوق التطبيقات الأخرى» ليظهر طلب الحجز الجديد فوق أي تطبيق تستخدمه. يمكنك تغيير ذلك لاحقاً من المزيد ← الإعدادات.</string>
+    <string name="alerts_overlay_allow">فتح الإعدادات</string>
+    <string name="alerts_later">ليس الآن</string>
 </resources>

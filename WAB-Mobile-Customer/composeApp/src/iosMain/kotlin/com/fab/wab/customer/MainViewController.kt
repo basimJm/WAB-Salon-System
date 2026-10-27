@@ -1,5 +1,6 @@
 package com.fab.wab.customer
 
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fab.wab.customer.app.deeplink.DeepLinkStore
 import com.fab.wab.customer.app.ui.App
@@ -13,7 +14,22 @@ import kotlinx.coroutines.launch
 import org.koin.core.context.startKoin
 import org.koin.mp.KoinPlatform
 
-fun MainViewController() = ComposeUIViewController {
+/**
+ * CUS-096: Metal command buffers are encoded on a background thread (`parallelRendering`), so the main thread only
+ * runs composition, layout and input; the view stays opaque (no blending with the window behind it).
+ */
+private const val PARALLEL_RENDERING = true
+private const val OPAQUE_ROOT_VIEW = true
+
+// Swift calls this by its type-like name (MainViewControllerKt.MainViewController()).
+@Suppress("FunctionNaming")
+@OptIn(ExperimentalComposeUiApi::class)
+fun MainViewController() = ComposeUIViewController(
+    configure = {
+        parallelRendering = PARALLEL_RENDERING
+        opaque = OPAQUE_ROOT_VIEW
+    },
+) {
     App(null)
 }
 

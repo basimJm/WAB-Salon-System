@@ -5,6 +5,7 @@ import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.config.ContactInfo
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.ui.media.ImageSource
+import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.feature.profile.domain.model.CustomerAccount
 
 /** S21 rows that open another screen or an external app. */
@@ -23,6 +24,9 @@ sealed interface ProfileOverlay {
     data object ContactUs : ProfileOverlay
     data object LogoutConfirm : ProfileOverlay
     data object DeleteAccountConfirm : ProfileOverlay
+
+    /** The OS refused [permission] for good: only the settings app can grant it (camera photo, push). */
+    data class PermissionBlocked(val permission: AppPermission) : ProfileOverlay
 }
 
 sealed interface ProfileContract {
@@ -69,6 +73,7 @@ sealed interface ProfileContract {
         data object OnDeleteAccountClick : UiAction
         data object OnDeleteAccountConfirm : UiAction
         data object OnOverlayDismiss : UiAction
+        data object OnOpenSettings : UiAction
     }
 
     sealed interface SideEffect {

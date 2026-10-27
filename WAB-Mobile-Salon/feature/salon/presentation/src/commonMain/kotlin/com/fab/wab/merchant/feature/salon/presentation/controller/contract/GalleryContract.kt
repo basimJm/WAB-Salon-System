@@ -3,6 +3,8 @@ package com.fab.wab.merchant.feature.salon.presentation.controller.contract
 import com.fab.wab.merchant.core.domain.upload.LocalFile
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
 import com.fab.wab.merchant.designsystem.components.upload.MediaGridMode
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.GalleryItem
 import com.fab.wab.merchant.feature.salon.domain.GalleryType
@@ -22,12 +24,14 @@ sealed interface GalleryContract {
         val busy: Boolean = false,
         val rejection: UploadRejection? = null,
         val viewerIndex: Int? = null,
+        val media: MediaPickUi = MediaPickUi(),
     ) {
         val isEmpty: Boolean get() = !loading && error == null && items.isEmpty() && pending.isEmpty()
     }
 
     sealed interface UiAction {
         data object OnAdd : UiAction
+        data class OnMedia(val action: MediaPickAction) : UiAction
         data class OnItemClick(val id: String) : UiAction
         data class OnRetryItem(val id: String) : UiAction
         data class OnMove(val from: Int, val to: Int) : UiAction

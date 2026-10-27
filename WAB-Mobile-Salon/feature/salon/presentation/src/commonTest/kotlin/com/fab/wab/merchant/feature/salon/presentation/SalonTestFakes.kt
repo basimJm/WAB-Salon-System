@@ -93,7 +93,7 @@ internal const val PLACE_LAT = 31.97
 internal const val PLACE_LNG = 35.85
 
 internal class FakeDeviceLocation(var point: LocationData? = LocationData(32.0, 35.8)) : DeviceLocationProvider {
-    override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) = onResult(point)
+    override suspend fun currentLocation(): LocationData? = point
 }
 
 internal class FakePermissions(var status: PermissionStatus = PermissionStatus.GRANTED) : PermissionManager {

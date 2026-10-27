@@ -20,6 +20,8 @@ import com.fab.wab.merchant.core.ui.media.FilePicker
 import com.fab.wab.merchant.core.ui.media.ImageCropper
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.auth.domain.model.AuthPurpose
@@ -57,6 +59,8 @@ class MyAccountViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
+    private val media = MediaPickHandler(deps.picker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
+
     override fun onStart() {
         load()
     }
@@ -78,10 +82,10 @@ class MyAccountViewModel(
 
     private fun handlePhoto(event: UiAction): Boolean {
         when (event) {
-            UiAction.OnPickPhoto -> scope.launch {
-                val file = deps.picker.pickMedia(maxCount = 1, includeVideo = false).firstOrNull() ?: return@launch
-                updateState { copy(cropBytes = file.bytes) }
+            UiAction.OnPickPhoto -> media.open(PHOTO_SOURCES, maxCount = 1) { files ->
+                files.firstOrNull()?.let { file -> updateState { copy(cropBytes = file.bytes) } }
             }
+            is UiAction.OnMedia -> media.handle(event.action)
             is UiAction.OnCropConfirm -> crop(event.region)
             UiAction.OnCropCancel -> updateState { copy(cropBytes = null) }
             UiAction.OnRemovePhoto -> updateState { copy(photo = null, photoChange = PhotoChange.Remove) }

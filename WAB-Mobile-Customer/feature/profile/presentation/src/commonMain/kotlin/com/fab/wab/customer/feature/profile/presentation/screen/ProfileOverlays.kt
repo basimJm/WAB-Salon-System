@@ -21,6 +21,9 @@ import com.fab.wab.customer.core.domain.ThemeMode
 import com.fab.wab.customer.core.domain.config.ContactInfo
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.ui.media.ImageSource
+import com.fab.wab.customer.core.ui.permission.AppPermission
+import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
+import com.fab.wab.customer.designsystem.components.dialog.GlobalDialogKind
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -119,6 +122,11 @@ internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
             body = stringResource(Res.string.profile_delete_body),
             confirmText = stringResource(Res.string.profile_delete_confirm),
             onConfirm = { onAction(UiAction.OnDeleteAccountConfirm) },
+            onDismiss = dismiss,
+        )
+        is ProfileOverlay.PermissionBlocked -> AppGlobalDialog(
+            kind = if (overlay.permission == AppPermission.CAMERA) GlobalDialogKind.CameraDenied else GlobalDialogKind.NotificationsDenied,
+            onConfirm = { onAction(UiAction.OnOpenSettings) },
             onDismiss = dismiss,
         )
     }

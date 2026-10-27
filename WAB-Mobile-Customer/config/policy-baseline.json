@@ -14,18 +14,11 @@
   "core/common/src/iosMain/kotlin/com/fab/wab/customer/core/common/Analytics.ios.kt": {
     "H003": 1
   },
-  "core/data/src/androidMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.android.kt": {
-    "H006": 2,
-    "Q001": 1
-  },
   "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/AppPagingDataSource.kt": {
     "H003": 1
   },
   "core/data/src/commonMain/kotlin/com/fab/wab/customer/core/data/places/PlacesApiService.kt": {
     "H004": 1
-  },
-  "core/data/src/iosMain/kotlin/com/fab/wab/customer/core/data/location/DeviceLocationProvider.ios.kt": {
-    "H006": 2
   },
   "core/network/src/commonMain/kotlin/com/fab/wab/customer/core/network/client/BaseHttpClient.kt": {
     "H004": 3,

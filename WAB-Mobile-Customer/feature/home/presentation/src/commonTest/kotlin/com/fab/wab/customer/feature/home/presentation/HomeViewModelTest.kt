@@ -131,7 +131,7 @@ class HomeViewModelTest {
 
     private fun kotlinx.coroutines.test.TestScope.viewModel(session: SessionState = GUEST): HomeViewModel {
         val provider = object : DeviceLocationProvider {
-            override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) = onResult(fix)
+            override suspend fun currentLocation(): LocationData? = fix
         }
         val deps = HomeDependencies(
             loadHome = LoadHomeUseCase(repository),

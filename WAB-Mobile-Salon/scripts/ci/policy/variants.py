@@ -11,6 +11,18 @@ RULE = "V001"
 _ANDROID_PLUGIN = "build-logic/convention/src/main/kotlin/com/fab/wab/merchant/buildlogic/AndroidAppPlugin.kt"
 _XCODE_PROJECT = "iosApp/iosApp.xcodeproj/project.pbxproj"
 _SCHEMES_DIR = "iosApp/iosApp.xcodeproj/xcshareddata/xcschemes"
+# MER-078: settings every project-level configuration must keep (iOS performance). Release = optimized Kotlin/Native
+# framework, optimized whole-module Swift, every architecture; Debug = fast incremental builds of the active one.
+_IOS_RELEASE_SETTINGS = {
+    "KOTLIN_FRAMEWORK_BUILD_TYPE": "release", "SWIFT_OPTIMIZATION_LEVEL": '"-O"', "SWIFT_COMPILATION_MODE": "wholemodule",
+    "DEAD_CODE_STRIPPING": "YES", "ONLY_ACTIVE_ARCH": "NO",
+}
+_IOS_DEBUG_SETTINGS = {"KOTLIN_FRAMEWORK_BUILD_TYPE": "debug", "ONLY_ACTIVE_ARCH": "YES"}
+_CONFIG_BLOCK = re.compile(
+    r"/\* (?P<name>(?:Debug|Release)-\w+) \*/ = \{\s*isa = XCBuildConfiguration;\s*baseConfigurationReference"
+    r".*?buildSettings = \{(?P<settings>.*?)\n\t\t\t\};",
+    re.DOTALL,
+)
 _BUILD_ACTIONS = {"TestAction": "Debug", "LaunchAction": "Debug", "AnalyzeAction": "Debug", "ProfileAction": "Release", "ArchiveAction": "Release"}
 
 
@@ -64,12 +76,26 @@ def _check_ios(config: Config, section: dict) -> list[Violation]:
             expected = debug if _BUILD_ACTIONS.get(node.tag) == "Debug" else release
             if node.tag in _BUILD_ACTIONS and node.get("buildConfiguration") != expected:
                 found.append(Violation(scheme_path, 1, RULE, f"{node.tag} must use '{expected}', found '{node.get('buildConfiguration')}'"))
+    found += _check_ios_build_settings(project)
     for environment in ("Dev", "Prod"):
         xcconfig = f"iosApp/Configuration/{environment}.xcconfig"
         values = _properties(_read(config, xcconfig) or "")
         for key in section["iosXcconfigKeys"]:
             if not values.get(key):
                 found.append(Violation(xcconfig, 1, RULE, f"missing or empty key {key}"))
+    return found
+
+
+def _check_ios_build_settings(project: str) -> list[Violation]:
+    """Project-level (xcconfig-based) configurations keep the release/debug performance settings."""
+    found: list[Violation] = []
+    for block in _CONFIG_BLOCK.finditer(project):
+        name = block.group("name")
+        settings = dict(re.findall(r"^\s*(\w+) = (.+);$", block.group("settings"), re.MULTILINE))
+        wanted = _IOS_RELEASE_SETTINGS if name.startswith("Release") else _IOS_DEBUG_SETTINGS
+        for key, value in wanted.items():
+            if settings.get(key) != value:
+                found.append(Violation(_XCODE_PROJECT, 1, RULE, f"{name}: {key} must be {value}, found {settings.get(key)}"))
     return found
 
 

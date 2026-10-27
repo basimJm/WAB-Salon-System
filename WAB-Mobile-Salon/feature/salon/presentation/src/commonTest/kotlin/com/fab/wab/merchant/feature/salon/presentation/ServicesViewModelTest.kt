@@ -10,7 +10,9 @@ import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
 import com.fab.wab.merchant.core.ui.media.PickedFile
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.ServiceField
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.CatalogPickerContract
@@ -119,6 +121,7 @@ class ServicesViewModelTest {
         viewModel.onEvent(ServiceEditContract.UiAction.OnDuration("30"))
         viewModel.onEvent(ServiceEditContract.UiAction.OnBrideOnly(true))
         viewModel.onEvent(ServiceEditContract.UiAction.OnAddMedia)
+        viewModel.onEvent(ServiceEditContract.UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         assertEquals(UploadStatus.Uploaded, viewModel.state.first().uploads.single().status)
         viewModel.onEvent(ServiceEditContract.UiAction.OnSave)
         val (catalogId, draft) = services.created.single()
@@ -136,6 +139,7 @@ class ServicesViewModelTest {
         assertEquals(listOf("m/s1"), loaded.currentMedia)
         assertFalse(loaded.canSave)
         viewModel.onEvent(ServiceEditContract.UiAction.OnAddMedia)
+        viewModel.onEvent(ServiceEditContract.UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         viewModel.onEvent(ServiceEditContract.UiAction.OnRemoveMedia(viewModel.state.first().uploads.single().id))
         assertNull(viewModel.state.first().draft.mediaKeys)
         viewModel.onEvent(ServiceEditContract.UiAction.OnActive(false))

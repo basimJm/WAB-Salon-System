@@ -56,7 +56,6 @@
     <string name="profile_discard">Discard changes</string>
     <string name="profile_preview_title">Preview</string>
     <string name="profile_preview_note">This is how customers see your salon in WAB</string>
-    <string name="profile_location_blocked">Location access is off. Enable it in Settings.</string>
     <string name="profile_rating">%1$s (%2$d)</string>
     <string name="profile_close">Close</string>
     <string name="gallery_title">Gallery</string>

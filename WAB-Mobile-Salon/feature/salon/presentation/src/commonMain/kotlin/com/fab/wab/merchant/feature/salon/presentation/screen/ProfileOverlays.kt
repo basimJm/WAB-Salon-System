@@ -3,6 +3,7 @@ package com.fab.wab.merchant.feature.salon.presentation.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import com.fab.wab.merchant.core.analytics.compose.TrackScreen
 import com.fab.wab.merchant.core.ui.map.MapProvider
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.button.AppButton
+import com.fab.wab.merchant.designsystem.components.button.AppTextButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.card.AppCard
 import com.fab.wab.merchant.designsystem.components.dialog.AppBottomSheet
@@ -29,6 +31,8 @@ import com.fab.wab.merchant.designsystem.components.image.AppImage
 import com.fab.wab.merchant.designsystem.components.image.AppImageFallback
 import com.fab.wab.merchant.designsystem.components.layout.AppScreen
 import com.fab.wab.merchant.designsystem.components.map.AppMapPicker
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
+import com.fab.wab.merchant.designsystem.resources.map_open_in_maps
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppTextField
@@ -54,9 +58,10 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.profile_rating
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_too_long
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import com.fab.wab.merchant.designsystem.resources.Res as DesignRes
 
 @Composable
-internal fun LocationSection(state: UiState, onAction: (UiAction) -> Unit) {
+internal fun ColumnScope.LocationSection(state: UiState, onAction: (UiAction) -> Unit) {
     val form = state.form
     val spacing = AppTheme.spacing
     val missing = ProfileField.LOCATION in state.visibleErrors
@@ -81,6 +86,13 @@ internal fun LocationSection(state: UiState, onAction: (UiAction) -> Unit) {
             )
         }
     }
+    if (form.location != null) {
+        AppTextButton(
+            text = stringResource(DesignRes.string.map_open_in_maps),
+            onClick = { onAction(UiAction.OnOpenInMaps) },
+            modifier = Modifier.align(Alignment.End),
+        )
+    }
     AppTextField(
         value = form.locationText,
         onValueChange = { onAction(UiAction.OnLocationText(it)) },
@@ -93,6 +105,7 @@ internal fun LocationSection(state: UiState, onAction: (UiAction) -> Unit) {
 /** Crop sheet, full-screen map picker and the customer preview (design 05 `sh.crop`, `on.map`, `on.preview`). */
 @Composable
 internal fun ProfileOverlays(state: UiState, onAction: (UiAction) -> Unit) {
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
     state.crop?.let { request ->
         AppBottomSheet(onDismiss = { onAction(UiAction.OnCropCancel) }) {
             AppImageCropper(

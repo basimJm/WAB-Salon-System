@@ -5,7 +5,9 @@ import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
 import com.fab.wab.merchant.core.ui.media.PickedFile
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.CatalogRequest
 import com.fab.wab.merchant.feature.salon.domain.CatalogRequestLimits
@@ -68,6 +70,7 @@ class CatalogRequestsViewModelTest {
         assertEquals(CatalogRequestLimits.DESCRIPTION_MAX, viewModel.state.first().form?.description?.length)
         viewModel.onEvent(UiAction.OnDescription("Smoothing treatment"))
         viewModel.onEvent(UiAction.OnPickImage)
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         assertEquals(UploadStatus.Uploaded, viewModel.state.first().form?.image?.status)
         viewModel.onEvent(UiAction.OnSend)
         assertEquals(Triple("Keratin", "Smoothing treatment", "CATALOG_IMAGE-key"), requests.sent.single())
