@@ -1,5 +1,6 @@
 package com.fab.wab.customer.buildlogic
 
+import androidx.baselineprofile.gradle.consumer.BaselineProfileConsumerExtension
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.ApplicationProductFlavor
 import org.gradle.api.JavaVersion
@@ -10,11 +11,14 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import java.util.Properties
 
-private const val ENVIRONMENT_DIMENSION = "environment"
 private const val PROGUARD_DEFAULT_FILE = "proguard-android-optimize.txt"
 private const val PROGUARD_APP_FILE = "proguard-rules.pro"
 private const val PROGUARD_DATA_FILE = "data-proguard-rules.pro"
 private const val LINT_CONFIG_FILE = "config/lint.xml"
+private const val DEBUG_SIGNING = "debug"
+private const val RELEASE_BUILD_TYPE = "release"
+private const val RELEASE_SUFFIX = "Release"
+private const val BASELINE_PROFILE_CONFIGURATION_SUFFIX = "BaselineProfile"
 
 class AndroidAppPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -25,6 +29,10 @@ class AndroidAppPlugin : Plugin<Project> {
             apply(plugin = "com.google.gms.google-services")
             // Generates the Crashlytics build id; without it the Crashlytics SDK aborts the app at startup.
             apply(plugin = "com.google.firebase.crashlytics")
+            // CUS-097: Baseline + Startup Profiles, only when the producer module is part of the build (the KMP_TEMPLATE
+            // tool generates projects without it).
+            val profiles = rootProject.findProject(AndroidSdk.BASELINE_PROFILE_PROJECT_PATH) != null
+            if (profiles) apply(plugin = "androidx.baselineprofile")
 
             val localProperties = Properties()
             val localPropertiesFile = rootProject.file("local.properties")
@@ -46,7 +54,7 @@ class AndroidAppPlugin : Plugin<Project> {
 
                     manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
                 }
-                flavorDimensions += ENVIRONMENT_DIMENSION
+                flavorDimensions += AndroidSdk.ENVIRONMENT_DIMENSION
                 productFlavors {
                     create("dev") { environment(id = "dev", prefix = "DEV", property = property) }
                     create("prod") { environment(id = "prod", prefix = "PROD", property = property) }
@@ -64,6 +72,11 @@ class AndroidAppPlugin : Plugin<Project> {
                             rootProject.file(PROGUARD_DATA_FILE),
                         )
                     }
+                }
+                // The profile build types (`nonMinifiedRelease`, `benchmarkRelease`) must install on the profiling device;
+                // release itself stays unsigned here (store signing is the owner's, outside the repo).
+                buildTypes.configureEach {
+                    if (name != RELEASE_BUILD_TYPE && name.endsWith(RELEASE_SUFFIX)) signingConfig = signingConfigs.getByName(DEBUG_SIGNING)
                 }
                 lint {
                     warningsAsErrors = true
@@ -104,6 +117,21 @@ class AndroidAppPlugin : Plugin<Project> {
                 add("implementation", libs.findBundle("lifecycle").get())
                 add("implementation", libs.findLibrary("firebase-messaging").get())
                 add("debugImplementation", libs.findLibrary("compose-uiTooling").get())
+                add("implementation", libs.findLibrary("androidx-profileinstaller").get())
+            }
+            if (profiles) {
+                // Only the dev flavor has a producer (the profile module profiles dev); prod uses the merged profile.
+                val producerConfiguration = AndroidSdk.PROFILE_ENVIRONMENT + BASELINE_PROFILE_CONFIGURATION_SUFFIX
+                configurations.matching { it.name == producerConfiguration }.configureEach {
+                    dependencies.add(project.dependencies.project(mapOf("path" to AndroidSdk.BASELINE_PROFILE_PROJECT_PATH)))
+                }
+            }
+            if (profiles) {
+                extensions.configure<BaselineProfileConsumerExtension> {
+                    // One profile for every variant (dev and prod run the same code), kept in src/main/generated.
+                    mergeIntoMain = true
+                    saveInSrc = true
+                }
             }
         }
     }
@@ -117,7 +145,7 @@ private fun Project.projectProperty(local: Properties, name: String): String? =
 private fun missing(name: String) = "Gradle property $name is required; set it in gradle.properties or local.properties"
 
 private fun ApplicationProductFlavor.environment(id: String, prefix: String, property: (String) -> String?) {
-    dimension = ENVIRONMENT_DIMENSION
+    dimension = AndroidSdk.ENVIRONMENT_DIMENSION
     val baseUrl = requireNotNull(property("${prefix}_API_BASE_URL")) { missing("${prefix}_API_BASE_URL") }
     property("${prefix}_APPLICATION_ID_SUFFIX")?.let { applicationIdSuffix = it }
     buildConfigField("String", "ENVIRONMENT", quoted(id))
