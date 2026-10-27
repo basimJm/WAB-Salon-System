@@ -75,7 +75,9 @@ fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
                 verticalArrangement = Arrangement.spacedBy(spacing.space14),
             ) {
                 val dashboard = state.dashboard
-                item(key = KEY_HEADER, contentType = KEY_HEADER) { HomeHeader(dashboard?.salon, state.memberName, dashboard?.unreadNotifications ?: 0, onAction) }
+                item(key = KEY_HEADER, contentType = KEY_HEADER) {
+                    HomeHeader(dashboard?.salon, state.memberName, dashboard?.unreadNotifications ?: 0, onAction)
+                }
                 when {
                     dashboard != null -> content(state, dashboard, onAction)
                     state.error != null -> item(key = KEY_ERROR, contentType = KEY_ERROR) {
