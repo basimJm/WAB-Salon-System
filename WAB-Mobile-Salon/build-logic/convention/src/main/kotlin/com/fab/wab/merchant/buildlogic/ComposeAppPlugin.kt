@@ -22,7 +22,7 @@ class ComposeAppPlugin : Plugin<Project> {
 
                 listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
                     iosTarget.binaries.all {
-                        freeCompilerArgs += listOf("-Xbinary=bundleId=com.fab.wab.merchant")
+                        freeCompilerArgs += listOf("-Xbinary=bundleId=com.fab.wab.merchant") + IOS_RUNTIME_BINARY_OPTIONS
                     }
                     iosTarget.binaries.framework {
                         baseName = "ComposeApp"
@@ -131,3 +131,12 @@ private val FEATURE_MODULES = listOf(
     ":feature:insights:domain",
     ":feature:insights:di",
 )
+
+/**
+ * Kotlin/Native runtime options for the app framework (MER-078, iOS performance).
+ * `appStateTracking`: the GC follows the app state and stops its timer-driven collections in the background,
+ * so a foregrounded app does not pay for background GC work (Kotlin/Native memory-management docs).
+ * The default concurrent mark-and-sweep GC (`gc=cms`) stays; `objcDisposeOnMain` keeps its default `true`
+ * because Compose holds UIKit objects that must be released on the main thread.
+ */
+private val IOS_RUNTIME_BINARY_OPTIONS = listOf("-Xbinary=appStateTracking=enabled")
