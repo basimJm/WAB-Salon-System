@@ -77,25 +77,25 @@ fun StatisticsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () ->
                 contentPadding = PaddingValues(spacing.space16),
                 verticalArrangement = Arrangement.spacedBy(spacing.space12),
             ) {
-                item(key = KEY_FILTERS) { PeriodFilters(state, onAction) }
+                item(key = KEY_FILTERS, contentType = KEY_FILTERS) { PeriodFilters(state, onAction) }
                 val stats = state.statistics
                 when {
-                    state.loading -> item(key = KEY_LOADING) { AppShimmerList() }
-                    state.error != null -> item(key = KEY_ERROR) {
+                    state.loading -> item(key = KEY_LOADING, contentType = KEY_LOADING) { AppShimmerList() }
+                    state.error != null -> item(key = KEY_ERROR, contentType = KEY_ERROR) {
                         AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
                     }
-                    state.isEmpty || stats == null -> item(key = KEY_EMPTY) {
+                    state.isEmpty || stats == null -> item(key = KEY_EMPTY, contentType = KEY_EMPTY) {
                         AppEmptyState(
                             title = stringResource(Res.string.stats_empty_title),
                             message = stringResource(Res.string.stats_empty_body),
                         )
                     }
                     else -> {
-                        item(key = KEY_KPIS) { KpiGrid(stats) }
-                        item(key = KEY_REVENUE) { RevenueCard(stats.bookings.revenue) }
-                        item(key = KEY_STATUS) { StatusCard(stats.bookings.byStatus) }
-                        item(key = KEY_CHART) { DailyChart(stats.days, state.chart, onAction) }
-                        item(key = KEY_RANKINGS) { Rankings(stats) }
+                        item(key = KEY_KPIS, contentType = KEY_KPIS) { KpiGrid(stats) }
+                        item(key = KEY_REVENUE, contentType = KEY_REVENUE) { RevenueCard(stats.bookings.revenue) }
+                        item(key = KEY_STATUS, contentType = KEY_STATUS) { StatusCard(stats.bookings.byStatus) }
+                        item(key = KEY_CHART, contentType = KEY_CHART) { DailyChart(stats.days, state.chart, onAction) }
+                        item(key = KEY_RANKINGS, contentType = KEY_RANKINGS) { Rankings(stats) }
                     }
                 }
             }

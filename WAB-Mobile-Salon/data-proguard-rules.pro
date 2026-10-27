@@ -1,28 +1,10 @@
-# ── DTOs (data layer) ──
--keep class com.fab.wab.merchant.feature.**.data.remote.dto.** { *; }
--keep class com.fab.wab.merchant.core.data.** { *; }
--keep class com.fab.wab.merchant.core.network.** { *; }
-
-# ── Domain entities ──
--keep class com.fab.wab.merchant.feature.**.domain.model.** { *; }
--keep class com.fab.wab.merchant.core.domain.** { *; }
-
-# ── kotlinx.serialization ──
--keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt
--keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
--keepclasseswithmembers class kotlinx.serialization.json.** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
--keep,includedescriptorclasses class com.fab.wab.merchant.**$$serializer { *; }
--keepclassmembers class com.fab.wab.merchant.** {
-    *** Companion;
-}
--keepclasseswithmembers class com.fab.wab.merchant.** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
-
-# ── Ktor ──
--keep class io.ktor.** { *; }
--dontwarn io.ktor.**
--keep class kotlin.coroutines.Continuation
+# Shared R8 rules of the data / serialization layers (release variants, see AndroidAppPlugin).
+#
+# MER-079 (r8-analyzer): the package-wide `-keep class … { *; }` rules on io.ktor, core.data, core.network,
+# core.domain, feature DTOs and domain models kept ~17 % of the app's classes unshrunk and unobfuscated. Nothing in
+# the app reads those classes reflectively: JSON goes through the generated `$$serializer`s, whose keep rules ship
+# with kotlinx-serialization (META-INF/com.android.tools/r8), Ktor ships its own rules (engines loaded through
+# ServiceLoader, AtomicFU volatile fields), and navigation routes use serial names, not class names. Proved by the
+# release smoke test (sign-in, Home, booking accept, calendar, salon hub, uploads) on the emulator.
+#
+# Do not add a package-wide keep rule here: keep the one class that is read reflectively, and say why.

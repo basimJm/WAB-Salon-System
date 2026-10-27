@@ -69,20 +69,20 @@ fun ReviewsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Un
                 contentPadding = PaddingValues(spacing.space16),
                 verticalArrangement = Arrangement.spacedBy(spacing.space10),
             ) {
-                item(key = KEY_HEADER) { Filters(state, onAction) }
+                item(key = KEY_HEADER, contentType = KEY_HEADER) { Filters(state, onAction) }
                 when {
-                    state.loading -> item(key = KEY_LOADING) { AppShimmerList() }
-                    state.error != null -> item(key = KEY_ERROR) {
+                    state.loading -> item(key = KEY_LOADING, contentType = KEY_LOADING) { AppShimmerList() }
+                    state.error != null -> item(key = KEY_ERROR, contentType = KEY_ERROR) {
                         AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
                     }
-                    state.isEmpty -> item(key = KEY_EMPTY) {
+                    state.isEmpty -> item(key = KEY_EMPTY, contentType = KEY_EMPTY) {
                         AppEmptyState(
                             title = stringResource(Res.string.reviews_empty_title),
                             message = stringResource(Res.string.reviews_empty_body),
                         )
                     }
                     else -> {
-                        item(key = KEY_SUMMARY) { ReviewSummaryCard(state.summary) }
+                        item(key = KEY_SUMMARY, contentType = KEY_SUMMARY) { ReviewSummaryCard(state.summary) }
                         items(state.reviews, key = { it.id }, contentType = { ROW }) { review ->
                             ReviewRow(review, showStaff = state.target == ReviewTarget.STAFF) { onAction(UiAction.OnReport(review.id)) }
                         }
@@ -90,7 +90,7 @@ fun ReviewsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Un
                 }
                 if (state.hasMore && !state.loading) {
                     // The footer appearing at the end of the list asks for the next page (infinite scroll).
-                    item(key = KEY_MORE) {
+                    item(key = KEY_MORE, contentType = KEY_MORE) {
                         LaunchedEffect(state.reviews.size) { currentOnAction(UiAction.OnLoadMore) }
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
                     }
@@ -119,7 +119,7 @@ private fun Filters(state: UiState, onAction: (UiAction) -> Unit) {
         }
         if (state.showsStaffSelector) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(spacing.space8)) {
-                item(key = CHIP) {
+                item(key = CHIP, contentType = CHIP) {
                     AppFilterChip(stringResource(Res.string.reviews_all_staff), state.staffId == null, { onAction(UiAction.OnStaff(null)) })
                 }
                 items(state.staffOptions, key = { CHIP + it.id }, contentType = { CHIP }) { staff ->

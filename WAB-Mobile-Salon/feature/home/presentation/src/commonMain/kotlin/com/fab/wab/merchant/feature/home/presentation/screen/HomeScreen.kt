@@ -75,15 +75,15 @@ fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
                 verticalArrangement = Arrangement.spacedBy(spacing.space14),
             ) {
                 val dashboard = state.dashboard
-                item(key = KEY_HEADER) { HomeHeader(dashboard?.salon, state.memberName, dashboard?.unreadNotifications ?: 0, onAction) }
+                item(key = KEY_HEADER, contentType = KEY_HEADER) { HomeHeader(dashboard?.salon, state.memberName, dashboard?.unreadNotifications ?: 0, onAction) }
                 when {
                     dashboard != null -> content(state, dashboard, onAction)
-                    state.error != null -> item(key = KEY_ERROR) {
+                    state.error != null -> item(key = KEY_ERROR, contentType = KEY_ERROR) {
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                             AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
                         }
                     }
-                    else -> item(key = KEY_LOADING) { HomeShimmer() }
+                    else -> item(key = KEY_LOADING, contentType = KEY_LOADING) { HomeShimmer() }
                 }
             }
         }
@@ -91,9 +91,9 @@ fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
 }
 
 private fun LazyListScope.content(state: UiState, dashboard: Dashboard, onAction: (UiAction) -> Unit) {
-    dashboard.salon.state?.let { salonState -> item(key = KEY_STATE) { AppSalonStateStrip(salonState) } }
+    dashboard.salon.state?.let { salonState -> item(key = KEY_STATE, contentType = KEY_STATE) { AppSalonStateStrip(salonState) } }
     if (state.incomplete) {
-        item(key = KEY_SETUP) {
+        item(key = KEY_SETUP, contentType = KEY_SETUP) {
             AppWarningBanner(
                 title = stringResource(Res.string.home_incomplete_title),
                 body = stringResource(Res.string.home_incomplete_body),
@@ -103,7 +103,7 @@ private fun LazyListScope.content(state: UiState, dashboard: Dashboard, onAction
     }
     val warning = dashboard.subscriptionWarning
     if (state.showsSubscriptionWarning && warning != null) {
-        item(key = KEY_SUBSCRIPTION) {
+        item(key = KEY_SUBSCRIPTION, contentType = KEY_SUBSCRIPTION) {
             AppWarningBanner(
                 title = pluralStringResource(Res.plurals.home_subscription_title, warning.daysRemaining, warning.daysRemaining),
                 body = stringResource(Res.string.home_subscription_body),
@@ -113,21 +113,21 @@ private fun LazyListScope.content(state: UiState, dashboard: Dashboard, onAction
     }
     val pending = dashboard.pending
     if (state.showsPending && pending != null) {
-        item(key = KEY_PENDING) { PendingSection(pending, state.nowMs, onAction) }
+        item(key = KEY_PENDING, contentType = KEY_PENDING) { PendingSection(pending, state.nowMs, onAction) }
     }
     val today = dashboard.today
     if (today != null) {
-        item(key = KEY_TODAY) { TodaySection(today) }
-        item(key = KEY_TIMELINE) { TimelineTitle(state.ownBookingsOnly) }
+        item(key = KEY_TODAY, contentType = KEY_TODAY) { TodaySection(today) }
+        item(key = KEY_TIMELINE, contentType = KEY_TIMELINE) { TimelineTitle(state.ownBookingsOnly) }
         if (state.hasNoBookingsToday) {
-            item(key = KEY_EMPTY) { NoBookingsToday(onAction) }
+            item(key = KEY_EMPTY, contentType = KEY_EMPTY) { NoBookingsToday(onAction) }
         } else {
             items(today.timeline, key = { ROW + it.id }, contentType = { ROW }) { booking -> TimelineRow(booking, onAction) }
         }
     }
     val stats = dashboard.quickStats
     if (state.showsStatistics && stats != null) {
-        item(key = KEY_STATS) { QuickStatsSection(stats, onAction) }
+        item(key = KEY_STATS, contentType = KEY_STATS) { QuickStatsSection(stats, onAction) }
     }
 }
 
