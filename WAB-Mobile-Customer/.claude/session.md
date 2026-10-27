@@ -9,6 +9,58 @@
 
 ## Current task
 
+### CUS-094 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
+- Branch: `fix/cus-094-device-integrations`
+- Status: IN PROGRESS
+- Acceptance criteria (PRD S03 nearest, S07 items 4–5, S15 contact, S21 photo + push + contact, S23 contact; PRD §3.16 uploads):
+  - [x] Call: dialer opens with a dialable number (`+` and digits only) on Android (`ACTION_DIAL`, no CALL_PHONE) and iOS (`UIApplication.open`); a device without a phone app shows a localized message, never a crash
+  - [x] WhatsApp: `https://wa.me/<digits>` (works without the app); Android `<queries>` for WhatsApp packages; iOS `LSApplicationQueriesSchemes` `whatsapp`; no handler → message
+  - [x] Maps: Android `geo:` chooser when a maps app exists, else the Google Maps web URL; iOS Google Maps app when installed (`comgooglemaps`), else Apple Maps; no handler → message
+  - [x] Every iOS hand-off (tel, WhatsApp, maps, mail, browser, settings) uses `open(_:options:completionHandler:)` (the deprecated `openURL:` is a no-op on iOS 18+); share sheet presents from the top view controller with an iPad popover anchor
+  - [x] Permissions: camera denied → message, blocked → settings dialog; notifications blocked → settings dialog; location unchanged flow; permission requests survive Activity recreation; iOS usage strings AR + EN (camera text = profile photo)
+  - [x] Camera/gallery: Android Photo Picker + full-resolution `TakePicture` through a FileProvider (no CAMERA permission needed), sampled decode + EXIF rotation; iOS PHPicker for the gallery, camera through UIImagePickerController with a strongly held delegate, unavailable camera (simulator) → message; JPEG ≤ 1024 px; presign → PUT → confirm → avatar end to end
+  - [x] Location: suspend provider with cancellation; Android fused current fix → last known, context from Koin (no `!!`); iOS CLLocationManager on the main thread, `requestLocation` + recent cached fix; authorization callbacks on main
+  - [x] Unit tests for link builders, outcomes, VM handling of unavailable hand-offs / camera / permission outcomes, image scaling math
+  - [ ] Device proof: Android emulator done per feature; iOS simulator NOT run (time limit) — iOS verified by framework link only
+- Tests: new `ExternalLinksTest` (5), `ImageScalingTest` (2), `DeviceTextTest` (2), `GetCurrentLocationUseCaseTest` (2); +4 `ProfileViewModelTest` (camera denied/blocked → settings, picker problems, push blocked → settings, no-handler message), +1 each `SalonDetailsViewModelTest`, `BookingDetailsViewModelTest`, `ContentViewModelsTest`; Terminal panel gate: see Loops
+- Device results (Android emulator Pixel_10_Pro_XL API 36, emulator-5560, local stack 10.0.2.2:4000 + adb reverse 9000):
+  - Call: S07 Call → `com.google.android.dialer` with `+962 6 592 1001` (no CALL_PHONE); dialer disabled → localized toast "الاتصال غير متاح على هذا الجهاز", no crash
+  - WhatsApp: no WhatsApp installed → `wa.me` opened in Chrome (`FirstRunActivity`) = works without the app
+  - Maps: S07 address → `com.google.android.apps.maps/MapsActivity` (geo:, only handler so the chooser auto-resolves); Maps disabled → Google Maps web URL in Chrome
+  - Permissions: push toggle → system POST_NOTIFICATIONS dialog; after two refusals → app dialog "الإشعارات متوقفة…" → Settings opens `AppNotificationSettingsActivity`
+  - Camera upload: S21 photo → Camera → `com.android.camera2/CaptureActivity` with no CAMERA permission prompt (permission removed), shutter + ✓ → presign → MinIO PUT → confirm → avatar shows the photo
+  - Gallery, location "nearest", rotation during a picker: NOT exercised on the device (time limit); covered by code review + unit tests only
+  - iOS simulator: NOT run (owner time limit 25 min); only `linkDebugFrameworkIosSimulatorArm64`. Expected iOS results need a real device for tel: and camera (simulator: tel → "not available" message, camera → "no camera" message)
+- Gate (Terminal panel): before the last code commit — targeted host tests (core/ui, design-system, profile, salon, bookings, content, home, salons presentation) green, `:androidApp:assembleDevDebug` ok, `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; after the detekt/policy fixes (b008ec0a) `policy_checks.py all` ok and `run_detekt.sh` ok, but the full `testAndroidHostTest` + assemble + iOS link re-run failed twice on `Timeout waiting to lock journal cache` (another session's Gradle holds `~/.gradle/caches/journal-1`) — NOT re-verified after the MapLinks split
+- Loops: 1/1 — batch verification (rules §3.13) on the integration branch `chore/customer-integration-perf`: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green; Android emulator proof per the Notes. DEFERRED: iOS simulator/real-iPhone hand-off checks (call, camera need a real iPhone), Android gallery + nearest on device
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
+- Notes: DEVIATIONS — owner 25-minute limit: iOS simulator proof, Android gallery / nearest-location / rotation-during-picker checks not done; `androidx.exifinterface` 1.3.7 added (EXIF rotation of camera photos, already in the Gradle cache; android.media.ExifInterface trips lint); not pushed / no PR. Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `Local.xcconfig`), removed at the end.
+### CUS-095 — Performance: R8, Compose, baseline profiles (Android + shared)
+- Branch: `perf/cus-095-android-performance`
+- Status: IN PROGRESS (partial: owner time limit 25 min on 2026-10-27)
+- Acceptance criteria (owner request 2026-10-27; skills r8-analyzer, jetpack-compose-performance, android-profiler, anr-audit-and-fix; no PRD/API change):
+  - [ ] Before/after numbers on an emulator (cold start TTID/TTFD, gfxinfo framestats on Home, search, salon details, bookings) — NOT DONE (time)
+  - [x] R8: release (dev + prod) minify + shrinkResources already on with `proguard-android-optimize.txt`, full mode default (AGP 9.1, no `fullMode=false`); broad keeps removed (`io.ktor.**`, `core.network.**`, `core.domain.**`, `feature.**.domain.model.**`); serializer/Companion keeps and generated DTO keeps stay; debug stays unminified
+  - [x] ANR/startup: `AndroidApp.onCreate` no longer resolves the DataStore-backed `AppSettings` + Firebase `PushTokenProvider` on the main thread (resolved inside the IO scope)
+  - [x] Compose: `AppImage` uses one Coil painter + overlays instead of `SubcomposeAsyncImage` (no subcomposition per image in lazy lists; same shimmer → image → fallback look); lazy lists checked: Home, salons paging, salon details already set `key` + `contentType`
+  - [ ] Baseline Profile + Startup Profile module (macrobenchmark), Compose compiler reports — NOT DONE (time)
+- Tests: `ImageOverlayTest` (new, overlay decision). `policy_checks.py all` ok; `tasks.py check` ok (only the known CUS-047 note). First `assembleProdRelease` failed on a Gradle cache lock held by another agent's daemon (`journal-1` / `modules-2`, not a code error); rerun `:core:design-system:testAndroidHostTest :androidApp:assembleProdRelease` still running at hand-off. Detekt, the full host test run, the other 3 variants and the iOS link were NOT run
+- Loops: 1/1 — batch verification (rules §3.13): gates above green incl. prodRelease with the narrowed R8 rules. DEFERRED: before/after measurements, baseline profile, a manual prodRelease journey on a device (owner smoke test before release)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
+- Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
+### CUS-096 — Performance: iOS release build + Compose iOS settings
+- Branch: `perf/cus-096-ios-performance`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-27 "iOS lags"; no PRD screen; iOS host + K/N framework only):
+  - [x] Release-Dev / Release-Prod: release Kotlin framework (`KOTLIN_FRAMEWORK_BUILD_TYPE = release`, already set; `embedAndSignAppleFrameworkForXcode` honours it), Swift `-O` whole-module, clang `-Os`, dead-code stripping, `ONLY_ACTIVE_ARCH = NO`, dSYM; Debug configs unchanged (fast dev loop)
+  - [x] K/N binary options on every iOS binary: `bundleId` (from `AndroidSdk.NAMESPACE_ROOT`, no literal), `gc=cms` (concurrent marking), `appStateTracking=enabled`
+  - [x] `ComposeUIViewController` `parallelRendering = true`, `opaque = true` (named constants); `CADisableMinimumFrameDurationOnPhone` (120 Hz ProMotion) already in Info.plist
+  - [ ] iosApp-Dev Debug + Release, iosApp-Prod Release simulator builds green (see Tests)
+- Tests: no Kotlin logic changed (build settings + one view-controller configuration), so no new unit tests; `policy_checks.py all` ok; policy tests 93 OK; simulator builds: see Notes
+- Loops: 1/1 — batch verification (rules §3.13): all four iOS simulator configurations (Debug/Release × Dev/Prod) build with the new K/N and Xcode settings. DEFERRED: launch/scroll measurements; parallelRendering is experimental (switch PARALLEL_RENDERING off first if native views glitch)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
+- Notes: DEVIATIONS — time-boxed (25 min); startup work (Koin/Firebase on the main thread, push permission prompt at launch) left as is: both must run on the main thread before the first frame; no cold-launch / scroll measurement done; simulator builds NOT verified: Debug-Dev failed in the `Compile Kotlin Framework` phase on `Timeout waiting to lock journal cache (~/.gradle/caches/journal-1)` held by a parallel agent's Gradle, Release-Dev stalled > 8 min at the K/N compile tasks (same lock) and was stopped; iosApp-Prod Release and the framework link were not reached. Rerun `xcodebuild -scheme iosApp-Dev -configuration Release-Dev -destination 'generic/platform=iOS Simulator' build` (and Debug-Dev, iosApp-Prod Release-Prod) once no other Gradle runs; `gc=cms` and `parallelRendering` need a scroll check on device/simulator.
+
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
 - Status: IN PROGRESS (ready for the lead: not pushed, no PR)
@@ -37,14 +89,3 @@
 - Loops: 1/1 — re-checked every fix on the device after the final build: S05 sheet clean after chip removal, no dead "See more" on S07 reviews, single-day closure text, S06 "more" only on overflow, "30%" in S16/S15, staff line hidden, localized cancel reason, Home reloads on AR/EN switch, live badge after token refresh, iOS sign-in with demo customer 2 (was 422); found and fixed during the loop: HomeViewModel over 300 lines, detekt MaxLineLength on plural call sites, a `?.` warning in the provider test
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — branch diff read once per role: fixes stay in their layer (presentation helpers pure + tested, socket retry in core/realtime without a second refresher, single-top in the shared navigator), no hardcoded values (new texts in AR + EN resources, plurals for counts), no contract change; server gaps listed in `docs/E2E_RESULTS.md` instead of client workarounds
 - Notes: DEVIATIONS — not pushed / no PR (lead runs the remote loop); S24 maintenance/force-update and the 5-minute OTP expiry not exercised live (shared stack / time; unit-tested); single-top navigation and the review/service "more" toggles are covered by option/rule tests, not Compose UI tests; `InstallationInfo.UNKNOWN_INSTALLATION` (repository fallback) is still contract-invalid but no longer reachable from the app; iOS only a smoke path (no booking on iOS). Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `iosApp/Configuration/Local.xcconfig`); never committed.
-
-### CUS-090 — Crash fix: decoding failures become `AppError.ParseError`
-- Branch: `fix/cus-090-decode-crash`
-- Status: IN REVIEW
-- Acceptance criteria (owner crash report 2026-10-26; rules §1.7 "failures are AppResult/AppError, never thrown"):
-  - [x] Root cause: Ktor wraps body decoding failures in `io.ktor.serialization.JsonConvertException` (a `ContentConvertException`, not a kotlinx `SerializationException`), so `safeApiCall` let it escape → FATAL on `OTP request` when the hosted dev API (old server) omitted `expiresInSeconds`
-  - [x] `safeApiCall` catches `ContentConvertException` → `AppError.ParseError` (the screen shows its error state instead of crashing)
-  - [x] Regression test: a 200 body missing a required field → `ParseError`; proven to fail without the fix (`JsonConvertException`)
-- Tests: `SafeApiCallTest` (+1, 7 total); `./gradlew :core:network:testAndroidHostTest` green; red without the fix
-- Loops: 1/1
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — one catch in the transport layer, no behaviour change for valid responses. NOTE: the OTP screen will still show an error against the hosted dev API until it runs the new server (main sync after the owner sets the Render env, SRV-154).

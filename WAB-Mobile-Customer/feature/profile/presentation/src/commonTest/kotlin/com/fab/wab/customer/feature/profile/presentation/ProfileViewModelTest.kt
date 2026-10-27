@@ -12,7 +12,9 @@ import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.ui.external.FakeExternalActions
 import com.fab.wab.customer.core.ui.media.FakeImagePicker
 import com.fab.wab.customer.core.ui.media.ImageSource
+import com.fab.wab.customer.core.ui.media.PickResult
 import com.fab.wab.customer.core.ui.media.PickedImage
+import com.fab.wab.customer.core.ui.external.ExternalApp
 import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.core.ui.permission.PermissionFlow
 import com.fab.wab.customer.core.ui.permission.PermissionStatus
@@ -84,6 +86,9 @@ class ProfileViewModelTest {
             external = external,
             analytics = NoOpAnalyticsTracker,
             errorText = { "error" },
+            externalText = { app -> "unavailable:$app" },
+            pickText = { result -> "pick:$result".takeIf { result != PickResult.Cancelled } },
+            cameraDeniedText = { "camera denied" },
         )
         val vm = ProfileViewModel(deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
@@ -129,7 +134,7 @@ class ProfileViewModelTest {
     fun registeredPhotoFlowUploadsFromGalleryAndRespectsCameraPermission() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel(USER)
         assertEquals(ACCOUNT, vm.state.value.account)
-        picker.result = PickedImage(ByteArray(3), "image/jpeg")
+        picker.result = PickResult.Picked(PickedImage(ByteArray(3), "image/jpeg"))
         vm.onEvent(UiAction.OnPhotoClick)
         assertEquals(ProfileOverlay.PhotoOptions, vm.state.value.overlay)
         vm.onEvent(UiAction.OnPhotoSourceSelect(ImageSource.GALLERY))
@@ -140,6 +145,57 @@ class ProfileViewModelTest {
         assertEquals(listOf(ImageSource.GALLERY), picker.requests)
         vm.onEvent(UiAction.OnPhotoDelete)
         assertFalse(vm.state.value.hasPhoto)
+    }
+
+    @Test
+    fun cameraPermissionDeniedExplainsAndBlockedOffersSettings() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(USER)
+        permissions.status = PermissionStatus.DENIED
+        vm.onEvent(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA))
+        assertEquals(listOf<SideEffect>(SideEffect.ShowError("camera denied")), effects)
+        permissions.status = PermissionStatus.DENIED_PERMANENTLY
+        vm.onEvent(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA))
+        assertEquals(ProfileOverlay.PermissionBlocked(AppPermission.CAMERA), vm.state.value.overlay)
+        vm.onEvent(UiAction.OnOpenSettings)
+        assertEquals(listOf(AppPermission.CAMERA), permissions.settingsOpened)
+        assertNull(vm.state.value.overlay)
+        assertTrue(picker.requests.isEmpty(), "no picker without the camera permission")
+    }
+
+    @Test
+    fun pickerProblemsShowAMessageAndCancelStaysQuiet() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(USER)
+        picker.result = PickResult.CameraUnavailable
+        vm.onEvent(UiAction.OnPhotoSourceSelect(ImageSource.CAMERA))
+        picker.result = PickResult.Cancelled
+        vm.onEvent(UiAction.OnPhotoSourceSelect(ImageSource.GALLERY))
+        picker.result = PickResult.Failed
+        vm.onEvent(UiAction.OnPhotoSourceSelect(ImageSource.GALLERY))
+        assertEquals(
+            listOf<SideEffect>(SideEffect.ShowError("pick:CameraUnavailable"), SideEffect.ShowError("pick:Failed")),
+            effects,
+        )
+        assertEquals(ACCOUNT, vm.state.value.account, "nothing uploaded")
+    }
+
+    @Test
+    fun pushBlockedInSettingsOffersTheNotificationSettings() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(USER)
+        permissions.status = PermissionStatus.DENIED_PERMANENTLY
+        vm.onEvent(UiAction.OnPushToggle(true))
+        assertEquals(ProfileOverlay.PermissionBlocked(AppPermission.NOTIFICATIONS), vm.state.value.overlay)
+        vm.onEvent(UiAction.OnOpenSettings)
+        assertEquals(listOf(AppPermission.NOTIFICATIONS), permissions.settingsOpened)
+    }
+
+    @Test
+    fun handOffWithoutAnAppShowsTheDeviceMessage() = runTest(UnconfinedTestDispatcher()) {
+        external.unavailable = setOf(ExternalApp.DIALER)
+        val vm = viewModel(GUEST)
+        vm.onEvent(UiAction.OnContactChannel(ContactChannel.CALL))
+        vm.onEvent(UiAction.OnContactChannel(ContactChannel.WHATSAPP))
+        assertEquals(listOf<SideEffect>(SideEffect.ShowError("unavailable:DIALER")), effects)
+        assertEquals(2, external.calls.size)
     }
 
     @Test

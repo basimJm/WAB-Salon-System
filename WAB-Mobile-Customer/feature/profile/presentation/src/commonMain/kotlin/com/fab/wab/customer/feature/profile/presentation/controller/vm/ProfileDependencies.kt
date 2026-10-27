@@ -7,9 +7,14 @@ import com.fab.wab.customer.core.domain.AppearanceSettings
 import com.fab.wab.customer.core.domain.config.AppConfigRepository
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.ui.external.ExternalActions
+import com.fab.wab.customer.core.ui.external.ExternalApp
 import com.fab.wab.customer.core.ui.media.ImagePicker
+import com.fab.wab.customer.core.ui.media.PickResult
 import com.fab.wab.customer.core.ui.permission.PermissionFlow
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
+import com.fab.wab.customer.designsystem.components.feedback.cameraDeniedText
+import com.fab.wab.customer.designsystem.components.feedback.externalUnavailableText
+import com.fab.wab.customer.designsystem.components.feedback.pickProblemText
 import com.fab.wab.customer.feature.auth.domain.usecase.LogoutUseCase
 import com.fab.wab.customer.feature.auth.domain.usecase.SetPushEnabledUseCase
 import com.fab.wab.customer.feature.profile.domain.usecase.DeleteAccountUseCase
@@ -36,4 +41,7 @@ class ProfileDependencies(
     val external: ExternalActions,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val externalText: suspend (ExternalApp) -> String = ::externalUnavailableText,
+    val pickText: suspend (PickResult) -> String? = ::pickProblemText,
+    val cameraDeniedText: suspend () -> String = ::cameraDeniedText,
 )

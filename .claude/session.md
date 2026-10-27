@@ -265,3 +265,13 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
+
+### T-142 — Customer integration: CUS-094 + CUS-095 + CUS-096 (2026-10-27)
+- Branch: `chore/customer-integration-perf`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] The three task branches merged into one branch from `origin/customer`; conflicts only in the customer backlog/session (both kept); one detekt fix (Swift-facing `MainViewController` name)
+  - [x] Gate: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + iosApp Dev/Prod × Debug/Release simulator builds green
+- Tests: gate above
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — integration only; deviations in the CUS-094…096 blocks.

@@ -10,6 +10,7 @@ import com.fab.wab.customer.core.domain.config.MaintenancePolicy
 import com.fab.wab.customer.core.domain.config.OtpConfig
 import com.fab.wab.customer.core.domain.config.UpdatePolicy
 import com.fab.wab.customer.core.domain.config.UpdateStatus
+import com.fab.wab.customer.core.ui.external.ExternalApp
 import com.fab.wab.customer.core.ui.external.FakeExternalActions
 import com.fab.wab.customer.feature.content.domain.model.ContentPage
 import com.fab.wab.customer.feature.content.domain.model.ContentSlugs
@@ -62,6 +63,7 @@ class ContentViewModelsTest {
 
     private val repository = ContentFake()
     private val external = FakeExternalActions()
+    private val effects = mutableListOf<ContentPageContract.SideEffect>()
 
     private fun TestScope.page(slug: String, contact: ContactInfo? = null): ContentPageViewModel {
         val deps = ContentPageDependencies(
@@ -70,9 +72,11 @@ class ContentViewModelsTest {
             external,
             NoOpAnalyticsTracker,
             errorText = { "error" },
+            externalText = { app -> "unavailable:$app" },
         )
         val vm = ContentPageViewModel(slug, deps, backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
+        backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         vm.onStart()
         return vm
     }
@@ -99,6 +103,14 @@ class ContentViewModelsTest {
         vm.onEvent(ContentPageContract.UiAction.OnContactChannel(ContactChannel.EMAIL))
         vm.onEvent(ContentPageContract.UiAction.OnContactChannel(ContactChannel.CALL))
         assertEquals(listOf("mailto:help@wab.jo", "tel:+962790000001"), external.calls)
+    }
+
+    @Test
+    fun contactWithoutAMailAppShowsTheDeviceMessage() = runTest(UnconfinedTestDispatcher()) {
+        external.unavailable = setOf(ExternalApp.EMAIL)
+        val vm = page(ContentSlugs.CONTACT, ContactInfo("+962790000001", "+962790000002", "help@wab.jo"))
+        vm.onEvent(ContentPageContract.UiAction.OnContactChannel(ContactChannel.EMAIL))
+        assertEquals(listOf<ContentPageContract.SideEffect>(ContentPageContract.SideEffect.ShowError("unavailable:EMAIL")), effects)
     }
 
     @Test

@@ -40,8 +40,8 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        getKoin().get<AndroidPermissionBridge>().detach()
-        getKoin().get<AndroidImagePickerBridge>().detach()
+        getKoin().get<AndroidPermissionBridge>().detach(isFinishing)
+        getKoin().get<AndroidImagePickerBridge>().detach(isFinishing)
         super.onDestroy()
     }
 }
