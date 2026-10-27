@@ -1,4 +1,4 @@
-# Deploying the admin panel (Netlify or Vercel)
+# Deploying the admin panel (Cloudflare Pages, Netlify or Vercel)
 
 The panel is a static site (`dist/<variant>/`). The host must serve the files, send the security headers and answer every path with `index.html`. `scripts/write-hosting.ts` writes those files from the same public values the build used, so the Content-Security-Policy always names the real API and socket origins.
 
@@ -10,6 +10,34 @@ The panel is a static site (`dist/<variant>/`). The host must serve the files, s
 | `VITE_SOCKET_URL` | build | Socket.IO origin, `https://…` (required for prod) |
 | `VITE_DATA_SOURCE` | build | `remote` (default everywhere except dev-debug) or `mock` (dev-debug only) |
 | `CSP_CONNECT_EXTRA` | build machine | comma list of extra `https://` origins the browser may call, e.g. the storage host presigned uploads go to |
+
+## Cloudflare Pages (recommended: free, global CDN, fast)
+
+Cloudflare reads the same `_headers` and `_redirects` files that `scripts/write-hosting.ts` writes, so the security headers and the single-page routing work unchanged.
+
+**With Git (builds on every push):** Workers & Pages -> Create -> Pages -> Connect to Git -> repository `WAB-Salon-System`.
+
+| Setting | Value |
+|---|---|
+| Production branch | `main` (or `admin` until it is merged) |
+| Root directory | `WAB-Admin-Dashboard` |
+| Build command | `npm ci && npm run build:prod-release && node scripts/write-hosting.ts prod-release --target cloudflare` |
+| Build output directory | `dist/prod-release` |
+| Node version | 22 (`.node-version` is committed) |
+
+Environment variables (Settings -> Variables and Secrets, plain text, Production): `VITE_API_BASE_URL` and `VITE_SOCKET_URL` (both `https://wab-server-dev.onrender.com` for now). Optional: `VITE_DEFAULT_LANGUAGE`, `CSP_CONNECT_EXTRA`. Without them the values in `.env.prod` are used. Preview deployments (other branches) can use the build command with `build:dev-release` and `dev-release`.
+
+**Without Git (one command, about a minute):**
+
+```bash
+cd WAB-Admin-Dashboard
+npm ci
+npm run build:prod-release && node scripts/write-hosting.ts prod-release --target cloudflare
+npx wrangler login                                                        # once, opens the browser
+npx wrangler pages deploy dist/prod-release --project-name <project-name> # first time it offers to create the project
+```
+
+The panel is then at `https://<project-name>.pages.dev`. Add that origin to the server's `CORS_ALLOWED_ORIGINS`.
 
 ## Netlify (config is committed: `netlify.toml`)
 
