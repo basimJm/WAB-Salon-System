@@ -15,6 +15,7 @@ object ProfileAnalytics {
     const val ACTION_OPEN = "profile_open"
     const val ACTION_LOGOUT = "profile_logout"
     const val ACTION_DELETE_ACCOUNT = "profile_delete_account"
+    const val ACTION_PERMISSION_SETTINGS = "profile_permission_settings"
     const val ACTION_EDIT_SAVE = "profile_edit_save"
     const val ACTION_EDIT_PHONE = "profile_edit_phone_otp"
     const val PARAM_VALUE = "value"

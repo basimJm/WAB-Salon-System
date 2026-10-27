@@ -11,5 +11,5 @@ actual val platformPermissionModule: Module = module {
     single { AndroidPermissionBridge() }
     single<PermissionManager> { AndroidPermissionManager(get<Context>(), get()) }
     single { AndroidImagePickerBridge() }
-    single<ImagePicker> { AndroidImagePicker(get(), get()) }
+    single<ImagePicker> { AndroidImagePicker(get<Context>(), get()) }
 }

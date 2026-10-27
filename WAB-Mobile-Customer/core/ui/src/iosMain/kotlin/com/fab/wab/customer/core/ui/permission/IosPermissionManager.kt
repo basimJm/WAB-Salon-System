@@ -11,8 +11,8 @@ import platform.CoreLocation.CLLocationManager
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 import platform.CoreLocation.kCLAuthorizationStatusNotDetermined
-import platform.Foundation.NSURL
-import platform.UIKit.UIApplication
+import com.fab.wab.customer.core.ui.external.IosSystem
+import platform.UIKit.UIApplicationOpenNotificationSettingsURLString
 import platform.UIKit.UIApplicationOpenSettingsURLString
 import platform.UserNotifications.UNAuthorizationOptionAlert
 import platform.UserNotifications.UNAuthorizationOptionBadge
@@ -45,15 +45,15 @@ class IosPermissionManager : PermissionManager {
         return status(permission)
     }
 
-    override fun openSettings(permission: AppPermission) = openSettingsApp()
+    /** The app's page in Settings (notifications have their own page since iOS 16). */
+    override fun openSettings(permission: AppPermission) = IosSystem.launch(
+        if (permission == AppPermission.NOTIFICATIONS) UIApplicationOpenNotificationSettingsURLString else UIApplicationOpenSettingsURLString,
+    )
 
     override fun isLocationServiceEnabled(): Boolean = CLLocationManager.locationServicesEnabled()
 
-    override fun openLocationServiceSettings() = openSettingsApp()
-
-    private fun openSettingsApp() {
-        UIApplication.sharedApplication.openURL(NSURL(string = UIApplicationOpenSettingsURLString))
-    }
+    /** iOS cannot deep-link to Privacy > Location Services; the app's page has the location row. */
+    override fun openLocationServiceSettings() = IosSystem.launch(UIApplicationOpenSettingsURLString)
 
     private suspend fun notificationStatus(): PermissionStatus = suspendCoroutine { continuation ->
         UNUserNotificationCenter.currentNotificationCenter().getNotificationSettingsWithCompletionHandler { settings ->

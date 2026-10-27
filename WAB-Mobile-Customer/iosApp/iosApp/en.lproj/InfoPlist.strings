@@ -1,3 +1,2 @@
-"NSLocationWhenInUseUsageDescription" = "We need your location to show salons near you.";
-"NSLocationAlwaysAndWhenInUseUsageDescription" = "We need your location to show salons near you.";
-"NSCameraUsageDescription" = "We need the camera to take photos for your reviews.";
+"NSLocationWhenInUseUsageDescription" = "WAB uses your location to show salons near you.";
+"NSCameraUsageDescription" = "WAB uses the camera to take your profile photo.";

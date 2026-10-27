@@ -19,6 +19,8 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>$(MERCHANT_APP_SCHEME)</string>
+		<string>whatsapp</string>
+		<string>comgooglemaps</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
@@ -27,10 +29,8 @@
 		<string>remote-notification</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We need your location to show salons near you.</string>
+	<string>WAB uses your location to show salons near you.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>We need the camera to take photos for your reviews.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need your location to show salons near you.</string>
+	<string>WAB uses the camera to take your profile photo.</string>
 </dict>
 </plist>

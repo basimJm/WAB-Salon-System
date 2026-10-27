@@ -3,37 +3,93 @@ package com.fab.wab.customer.core.ui.external
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-/** Hand-offs to other apps (PRD S07): maps chooser, dialer, WhatsApp chat, native share sheet. Never throws. */
+/** The kind of app a hand-off needs; picks the localized "not available on this device" text. */
+enum class ExternalApp { DIALER, WHATSAPP, MAPS, BROWSER, EMAIL, SHARE }
+
+/** Result of a hand-off: the other app opened, or this device has nothing that can handle it (e.g. no phone app). */
+sealed interface ExternalOutcome {
+    data object Opened : ExternalOutcome
+    data class Unavailable(val app: ExternalApp) : ExternalOutcome
+}
+
+/** The app that was missing, or null when the hand-off worked. */
+val ExternalOutcome.unavailableApp: ExternalApp? get() = (this as? ExternalOutcome.Unavailable)?.app
+
+/**
+ * Hand-offs to other apps (PRD S07, S15, S21, S23): maps, dialer, WhatsApp chat, share sheet, browser, mail.
+ * Never throws; a device without a handler answers [ExternalOutcome.Unavailable] so the screen can say so.
+ */
 interface ExternalActions {
-    fun openMaps(latitude: Double, longitude: Double, label: String)
-    fun dial(phoneE164: String)
-    fun openWhatsApp(phoneE164: String)
-    fun share(text: String)
+    suspend fun openMaps(latitude: Double, longitude: Double, label: String): ExternalOutcome
+    suspend fun dial(phone: String): ExternalOutcome
+    suspend fun openWhatsApp(phone: String): ExternalOutcome
+    suspend fun share(text: String): ExternalOutcome
+
     /** Web page in the system browser (store page, merchant registration). */
-    fun openUrl(url: String)
+    suspend fun openUrl(url: String): ExternalOutcome
+
     /** Mail app composer (PRD S23 contact). */
-    fun email(address: String)
+    suspend fun email(address: String): ExternalOutcome
+
     /** Opens [appUrl] in the app identified by [appId] (package / URL scheme) when installed, else [fallbackUrl] (store page). */
-    fun openApp(appUrl: String, appId: String, fallbackUrl: String)
+    suspend fun openApp(appUrl: String, appId: String, fallbackUrl: String): ExternalOutcome
 }
 
 /** Pure link builders shared by the platforms (unit-tested). */
 object ExternalLinks {
     private const val SCHEME_SEPARATOR = "://"
-    private const val WHATSAPP_SCHEME = "https"
+    private const val HTTPS = "https"
     private const val WHATSAPP_HOST = "wa.me"
     private const val TEL_SCHEME = "tel"
     private const val MAILTO_SCHEME = "mailto"
     private const val PATH_SEPARATOR = '/'
+    private const val PLUS = '+'
+    private const val GOOGLE_MAPS_WEB = "www.google.com/maps/search/"
+    private const val GOOGLE_MAPS_API = "api=1"
+    private const val GOOGLE_MAPS_QUERY = "query"
+    private const val GOOGLE_MAPS_APP = "comgooglemaps"
+    private const val GOOGLE_MAPS_APP_QUERY = "q"
+    private const val APPLE_MAPS_HOST = "maps.apple.com"
+    private const val APPLE_MAPS_COORDS = "ll"
+    private const val APPLE_MAPS_QUERY = "q"
+    private const val GEO_SCHEME = "geo"
+    private const val GEO_QUERY = "q"
+    private const val COMMA = ","
     private val NON_DIGITS = Regex("[^0-9]")
 
-    /** `https://wa.me/<digits>`: WhatsApp wants the number without `+` or spaces. */
-    fun whatsApp(phoneE164: String): String =
-        "$WHATSAPP_SCHEME$SCHEME_SEPARATOR$WHATSAPP_HOST$PATH_SEPARATOR${phoneE164.replace(NON_DIGITS, "")}"
+    /** `+` (only when leading) and digits: what dialers and `tel:` URLs accept; spaces, dashes and brackets dropped. */
+    fun dialable(phone: String): String {
+        val trimmed = phone.trim()
+        val digits = trimmed.replace(NON_DIGITS, "")
+        return if (trimmed.startsWith(PLUS)) "$PLUS$digits" else digits
+    }
 
-    fun tel(phoneE164: String): String = "$TEL_SCHEME:${phoneE164.trim()}"
+    /** `https://wa.me/<digits>`: works with or without the app (the browser hands over to WhatsApp or offers it). */
+    fun whatsApp(phone: String): String =
+        "$HTTPS$SCHEME_SEPARATOR$WHATSAPP_HOST$PATH_SEPARATOR${phone.replace(NON_DIGITS, "")}"
+
+    fun tel(phone: String): String = "$TEL_SCHEME:${dialable(phone)}"
 
     fun mailto(address: String): String = "$MAILTO_SCHEME:${address.trim()}"
+
+    /** Android `geo:` URI with a labelled pin, answered by every maps app (Google Maps, Waze, …). */
+    fun geo(latitude: Double, longitude: Double, label: String): String =
+        "$GEO_SCHEME:$latitude$COMMA$longitude?$GEO_QUERY=$latitude$COMMA$longitude(${queryEncode(label)})"
+
+    /** Google Maps web search: opens the Google Maps app when installed, else the browser. */
+    fun googleMapsWeb(latitude: Double, longitude: Double): String =
+        "$HTTPS$SCHEME_SEPARATOR$GOOGLE_MAPS_WEB?$GOOGLE_MAPS_API&$GOOGLE_MAPS_QUERY=$latitude$COMMA$longitude"
+
+    /** Google Maps iOS app URL (`comgooglemaps://?q=lat,lng`). */
+    fun googleMapsApp(latitude: Double, longitude: Double): String =
+        "$GOOGLE_MAPS_APP$SCHEME_SEPARATOR?$GOOGLE_MAPS_APP_QUERY=$latitude$COMMA$longitude"
+
+    /** Probe URL for `canOpenURL` (the scheme must be listed in `LSApplicationQueriesSchemes`). */
+    fun googleMapsAppProbe(): String = "$GOOGLE_MAPS_APP$SCHEME_SEPARATOR"
+
+    /** Apple Maps universal link with a labelled pin. */
+    fun appleMaps(latitude: Double, longitude: Double, label: String): String =
+        "$HTTPS$SCHEME_SEPARATOR$APPLE_MAPS_HOST/?$APPLE_MAPS_COORDS=$latitude$COMMA$longitude&$APPLE_MAPS_QUERY=${queryEncode(label)}"
 
     /** RFC 3986 query encoding of a label (UTF-8 bytes as %XX; unreserved characters kept). */
     fun queryEncode(value: String): String = buildString {
@@ -54,16 +110,24 @@ object ExternalLinks {
     private const val NIBBLE_MASK = 0x0F
 }
 
-/** Recording double for tests and previews. */
-class FakeExternalActions : ExternalActions {
+/** Recording double for tests and previews; [unavailable] apps answer [ExternalOutcome.Unavailable]. */
+class FakeExternalActions(var unavailable: Set<ExternalApp> = emptySet()) : ExternalActions {
     val calls = mutableListOf<String>()
-    override fun openMaps(latitude: Double, longitude: Double, label: String) { calls += "maps:$latitude,$longitude:$label" }
-    override fun dial(phoneE164: String) { calls += ExternalLinks.tel(phoneE164) }
-    override fun openWhatsApp(phoneE164: String) { calls += ExternalLinks.whatsApp(phoneE164) }
-    override fun share(text: String) { calls += "share:$text" }
-    override fun openUrl(url: String) { calls += "url:$url" }
-    override fun email(address: String) { calls += ExternalLinks.mailto(address) }
-    override fun openApp(appUrl: String, appId: String, fallbackUrl: String) { calls += "app:$appUrl|$appId|$fallbackUrl" }
+
+    private fun record(app: ExternalApp, call: String): ExternalOutcome {
+        calls += call
+        return if (app in unavailable) ExternalOutcome.Unavailable(app) else ExternalOutcome.Opened
+    }
+
+    override suspend fun openMaps(latitude: Double, longitude: Double, label: String) =
+        record(ExternalApp.MAPS, "maps:$latitude,$longitude:$label")
+    override suspend fun dial(phone: String) = record(ExternalApp.DIALER, ExternalLinks.tel(phone))
+    override suspend fun openWhatsApp(phone: String) = record(ExternalApp.WHATSAPP, ExternalLinks.whatsApp(phone))
+    override suspend fun share(text: String) = record(ExternalApp.SHARE, "share:$text")
+    override suspend fun openUrl(url: String) = record(ExternalApp.BROWSER, "url:$url")
+    override suspend fun email(address: String) = record(ExternalApp.EMAIL, ExternalLinks.mailto(address))
+    override suspend fun openApp(appUrl: String, appId: String, fallbackUrl: String) =
+        record(ExternalApp.BROWSER, "app:$appUrl|$appId|$fallbackUrl")
 }
 
 expect val platformExternalActionsModule: Module
