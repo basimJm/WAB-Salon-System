@@ -28,6 +28,10 @@ kotlin {
         implementation(libs.kotlinx.datetime)
         api(libs.material.icons.extended)
     }
+    sourceSets.commonTest.dependencies {
+        // MER-076: the media / hand-off / map reducers launch coroutines.
+        implementation(libs.kotlinx.coroutines.test)
+    }
     sourceSets.androidMain.dependencies {
         implementation(libs.compose.uiTooling)
         implementation(libs.androidx.core.ktx)
