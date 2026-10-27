@@ -96,6 +96,10 @@ describe('host files', () => {
     expect(netlifyHeaders(origins)).toContain('\n\n/assets/*\n');
   });
 
+  it('writes the same _headers and _redirects for Cloudflare Pages', () => {
+    expect(hostingFiles('cloudflare', origins)).toEqual(hostingFiles('netlify', origins));
+  });
+
   it('writes a Vercel config with the same headers and a rewrite to the page', () => {
     const json = JSON.parse(hostingFiles('vercel', origins)['vercel.json'] ?? '') as {
       rewrites: { source: string; destination: string }[];

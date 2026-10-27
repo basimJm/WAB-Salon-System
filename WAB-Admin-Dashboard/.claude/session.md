@@ -10,6 +10,15 @@
 
 ## Current task
 
+### ADM-108 — Cloudflare Pages deploy
+
+- Branch: `feat/adm-108-cloudflare`
+- Status: DONE
+- Acceptance criteria: `write-hosting.ts --target cloudflare` writes the same `_headers`/`_redirects` (Cloudflare Pages reads them); `.node-version` 22; `docs/DEPLOY.md` has the Git settings (root directory, build command, output directory, variables) and a wrangler CLI deploy
+- Tests: tests/hosting.test.ts (+1, 16 total) green; full suite 1374 pass; builds dev-release + prod-release and the Cloudflare `_headers` generation checked. DEVIATION: 3 tests in tests/contract.test.ts fail on `origin/admin` itself (the committed contract is behind the server spec; a resync changes the branches query and breaks 77 test files): not touched here, needs its own contract re-sync task.
+- Loops: 1/1 (user decision)
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — config and docs only. DEVIATION: no e2e; the deploy itself needs the owner's Cloudflare login.
+
 ### ADM-107 — Adopt admin contract 1.7.0 (SRV-170) + end-to-end pass on the local real stack
 
 - Branch: `feat/adm-107-contract-1-7`
