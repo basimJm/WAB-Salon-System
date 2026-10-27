@@ -12,7 +12,11 @@ import type { StorageProvider } from '../providers/storage/types';
 import { planDemoImages, type DemoImagePurpose, type DemoImageTarget } from './demoImages';
 
 export interface DemoImageUploadDeps {
-  readonly storage: Pick<StorageProvider, 'write'>;
+  /**
+   * With `read`, a key that already holds an object keeps it (no placeholder over an existing
+   * image, SRV-173); without it every placeholder key is written again. Photos always win.
+   */
+  readonly storage: Pick<StorageProvider, 'write'> & Partial<Pick<StorageProvider, 'read'>>;
   readonly variants: ImageVariants;
   /** Lists the photo files of one sub-folder (empty when the folder is missing). */
   readonly list: (folder: string) => readonly string[];
@@ -25,6 +29,8 @@ export interface DemoImageUploadReport {
   /** Keys that got the generated placeholder because no photo was available for them. */
   readonly placeholders: number;
   readonly placeholdersByPurpose: Readonly<Partial<Record<DemoImagePurpose, number>>>;
+  /** Placeholder keys left alone because storage already holds an object there. */
+  readonly existing: number;
 }
 
 /** A plain square JPEG for demo keys without a photo, so no seeded URL answers 404 (SRV-171 S4). */
@@ -49,7 +55,8 @@ const reencode = (photo: Buffer): Promise<Buffer> =>
 
 /**
  * Writes an image to every demo key: the owner's photo when the plan has one, else the
- * placeholder. Public images also get their list thumbnails.
+ * placeholder (only where storage holds nothing yet, when it can tell). Public images also get
+ * their list thumbnails. Running it again without photos writes nothing.
  */
 export const uploadDemoImages = async (
   targets: readonly DemoImageTarget[],
@@ -66,15 +73,24 @@ export const uploadDemoImages = async (
   for (const item of plan.assignments) {
     await store(item.key, item.purpose, await reencode(deps.read(item.source)));
   }
-  const placeholder = plan.missing.length === 0 ? undefined : await demoPlaceholderImage();
-  const placeholdersByPurpose: Partial<Record<DemoImagePurpose, number>> = {};
+  const isStored = async (key: string): Promise<boolean> =>
+    deps.storage.read !== undefined && (await deps.storage.read(key)) !== null;
+  const todo: DemoImageTarget[] = [];
+  let existing = 0;
   for (const target of plan.missing) {
+    if (await isStored(target.key)) existing += 1;
+    else todo.push(target);
+  }
+  const placeholder = todo.length === 0 ? undefined : await demoPlaceholderImage();
+  const placeholdersByPurpose: Partial<Record<DemoImagePurpose, number>> = {};
+  for (const target of todo) {
     if (placeholder !== undefined) await store(target.key, target.purpose, placeholder);
     placeholdersByPurpose[target.purpose] = (placeholdersByPurpose[target.purpose] ?? 0) + 1;
   }
   return {
     uploaded: plan.assignments.length,
-    placeholders: plan.missing.length,
+    placeholders: todo.length,
     placeholdersByPurpose,
+    existing,
   };
 };

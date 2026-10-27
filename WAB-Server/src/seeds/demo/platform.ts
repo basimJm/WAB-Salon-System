@@ -13,6 +13,7 @@ import {
   DEMO_MAINTENANCE_MESSAGE,
   DEMO_STORE_URLS,
 } from '../../constants/demoSeed';
+import { DEMO_IMAGE_PREFIX } from '../../constants/demoCatalog';
 import { APP_KINDS, LANGUAGES } from '../../constants/enums';
 import { CONTENT_KINDS } from '../../constants/content';
 import { CLIENT_PLATFORMS } from '../../constants/appConfig';
@@ -62,8 +63,11 @@ export const buildPlatform = (ctx: DemoContext, data: DemoDataset): void => {
     });
   });
 
+  // Only the demo catalog's own pictures: an admin-made service already has its real upload record,
+  // and its key as the last upload would hide the "base written" marker (SRV-173: every run then
+  // re-inserted the day-dependent rows).
   for (const entry of ctx.catalog) {
-    if (entry.imageKey !== undefined)
+    if (entry.imageKey !== undefined && entry.imageKey.startsWith(DEMO_IMAGE_PREFIX))
       addUpload(data, { key: entry.imageKey, purpose: 'CATALOG_IMAGE', ...admin, at: since });
   }
 

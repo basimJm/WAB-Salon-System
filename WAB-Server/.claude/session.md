@@ -10,6 +10,30 @@
 
 ## Current task
 
+### SRV-173 — One-command dev seed: data, branches, images, reports (owner 2026-10-27)
+
+- Branch: `feat/srv-173-dev-seed`
+- Branched: from `origin/server`
+- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
+- Acceptance criteria (owner request "seeds, demo images and real data just for development, so when we run the seed it fills the dev db"; BUSINESS_DOMAIN §3.3a/§5.16–§5.18 demo branches (unchanged), storage port; no operation changed):
+  - [x] `npm run seed:dev [-- <photo folder>]` (`seeds/runDev.ts` → `seeds/devSeed.ts` `runDevSeed`): indexes + reference → admin from `ADMIN_EMAIL`/`ADMIN_PASSWORD` only when no admin exists (else `existing`; neither → `skipped` + warning, demo parts skipped) → demo catalog + base data + main-branch migration + extra branches (Lamar 4, Rose 3, Al-Ostaz 3, Gentlemen's 3) + branch staff photos → demo images (placeholders / owner photos) + thumbnails + flags through the storage port → daily reports; one counts line per part (no keys, ids or secrets)
+  - [x] Idempotent: data insert-only (base once, branches once); a placeholder only where `storage.read` finds nothing, a flag only when the stored bytes differ; owner photos always win; a second run writes nothing new (unit + real run)
+  - [x] Branch staff carry `photoKey` + a confirmed `MEMBER_PHOTO` upload record; branches an earlier seed wrote get them backfilled (`$set` only where `photoKey` is missing; upload records insert-only)
+  - [x] `SEED_DEMO_ON_START=true` runs the same `seedDev` in the background with real storage when configured (images included), logs a counts summary, never throws
+  - [x] Guard: `assertDemoAllowed` for `seed:dev` and on-start (production rules need `SEED_DEMO_DATABASE` = connected database); no real storage → images + flags skipped with a warning, data still seeded
+  - [x] Scripts consistent: `seed` = `seedIndexesAndReference` + flags, `seed:demo` = reference + `seedDemoData` + `storeDailyReports`, `seed:demo-images` = `seedDemoImages`; `seed:dev` composes those functions (no copied logic)
+  - [x] Docs: `docs/DEPLOYMENT.md` + `docs/DEMO_ACCOUNTS.md` "fill the dev database" (local one command; Render env or Render Shell), `.env.example` + `docker/env.dev.example` comments (no key changed)
+  - [x] Found by the real run and fixed: an admin-made catalog service became the base data set's last upload (its record already existed), so the "base written" marker was never stored and every run re-inserted ~105 time-dependent server events; only demo catalog pictures get demo upload records now
+- Tests: `tests/devSeed.test.ts` (new, 13: order reference→admin→demo→images→reports, no-admin and no-storage paths with warnings, steps without storage, summary lines, every demo key incl. branch staff + thumbnails + flags through the real `@wab/storage` memory adapter with a second run writing nothing, branch staff photo backfill, on-start summary/failure/production guard, catalog marker regression), `tests/demoImageUpload.test.ts` (+1), `tests/flagImages.test.ts` + `tests/demoBranchActivity.test.ts` updated; shared fixtures in `tests/helpers/demoFixtures.ts`
+- Gate (Terminal panel): prettier --check ., eslint ., `tsc --noEmit`, `tsc -p tsconfig.build.json` + `node dist/docs/generate.js` (no diff in `docs/api`), full jest 168 suites / 2957 tests green
+- API docs: no change
+- Real run (local QA stack :4000 / Mongo 27018 / MinIO 9000, left running): `seed:dev` twice after the fix → both: reference 0 created / 27 there, admin existing, catalog 0/18, base "already seeded", extra branches 0 written / 9 there, images 0 placeholders / 135 already stored, flags 0 written / 1 unchanged, reports 14; 24/24 branch staff have `photoKey`; `GET /customer/v1/salons?gender=FEMALE` → Lamar `branchCount` 4, Rose 3; MinIO 200 for `demo/salons/lamar/profile.jpg`, its `_thumb.webp`, `demo/members/lamar-khalda-staff0.jpg`, `flags/jo.svg`
+- Loops: 1/1 — re-checked each criterion against the code, the tests and the real run; found and fixed: the base marker defect above, flags rewritten on every run (now compared)
+- Review: PASSED (SE ✔ (composition over the existing seed functions; storage port only; constants/env keys named), Mobile N/A (no contract change), Architect ✔ (no API change; dev-only guard reused; on-start never blocks the API), QA ✔ (every criterion has a test; real run idempotent))
+- Notes: DEVIATIONS: (1) the QA database keeps the duplicate demo server events the pre-fix runs (2 here, plus earlier `qa/stack.sh` starts) inserted — not deleted (insert-only seed; QA analytics noise only); (2) the first real run's counts scrolled out of the terminal (the second pre-fix run and both post-fix runs were read); (3) the reports step recomputes the 14 stored days each run (same values); (4) an `ADMIN_PASSWORD` under 12 characters fails the run loudly (same rule as `seed:admin`); (5) admin-made catalog services still feed demo salon services on an edited DB (pre-existing, unchanged); (6) tools run from a symlinked `node_modules` (not committed), `ensure-sdks` skipped.
+
+## Last blocks
+
 ### SRV-172 — Server defects from the merchant/customer e2e passes
 
 - Branch: `feat/srv-172-e2e-defects-2`

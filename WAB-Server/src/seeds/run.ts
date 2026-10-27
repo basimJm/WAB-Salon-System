@@ -8,9 +8,19 @@ import {
 import { createRealStorage } from '../providers/storage/real';
 import { connectMongo, disconnectMongo } from '../utils/database/connection';
 import { ensureIndexes } from '../utils/database/indexes';
-import { createLogger } from '../utils/logger';
+import { createLogger, type Logger } from '../utils/logger';
 import { uploadSeedFlags } from './flagImages';
-import { seedReferenceData } from './referenceData';
+import { seedReferenceData, type SeedResult } from './referenceData';
+
+/** Indexes, then the reference data that is missing (insert-only). */
+export const seedIndexesAndReference = async (logger: Logger): Promise<SeedResult> => {
+  await ensureIndexes(ALL_MODELS, logger);
+  return seedReferenceData({
+    countries: new CountriesRepository(),
+    cities: new CitiesRepository(),
+    areas: new AreasRepository(),
+  });
+};
 
 /**
  * `npm run seed`: creates indexes, inserts the reference data that is missing and, with real
@@ -21,13 +31,7 @@ const main = async (): Promise<void> => {
   const logger = createLogger({ level: config.logLevel });
   await connectMongo(config, logger);
   try {
-    await ensureIndexes(ALL_MODELS, logger);
-    const result = await seedReferenceData({
-      countries: new CountriesRepository(),
-      cities: new CitiesRepository(),
-      areas: new AreasRepository(),
-    });
-    logger.info(result, 'reference data seeded');
+    logger.info(await seedIndexesAndReference(logger), 'reference data seeded');
     if (config.storage === undefined) {
       logger.warn('flags not written: set STORAGE_PROVIDER=real and the S3/CDN settings');
     } else {

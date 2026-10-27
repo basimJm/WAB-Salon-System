@@ -6,7 +6,7 @@ import { resolveVariant } from '../src/infrastructure/config/variant.ts';
 import { buildEnv, hostingFiles, originsFromEnv, type HostingTarget } from './lib/hosting.ts';
 
 /**
- * node scripts/write-hosting.ts <variant> [--target netlify|vercel] [--out <dir>]
+ * node scripts/write-hosting.ts <variant> [--target netlify|cloudflare|vercel] [--out <dir>]
  * Writes the host's header and routing files from the same public env values the build used
  * (VITE_API_BASE_URL, VITE_SOCKET_URL from the environment or the variant's `.env.<dev|prod>` file; optional
  * CSP_CONNECT_EXTRA = comma list of extra https origins).
@@ -21,7 +21,8 @@ if (!variant) {
   console.error('usage: write-hosting.ts <variant> [--target netlify|vercel] [--out <dir>]');
   process.exit(1);
 }
-const target: HostingTarget = option('--target') === 'vercel' ? 'vercel' : 'netlify';
+const TARGETS: readonly HostingTarget[] = ['netlify', 'cloudflare', 'vercel'];
+const target: HostingTarget = TARGETS.find((t) => t === option('--target')) ?? 'netlify';
 const out = option('--out') ?? join('dist', variant);
 const requireRemote = variant.startsWith('prod');
 const fileEnv = loadEnv(resolveVariant(variant).appEnv, process.cwd(), PUBLIC_ENV_PREFIX);
