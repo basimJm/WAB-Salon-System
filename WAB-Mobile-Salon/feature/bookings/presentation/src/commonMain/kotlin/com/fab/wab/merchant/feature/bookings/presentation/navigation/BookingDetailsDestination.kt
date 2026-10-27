@@ -12,6 +12,7 @@ import com.fab.wab.merchant.core.navigation.route.Screen
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.ui.external.ExternalActions
+import com.fab.wab.merchant.designsystem.components.external.rememberExternalHandoff
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.ActionMessage
 import com.fab.wab.merchant.feature.bookings.presentation.controller.contract.BookingDetailsContract.SideEffect
 import com.fab.wab.merchant.feature.bookings.presentation.controller.vm.BookingDetailsViewModel
@@ -43,10 +44,11 @@ private fun BookingDetailsRoute(bookingId: String, navigator: Navigator) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val notifications = rememberNotificationManager()
     val external = koinInject<ExternalActions>()
+    val handoff = rememberExternalHandoff(external)
     CollectSideEffect(viewModel.sideEffect) { effect ->
         when (effect) {
-            is SideEffect.Dial -> external.dial(effect.phone)
-            is SideEffect.WhatsApp -> external.openWhatsApp(effect.phone)
+            is SideEffect.Dial -> handoff.call(effect.phone)
+            is SideEffect.WhatsApp -> handoff.whatsApp(effect.phone)
             is SideEffect.CopyReference -> {
                 external.copyText(effect.reference)
                 notifications.show(getString(Res.string.details_copied), style = NotificationStyle.Success)

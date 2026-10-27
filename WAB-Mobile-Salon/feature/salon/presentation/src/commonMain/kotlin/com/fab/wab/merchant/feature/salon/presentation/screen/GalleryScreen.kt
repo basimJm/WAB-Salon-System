@@ -28,6 +28,7 @@ import com.fab.wab.merchant.designsystem.components.media.MediaKind
 import com.fab.wab.merchant.designsystem.components.navigation.AppTopBar
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.upload.AppMediaGrid
+import com.fab.wab.merchant.designsystem.components.upload.AppMediaPicker
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
 import com.fab.wab.merchant.designsystem.components.upload.MediaGridMode
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
@@ -99,6 +100,7 @@ fun GalleryScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Un
         }
     }
     GalleryDialogs(state, onAction)
+    AppMediaPicker(state.media) { onAction(UiAction.OnMedia(it)) }
 }
 
 @Composable

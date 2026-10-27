@@ -1,55 +1,43 @@
 package com.fab.wab.merchant.core.data.location
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Looper
-import androidx.annotation.RequiresPermission
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority.PRIORITY_BALANCED_POWER_ACCURACY
+import android.location.Location
 import com.fab.wab.merchant.core.domain.model.LocationData
 import com.fab.wab.merchant.core.domain.provider.DeviceLocationProvider
-import org.koin.mp.KoinPlatform
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import com.google.android.gms.tasks.Task
+import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
+/**
+ * Fused location: one fresh fix (`getCurrentLocation`), else the last known one. Every failure (no Play services,
+ * permission revoked meanwhile, no fix) answers null instead of throwing or waiting forever; the map picker bounds
+ * the wait and explains.
+ */
+class DeviceLocationProviderAndroid(private val context: Context) : DeviceLocationProvider {
 
-private const val ANDROID_CONTEXT_PROPERTY = "androidContext"
-private const val LOCATION_INTERVAL_MS = 10_000L
-private const val LOCATION_MIN_INTERVAL_MS = 5_000L
-
-class DeviceLocationProviderAndroid : DeviceLocationProvider {
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    override fun fetchCurrentLocation(onResult: (LocationData?) -> Unit) {
-        val context = KoinPlatform.getKoin().getProperty<Context>(ANDROID_CONTEXT_PROPERTY) ?: return onResult(null)
-        val fusedLocationClient: FusedLocationProviderClient =
-            LocationServices.getFusedLocationProviderClient(context)
-
-        val locationRequest = LocationRequest.Builder(PRIORITY_BALANCED_POWER_ACCURACY, LOCATION_INTERVAL_MS)
-            .setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(LOCATION_MIN_INTERVAL_MS)
-            .setMaxUpdates(1)
-            .build()
-
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                result.lastLocation?.let { location ->
-                    onResult(
-                        LocationData(
-                            latitude = location.latitude,
-                            longitude = location.longitude,
-                        )
-                    )
-                } ?: onResult(null)
-                fusedLocationClient.removeLocationUpdates(this)
-            }
+    // The map picker asks PermissionFlow for LOCATION before calling; a revoked permission lands in the catch.
+    @SuppressLint("MissingPermission")
+    override suspend fun currentLocation(): LocationData? = try {
+        val client = LocationServices.getFusedLocationProviderClient(context)
+        val cancellation = CancellationTokenSource()
+        val fresh = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cancellation.token).awaitOrNull {
+            cancellation.cancel()
         }
+        (fresh ?: client.lastLocation.awaitOrNull())?.toData()
+    } catch (ignored: SecurityException) {
+        null
+    }
 
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
+    private fun Location.toData() = LocationData(latitude = latitude, longitude = longitude)
+
+    private suspend fun Task<Location?>.awaitOrNull(onCancel: () -> Unit = {}): Location? = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { onCancel() }
+        addOnCompleteListener { task ->
+            if (continuation.isActive) continuation.resume(if (task.isSuccessful) task.result else null)
+        }
     }
 }

@@ -8,12 +8,16 @@ import com.fab.wab.merchant.core.domain.model.LocationData
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.ui.media.CropRegion
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
+import com.fab.wab.merchant.core.ui.media.MediaSource
 import com.fab.wab.merchant.core.ui.media.FakeImageCropper
 import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.core.ui.media.PickedImage
 import com.fab.wab.merchant.core.ui.permission.PermissionFlow
 import com.fab.wab.merchant.core.ui.permission.PermissionStatus
+import com.fab.wab.merchant.designsystem.components.map.MapNotice
 import com.fab.wab.merchant.designsystem.components.map.MapPickerAction
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.Change
 import com.fab.wab.merchant.feature.salon.domain.ProfileField
@@ -105,6 +109,7 @@ class SalonProfileViewModelTest {
         val viewModel = viewModel()
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnPickImage(ProfileImage.COVER))
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         assertEquals(ProfileImage.COVER, viewModel.state.first().crop?.target)
         viewModel.onEvent(UiAction.OnCropConfirm(CropRegion.FULL))
         val state = viewModel.state.first()
@@ -121,6 +126,7 @@ class SalonProfileViewModelTest {
         val effects = effectsOf(viewModel)
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnPickImage(ProfileImage.PROFILE))
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.SourceChosen(MediaSource.LIBRARY)))
         viewModel.onEvent(UiAction.OnCropConfirm(CropRegion.FULL))
         assertEquals(UploadStatus.Failed, viewModel.state.first().profile?.status)
         assertNull(viewModel.state.first().form.profileKey)
@@ -159,7 +165,7 @@ class SalonProfileViewModelTest {
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnOpenMap)
         viewModel.onEvent(UiAction.OnMap(MapPickerAction.UseMyLocation))
-        assertEquals(SideEffect.LocationBlocked, effects.last())
+        assertEquals(MapNotice.BLOCKED, viewModel.state.first().map?.notice)
         viewModel.onEvent(UiAction.OnCloseMap)
         viewModel.onEvent(UiAction.OnBack)
         assertEquals(SideEffect.NavigateBack, effects.last())
@@ -168,6 +174,24 @@ class SalonProfileViewModelTest {
         assertTrue(viewModel.state.first().unsavedDialog)
         viewModel.onEvent(UiAction.OnSaveAndLeave)
         assertEquals(listOf(SideEffect.Saved, SideEffect.NavigateBack), effects.takeLast(2))
+    }
+
+    @Test
+    fun openInMapsHandsThePinnedPointOverAndCameraIsOffered() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        val effects = effectsOf(viewModel)
+        viewModel.state.first { !it.loading }
+        viewModel.onEvent(UiAction.OnOpenMap)
+        viewModel.onEvent(UiAction.OnMap(MapPickerAction.UseMyLocation))
+        viewModel.onEvent(UiAction.OnMap(MapPickerAction.Confirm))
+        viewModel.onEvent(UiAction.OnOpenInMaps)
+        val form = viewModel.state.first().form
+        assertEquals(SideEffect.OpenInMaps(32.0, 35.8, form.name), effects.last())
+        viewModel.onEvent(UiAction.OnPickImage(ProfileImage.COVER))
+        assertEquals(PHOTO_SOURCES, viewModel.state.first().media.sources)
+        viewModel.onEvent(UiAction.OnMedia(MediaPickAction.Dismiss))
+        assertTrue(viewModel.state.first().media.sources.isEmpty())
+        assertNull(viewModel.state.first().crop)
     }
 
     @Test

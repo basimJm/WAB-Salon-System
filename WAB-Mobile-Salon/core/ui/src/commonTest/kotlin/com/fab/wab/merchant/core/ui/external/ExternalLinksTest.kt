@@ -11,6 +11,23 @@ class ExternalLinksTest {
     }
 
     @Test
+    fun displayedPhonesAreNormalizedBeforeDialling() {
+        // The UI wraps phones in bidi isolates (ltrIsolate) and may show Arabic-Indic digits.
+        assertEquals("+962791234567", ExternalLinks.dialable("⁦+962 79-123 4567⁩"))
+        assertEquals("0791234567", ExternalLinks.dialable("٠٧٩١٢٣٤٥٦٧"))
+        assertEquals("+962791234567", ExternalLinks.dialable("+۹۶۲۷۹۱۲۳۴۵۶۷"))
+        assertEquals("tel:+962791234567", ExternalLinks.tel("⁦+962 79 123 4567⁩"))
+        assertEquals("", ExternalLinks.dialable(" - "))
+    }
+
+    @Test
+    fun whatsAppAppSchemeAndWebFallbacks() {
+        assertEquals("whatsapp://send?phone=962791234567", ExternalLinks.whatsAppApp("+962 79 123 4567", null))
+        assertEquals("whatsapp://send?phone=962791234567&text=Hi%20WAB", ExternalLinks.whatsAppApp("+962791234567", "Hi WAB"))
+        assertEquals("https://wa.me/962791234567", ExternalLinks.whatsAppMessage("+962791234567", " "))
+    }
+
+    @Test
     fun queryEncodingKeepsUnreservedAndEncodesUtf8() {
         assertEquals("Glow%20Store%20%26%20Spa", ExternalLinks.queryEncode("Glow Store & Spa"))
         assertEquals("%D8%B5%D8%A7%D9%84%D9%88%D9%86", ExternalLinks.queryEncode("صالون"))

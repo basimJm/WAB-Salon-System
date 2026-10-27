@@ -28,18 +28,21 @@ class AndroidPermissionBridge {
         }
     }
 
-    fun detach() {
+    /** A rotation keeps the pending request (the new activity's launcher receives the answer); finishing drops it. */
+    fun detach(activity: Activity) {
         launcher?.unregister()
         launcher = null
-        pending?.cancel()
-        pending = null
-        activityRef = null
+        if (activity.isFinishing && !activity.isChangingConfigurations) {
+            pending?.complete(emptyMap())
+            pending = null
+        }
+        if (activityRef?.get() === activity) activityRef = null
     }
 
     /** Shows the system dialog; returns an empty map when no Activity is attached (nothing can be shown). */
     suspend fun request(permissions: Array<String>): Map<String, Boolean> {
         val current = launcher ?: return emptyMap()
-        pending?.cancel()
+        pending?.complete(emptyMap())
         val answer = CompletableDeferred<Map<String, Boolean>>()
         pending = answer
         current.launch(permissions)

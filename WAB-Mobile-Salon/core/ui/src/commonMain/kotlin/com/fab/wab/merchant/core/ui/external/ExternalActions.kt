@@ -3,42 +3,75 @@ package com.fab.wab.merchant.core.ui.external
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
-/** Hand-offs to other apps: maps chooser, dialer, WhatsApp chat, native share sheet. Never throws. */
+/**
+ * Hand-offs to other apps: maps, dialer, WhatsApp chat, mail, browser, native share sheet. Never throws; the suspend
+ * calls answer whether another app took over, so the screen can explain when nothing could open (no dialer on a
+ * tablet or simulator, WhatsApp missing and no browser, …).
+ */
 interface ExternalActions {
-    fun openMaps(latitude: Double, longitude: Double, label: String)
-    fun dial(phoneE164: String)
-    fun openWhatsApp(phoneE164: String)
+    suspend fun openMaps(latitude: Double, longitude: Double, label: String): Boolean
+    suspend fun dial(phoneE164: String): Boolean
+
+    /** WhatsApp chat with [phoneE164], [text] already typed when given; the `wa.me` web page when WhatsApp is missing. */
+    suspend fun openWhatsApp(phoneE164: String, text: String? = null): Boolean
     fun share(text: String)
-    /** Web page in the system browser (store page, partner registration). */
-    fun openUrl(url: String)
+
+    /** Web page in the system browser (store page, partner registration) or a `mailto:` / `tel:` link. */
+    suspend fun openUrl(url: String): Boolean
+
     /** Mail app composer. */
-    fun email(address: String)
+    suspend fun email(address: String): Boolean
+
     /** Opens [appUrl] in the app identified by [appId] (package / URL scheme) when installed, else [fallbackUrl] (store page). */
-    fun openApp(appUrl: String, appId: String, fallbackUrl: String)
-    /** Copies [text] to the system clipboard (booking reference). */
+    suspend fun openApp(appUrl: String, appId: String, fallbackUrl: String): Boolean
+
+    /** Copies [text] to the system clipboard (booking reference, a phone number that could not be dialled). */
     fun copyText(text: String)
 }
 
 /** Pure link builders shared by the platforms (unit-tested). */
 object ExternalLinks {
     private const val SCHEME_SEPARATOR = "://"
-    private const val WHATSAPP_SCHEME = "https"
+    private const val HTTPS = "https"
     private const val WHATSAPP_HOST = "wa.me"
+    private const val WHATSAPP_APP_SCHEME = "whatsapp"
+    private const val WHATSAPP_APP_SEND = "send"
+    private const val PHONE_PARAM = "phone="
     private const val TEL_SCHEME = "tel"
     private const val MAILTO_SCHEME = "mailto"
     private const val PATH_SEPARATOR = '/'
-    private val NON_DIGITS = Regex("[^0-9]")
+    private const val PLUS = '+'
+
+    /**
+     * The number as a dialler expects it: ASCII digits with a leading `+` kept, everything else (spaces, dashes,
+     * bidi isolates around a displayed phone, Arabic-Indic digits) normalized away.
+     */
+    fun dialable(phone: String): String {
+        val trimmed = phone.trim { it.isWhitespace() || it.isBidiMark() }
+        val digits = buildString {
+            trimmed.forEach { char -> asciiDigit(char)?.let(::append) }
+        }
+        return if (trimmed.firstOrNull() == PLUS) "$PLUS$digits" else digits
+    }
 
     /** `https://wa.me/<digits>`: WhatsApp wants the number without `+` or spaces. */
     fun whatsApp(phoneE164: String): String =
-        "$WHATSAPP_SCHEME$SCHEME_SEPARATOR$WHATSAPP_HOST$PATH_SEPARATOR${phoneE164.replace(NON_DIGITS, "")}"
-
-    fun tel(phoneE164: String): String = "$TEL_SCHEME:${phoneE164.trim()}"
-
-    fun mailto(address: String): String = "$MAILTO_SCHEME:${address.trim()}"
+        "$HTTPS$SCHEME_SEPARATOR$WHATSAPP_HOST$PATH_SEPARATOR${dialable(phoneE164).trimStart(PLUS)}"
 
     /** WhatsApp chat with [text] already typed (`https://wa.me/<digits>?text=…`), e.g. a reported review reference. */
-    fun whatsAppMessage(phoneE164: String, text: String): String = whatsApp(phoneE164) + QUERY_START + TEXT_PARAM + queryEncode(text)
+    fun whatsAppMessage(phoneE164: String, text: String?): String =
+        whatsApp(phoneE164) + (text?.takeIf { it.isNotBlank() }?.let { QUERY_START + TEXT_PARAM + queryEncode(it) } ?: "")
+
+    /** The app's own scheme (`whatsapp://send?phone=…&text=…`), used on iOS when the app is installed. */
+    fun whatsAppApp(phoneE164: String, text: String?): String = buildString {
+        append(WHATSAPP_APP_SCHEME).append(SCHEME_SEPARATOR).append(WHATSAPP_APP_SEND)
+        append(QUERY_START).append(PHONE_PARAM).append(dialable(phoneE164).trimStart(PLUS))
+        text?.takeIf { it.isNotBlank() }?.let { append(PARAM_SEPARATOR).append(TEXT_PARAM).append(queryEncode(it)) }
+    }
+
+    fun tel(phoneE164: String): String = "$TEL_SCHEME:${dialable(phoneE164)}"
+
+    fun mailto(address: String): String = "$MAILTO_SCHEME:${address.trim()}"
 
     /** Mail composer with [subject] and [body] filled in. */
     fun mailtoMessage(address: String, subject: String, body: String): String =
@@ -69,17 +102,38 @@ object ExternalLinks {
     private const val NIBBLE_MASK = 0x0F
 }
 
-/** Recording double for tests and previews. */
-class FakeExternalActions : ExternalActions {
+private fun asciiDigit(char: Char): Char? = when (char) {
+    in '0'..'9' -> char
+    in ARABIC_INDIC_ZERO until ARABIC_INDIC_ZERO + DIGIT_COUNT -> '0' + (char - ARABIC_INDIC_ZERO)
+    in EXTENDED_ARABIC_INDIC_ZERO until EXTENDED_ARABIC_INDIC_ZERO + DIGIT_COUNT -> '0' + (char - EXTENDED_ARABIC_INDIC_ZERO)
+    else -> null
+}
+
+private fun Char.isBidiMark(): Boolean = this in BIDI_MARKS
+
+private const val ARABIC_INDIC_ZERO = '\u0660'
+private const val EXTENDED_ARABIC_INDIC_ZERO = '\u06F0'
+private const val DIGIT_COUNT = 10
+
+/** LRM, RLM, ALM and the isolate / embedding controls the UI wraps phones in. */
+private const val BIDI_MARKS = "\u200E\u200F\u061C\u2066\u2067\u2068\u2069\u202A\u202B\u202C\u202D\u202E"
+
+/** Recording double for tests and previews; [available] = false simulates a device where nothing can open. */
+class FakeExternalActions(var available: Boolean = true) : ExternalActions {
     val calls = mutableListOf<String>()
-    override fun openMaps(latitude: Double, longitude: Double, label: String) { calls += "maps:$latitude,$longitude:$label" }
-    override fun dial(phoneE164: String) { calls += ExternalLinks.tel(phoneE164) }
-    override fun openWhatsApp(phoneE164: String) { calls += ExternalLinks.whatsApp(phoneE164) }
+    override suspend fun openMaps(latitude: Double, longitude: Double, label: String) = record("maps:$latitude,$longitude:$label")
+    override suspend fun dial(phoneE164: String) = record(ExternalLinks.tel(phoneE164))
+    override suspend fun openWhatsApp(phoneE164: String, text: String?) = record(ExternalLinks.whatsAppMessage(phoneE164, text))
     override fun share(text: String) { calls += "share:$text" }
-    override fun openUrl(url: String) { calls += "url:$url" }
-    override fun email(address: String) { calls += ExternalLinks.mailto(address) }
-    override fun openApp(appUrl: String, appId: String, fallbackUrl: String) { calls += "app:$appUrl|$appId|$fallbackUrl" }
+    override suspend fun openUrl(url: String) = record("url:$url")
+    override suspend fun email(address: String) = record(ExternalLinks.mailto(address))
+    override suspend fun openApp(appUrl: String, appId: String, fallbackUrl: String) = record("app:$appUrl|$appId|$fallbackUrl")
     override fun copyText(text: String) { calls += "copy:$text" }
+
+    private fun record(call: String): Boolean {
+        calls += call
+        return available
+    }
 }
 
 expect val platformExternalActionsModule: Module

@@ -265,3 +265,13 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merge + backlog status only, no product code written.
+
+### T-143 — Merchant integration: MER-076 + MER-077 + MER-078 (2026-10-27)
+- Branch: `chore/merchant-integration-perf`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] The three task branches merged into one branch from `origin/merchant`; conflicts only in the merchant backlog/session (both kept)
+  - [x] Gate: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + iosApp Dev/Prod × Debug/Release simulator builds green
+- Tests: gate above
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — integration only; deviations in the MER-076…078 blocks.

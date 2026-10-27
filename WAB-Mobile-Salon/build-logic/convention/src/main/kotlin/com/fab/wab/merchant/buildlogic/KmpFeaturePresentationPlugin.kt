@@ -12,6 +12,7 @@ class KmpFeaturePresentationPlugin : Plugin<Project> {
             apply(plugin = "com.fab.wab.merchant.kotlin.multiplatform.library")
             apply(plugin = "org.jetbrains.compose")
             apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+            configureComposeStability()
 
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.commonMain.dependencies {

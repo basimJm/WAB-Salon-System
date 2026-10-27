@@ -31,4 +31,11 @@
     <string name="request_accepted">Booking accepted</string>
     <string name="request_handled">Already handled by another team member</string>
     <string name="request_failed">Could not accept the booking. Open the app to try again.</string>
+    <string name="alerts_notifications_title">Get booking requests on time</string>
+    <string name="alerts_notifications_message">Allow notifications so new booking requests, reminders and salon alerts reach you even when the app is closed.</string>
+    <string name="alerts_notifications_allow">Allow notifications</string>
+    <string name="alerts_overlay_title">Show requests over other apps</string>
+    <string name="alerts_overlay_message">Turn on “Display over other apps” so a new booking request appears on top of whatever you are using. You can change it later in More → Settings.</string>
+    <string name="alerts_overlay_allow">Open settings</string>
+    <string name="alerts_later">Not now</string>
 </resources>

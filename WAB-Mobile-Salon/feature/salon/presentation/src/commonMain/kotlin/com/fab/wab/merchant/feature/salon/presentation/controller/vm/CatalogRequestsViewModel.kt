@@ -13,8 +13,11 @@ import com.fab.wab.merchant.core.domain.upload.UploadSlot
 import com.fab.wab.merchant.core.domain.upload.validateUpload
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.media.FilePicker
+import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.upload.LocalPreview
+import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
+import com.fab.wab.merchant.designsystem.components.upload.PHOTO_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.UploadItemUi
 import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.salon.domain.CatalogRequestLimits
@@ -40,6 +43,8 @@ class CatalogRequestsViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
+    private val media = MediaPickHandler(picker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
+
     override fun onStart() {
         load()
     }
@@ -49,7 +54,8 @@ class CatalogRequestsViewModel(
             UiAction.OnNew -> updateState { copy(form = CatalogRequestForm()) }
             is UiAction.OnName -> editForm { copy(name = event.value.take(CatalogRequestLimits.NAME_MAX)) }
             is UiAction.OnDescription -> editForm { copy(description = event.value.take(CatalogRequestLimits.DESCRIPTION_MAX)) }
-            UiAction.OnPickImage -> pickImage()
+            UiAction.OnPickImage -> media.open(PHOTO_SOURCES, maxCount = 1) { files -> files.firstOrNull()?.let { uploadImage(it) } }
+            is UiAction.OnMedia -> media.handle(event.action)
             UiAction.OnSend -> send()
             UiAction.OnDismiss -> updateState { copy(form = null) }
             UiAction.OnRetry -> load()
@@ -72,21 +78,18 @@ class CatalogRequestsViewModel(
         }
     }
 
-    private fun pickImage() {
-        scope.launch {
-            val picked = picker.pickMedia(maxCount = 1, includeVideo = false).firstOrNull() ?: return@launch
-            val file = LocalFile(IMAGE_ID, picked.name, picked.bytes, picked.contentType)
-            if (validateUpload(file, UploadSlot.IMAGE) != null) return@launch
-            upload(file, UploadPurpose.CATALOG_IMAGE).collect { progress ->
-                val status = when (progress) {
-                    is UploadProgress.Uploading -> UploadStatus.Uploading(progress.fraction)
-                    is UploadProgress.Done -> UploadStatus.Uploaded
-                    is UploadProgress.Failed -> UploadStatus.Failed
-                }
-                val item = UploadItemUi(IMAGE_ID, file.name, UploadKind.IMAGE, status, preview = LocalPreview(file.bytes))
-                editForm { copy(image = item, imageKey = (progress as? UploadProgress.Done)?.upload?.key ?: imageKey) }
-                if (progress is UploadProgress.Failed) emitSideEffect(SideEffect.ShowError(errorText(progress.error)))
+    private suspend fun uploadImage(picked: PickedFile) {
+        val file = LocalFile(IMAGE_ID, picked.name, picked.bytes, picked.contentType)
+        if (validateUpload(file, UploadSlot.IMAGE) != null) return
+        upload(file, UploadPurpose.CATALOG_IMAGE).collect { progress ->
+            val status = when (progress) {
+                is UploadProgress.Uploading -> UploadStatus.Uploading(progress.fraction)
+                is UploadProgress.Done -> UploadStatus.Uploaded
+                is UploadProgress.Failed -> UploadStatus.Failed
             }
+            val item = UploadItemUi(IMAGE_ID, file.name, UploadKind.IMAGE, status, preview = LocalPreview(file.bytes))
+            editForm { copy(image = item, imageKey = (progress as? UploadProgress.Done)?.upload?.key ?: imageKey) }
+            if (progress is UploadProgress.Failed) emitSideEffect(SideEffect.ShowError(errorText(progress.error)))
         }
     }
 

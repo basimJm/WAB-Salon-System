@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.app.di
 
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
+import com.fab.wab.merchant.app.permission.AlertsPermissionViewModel
 import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SessionStore
@@ -21,6 +22,15 @@ val viewModelModule = module {
             accountEvents = RealtimeAccountEvents(client = get(), permissionsSync = get(), sessionStore = get()),
             session = get<SessionStore>().state,
             refreshSalon = { get<SalonRepository>().refresh() },
+        )
+    }
+    viewModel { (answersRequests: Boolean) ->
+        AlertsPermissionViewModel(
+            permissions = get(),
+            manager = get(),
+            overlay = get(),
+            session = get(),
+            answersRequests = answersRequests,
         )
     }
 }
