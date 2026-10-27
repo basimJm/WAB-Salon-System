@@ -1,6 +1,7 @@
 /** Security headers and routing a static host must serve for the admin panel (Admin Tasks ADM-006). */
 
-export type HostingTarget = 'netlify' | 'vercel';
+/** Cloudflare Pages reads the same `_headers` and `_redirects` files as Netlify. */
+export type HostingTarget = 'netlify' | 'cloudflare' | 'vercel';
 
 export interface HostingOrigins {
   /** Base URL of the API (`https://…`); empty for a mock-only dev build. */
@@ -112,7 +113,7 @@ export function vercelConfig(o: HostingOrigins): string {
 
 /** Files to write for a target: path (relative to the output folder) and content. */
 export function hostingFiles(target: HostingTarget, o: HostingOrigins): Record<string, string> {
-  return target === 'netlify'
+  return target === 'netlify' || target === 'cloudflare'
     ? { _headers: netlifyHeaders(o), _redirects: NETLIFY_REDIRECTS }
     : { 'vercel.json': vercelConfig(o) };
 }
