@@ -1,64 +1,26 @@
 import { Types } from 'mongoose';
-import { DEMO_IMAGE_PREFIX, DEMO_SERVICES } from '../src/constants/demoCatalog';
 import { DEMO_BRANCHES, DEMO_DAYS_AHEAD, DEMO_SALONS } from '../src/constants/demoSeed';
 import { SEED_AREAS } from '../src/constants/referenceData';
 import { ALL_MODELS } from '../src/models';
 import { buildDemoBranchPlans, writeDemoBranchPlans } from '../src/seeds/demo/branchActivity';
-import type { DemoBranchSource } from '../src/seeds/demo/branches';
 import { buildDemoDatasetParts } from '../src/seeds/demo/dataset';
 import { demoId } from '../src/seeds/demo/random';
-import {
-  DEMO_COLLECTIONS,
-  type DemoContext,
-  type DemoDataset,
-  type DemoDoc,
-} from '../src/seeds/demo/types';
-import {
-  toDemoModel,
-  writeDemoBaseOnce,
-  writeDemoDataset,
-  type DemoModel,
-} from '../src/seeds/demo/writer';
+import { DEMO_COLLECTIONS, type DemoDataset, type DemoDoc } from '../src/seeds/demo/types';
+import { toDemoModel, writeDemoBaseOnce, writeDemoDataset } from '../src/seeds/demo/writer';
 import { seedDemoOnStart } from '../src/seeds/demoOnStart';
+import {
+  EMPTY_DEV_SEED_REPORT,
+  NOW,
+  TZ,
+  base,
+  context,
+  customers,
+  memoryModels,
+  sources,
+} from './helpers/demoFixtures';
 import { createLogger } from '../src/utils/logger';
 import { addDays, localDateOf } from '../src/utils/time';
 
-const NOW = new Date('2026-10-26T09:00:00.000Z');
-const TZ = 'Asia/Amman';
-const context: DemoContext = {
-  now: NOW,
-  timeZone: TZ,
-  adminId: new Types.ObjectId(),
-  countryCode: 'JO',
-  dialCode: '+962',
-  cityId: new Types.ObjectId(),
-  areaIds: new Map(SEED_AREAS.map((area) => [area.name.en, new Types.ObjectId()])),
-  catalog: DEMO_SERVICES.map((service) => ({
-    id: new Types.ObjectId(),
-    gender: service.gender,
-    name: service.name,
-    imageKey: `${DEMO_IMAGE_PREFIX}${service.image}`,
-  })),
-};
-const { data: base, customers } = buildDemoDatasetParts(context);
-
-/** What `loadDemoBranchSources` reads after the migration: LIVE salons and their main services. */
-const sources = new Map<string, DemoBranchSource>(
-  [...new Set(DEMO_BRANCHES.map((spec) => spec.salon))].flatMap((key) => {
-    const salonId = demoId(`salon:${key}`);
-    const salon = base.Salon.find((row) => row._id.equals(salonId));
-    if (salon?.['state'] !== 'LIVE') return [];
-    const services = base.SalonService.filter(
-      (row) => String(row['salonId']) === salonId.toString() && row['active'] === true,
-    ).map((row) => ({
-      catalogServiceId: row['catalogServiceId'] as Types.ObjectId,
-      price: row['price'] as number,
-      durationMinutes: row['durationMinutes'] as number,
-      brideOnly: row['brideOnly'] === true,
-    }));
-    return [[key, { salonId, gender: salon['gender'] as DemoBranchSource['gender'], services }]];
-  }),
-);
 const plans = buildDemoBranchPlans(context, sources, customers);
 const str = (value: unknown): string => String(value);
 const today = localDateOf(NOW, TZ);
@@ -280,33 +242,6 @@ describe('demo branches for the merchant app (SRV-160)', () => {
   });
 });
 
-/** In-memory stand-in for the Mongoose models (rows by id). */
-const memoryModels = (): Map<string, DemoModel & { rows: Map<string, object> }> =>
-  new Map(
-    DEMO_COLLECTIONS.map((name) => {
-      const rows = new Map<string, object>();
-      return [
-        name,
-        {
-          modelName: name,
-          rows,
-          validateDoc: () => null,
-          find: (filter: object) => ({
-            lean: () => {
-              const wanted = (filter as { _id: { $in: Types.ObjectId[] } })._id.$in.map(str);
-              return Promise.resolve(
-                wanted.filter((id) => rows.has(id)).map((id) => ({ _id: id })),
-              );
-            },
-          }),
-          insertMany: (docs: object[]) => {
-            for (const doc of docs as DemoDoc[]) rows.set(doc._id.toString(), doc);
-            return Promise.resolve(docs);
-          },
-        },
-      ];
-    }),
-  );
 const total = (models: ReturnType<typeof memoryModels>): number =>
   [...models.values()].reduce((sum, model) => sum + model.rows.size, 0);
 
@@ -373,7 +308,7 @@ describe('seedDemoOnStart (SEED_DEMO_ON_START, SRV-160)', () => {
   });
 
   it('seeds outside production, and under production rules only the named database', async () => {
-    const seed = jest.fn().mockResolvedValue({});
+    const seed = jest.fn().mockResolvedValue(EMPTY_DEV_SEED_REPORT);
     expect(await run({ isProduction: false, demoSeed: { onStart: true } }, seed)).toBe('seeded');
     const hostedDev = {
       isProduction: true,

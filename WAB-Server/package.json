@@ -17,6 +17,7 @@
     "seed": "node dist/seeds/run.js",
     "seed:demo": "node dist/seeds/runDemo.js",
     "seed:demo-images": "node dist/seeds/runDemoImages.js",
+    "seed:dev": "node dist/seeds/runDev.js",
     "migrate:branches": "node dist/seeds/runMigrateBranches.js",
     "seed:admin": "node dist/seeds/runAdmin.js",
     "docs": "npm run build && node dist/docs/generate.js",
