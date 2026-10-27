@@ -9,6 +9,7 @@
 
 ## Current task
 
+<<<<<<< HEAD
 ### CUS-094 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/cus-094-device-integrations`
 - Status: IN PROGRESS
@@ -35,6 +36,21 @@
 - Loops: 0/1 — not recorded: full host tests + builds not re-run after the last commit (Gradle lock), iOS simulator not run
 - Review: PENDING
 - Notes: DEVIATIONS — owner 25-minute limit: iOS simulator proof, Android gallery / nearest-location / rotation-during-picker checks not done; `androidx.exifinterface` 1.3.7 added (EXIF rotation of camera photos, already in the Gradle cache; android.media.ExifInterface trips lint); not pushed / no PR. Local overrides only (untracked `local.properties`, `androidApp/src/devDebug/AndroidManifest.xml`, git-ignored `Local.xcconfig`), removed at the end.
+=======
+### CUS-095 — Performance: R8, Compose, baseline profiles (Android + shared)
+- Branch: `perf/cus-095-android-performance`
+- Status: IN PROGRESS (partial: owner time limit 25 min on 2026-10-27)
+- Acceptance criteria (owner request 2026-10-27; skills r8-analyzer, jetpack-compose-performance, android-profiler, anr-audit-and-fix; no PRD/API change):
+  - [ ] Before/after numbers on an emulator (cold start TTID/TTFD, gfxinfo framestats on Home, search, salon details, bookings) — NOT DONE (time)
+  - [x] R8: release (dev + prod) minify + shrinkResources already on with `proguard-android-optimize.txt`, full mode default (AGP 9.1, no `fullMode=false`); broad keeps removed (`io.ktor.**`, `core.network.**`, `core.domain.**`, `feature.**.domain.model.**`); serializer/Companion keeps and generated DTO keeps stay; debug stays unminified
+  - [x] ANR/startup: `AndroidApp.onCreate` no longer resolves the DataStore-backed `AppSettings` + Firebase `PushTokenProvider` on the main thread (resolved inside the IO scope)
+  - [x] Compose: `AppImage` uses one Coil painter + overlays instead of `SubcomposeAsyncImage` (no subcomposition per image in lazy lists; same shimmer → image → fallback look); lazy lists checked: Home, salons paging, salon details already set `key` + `contentType`
+  - [ ] Baseline Profile + Startup Profile module (macrobenchmark), Compose compiler reports — NOT DONE (time)
+- Tests: `ImageOverlayTest` (new, overlay decision). `policy_checks.py all` ok; `tasks.py check` ok (only the known CUS-047 note). First `assembleProdRelease` failed on a Gradle cache lock held by another agent's daemon (`journal-1` / `modules-2`, not a code error); rerun `:core:design-system:testAndroidHostTest :androidApp:assembleProdRelease` still running at hand-off. Detekt, the full host test run, the other 3 variants and the iOS link were NOT run
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.
+>>>>>>> perf/cus-095-android-performance
 
 ### CUS-093 — Bride-only services, staff per person, list rejection, completed money (SRV-170, contract 1.5.0)
 - Branch: `feat/cus-093-srv-170-contract`
