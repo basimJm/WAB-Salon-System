@@ -10,7 +10,6 @@
 ## Current task
 
 <<<<<<< HEAD
-<<<<<<< HEAD
 ### MER-076 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/mer-076-device-integrations`
 - Status: IN PROGRESS
@@ -29,7 +28,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: Stopped at the owner's 25-minute limit (2026-10-27). NOT done: emulator/simulator proof of each feature (the free AVD was already in use by another session), iOS `iosApp-Dev` simulator build, Personal-Team (`iosApp-Personal.entitlements`) launch check — AppDelegate only fails `registerForRemoteNotifications` there (no crash path found in code, not run). Removed dead code: `ImagePicker` port + platform pickers, `PlatformUrlLauncher`. `android.media.ExifInterface` (framework) used, no new library; design-system commonTest gained `kotlinx-coroutines-test` (already in the catalog). Staff have no call action in PRD/design, so none was added. "Open in Maps" has no web fallback (a host literal would need build config).
-=======
 ### MER-077 — Performance: R8, Compose, startup (Android + shared)
 - Branch: `perf/mer-077-android-performance`
 - Status: IN PROGRESS
@@ -44,7 +42,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATIONS — Gradle runs only from the terminal panel (no Java in the sandbox) and the panel hook refused a new tab (6 tabs open by other agents; their tabs were not reused), so no Gradle task, no detekt, no device measurement ran. Not done (time box 25 min): narrowing the broad keep rules (`io.ktor.**`, whole `core.data/network/domain` packages) needs a release run on a device to prove nothing breaks; ProfileInstaller already arrives transitively through androidx.activity (library baseline profiles apply), no app baseline profile (needs a Macrobenchmark module); bookings list / Home / team / finance lists already use `key` + `contentType`.
->>>>>>> perf/mer-077-android-performance
 =======
 ### MER-078 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/mer-078-ios-performance`
