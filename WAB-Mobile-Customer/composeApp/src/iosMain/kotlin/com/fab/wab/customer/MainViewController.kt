@@ -21,6 +21,8 @@ import org.koin.mp.KoinPlatform
 private const val PARALLEL_RENDERING = true
 private const val OPAQUE_ROOT_VIEW = true
 
+// Swift calls this by its type-like name (MainViewControllerKt.MainViewController()).
+@Suppress("FunctionNaming")
 @OptIn(ExperimentalComposeUiApi::class)
 fun MainViewController() = ComposeUIViewController(
     configure = {
