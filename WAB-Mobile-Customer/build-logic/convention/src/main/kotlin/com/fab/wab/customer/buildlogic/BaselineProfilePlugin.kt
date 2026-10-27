@@ -2,6 +2,7 @@ package com.fab.wab.customer.buildlogic
 
 import androidx.baselineprofile.gradle.producer.BaselineProfileProducerExtension
 import com.android.build.api.dsl.TestExtension
+import com.android.build.api.variant.TestAndroidComponentsExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -10,6 +11,9 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
 private const val TEST_RUNNER = "androidx.test.runner.AndroidJUnitRunner"
+
+/** Instrumentation argument the profile journey reads to know which app id (dev flavor) it drives. */
+private const val TARGET_APP_ID_ARGUMENT = "targetAppId"
 
 /**
  * CUS-097: the `:baselineprofile` producer module. A Macrobenchmark test module that drives the release app through the
@@ -40,6 +44,17 @@ class BaselineProfilePlugin : Plugin<Project> {
                 compileOptions {
                     sourceCompatibility = JavaVersion.VERSION_21
                     targetCompatibility = JavaVersion.VERSION_21
+                }
+            }
+
+            // The journey drives the tested app by its real application id (flavor suffix included).
+            extensions.configure<TestAndroidComponentsExtension> {
+                onVariants { variant ->
+                    val loader = variant.artifacts.getBuiltArtifactsLoader()
+                    variant.instrumentationRunnerArguments.put(
+                        TARGET_APP_ID_ARGUMENT,
+                        variant.testedApks.map { apks -> loader.load(apks)?.applicationId.orEmpty() },
+                    )
                 }
             }
 

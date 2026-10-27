@@ -18,7 +18,6 @@ private const val LINT_CONFIG_FILE = "config/lint.xml"
 private const val DEBUG_SIGNING = "debug"
 private const val RELEASE_BUILD_TYPE = "release"
 private const val RELEASE_SUFFIX = "Release"
-private const val BASELINE_PROFILE_CONFIGURATION_SUFFIX = "BaselineProfile"
 
 class AndroidAppPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -120,17 +119,15 @@ class AndroidAppPlugin : Plugin<Project> {
                 add("implementation", libs.findLibrary("androidx-profileinstaller").get())
             }
             if (profiles) {
-                // Only the dev flavor has a producer (the profile module profiles dev); prod uses the merged profile.
-                val producerConfiguration = AndroidSdk.PROFILE_ENVIRONMENT + BASELINE_PROFILE_CONFIGURATION_SUFFIX
-                configurations.matching { it.name == producerConfiguration }.configureEach {
-                    dependencies.add(project.dependencies.project(mapOf("path" to AndroidSdk.BASELINE_PROFILE_PROJECT_PATH)))
-                }
-            }
-            if (profiles) {
                 extensions.configure<BaselineProfileConsumerExtension> {
                     // One profile for every variant (dev and prod run the same code), kept in src/main/generated.
                     mergeIntoMain = true
                     saveInSrc = true
+                    // Only devRelease has a producer (the profile module profiles dev); prod uses the merged profile.
+                    variants.create(AndroidSdk.PROFILE_ENVIRONMENT + RELEASE_SUFFIX) {
+                        from(rootProject.project(AndroidSdk.BASELINE_PROFILE_PROJECT_PATH))
+                    }
+                    warnings.variantHasNoBaselineProfileDependency = false
                 }
             }
         }

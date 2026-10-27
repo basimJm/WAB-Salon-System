@@ -3,7 +3,7 @@ package com.fab.wab.customer.baselineprofile
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
-import androidx.test.uiautomator.Direction
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import java.util.regex.Pattern
@@ -14,10 +14,7 @@ import java.util.regex.Pattern
  * step instead of failing the collection, because the profile only needs the code paths that were reached.
  */
 internal fun MacrobenchmarkScope.mainJourney() {
-    pressHome()
-    startActivityAndWait()
-    device.waitForIdle()
-    passFirstLaunch()
+    launchToHome()
     scrollFeed()
     openAndReturn(JourneyTexts.SEARCH) { scrollFeed() }
     openFirstRecommendedSalon()
@@ -26,23 +23,43 @@ internal fun MacrobenchmarkScope.mainJourney() {
     openTab(JourneyTexts.HOME_TAB)
 }
 
-/** Onboarding (Skip) and the guest profile (name + gender + Continue) on a fresh install. */
-private fun MacrobenchmarkScope.passFirstLaunch() {
-    device.clickIfShown(By.text(JourneyTexts.SKIP)) ?: return
-    device.findObject(By.clazz(EDIT_TEXT_CLASS))?.text = JourneyTexts.GUEST_NAME
-    device.pressBack()
-    device.clickIfShown(By.text(JourneyTexts.WOMAN))
-    device.clickIfShown(By.text(JourneyTexts.CONTINUE))
-    device.wait(Until.hasObject(By.text(JourneyTexts.HOME_TAB)), JourneyTimeouts.SCREEN_MS)
+/** Cold start up to Home (first launch screens included on a fresh install). */
+internal fun MacrobenchmarkScope.launchToHome() {
+    pressHome()
+    startActivityAndWait()
+    device.waitForIdle()
+    passFirstLaunch()
 }
 
-/** Flings the first scrollable container down and back up (lazy lists, the Home feed, salon details). */
+/**
+ * Onboarding (Skip) and the guest profile (name + gender + Continue) on a fresh install. The name is set through
+ * accessibility (no keyboard); Back is pressed only when Continue did not lead Home (a keyboard covered it), because
+ * Back without a keyboard would leave the app.
+ */
+private fun MacrobenchmarkScope.passFirstLaunch() {
+    device.clickIfShown(By.text(JourneyTexts.SKIP)) ?: return
+    device.wait(Until.findObject(By.clazz(EDIT_TEXT_CLASS)), JourneyTimeouts.SCREEN_MS)?.text = JourneyTexts.GUEST_NAME
+    device.clickIfShown(By.text(JourneyTexts.WOMAN))
+    device.clickIfShown(By.text(JourneyTexts.CONTINUE))
+    if (!device.wait(Until.hasObject(By.text(JourneyTexts.HOME_TAB)), JourneyTimeouts.SCREEN_MS)) {
+        device.pressBack()
+        device.clickIfShown(By.text(JourneyTexts.CONTINUE))
+        device.wait(Until.hasObject(By.text(JourneyTexts.HOME_TAB)), JourneyTimeouts.SCREEN_MS)
+    }
+}
+
+/**
+ * Swipes the screen content up and back down (Home feed, lists, salon details). Device-level swipes instead of
+ * `UiObject2.fling`: the feed recomposes while it loads, which makes a found node stale.
+ */
 private fun MacrobenchmarkScope.scrollFeed() {
-    val scrollable = device.wait(Until.findObject(By.scrollable(true)), JourneyTimeouts.SCREEN_MS) ?: return
-    scrollable.setGestureMargin(device.displayWidth / GESTURE_MARGIN_DIVISOR)
-    repeat(FLINGS) { scrollable.fling(Direction.DOWN) }
+    device.wait(Until.hasObject(By.scrollable(true)), JourneyTimeouts.SCREEN_MS)
+    val x = device.displayWidth / 2
+    val top = device.displayHeight / SWIPE_EDGE_DIVISOR
+    val bottom = device.displayHeight - top
+    repeat(FLINGS) { device.swipe(x, bottom, x, top, SWIPE_STEPS) }
     device.waitForIdle()
-    repeat(FLINGS) { scrollable.fling(Direction.UP) }
+    repeat(FLINGS) { device.swipe(x, top, x, bottom, SWIPE_STEPS) }
     device.waitForIdle()
 }
 
@@ -50,8 +67,7 @@ private fun MacrobenchmarkScope.openAndReturn(target: Pattern, onScreen: Macrobe
     device.clickIfShown(By.text(target)) ?: return
     device.waitForIdle()
     onScreen()
-    device.pressBack()
-    device.waitForIdle()
+    backToTabs()
 }
 
 /** Salon details: taps the first salon card (its review count "(28)" sits inside the card in both layouts). */
@@ -59,8 +75,16 @@ private fun MacrobenchmarkScope.openFirstRecommendedSalon() {
     device.clickIfShown(By.text(JourneyTexts.REVIEW_COUNT)) ?: return
     device.waitForIdle()
     scrollFeed()
-    device.pressBack()
-    device.waitForIdle()
+    backToTabs()
+}
+
+/** Back until the tab bar shows again (a keyboard or a nested screen may take one Back each). */
+private fun MacrobenchmarkScope.backToTabs() {
+    repeat(MAX_BACKS) {
+        if (device.hasObject(By.text(JourneyTexts.HOME_TAB))) return
+        device.pressBack()
+        device.waitForIdle()
+    }
 }
 
 private fun MacrobenchmarkScope.openTab(label: Pattern) {
@@ -68,12 +92,19 @@ private fun MacrobenchmarkScope.openTab(label: Pattern) {
     device.waitForIdle()
 }
 
+/** Taps the element when it shows up; a node that recomposed away between find and tap counts as not shown. */
 private fun UiDevice.clickIfShown(selector: BySelector): Unit? =
-    wait(Until.findObject(selector), JourneyTimeouts.ELEMENT_MS)?.click()
+    try {
+        wait(Until.findObject(selector), JourneyTimeouts.ELEMENT_MS)?.click()
+    } catch (ignored: StaleObjectException) {
+        null
+    }
 
 private const val EDIT_TEXT_CLASS = "android.widget.EditText"
 private const val FLINGS = 2
-private const val GESTURE_MARGIN_DIVISOR = 5
+private const val SWIPE_EDGE_DIVISOR = 4
+private const val SWIPE_STEPS = 12
+private const val MAX_BACKS = 3
 
 /** Visible texts the journey looks for, in both app languages (Arabic is the default). Test-only, never shipped. */
 private object JourneyTexts {
