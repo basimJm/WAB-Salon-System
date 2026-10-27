@@ -143,6 +143,7 @@ import {
 } from './repositories/appConfig.repository';
 import { createInstallationService } from './domain/installations/installations.service';
 import { createProviders } from './providers';
+import { createRealStorage } from './providers/storage/real';
 import {
   AdminsRepository,
   CustomersRepository,
@@ -1244,8 +1245,25 @@ const main = async (): Promise<void> => {
         logger.error({ err: error }, 'background jobs could not be reconciled');
       }
     }
-    // Dev data (SEED_DEMO_ON_START): in the background, after the API is up; never throws.
-    void seedDemoOnStart({ config, logger, databaseName: mongo.name });
+    // Dev data (SEED_DEMO_ON_START = the full `seed:dev`, images with real storage): in the
+    // background, after the API is up; never throws.
+    if (config.demoSeed.onStart) {
+      void seedDemoOnStart({
+        config,
+        logger,
+        databaseName: mongo.name,
+        env: process.env,
+        ...(config.storage === undefined
+          ? {}
+          : {
+              storage: createRealStorage({
+                settings: config.storage,
+                isProduction: config.isProduction,
+                logger,
+              }),
+            }),
+      });
+    }
   } catch (error) {
     if (redis) await disconnectRedis(redis);
     await disconnectMongo();
