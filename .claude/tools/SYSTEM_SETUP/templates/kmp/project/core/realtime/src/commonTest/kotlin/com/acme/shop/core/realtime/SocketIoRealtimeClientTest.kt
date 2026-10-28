@@ -13,6 +13,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+// Fixed Socket.IO protocol fixtures: the frames below encode this namespace, independent of RealtimeDefaults.APP_NAMESPACE.
+private const val TEST_NAMESPACE = "/app"
 private const val OPEN_FRAME = """0{"sid":"s1","pingInterval":100,"pingTimeout":50}"""
 private const val CONNECTED_FRAME = """40/app,{"sid":"n1"}"""
 private const val UNAUTHORIZED_FRAME = """44/app,{"message":"UNAUTHORIZED","data":{"code":"UNAUTHORIZED"}}"""
@@ -26,7 +28,7 @@ class SocketIoRealtimeClientTest {
     private var token: String? = "access-1"
 
     private fun TestScope.client() = SocketIoRealtimeClient(
-        config = RealtimeConfig("https://api.example"),
+        config = RealtimeConfig("https://api.example", namespace = TEST_NAMESPACE),
         transport = transport,
         accessToken = { token },
         scope = backgroundScope,
