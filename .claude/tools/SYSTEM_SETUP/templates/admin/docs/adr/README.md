@@ -1,6 +1,6 @@
 # Architecture decision records
 
-One file per decision: `NNNN-short-title.md` with Status, Context, Decision, Consequences. Decisions that are still open are listed in `docs/WAB_Admin_Tasks.md`, Appendix C; write the ADR in the task that needs the decision, before the code.
+One file per decision: `NNNN-short-title.md` with Status, Context, Decision, Consequences. Decisions that are still open are listed in `docs/Admin_Tasks.md`, Appendix C; write the ADR in the task that needs the decision, before the code.
 
 | ADR | Decision |
 | --- | --- |

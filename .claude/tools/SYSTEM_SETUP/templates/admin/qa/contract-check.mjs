@@ -1,3 +1,8 @@
+/**
+ * Every readable admin operation against a LOCAL server, parsed with the generated zod schemas: a `BAD` line means the
+ * server answers differently from the OpenAPI the panel was generated from (run `npm run api:sync` first).
+ * Usage: node qa/contract-check.mjs   (writes qa-contract.txt)
+ */
 import { adminToken, BASE } from './lib.mjs';
 import { writeFileSync } from 'node:fs';
 const ROOT = new URL('../src/data/contract/generated', import.meta.url).pathname;
@@ -17,34 +22,23 @@ const get = async (path, query = '') => {
   }
   return { status: res.status, json };
 };
-const ids = {};
 const q = (op) => (op.hasQuery ? '?page=1&pageSize=25' : '');
-const NEED = {
-  getReportsDaily: '?date=2026-10-19',
-  getReportsWeekly: '?from=2026-10-13',
-  getReportsMonthly: '?month=2026-10',
-  getAnalyticsOverview: '?from=2026-10-01T00:00:00.000Z&to=2026-10-20T00:00:00.000Z',
-  getAnalyticsEvents: '?from=2026-10-01T00:00:00.000Z&to=2026-10-20T00:00:00.000Z&groupBy=NAME',
-  getSalonsByIdAnalytics: '?from=2026-10-01&to=2026-10-19',
-  getSearch: '?q=noor',
-};
+/** Operations whose query needs more than paging: add the sample query here. */
+const NEED = {};
 const ops = Object.values(OPERATIONS).filter((o) => o.method === 'get');
-const SALON = process.env.QA_SALON_ID ?? '';
 for (const op of ops) {
   let path = op.path;
   const params = [...path.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
   if (params.length) {
-    const base = path.slice(0, path.indexOf('{'));
-    if (path.includes('/salons/{id}')) path = path.replace('{id}', SALON);
-    else {
-      const list = await get(base.replace(/\/$/, ''), '?page=1&pageSize=1');
-      const first = Array.isArray(list.json?.data) ? list.json.data[0] : null;
-      if (!first?.id) {
-        out.push(`SKIP ${op.id} (no sample for ${base})`);
-        continue;
-      }
-      path = path.replace('{id}', first.id);
+    // `GET /x/{id}`: take the first record of `GET /x`.
+    const base = path.slice(0, path.indexOf('{')).replace(/\/$/, '');
+    const list = await get(base, '?page=1&pageSize=1');
+    const first = Array.isArray(list.json?.data) ? list.json.data[0] : null;
+    if (!first?.id) {
+      out.push(`SKIP ${op.id} (no sample for ${base})`);
+      continue;
     }
+    path = path.replace('{id}', first.id);
     if (/\{\w+\}/.test(path)) {
       out.push(`SKIP ${op.id} (params ${params.join(',')})`);
       continue;
@@ -54,10 +48,6 @@ for (const op of ops) {
   const schemaFn = dto[`${op.id}DataSchema`];
   if (!schemaFn) {
     out.push(`NOSCHEMA ${op.id}`);
-    continue;
-  }
-  if (res.status === 404 || res.status === 422 || res.status >= 500) {
-    out.push(`HTTP ${res.status} ${op.id} ${path} ${JSON.stringify(res.json?.error?.code)}`);
     continue;
   }
   if (res.status !== 200) {

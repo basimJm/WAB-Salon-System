@@ -1,17 +1,17 @@
 # How to add a feature module
 
-A feature (salons, bookings, refunds, …) is a **vertical slice** across the layers. The slice rules are enforced by `npm run check:layers` (`.dependency-cruiser.cjs`, rules `feature-isolation-*`) and by `tests/layers.test.ts`.
+A feature (items, orders, members, …) is a **vertical slice** across the layers. The slice rules are enforced by `npm run check:layers` (`.dependency-cruiser.cjs`, rules `feature-isolation-*`) and by `tests/layers.test.ts`.
 
 ## Folders
 
 ```
 src/domain/<feature>/         entities, enums, <Feature>Repository interface, pure use-case functions
-src/data/<feature>/           mapper (DTO -> entity), Remote<Feature>Repository, Mock<Feature>Repository
-src/data/mock/fixtures/       <feature>.ts  (typed by the generated DTOs)
-src/presentation/<feature>/   use<Feature>Controller.ts, <Feature>Page.tsx, components/
+src/data/<feature>/           Remote<Feature>Repository (generated DTOs, no hand-written URLs)
+src/data/mock/<feature>Routes.ts  fixture routes (typed by the generated DTOs), registered in data/mock/fixtures.ts
+src/presentation/<feature>/   <Feature>Page.tsx, <Feature>DetailsPage.tsx, <Feature>Drawer.tsx, <feature>Filters.ts
 src/app/routes.tsx            lazy route          src/constants/nav.ts   nav entry
-src/locales/{ar,en}/<area>.json every new string, same keys (files stay under 300 lines)
-tests/<feature>/              domain, mapper/repository, controller + page tests
+src/locales/{ar,en}/<area>.json every new string, same keys; lazy area = locales/lazy/<area>.ts + lazyAreas.ts
+tests/<feature>.test.tsx      domain rules, repository through the mock, page + drawer tests
 e2e/<feature>.spec.ts         smoke test of the screen
 ```
 
@@ -30,12 +30,12 @@ Two features that need the same thing move it to the shared directory of the lay
 A repository never builds URLs or parses responses itself. It defines each endpoint once from the generated contract and runs it through `ApiClient`:
 
 ```ts
-const listSalons = defineEndpoint(OPERATIONS.getSalons, { data: getSalonsDataSchema, query: getSalonsQuerySchema });
-const approve = defineEndpoint(OPERATIONS.postSalonsApplicationsByIdApprove, { data: ..., body: ... }, { idempotent: true });
+const listItems = defineEndpoint(OPERATIONS.getItems, { data: getItemsDataSchema, query: getItemsQuerySchema });
+const update = defineEndpoint(OPERATIONS.patchItemsById, { data: ..., body: ... }, { idempotent: true });
 
-api.executePage(listSalons, { query, signal });          // Page<Item> = items + meta
-api.execute(approve, { params: { id }, body });          // body/query are checked before anything is sent
-useQuery({ queryKey: queryKey(listSalons, { query }), queryFn: ({ signal }) => ... });  // unmount aborts
+api.executePage(listItems, { query, signal });           // Page<Item> = items + meta
+api.execute(update, { params: { id }, body });           // body/query are checked before anything is sent
+useQuery({ queryKey: queryKey(listItems, { query }), queryFn: ({ signal }) => ... });  // unmount aborts
 ```
 
 - `defineEndpoint` throws when the schemas disagree with the contract (body/query present or missing), so a contract change fails the first test that imports the endpoint.
@@ -44,14 +44,14 @@ useQuery({ queryKey: queryKey(listSalons, { query }), queryFn: ({ signal }) => .
 
 ## Checklist (copy into the task block in `.claude/session.md`)
 
-1. **Read** the PRD page, the BRD ids, the task row, the Design Script and `design/*.dc.html`; list the admin operations the task consumes (`src/data/contract/generated/operations.ts`, `docs/WAB_Admin_Tasks.md` Appendix A). If the server lacks one, the task is `PENDING` with the gap id — do not invent endpoints.
-2. **Domain:** entities and enums copied from `BUSINESS_DOMAIN.md` names; repository interface; pure rules with unit tests.
-3. **Data:** DTO schemas come from `api:sync` output (never hand-written); mapper + `Remote…Repository` over `HttpClient`; fixture + `Mock…Repository`; register both in `app/container.ts` behind `VITE_DATA_SOURCE`.
+1. **Read** the PRD page, the BRD ids, the task row, the Design Script and `design/*.dc.html`; list the admin operations the task consumes (`src/data/contract/generated/operations.ts`, `docs/Admin_Tasks.md` Appendix A). If the server lacks one, the task is `PENDING` with the gap id — do not invent endpoints.
+2. **Domain:** entities and enums named like the server's domain document; repository interface; pure rules with unit tests (`src/domain/items/items.ts` is the model).
+3. **Data:** DTO schemas come from `api:sync` output (never hand-written); `Remote…Repository` over `ApiClient`; fixture routes in `data/mock/<feature>Routes.ts`; register in `data/repositories.ts`, `data/mock/fixtures.ts` and `tests/helpers/render.tsx`.
 4. **Presentation:** controller hook (TanStack Query, key factory) → page built from base components; loading, empty, error with retry, forbidden, validation and realtime states.
-5. **Constants and text:** paths in `constants/endpoints.ts`, routes in `constants/routes.ts`, nav in `constants/nav.ts`; Arabic **and** English strings; no literal URLs, colors, sizes or timings.
+5. **Constants and text:** routes in `constants/routes.ts`, nav in `constants/nav.ts`, page in `app/routes.tsx`; status tones in `constants/status.ts`; Arabic **and** English strings; no literal URLs, colors, sizes or timings.
 6. **Tests:** unit per layer, page test, e2e smoke; coverage floor holds (`npm run test:coverage`).
 7. **Gate:** `npm run verify`, four variant builds, `npm run check:size`, e2e, browser check in AR/EN, light/dark, phone/tablet/desktop (`.claude/rules.md` §6, §8).
-8. **Docs:** task row to `DONE`, `.claude/session.md` block with `Loops: 3/3` and `Review: PASSED`, durable facts to `.claude/memory.md`.
+8. **Docs:** task row to `DONE`, Appendix A row for every new operation, `.claude/session.md` block with `Loops: 1/1` and `Review: PASSED`, durable facts to `.claude/memory.md`.
 
 ## List screens: state in the URL
 

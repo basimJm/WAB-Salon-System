@@ -9,28 +9,28 @@ The panel is a static site (`dist/<variant>/`). The host must serve the files, s
 | `VITE_API_BASE_URL` | build | API base URL, `https://…` (required for prod) |
 | `VITE_SOCKET_URL` | build | Socket.IO origin, `https://…` (required for prod) |
 | `VITE_DATA_SOURCE` | build | `remote` (default everywhere except dev-debug) or `mock` (dev-debug only) |
-| `CSP_CONNECT_EXTRA` | build machine | comma list of extra `https://` origins the browser may call, e.g. the storage host presigned uploads go to |
+| `CSP_CONNECT_EXTRA` | build machine | comma list of extra `https://` origins the browser may call, e.g. a file-storage host the browser uploads to |
 
 ## Cloudflare Pages (recommended: free, global CDN, fast)
 
 Cloudflare reads the same `_headers` and `_redirects` files that `scripts/write-hosting.ts` writes, so the security headers and the single-page routing work unchanged.
 
-**With Git (builds on every push):** Workers & Pages -> Create -> Pages -> Connect to Git -> repository `WAB-Salon-System`.
+**With Git (builds on every push):** Workers & Pages -> Create -> Pages -> Connect to Git -> repository `__REPO_NAME__`.
 
 | Setting | Value |
 |---|---|
-| Production branch | `main` (or `admin` until it is merged) |
-| Root directory | `WAB-Admin-Dashboard` |
+| Production branch | `main` |
+| Root directory | `__ADMIN_DIR__` |
 | Build command | `npm ci && npm run build:prod-release && node scripts/write-hosting.ts prod-release --target cloudflare` |
 | Build output directory | `dist/prod-release` |
 | Node version | 22 (`.node-version` is committed) |
 
-Environment variables (Settings -> Variables and Secrets, plain text, Production): `VITE_API_BASE_URL` and `VITE_SOCKET_URL` (both `https://app-server-dev.onrender.com` for now). Optional: `VITE_DEFAULT_LANGUAGE`, `CSP_CONNECT_EXTRA`. Without them the values in `.env.prod` are used. Preview deployments (other branches) can use the build command with `build:dev-release` and `dev-release`.
+Environment variables (Settings -> Variables and Secrets, plain text, Production): `VITE_API_BASE_URL` and `VITE_SOCKET_URL` (`__PROD_API_URL__`). Optional: `VITE_DEFAULT_LANGUAGE`, `CSP_CONNECT_EXTRA`. Without them the values in `.env.prod` are used. Preview deployments (other branches) can use the build command with `build:dev-release` and `dev-release`.
 
 **Without Git (one command, about a minute):**
 
 ```bash
-cd WAB-Admin-Dashboard
+cd __ADMIN_DIR__
 npm ci
 npm run build:prod-release && node scripts/write-hosting.ts prod-release --target cloudflare
 npx wrangler login                                                        # once, opens the browser
@@ -41,14 +41,14 @@ The panel is then at `https://<project-name>.pages.dev`. Add that origin to the 
 
 ## Netlify (config is committed: `netlify.toml`)
 
-1. New site from Git, repository `WAB-Salon-System`, **Base directory** `WAB-Admin-Dashboard`. The build command and publish folder come from `netlify.toml`.
+1. New site from Git, repository `__REPO_NAME__`, **Base directory** `__ADMIN_DIR__`. The build command and publish folder come from `netlify.toml`.
 2. Site settings → Environment variables: `VITE_API_BASE_URL`, `VITE_SOCKET_URL` (and `CSP_CONNECT_EXTRA` if needed) for the production context.
-3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed `.env.dev` / `.env.prod` hold the base URLs (both `https://app-server-dev.onrender.com` for now); change them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
+3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed `.env.dev` / `.env.prod` hold the base URLs (`__PROD_API_URL__`); change them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
 4. Add the custom domain in Domain management; HTTPS is automatic. The headers include HSTS.
 
 ## Vercel
 
-1. Import the repository, **Root Directory** `WAB-Admin-Dashboard`, framework preset *Other*.
+1. Import the repository, **Root Directory** `__ADMIN_DIR__`, framework preset *Other*.
 2. Build command: `npm ci && npm run build:prod-release && node scripts/write-hosting.ts prod-release --target vercel --out dist/prod-release`; output directory `dist/prod-release`; Node 22.
 3. Set the same environment variables.
 
@@ -66,7 +66,7 @@ The panel is then at `https://<project-name>.pages.dev`. Add that origin to the 
 ## Fast free deploy (Netlify CLI, about two minutes)
 
 ```bash
-cd WAB-Admin-Dashboard
+cd __ADMIN_DIR__
 npm ci
 npm run build:prod-release && node scripts/write-hosting.ts prod-release     # reads .env.prod
 npx netlify-cli login                                                          # once, opens the browser
@@ -74,5 +74,3 @@ npx netlify-cli deploy --prod --dir dist/prod-release --site <site-name>       #
 ```
 
 Dev copy (second site or the same site's draft deploy): `npm run build:dev-release && node scripts/write-hosting.ts dev-release && npx netlify-cli deploy --dir dist/dev-release` (add `--prod` on a separate dev site).
-
-Render's free server sleeps after idle time: the first request after a pause can take up to a minute; the panel shows its loading state until then. The server's `CORS_ALLOWED_ORIGINS` must include the deployed panel origin (`https://<site-name>.netlify.app`).

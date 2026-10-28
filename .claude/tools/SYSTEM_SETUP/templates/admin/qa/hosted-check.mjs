@@ -17,7 +17,7 @@ const status = async (path, init) => {
   const body = await res.text();
   return { res, code: body.match(/"code":"(\w+)"/)?.[1] ?? '-' };
 };
-for (const path of ['/health', '/ready', '/admin/v1/salons', '/admin/v1/nope']) {
+for (const path of ['/health', '/ready', '/admin/v1/items', '/admin/v1/nope']) {
   const { res, code } = await status(path, { headers: { 'accept-language': 'en' } });
   out.push(`HTTP ${path} -> ${String(res.status)} ${code}`);
 }

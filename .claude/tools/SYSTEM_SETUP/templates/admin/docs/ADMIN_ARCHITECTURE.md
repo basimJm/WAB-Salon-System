@@ -1,4 +1,4 @@
-# WAB Admin Dashboard — Architecture
+# __SYSTEM_NAME__ Admin Dashboard — Architecture
 
 Rules live in `CLAUDE.md` and `.claude/rules.md`; this file explains how the pieces fit. Decisions are recorded as ADRs in `docs/adr/`.
 
@@ -33,11 +33,11 @@ Imports point inward only. `presentation` never imports `data`; it reaches repos
 
 ## 3. Contract tooling
 
-The server publishes `WAB-Server/docs/api/openapi.admin.json` (the contract of record until `contracts/` exists, ADR-0001). `npm run api:sync` snapshots it into `contract/` and generates `src/data/contract/generated/dto.ts` (lazy zod factories and inferred types) and `operations.ts` (method, path, tag, flags per operation). `npm run api:check` and `tests/contract.test.ts` fail when the snapshot is older than the server file. Handwritten response types are not allowed.
+The server publishes `../__SERVER_DIR__/docs/api/openapi.admin.json` (the contract of record, ADR-0001). `npm run api:sync` snapshots it into `contract/` and generates `src/data/contract/generated/dto.ts` (lazy zod factories and inferred types) and `operations.ts` (method, path, tag, flags per operation). `npm run api:check` and `tests/contract.test.ts` fail when the snapshot is older than the server file. Handwritten response types are not allowed.
 
 ## 4. Error model
 
-Everything thrown becomes an `AppError` (`src/infrastructure/errors/AppError.ts`) with a `kind`. A server `code` from `BUSINESS_DOMAIN.md` §11 decides the kind and the message (`src/constants/errorCatalog.ts`, `errors.codes.<CODE>` in both locales). `fieldErrorsFrom()` turns `details[]` into per-field form errors. Screens show `ErrorState` / `InlineAlert`; render crashes hit `ErrorBoundary`; nothing is swallowed.
+Everything thrown becomes an `AppError` (`src/infrastructure/errors/AppError.ts`) with a `kind`. A server `code` (the contract's `ErrorResponse` enum) decides the kind and the message (`src/constants/errorCatalog.ts`, `errors.codes.<CODE>` in both locales). `fieldErrorsFrom()` turns `details[]` into per-field form errors. Screens show `ErrorState` / `InlineAlert`; render crashes hit `ErrorBoundary`; nothing is swallowed.
 
 ## 5. Shared kernel (`src/domain/shared`)
 

@@ -1,12 +1,13 @@
 /**
- * Realtime check against a LOCAL WAB-Server (see docs/REAL_SERVER_QA.md): connects to the `/admin` namespace the way the
- * panel does (path, namespace, `auth.token`, websocket only), triggers server events through the public APIs and writes
- * every received event name + payload keys to the report. Also checks the handshake refusals (no token, wrong scope).
- * Usage: node qa/socket-check.mjs (QA_REPORT=<file>). Never run it against a shared server: it creates data.
+ * Realtime check against a LOCAL server (see docs/REAL_SERVER_QA.md): connects to the `/admin` namespace the way the
+ * panel does (path, namespace, `auth.token`, websocket only), triggers a server event through the public API
+ * (`item.updated` after an item patch) and writes every received event name + payload keys to the report. Also
+ * checks the handshake refusals (no token, malformed token).
+ * Usage: node qa/socket-check.mjs (QA_REPORT=<file>). Never run it against a shared server: it writes data.
  */
 import { writeFileSync } from 'node:fs';
 import { io } from 'socket.io-client';
-import { PDF, adminToken, api, BASE, installation, proof, putTo } from './lib.mjs';
+import { adminToken, api, BASE } from './lib.mjs';
 
 const PATH = '/socket.io';
 /** Not a JWT: the server must refuse it with UNAUTHORIZED. */
@@ -37,58 +38,25 @@ const none = await open({});
 out.push(`HANDSHAKE no token -> ${none.error} (active=${String(none.active)})`);
 const bad = await open({ token: MALFORMED });
 out.push(`HANDSHAKE bad token -> ${bad.error} (active=${String(bad.active)})`);
-const merchantPhone = '791000001';
-const merchant = await api('merchant', 'POST', '/auth/login', {
-  phone: { countryCode: 'JO', number: merchantPhone },
-  otpToken: await proof('merchant', `+962${merchantPhone}`, 'LOGIN'),
-  installation: installation(`qa-merchant-${merchantPhone}-dev`),
-});
-const wrong = await open({ token: merchant.data?.accessToken });
-out.push(`HANDSHAKE merchant token on /admin -> ${wrong.error} (active=${String(wrong.active)})`);
 
 const token = await adminToken();
 const { socket, error } = await open({ token });
 out.push(`HANDSHAKE admin token -> ${error ?? 'connected'}`);
 socket.onAny((event, payload) => received.push({ event, keys: Object.keys(payload ?? {}).sort() }));
 
-// application.created + alert.created (SALON_APPLICATION): a new salon application.
-const n = String(Date.now()).slice(-6);
-const pres = await api('merchant', 'POST', '/uploads/license/presign', {
-  contentType: 'application/pdf',
-  size: PDF.length,
-});
-await putTo(pres.data.upload, PDF);
-await api('merchant', 'POST', '/uploads/license/confirm', { key: pres.data.key });
-const areas = (
-  await api('admin', 'GET', '/locations/areas', undefined, token, '?page=1&pageSize=1')
-).data;
-const app = await api('merchant', 'POST', '/salon/applications', {
-  phone: { countryCode: 'JO', number: `792${n}` },
-  otpToken: await proof('merchant', `+962792${n}`, 'REGISTER'),
-  firstName: 'Qa',
-  lastName: 'Socket',
-  salon: { name: `QA Socket ${n}`, gender: 'FEMALE', cityId: areas[0].cityId, areaId: areas[0].id },
-  documentKeys: [pres.data.key],
-  installation: installation(`qa-socket-${n}-dev`),
-});
-out.push(`ACTION salon application -> ${String(app.status)}`);
-
-// booking.updated (+ refund.updated when the booking was paid online): admin cancels an open booking.
-const open1 = (
-  await api('admin', 'GET', '/bookings', undefined, token, '?page=1&pageSize=1&tab=UPCOMING')
-).data?.[0];
-if (open1) {
-  const c = await api(
+// item.updated: patch the first item (the status it already has, so nothing changes but the audit row).
+const first = (await api('admin', 'GET', '/items', undefined, token, '?page=1&pageSize=1'))
+  .data?.[0];
+if (first) {
+  const patch = await api(
     'admin',
-    'POST',
-    `/bookings/${open1.id}/cancel`,
-    { mode: 'ADMIN', reason: 'QA socket check' },
+    'PATCH',
+    `/items/${first.id}`,
+    { status: first.status, reason: 'QA socket check' },
     token,
   );
-  out.push(
-    `ACTION cancel booking ${open1.referenceNumber} (${open1.paymentMethod}) -> ${String(c.status)}`,
-  );
-} else out.push('ACTION cancel booking -> SKIP (no upcoming booking; run qa/seed.mjs)');
+  out.push(`ACTION patch item ${first.id} -> ${String(patch.status)}`);
+} else out.push('ACTION patch item -> SKIP (no item; run qa/seed.mjs)');
 
 await sleep(WAIT_MS);
 socket.close();
