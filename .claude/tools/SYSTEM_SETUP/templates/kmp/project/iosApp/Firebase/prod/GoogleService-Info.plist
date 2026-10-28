@@ -23,8 +23,8 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>PROJECT_ID</key>
-	<string>shop-prod-placeholder</string>
+	<string>firebase-prod-placeholder</string>
 	<key>STORAGE_BUCKET</key>
-	<string>shop-prod-placeholder.firebasestorage.app</string>
+	<string>firebase-prod-placeholder.firebasestorage.app</string>
 </dict>
 </plist>

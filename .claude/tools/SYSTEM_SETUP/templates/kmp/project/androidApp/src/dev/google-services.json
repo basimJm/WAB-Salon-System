@@ -1,8 +1,8 @@
 {
   "project_info": {
     "project_number": "000000000000",
-    "project_id": "shop-dev-placeholder",
-    "storage_bucket": "shop-dev-placeholder.firebasestorage.app"
+    "project_id": "firebase-dev-placeholder",
+    "storage_bucket": "firebase-dev-placeholder.firebasestorage.app"
   },
   "client": [
     {
