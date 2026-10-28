@@ -190,8 +190,8 @@ private fun rangeText(): (Instant, Instant) -> String {
     val pm = stringResource(DesignRes.string.time_pm)
     return remember(separator, am, pm) {
         { start, end ->
-            val from = TimeFormat.instantText(start.toString(), am, pm)?.time.orEmpty()
-            val to = TimeFormat.instantText(end.toString(), am, pm)?.time.orEmpty()
+            val from = TimeFormat.instantText(start, am, pm).time
+            val to = TimeFormat.instantText(end, am, pm).time
             from + separator + to
         }
     }

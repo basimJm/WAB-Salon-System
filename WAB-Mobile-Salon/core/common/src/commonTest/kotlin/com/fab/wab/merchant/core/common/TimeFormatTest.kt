@@ -3,6 +3,7 @@ package com.fab.wab.merchant.core.common
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 class TimeFormatTest {
 
@@ -32,6 +33,16 @@ class TimeFormatTest {
     fun formatsInstantsInAmman() {
         assertEquals(DateTimeText("18/10/2026", "1:00 PM"), TimeFormat.instantText("2026-10-18T10:00:00.000Z", "AM", "PM"))
         assertNull(TimeFormat.instantText("soon", "AM", "PM"))
+    }
+
+    @Test
+    fun instantOverloadMatchesTheIsoTextInTheBusinessZone() {
+        val iso = "2026-10-18T22:30:00Z"
+        val instant = kotlin.time.Instant.parse(iso)
+        assertEquals(TimeFormat.instantText(iso, "AM", "PM"), TimeFormat.instantText(instant, "AM", "PM"))
+        // Amman is UTC+3 in October 2026: 22:30Z is 1:30 AM on the next day.
+        assertEquals(DateTimeText("19/10/2026", "1:30 AM"), TimeFormat.instantText(instant, "AM", "PM"))
+        assertSame(BusinessTime.zone, BusinessTime.zoneOf(BusinessTime.ZONE_ID))
     }
 
     @Test

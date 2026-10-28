@@ -75,7 +75,7 @@ fun SalonHubScreen(state: UiState, available: Set<HubTile>, onAction: (UiAction)
                 horizontalArrangement = Arrangement.spacedBy(spacing.space10),
                 verticalArrangement = Arrangement.spacedBy(spacing.space10),
             ) {
-                item(key = HEADER_KEY, span = { GridItemSpan(maxLineSpan) }) { Header(state) }
+                item(key = HEADER_KEY, contentType = HEADER_KEY, span = { GridItemSpan(maxLineSpan) }) { Header(state) }
                 items(tiles, key = { it.tile.name }, contentType = { HubEntry::class }) { entry ->
                     HubTileCard(entry) { onAction(UiAction.OnTileClick(entry.tile)) }
                 }

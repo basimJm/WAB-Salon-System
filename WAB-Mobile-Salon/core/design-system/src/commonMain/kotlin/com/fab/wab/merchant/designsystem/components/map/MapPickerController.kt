@@ -36,6 +36,12 @@ sealed interface LocateResult {
 /** "Use my location" gives up after this long and asks the user to move the map instead of spinning forever. */
 const val LOCATE_TIMEOUT_MS = 15_000L
 
+/**
+ * Reverse geocoding gives up after this long (MER-079, emulator: the platform geocoder never answered, so "Locating
+ * address" spun forever and Confirm stayed disabled).
+ */
+const val GEOCODE_TIMEOUT_MS = 10_000L
+
 /** Geocoding, place search and the device position for the map picker; the view model owns the state. */
 class MapPickerController(private val deps: MapPickerDependencies) {
 
@@ -47,7 +53,9 @@ class MapPickerController(private val deps: MapPickerDependencies) {
     fun isSamePoint(a: LocationData, b: LocationData): Boolean =
         abs(a.latitude - b.latitude) < MapDefaults.SAME_POINT_DEGREES && abs(a.longitude - b.longitude) < MapDefaults.SAME_POINT_DEGREES
 
-    suspend fun addressOf(point: LocationData): String? = deps.geocoder.addressOf(point, deps.language())
+    /** Null after [GEOCODE_TIMEOUT_MS]: the pin keeps its coordinates and Confirm comes back instead of waiting forever. */
+    suspend fun addressOf(point: LocationData): String? =
+        withTimeoutOrNull(GEOCODE_TIMEOUT_MS) { deps.geocoder.addressOf(point, deps.language()) }
 
     suspend fun search(query: String): List<PlaceSuggestionUi> =
         if (query.isBlank()) emptyList() else deps.places.searchPlaces(query.trim()).map {
