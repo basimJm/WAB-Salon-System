@@ -1,0 +1,44 @@
+{
+  "profile": {
+    "title": "My profile",
+    "subtitle": "Your account, alert recipients and sign-in details.",
+    "account": "Account",
+    "email": "Email",
+    "lastLogin": "Last sign-in",
+    "never": "Never",
+    "alerts": "Alert emails",
+    "alertsLabel": "Recipients (one address per line)",
+    "alertsHint": "Admin alerts are emailed to these addresses. Up to {{max}} addresses.",
+    "alertsInvalid": "Not valid email addresses: {{emails}}",
+    "alertsTooMany": "At most {{max}} addresses.",
+    "saveAlerts": "Save recipients",
+    "alertsSaved": "Alert recipients saved",
+    "password": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordHint": "At least {{min}} characters.",
+    "confirmPassword": "Repeat the new password",
+    "changePassword": "Change password",
+    "passwordChanged": "Password changed",
+    "passwordError": {
+      "current": "Enter your current password.",
+      "short": "The new password needs at least {{min}} characters.",
+      "long": "The new password is too long.",
+      "same": "The new password must differ from the current one.",
+      "mismatch": "The two passwords do not match."
+    },
+    "changeEmail": "Change email",
+    "newEmail": "New email address",
+    "code": "Verification code",
+    "codeHint": "Enter the code sent to {{email}}.",
+    "codeSent": "A code was sent to {{email}}",
+    "sendCode": "Send code",
+    "confirmEmail": "Confirm new email",
+    "emailChanged": "Email changed",
+    "emailError": {
+      "email": "Enter a valid email address.",
+      "password": "Enter your current password.",
+      "code": "Enter the digits of the code."
+    }
+  }
+}

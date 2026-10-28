@@ -1,0 +1,96 @@
+{
+  "status": {
+    "booking": {
+      "PENDING": "قيد الانتظار",
+      "APPROVED": "مقبول",
+      "REJECTED": "مرفوض",
+      "CANCELLED_BY_CUSTOMER": "ألغاه العميل",
+      "CANCELLED_BY_SALON": "ألغاه الصالون",
+      "AUTO_CANCELLED": "أُلغي تلقائيًا",
+      "COMPLETED": "مكتمل",
+      "NO_SHOW": "لم يحضر"
+    },
+    "payment": {
+      "PAY_ON_ARRIVAL": "الدفع عند الوصول",
+      "DEPOSIT_PAID": "عربون مدفوع",
+      "FULLY_PAID": "مدفوع بالكامل",
+      "PAID": "مدفوع"
+    },
+    "refund": {
+      "NONE": "لا يوجد استرداد",
+      "REFUND_PENDING": "استرداد قيد التنفيذ",
+      "REFUNDED": "تم الاسترداد",
+      "REFUND_FAILED": "فشل الاسترداد"
+    },
+    "transaction": {
+      "PENDING": "قيد المعالجة",
+      "SUCCEEDED": "ناجحة",
+      "FAILED": "فاشلة",
+      "CANCELLED": "ملغاة"
+    },
+    "review": {
+      "PENDING": "بانتظار المراجعة",
+      "APPROVED": "منشور",
+      "REJECTED": "مرفوض",
+      "REMOVED": "محذوف"
+    },
+    "customer": {
+      "ACTIVE": "نشط",
+      "BLOCKED": "محظور",
+      "DELETION_PENDING": "حذف قيد الانتظار",
+      "DELETED": "محذوف"
+    },
+    "salon": {
+      "APPLICATION_PENDING": "طلب قيد المراجعة",
+      "APPLICATION_REJECTED": "طلب مرفوض",
+      "APPROVED_INCOMPLETE": "موافَق عليه، الملف غير مكتمل",
+      "LIVE": "ظاهر للعملاء",
+      "OFFLINE": "غير متصل"
+    },
+    "subscription": {
+      "TRIAL": "تجريبي",
+      "ACTIVE": "فعّال",
+      "EXPIRED": "منتهٍ"
+    },
+    "payout": {
+      "PENDING": "بانتظار التحويل",
+      "TRANSFERRED": "تم التحويل"
+    },
+    "catalogRequest": {
+      "PENDING": "قيد المراجعة",
+      "APPROVED": "مقبول",
+      "REJECTED": "مرفوض"
+    },
+    "campaign": {
+      "SCHEDULED": "مجدولة",
+      "SENDING": "قيد الإرسال",
+      "SENT": "تم الإرسال",
+      "CANCELLED": "ملغاة"
+    },
+    "placement": {
+      "SCHEDULED": "مجدول",
+      "ACTIVE": "نشط",
+      "ENDED": "منتهٍ"
+    },
+    "alert": {
+      "NEW": "جديد",
+      "ACKNOWLEDGED": "تم الاطلاع"
+    },
+    "alertSeverity": {
+      "INFO": "معلومة",
+      "WARNING": "تحذير",
+      "CRITICAL": "حرج"
+    },
+    "export": {
+      "QUEUED": "في الانتظار",
+      "RUNNING": "قيد التنفيذ",
+      "DONE": "جاهز",
+      "FAILED": "فشل"
+    },
+    "branch": {
+      "ACTIVE": "نشط",
+      "OFFLINE": "غير متاح",
+      "CLOSED": "مغلق"
+    }
+  }
+}

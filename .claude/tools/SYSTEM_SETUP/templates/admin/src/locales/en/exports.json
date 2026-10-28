@@ -1,0 +1,25 @@
+{
+  "exports": {
+    "subtitle": "Files you asked for. Download links are short-lived: open them from here.",
+    "kind": "What",
+    "format": "Format",
+    "rows": "Rows",
+    "file": "File",
+    "download": "Download",
+    "empty": "No exports yet",
+    "kinds": {
+      "REPORT_DAILY": "Daily report",
+      "REPORT_WEEKLY": "Weekly report",
+      "REPORT_MONTHLY": "Monthly report",
+      "TRANSACTIONS": "Transactions",
+      "AUDIT_LOGS": "Audit log",
+      "BOOKINGS": "Bookings",
+      "CUSTOMERS": "Customers",
+      "SALONS": "Salons"
+    },
+    "failures": {
+      "TOO_MANY_ROWS": "Too many rows: narrow the filters",
+      "GENERATION_FAILED": "The file could not be generated"
+    }
+  }
+}

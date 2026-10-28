@@ -1,0 +1,25 @@
+{
+  "exports": {
+    "subtitle": "الملفات التي طلبتها. روابط التنزيل قصيرة العمر: افتحها من هنا.",
+    "kind": "المحتوى",
+    "format": "الصيغة",
+    "rows": "الصفوف",
+    "file": "الملف",
+    "download": "تنزيل",
+    "empty": "لا توجد عمليات تصدير بعد",
+    "kinds": {
+      "REPORT_DAILY": "تقرير يومي",
+      "REPORT_WEEKLY": "تقرير أسبوعي",
+      "REPORT_MONTHLY": "تقرير شهري",
+      "TRANSACTIONS": "المعاملات",
+      "AUDIT_LOGS": "سجل التدقيق",
+      "BOOKINGS": "الحجوزات",
+      "CUSTOMERS": "العملاء",
+      "SALONS": "الصالونات"
+    },
+    "failures": {
+      "TOO_MANY_ROWS": "عدد الصفوف كبير: ضيّق عوامل التصفية",
+      "GENERATION_FAILED": "تعذّر إنشاء الملف"
+    }
+  }
+}
