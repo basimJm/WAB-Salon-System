@@ -7,7 +7,8 @@ from pathlib import PurePosixPath
 from _support import TOOL_ROOT, TempDirTest
 
 from engine import (EngineError, check_target, expand_blocks, instantiate, layer_dirs, leftovers, matches_any, render_path,
-                    render_text, sentinel_leftovers, substitute_sentinels, substitute_tokens, template_files, verification_errors)
+                    is_declared, render_text, sentinel_leftovers, split_leftovers, substitute_sentinels, substitute_tokens, template_files,
+                    verification_errors)
 from manifest import load_manifest, parse_manifest
 
 VALUES = {"__SYSTEM_PREFIX__": "ACME", "__SYSTEM_NAME__": "Acme Shop", "__APP_PACKAGE__": "com.acme.customer",
@@ -95,7 +96,8 @@ class InstantiateTest(TempDirTest):
         self.assertFalse((dest / "TEMPLATE.json").exists())
         self.assertEqual(b"\x89PNG Acme Shop com.acme.shop", (dest / "img/Customer.png").read_bytes())  # renamed, bytes intact
         self.assertEqual(b"\xff\xfe Acme Shop", (dest / "raw.bin").read_bytes())  # not utf-8 -> binary
-        self.assertEqual({"ACME-Mobile-Customer/src/com/acme/customer/App.kt": ["__MISSING__"]}, result.unresolved)
+        self.assertEqual({}, result.unresolved)  # __MISSING__ is not a declared token
+        self.assertEqual({"ACME-Mobile-Customer/src/com/acme/customer/App.kt": ["__MISSING__"]}, result.foreign)
         self.assertEqual(["echo Customer"], result.post_generate)
         self.assertTrue((dest / "run.sh").stat().st_mode & 0o100)
         self.assertEqual("#!/bin/sh\necho Customer\n", (dest / "run.sh").read_text(encoding="utf-8"))
@@ -107,6 +109,18 @@ class InstantiateTest(TempDirTest):
         instantiate(load_manifest(self.template), repo, self.values)
         result = instantiate(load_manifest(self.template), repo, self.values)
         self.assertTrue(any(p.name == "App.kt" for p in result.overwritten))
+
+
+class LeftoverTest(TempDirTest):
+    def test_declared_tokens_and_families_are_unresolved_others_are_foreign(self):
+        from manifest import parse_manifest as pm
+        m = pm({"kind": "server", "description": "t", "placeholders": ["__SYSTEM_NAME__", "__APP_DIR_<n>__", "__SDK_DIR_<name>__"]}, self.root)
+        unresolved, foreign = split_leftovers("__SYSTEM_NAME__ __APP_DIR_3__ __SDK_DIR_otp__ __TEXT__ __APP_DIR__ __NPM_SCOPE__", m,
+                                              {"__NPM_SCOPE__": "@x"})
+        self.assertEqual(["__APP_DIR_3__", "__NPM_SCOPE__", "__SDK_DIR_otp__", "__SYSTEM_NAME__"], unresolved)
+        self.assertEqual(["__APP_DIR__", "__TEXT__"], foreign)
+        self.assertTrue(is_declared("__APP_DIR_12__", ["__APP_DIR_<n>__"]))
+        self.assertFalse(is_declared("__APP_DIR_a-b__", ["__APP_DIR_<n>__"]))
 
 
 class TargetTest(TempDirTest):

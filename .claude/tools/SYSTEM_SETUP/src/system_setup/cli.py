@@ -168,13 +168,21 @@ def load_templates(root: Path, kinds: List[str]) -> Dict[str, Manifest]:
 
 
 def apply_sdk_kinds(spec: Spec, manifest: Optional[Manifest]) -> None:
-    """The sdk template's `kinds` decide which SDKs exist and may name their folder/prefix/title."""
-    if manifest is None or not manifest.kinds:
+    """The sdk template's `kinds` decide which SDKs exist (prefix, title, overlay folder); the overlay folder of every
+    chosen SDK must exist in the template."""
+    if manifest is None:
         return
-    unknown = [sdk for sdk in spec.sdks if sdk not in manifest.kinds]
-    if unknown:
-        raise ManifestError(f"the sdk template has no kind(s) {', '.join(unknown)}; it ships: {', '.join(sorted(manifest.kinds))}")
-    spec.sdk_overrides = {sdk: dict(manifest.kinds[sdk]) for sdk in spec.sdks}
+    if manifest.kinds:
+        unknown = [sdk for sdk in spec.sdks if sdk not in manifest.kinds]
+        if unknown:
+            raise ManifestError(f"the sdk template has no kind(s) {', '.join(unknown)}; it declares: {', '.join(sorted(manifest.kinds))}")
+        spec.sdk_overrides = {sdk: dict(manifest.kinds[sdk]) for sdk in spec.sdks}
+    if manifest.layers != ["."]:
+        missing = [sdk for sdk in spec.sdks if not (manifest.root / spec.sdk_layer(sdk)).is_dir()]
+        if missing:
+            shipped = sorted(p.name for p in (manifest.root / "kinds").iterdir() if p.is_dir()) if (manifest.root / "kinds").is_dir() else []
+            raise ManifestError(f"the sdk template has no overlay folder for {', '.join(missing)} "
+                                f"({', '.join(spec.sdk_layer(s) for s in missing)}); folders shipped under kinds/: {', '.join(shipped) or 'none'}")
 
 
 def generate(spec: Spec, templates: Path, run_post: bool = False, git: bool = True,
@@ -240,6 +248,9 @@ def print_report(report: Report, run_post: bool) -> None:
         print("\nUnresolved tokens (fix the template or the answers):")
         for rel, tokens in sorted(report.unresolved.items()):
             print(f"  {rel}: {', '.join(tokens)}")
+    foreign = sorted({t for r in report.results for ts in r.foreign.values() for t in ts})
+    if foreign:
+        print(f"  (other __X__ strings kept as they are, not contract tokens: {', '.join(foreign)})")
     if report.sentinel_left:
         print("\nSentinel literals left in rendered files (the template's TEMPLATE.json maps them, but the text still has them):")
         for rel, literals in sorted(report.sentinel_left.items()):

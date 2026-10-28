@@ -101,6 +101,10 @@ class TemplateSelectionTest(TempDirTest):
         self.assertEqual(("a-otp", "OTP", "Otp", "a-storage", "STO", "Storage"),
                          (spec.sdk_dir("otp"), spec.sdk_prefix("otp"), spec.sdk_title_of("otp"),
                           spec.sdk_dir("storage"), spec.sdk_prefix("storage"), spec.sdk_title_of("storage")))
+        with self.assertRaises(ManifestError) as caught:
+            apply_sdk_kinds(self.spec(sdks=["notifications"]), load_manifest(FIXTURE_TEMPLATES / "sdk"))  # declared, no folder
+        self.assertIn("kinds/notifications", str(caught.exception))
+        self.assertIn("otp, payments, storage", str(caught.exception))
         apply_sdk_kinds(self.spec(sdks=["analytics"]), None)  # no manifest: derived names stay
         self.assertEqual("ANA", self.spec(sdks=["analytics"]).sdk_prefix("analytics"))
         self.assertEqual(("kinds/otp", "kinds/notifications", "presigned uploads"),

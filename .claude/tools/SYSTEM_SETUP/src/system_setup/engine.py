@@ -34,7 +34,8 @@ class Result:
     files: List[Path] = field(default_factory=list)
     binaries: List[Path] = field(default_factory=list)
     overwritten: List[Path] = field(default_factory=list)
-    unresolved: Dict[str, List[str]] = field(default_factory=dict)
+    unresolved: Dict[str, List[str]] = field(default_factory=dict)   # declared tokens nobody filled
+    foreign: Dict[str, List[str]] = field(default_factory=dict)      # other __X__ strings (the template's own code)
     sentinel_left: Dict[str, List[str]] = field(default_factory=dict)
     post_generate: List[str] = field(default_factory=list)
 
@@ -81,6 +82,27 @@ def render_path(rel: PurePosixPath, manifest: Manifest, values: Mapping[str, str
 
 def leftovers(text: str) -> List[str]:
     return sorted(set(LEFTOVER_RE.findall(text)))
+
+
+def is_declared(token: str, declared: Iterable[str]) -> bool:
+    """`__APP_DIR_2__` is declared by `__APP_DIR_<n>__`, `__SDK_DIR_otp__` by `__SDK_DIR_<name>__`."""
+    for family in declared:
+        if token == family:
+            return True
+        if "<" in family:
+            head = family[:family.index("<")]
+            if token.startswith(head) and token.endswith("__") and token[len(head):-2].isalnum():
+                return True
+    return False
+
+
+def split_leftovers(text: str, manifest: Manifest, values: Mapping[str, str]) -> Tuple[List[str], List[str]]:
+    """(unresolved declared tokens, foreign token-shaped strings) left in a rendered text."""
+    declared = [*manifest.tokens, *values]
+    unresolved, foreign = [], []
+    for token in leftovers(text):
+        (unresolved if is_declared(token, declared) else foreign).append(token)
+    return unresolved, foreign
 
 
 def sentinel_leftovers(text: str, sentinels: Mapping[str, str], values: Mapping[str, str]) -> List[str]:
@@ -134,7 +156,7 @@ def layer_dirs(manifest: Manifest, values: Mapping[str, str]) -> List[Path]:
         if manifest.root.resolve() not in (folder, *folder.parents):
             raise EngineError(f"{manifest.kind}: layer {layer!r} leaves the template")
         if not folder.is_dir():
-            raise EngineError(f"{manifest.kind}: layer {layer!r} not found in {manifest.root}")
+            raise EngineError(f"{manifest.kind}: layer {layer!r} = {rendered!r} not found in {manifest.root}")
         dirs.append(folder)
     return dirs
 
@@ -197,9 +219,11 @@ def instantiate(manifest: Manifest, repo_root: Path, values: Mapping[str, str],
             else:
                 rendered = render_text(text, manifest, values, parts)
                 out.write_text(rendered, encoding="utf-8")
-                rest = leftovers(rendered)
-                if rest:
-                    result.unresolved[str(out.relative_to(repo_root))] = rest
+                unresolved, foreign = split_leftovers(rendered, manifest, values)
+                if unresolved:
+                    result.unresolved[str(out.relative_to(repo_root))] = unresolved
+                if foreign:
+                    result.foreign[str(out.relative_to(repo_root))] = foreign
                 left = sentinel_leftovers(rendered, manifest.sentinels, values)
                 if left:
                     key = str(out.relative_to(repo_root))
