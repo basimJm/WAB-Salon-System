@@ -62,6 +62,12 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
     return toEntity<MemberRaw>(created.toObject());
   }
 
+  /** Logout: the device stops receiving pushes for this account. */
+  async clearPushToken(id: string): Promise<void> {
+    if (!isValidId(id)) return;
+    await this.model.findOneAndUpdate({ _id: id }, { $unset: { pushToken: 1 } }).exec();
+  }
+
   findTeam(tenantId: string): Promise<Entity<MemberRaw>[]> {
     return this.findMany({ tenantId }, { createdAt: 1 });
   }
