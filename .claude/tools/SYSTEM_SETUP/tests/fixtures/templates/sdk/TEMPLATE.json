@@ -1,0 +1,10 @@
+{
+  "kind": "sdk",
+  "description": "Fixture: one SDK package, instantiated once per chosen SDK",
+  "placeholders": ["__NPM_SCOPE__", "__SDK_NAME__", "__SDK_DIR__", "__SDK_PACKAGE__", "__SDK_PREFIX__", "__SDK_DESCRIPTION__"],
+  "sentinels": {"wab-sdk": "__SDK_DIR__", "@wab/sdk": "__SDK_PACKAGE__"},
+  "rename_paths": {"sdk_name": "__SDK_NAME__"},
+  "skip": [],
+  "post_generate": ["npm install"],
+  "binary_globs": []
+}

@@ -1,0 +1,11 @@
+{
+  "kind": "kmp",
+  "description": "Fixture: KMP_TEMPLATE snapshot with the Acme Shop / com.acme.shop / AcmeShop identity",
+  "placeholders": ["__APP_NAME__", "__APP_NAME_AR__", "__APP_PACKAGE__", "__APP_PROJECT__", "__DEV_API_URL__", "__PROD_API_URL__",
+                   "__APPLE_TEAM_ID__"],
+  "sentinels": {"Acme Shop": "__APP_NAME__", "com.acme.shop": "__APP_PACKAGE__", "AcmeShop": "__APP_PROJECT__"},
+  "rename_paths": {"com/acme/shop": "__APP_PACKAGE_PATH__", "AcmeShop": "__APP_PROJECT__"},
+  "skip": ["build/**", ".gradle/**"],
+  "post_generate": ["./gradlew tasks"],
+  "binary_globs": ["*.png", "*.jar"]
+}
