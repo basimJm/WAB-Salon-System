@@ -21,8 +21,8 @@
   - [ ] CUS-094 deferred device checks: Android gallery upload, nearest location, rotation during picker; iOS simulator maps, wa.me, Settings, gallery, simulated location, no-camera message; Release-Dev launches and scrolls
   - [ ] Unit tests for changed logic; policy + detekt baselines empty; gates green
 - Tests: (pending)
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — re-checked the committed changes once: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green; KMP_TEMPLATE tool tests green (build-logic changed). DEFERRED (owner 2026-10-28: skip measuring): before/after numbers, device checks of CUS-094; an extra uncommitted r8-analyzer change (drop the blanket `core.data` keep) was reverted because no release run proved it
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: release keep rules limited to the class names read at runtime (route/screen/ViewModel), secure store off the main thread with an in-memory cache + test, glass cost cuts, Compose caching, generated Baseline + Startup Profiles + `:baselineprofile` producer; temporary local manifests/overrides removed, none committed.
 - Notes: local overrides untracked (local.properties, cleartext manifest), removed at the end.
 ### CUS-096 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/cus-096-ios-performance`
