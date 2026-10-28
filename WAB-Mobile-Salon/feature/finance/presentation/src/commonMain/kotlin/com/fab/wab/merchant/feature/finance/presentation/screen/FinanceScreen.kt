@@ -87,15 +87,15 @@ fun FinanceScreen(state: UiState, bankReady: Boolean, onAction: (UiAction) -> Un
             modifier = Modifier.padding(padding),
         ) {
             LazyColumn(contentPadding = PaddingValues(spacing.space16), verticalArrangement = Arrangement.spacedBy(spacing.space10)) {
-                item(key = HEADER) { Header(state, bankReady, onAction) }
+                item(key = HEADER, contentType = HEADER) { Header(state, bankReady, onAction) }
                 when {
-                    state.loading -> item(key = LOADING) {
+                    state.loading -> item(key = LOADING, contentType = LOADING) {
                         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { AppLoadingIndicator() }
                     }
-                    state.error != null -> item(key = ERROR) {
+                    state.error != null -> item(key = ERROR, contentType = ERROR) {
                         AppErrorState(onRetry = { onAction(UiAction.OnRetry) }, message = state.error)
                     }
-                    state.isEmpty -> item(key = EMPTY) {
+                    state.isEmpty -> item(key = EMPTY, contentType = EMPTY) {
                         AppEmptyState(title = stringResource(emptyTitle(state.tab)), message = stringResource(Res.string.empty_body))
                     }
                     state.tab == FinanceTab.TRANSACTIONS -> items(
@@ -112,7 +112,7 @@ fun FinanceScreen(state: UiState, bankReady: Boolean, onAction: (UiAction) -> Un
                 }
                 if (state.hasMore && !state.loading) {
                     // The footer appearing at the end of the list asks for the next page (infinite scroll).
-                    item(key = MORE) {
+                    item(key = MORE, contentType = MORE) {
                         LaunchedEffect(
                             state.transactions.size,
                             state.refunds.size,
