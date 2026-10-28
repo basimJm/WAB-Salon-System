@@ -8,7 +8,7 @@ from pathlib import Path
 
 from _support import make_spec
 
-from prompts import (AppSpec, ask, parse_app, parse_apps, prefix_from, slug_from, validate_app_specs, validate_npm_scope,
+from prompts import (AppSpec, ask, parse_app, parse_apps, prefix_from, slug_from, system_prefix_from, validate_app_specs, validate_npm_scope,
                      validate_package, validate_prefix, validate_sdk_names, validate_slug, validate_team_id, validate_url)
 
 
@@ -60,6 +60,7 @@ class DerivedNamesTest(unittest.TestCase):
         self.assertEqual("acme-shop", slug_from("Acme Shop!"))
         self.assertEqual("app-2026", slug_from("2026"))
         self.assertEqual("ACM", prefix_from("Acme Shop"))
+        self.assertEqual(("ACME", "BETA", "WAB", "AX"), tuple(system_prefix_from(n) for n in ("Acme Shop", "Beta Store!", "WAB", "a")))
         self.assertEqual("ABX", prefix_from("a b"))
 
     def test_spec_names_packages_prefixes_and_masters(self):

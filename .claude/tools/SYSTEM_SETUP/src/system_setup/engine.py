@@ -91,12 +91,21 @@ def sentinel_leftovers(text: str, sentinels: Mapping[str, str], values: Mapping[
 # ---------- selection ----------
 
 def matches_any(rel: PurePosixPath, globs: Iterable[str]) -> bool:
+    """`*.png` / `build` match any path segment; `node_modules/**` and `**/build/**` match a folder at any depth."""
     text = rel.as_posix()
     for glob in globs:
-        if fnmatch.fnmatch(text, glob) or any(fnmatch.fnmatch(part, glob) for part in rel.parts):
-            return True
-        if glob.endswith("/**") and (text == glob[:-3] or text.startswith(glob[:-2])):
-            return True
+        for pattern in {glob, glob[3:]} if glob.startswith("**/") else {glob}:
+            if not pattern:
+                continue
+            if fnmatch.fnmatch(text, pattern):
+                return True
+            if pattern.endswith("/**"):
+                folder = pattern[:-3]
+                parents = rel.parts[:-1]
+                if any(fnmatch.fnmatch("/".join(parents[:i]), folder) for i in range(1, len(parents) + 1)):
+                    return True
+            elif "/" not in pattern and any(fnmatch.fnmatch(part, pattern) for part in rel.parts):
+                return True
     return False
 
 

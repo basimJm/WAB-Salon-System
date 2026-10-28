@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from engine import EngineError, Result, check_target, instantiate, run_post_generate  # noqa: E402
 from kmp import check_kmp_manifest, identity_leftovers, instantiate_apps  # noqa: E402
 from manifest import KINDS, Manifest, ManifestError, available_kinds, load_manifest, templates_root, tool_root  # noqa: E402
-from prompts import (SDK_CATALOG, SDK_DESCRIPTIONS, Spec, ask, parse_apps, prefix_from, slug_from, split_list,  # noqa: E402
+from prompts import (SDK_CATALOG, SDK_DESCRIPTIONS, Spec, ask, parse_apps, slug_from, split_list, system_prefix_from,  # noqa: E402
                      validate_app_specs, validate_github_name, validate_npm_scope, validate_package, validate_prefix,
                      validate_required, validate_sdk_names, validate_team_id, validate_url)
 from workspace import (ensure_project_files, git_init, next_steps, projects_registry, registry_shipped,  # noqa: E402
@@ -109,7 +109,7 @@ def collect(args: argparse.Namespace, reader: Callable[[str], str] = input) -> S
     name = value(args.name, "System name (English)", check=validate_required)
     name_ar = value(args.name_ar, "System name (Arabic, Enter = same)", name)
     slug = slug_from(name)
-    prefix = value(args.prefix, "Short prefix for folders and task ids", prefix_from(name)[:4], check=validate_prefix)
+    prefix = value(args.prefix, "Short prefix for folders and task ids", system_prefix_from(name), check=validate_prefix)
     package_root = value(args.package_root, "Package root (Kotlin / Android)", f"{DEFAULT_PACKAGE_ROOT}.{slug.replace('-', '')}",
                          check=validate_package)
     npm_scope = value(args.npm_scope, "npm scope of the SDKs", f"@{slug}", check=validate_npm_scope)

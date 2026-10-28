@@ -55,6 +55,10 @@ class SubstitutionTest(TempDirTest):
         self.assertTrue(matches_any(PurePosixPath("assets/logo.png"), ["*.png"]))
         self.assertTrue(matches_any(PurePosixPath("a/build/x"), ["build"]))
         self.assertFalse(matches_any(PurePosixPath("src/index.ts"), ["node_modules/**", "*.png"]))
+        self.assertTrue(matches_any(PurePosixPath("build/out.txt"), ["**/build/**"]))
+        self.assertTrue(matches_any(PurePosixPath("a/b/build/out.txt"), ["**/build/**"]))
+        self.assertTrue(matches_any(PurePosixPath("local.properties"), ["**/local.properties"]))
+        self.assertFalse(matches_any(PurePosixPath("builder/x.kt"), ["**/build/**"]))
 
 
 class InstantiateTest(TempDirTest):

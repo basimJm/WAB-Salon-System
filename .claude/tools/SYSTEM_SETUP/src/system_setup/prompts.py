@@ -17,6 +17,7 @@ SDK_DESCRIPTIONS = {
     "analytics": "server events + Firebase / BigQuery ports",
 }
 APP_PREFIX_LENGTH = 3
+SYSTEM_PREFIX_LENGTH = 4  # default folder/task prefix of the system: 'Acme Shop' -> ACME, 'WAB' -> WAB
 FIXED_PREFIXES = {"server": "SRV", "admin": "ADM"}
 MAIN_BRANCH = "main"
 API_VERSION_SEGMENT = "v1"
@@ -138,6 +139,12 @@ def pascal_from(name: str) -> str:
 def prefix_from(name: str) -> str:
     letters = re.sub(r"[^A-Za-z0-9]", "", name).upper()
     return (letters[:APP_PREFIX_LENGTH] or "APP").ljust(APP_PREFIX_LENGTH, "X")
+
+
+def system_prefix_from(name: str) -> str:
+    """'Acme Shop' -> 'ACME', 'Beta Store' -> 'BETA', 'WAB' -> 'WAB' (letters of the name, at most 4, at least 2)."""
+    letters = re.sub(r"[^A-Za-z0-9]", "", name).upper()
+    return letters[:SYSTEM_PREFIX_LENGTH].ljust(2, "X") if letters else "APP"
 
 
 def sdk_title(sdk: str) -> str:
