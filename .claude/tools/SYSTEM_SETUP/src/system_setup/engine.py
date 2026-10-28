@@ -20,7 +20,7 @@ from manifest import MANIFEST_NAME, Manifest
 
 ALWAYS_SKIP = (".git", "__pycache__", ".DS_Store")
 BLOCK_RE = re.compile(r"^[^\S\n]*__EACH_(APP|SDK)__[^\n]*\n(.*?)^[^\S\n]*__END_EACH__[^\n]*\n?", re.M | re.S)
-LEFTOVER_RE = re.compile(r"__[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*__")
+LEFTOVER_RE = re.compile(r"__[A-Z][A-Z0-9]*(?:_[A-Za-z0-9]+)*__")
 
 
 class EngineError(RuntimeError):
@@ -84,8 +84,14 @@ def leftovers(text: str) -> List[str]:
 
 
 def sentinel_leftovers(text: str, sentinels: Mapping[str, str], values: Mapping[str, str]) -> List[str]:
-    """Sentinel literals still in a rendered text, ignoring literals a token legitimately rendered to (same value)."""
-    return sorted(literal for literal, token in sentinels.items() if literal in text and values.get(token) != literal)
+    """Sentinel literals still in a rendered text or path, ignoring literals some answer legitimately equals."""
+    chosen = set(values.values())
+    return sorted(literal for literal in sentinels if literal in text and literal not in chosen)
+
+
+def verification_errors(result: "Result") -> List[str]:
+    """Post-write check of one part: every sentinel left in a path or text file, one line each (empty = clean)."""
+    return [f"{rel}: {', '.join(literals)}" for rel, literals in sorted(result.sentinel_left.items())]
 
 
 # ---------- selection ----------
@@ -167,6 +173,9 @@ def instantiate(manifest: Manifest, repo_root: Path, values: Mapping[str, str],
         out_rel = render_path(rel, manifest, values)
         out = dest / Path(*out_rel.parts)
         out.parent.mkdir(parents=True, exist_ok=True)
+        left_in_path = sentinel_leftovers(out_rel.as_posix(), manifest.sentinels, values)
+        if left_in_path:
+            result.sentinel_left[str(out.relative_to(repo_root))] = left_in_path
         if out.exists():
             result.overwritten.append(out)
         if source.is_symlink():
@@ -175,7 +184,7 @@ def instantiate(manifest: Manifest, repo_root: Path, values: Mapping[str, str],
             out.symlink_to(source.readlink())
             result.files.append(out)
             continue
-        if matches_any(rel, manifest.binary_globs):
+        if matches_any(rel, manifest.binary_globs) or matches_any(rel, manifest.verbatim_globs):
             shutil.copyfile(source, out)
             result.binaries.append(out)
         else:
@@ -193,7 +202,8 @@ def instantiate(manifest: Manifest, repo_root: Path, values: Mapping[str, str],
                     result.unresolved[str(out.relative_to(repo_root))] = rest
                 left = sentinel_leftovers(rendered, manifest.sentinels, values)
                 if left:
-                    result.sentinel_left[str(out.relative_to(repo_root))] = left
+                    key = str(out.relative_to(repo_root))
+                    result.sentinel_left[key] = sorted(set(result.sentinel_left.get(key, [])) | set(left))
                 result.files.append(out)
         shutil.copymode(source, out)
     apply_targeted(manifest, dest, values)

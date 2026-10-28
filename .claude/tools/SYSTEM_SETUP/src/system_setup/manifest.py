@@ -8,8 +8,9 @@ from pathlib import Path, PurePosixPath
 from typing import Dict, List, Optional
 
 MANIFEST_NAME = "TEMPLATE.json"
-# `__APP_DIR_<n>__` / `__SDK_DIR_<name>__` are the documented families; concrete tokens are upper-case segments.
-TOKEN_RE = re.compile(r"__[A-Z][A-Z0-9]*(?:_(?:[A-Z0-9]+|<[a-z]+>))*__")
+# `__APP_DIR_<n>__` / `__SDK_DIR_<name>__` are the documented families; concrete tokens start upper-case and a later
+# segment may be a lower-case name (`__SDK_DIR_storage__`).
+TOKEN_RE = re.compile(r"__[A-Z][A-Z0-9]*(?:_(?:[A-Za-z0-9]+|<[a-z]+>))*__")
 KINDS = ("workspace", "server", "admin", "sdk", "kmp")
 # Where each kind lands inside the generated repo (relative to its root). A template may override this with "dest".
 DEFAULT_DEST = {
@@ -19,12 +20,14 @@ DEFAULT_DEST = {
     "sdk": "__SDK_DIR__",
     "kmp": "__APP_DIR__",
 }
-REQUIRED_KEYS = ("kind", "description", "placeholders")
+REQUIRED_KEYS = ("kind", "placeholders")  # description is recommended, not required
 LIST_KEYS = ("placeholders", "skip", "post_generate", "binary_globs", "layers")
 DICT_KEYS = ("sentinels", "rename_paths")
 # Where a template keeps its files when not at its root: sdk = common/ + kinds/<name>/ overlay, kmp = project/.
 DEFAULT_LAYERS = {"sdk": ["common", "kinds/__SDK_NAME__"], "kmp": ["project"]}
-SDK_KIND_KEYS = ("dir", "prefix", "title")
+SDK_KIND_KEYS = ("prefix", "title")   # optional: "dir" = overlay folder inside the template, "description"
+# Copied byte for byte and never substituted, per kind (on top of binary_globs): vendored skills keep their files intact.
+DEFAULT_VERBATIM = {"workspace": [".claude/skills/**"]}
 TARGETED_KEYS = ("file", "placeholder", "find", "replace_with")
 
 
@@ -44,6 +47,7 @@ class Manifest:
     post_generate: List[str] = field(default_factory=list)
     binary_globs: List[str] = field(default_factory=list)
     dest: str = "."
+    verbatim_globs: List[str] = field(default_factory=list)  # copied as-is, no substitution (kind default)
     layers: List[str] = field(default_factory=list)          # sub-folders copied in order (later ones overlay)
     kinds: Dict[str, Dict[str, str]] = field(default_factory=dict)  # sdk only: name -> {dir, prefix, title}
     targeted: List[Dict[str, str]] = field(default_factory=list)   # {file, placeholder, find, replace_with}
@@ -102,15 +106,17 @@ def parse_manifest(data: object, root: Path) -> Manifest:
                 f"{where}: every 'targeted' edit needs the string keys {', '.join(TARGETED_KEYS)}")
         _expect(TOKEN_RE.fullmatch(edit["placeholder"]) is not None,
                 f"{where}: targeted placeholder {edit['placeholder']!r} is not a __TOKEN__")
-    return Manifest(kind=kind, description=str(data["description"]), root=root, placeholders=list(data["placeholders"]),
+    return Manifest(kind=kind, description=str(data.get("description", "")), root=root, placeholders=list(data["placeholders"]),
                     sentinels=dict(data.get("sentinels", {})), rename_paths=dict(data.get("rename_paths", {})),
                     skip=list(data.get("skip", [])), post_generate=list(data.get("post_generate", [])),
                     binary_globs=list(data.get("binary_globs", [])), dest=dest, layers=layers,
+                    verbatim_globs=list(DEFAULT_VERBATIM.get(kind, [])),
                     kinds={k: dict(v) for k, v in kinds.items()}, targeted=[dict(e) for e in targeted])
 
 
 def _layers(data: dict, kind: str, root: Path, where: Path) -> List[str]:
-    """Declared `layers`, else the kind's default when that folder exists in the template, else the template root."""
+    """Declared `layers`, else the kind's default when that folder exists in the template, else the template root.
+    For the sdk kind the second layer is `kinds.<name>.dir` when declared (`__SDK_LAYER__`), else `kinds/<name>`."""
     if "layers" in data:
         layers = list(data["layers"])
         for layer in layers:
@@ -119,6 +125,8 @@ def _layers(data: dict, kind: str, root: Path, where: Path) -> List[str]:
         return layers
     default = DEFAULT_LAYERS.get(kind, [])
     if default and (root / default[0]).is_dir():
+        if kind == "sdk" and any(isinstance(m, dict) and m.get("dir") for m in data.get("kinds", {}).values()):
+            return [default[0], "__SDK_LAYER__"]
         return default
     return ["."]
 

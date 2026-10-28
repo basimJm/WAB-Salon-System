@@ -1,6 +1,6 @@
 {
   "kind": "sdk",
-  "description": "Fixture: one SDK package per chosen kind: common/ files + kinds/<name>/ overlay",
+  "description": "Fixture: common/ skeleton + kinds/<kind>/ overlay (kinds[].dir = overlay folder, default kinds/<kind>); output <slug>-<kind>",
   "placeholders": [
     "__SYSTEM_NAME__",
     "__NPM_SCOPE__",
@@ -15,22 +15,22 @@
   ],
   "kinds": {
     "storage": {
-      "dir": "__SYSTEM_PREFIX_LOWER__-storage",
+      "dir": "kinds/storage",
       "prefix": "STO",
-      "title": "Storage"
+      "title": "Storage",
+      "description": "presigned uploads"
     },
     "otp": {
-      "dir": "__SYSTEM_PREFIX_LOWER__-otp",
+      "dir": "kinds/otp",
       "prefix": "OTP",
-      "title": "OTP"
+      "title": "Otp"
     },
     "notifications": {
-      "dir": "__SYSTEM_PREFIX_LOWER__-notifications",
       "prefix": "NOT",
       "title": "Notifications"
     },
     "payments": {
-      "dir": "__SYSTEM_PREFIX_LOWER__-payments",
+      "dir": "kinds/payments",
       "prefix": "PAY",
       "title": "Payments"
     }

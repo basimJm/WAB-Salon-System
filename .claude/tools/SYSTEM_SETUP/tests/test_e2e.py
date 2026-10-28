@@ -6,7 +6,7 @@ import json
 import subprocess
 from contextlib import redirect_stdout
 
-from _support import FIXTURE_TEMPLATES, TempDirTest, make_spec
+from _support import FIXTURE_KNOWLEDGE, FIXTURE_TEMPLATES, TOOL_ROOT, TempDirTest, make_spec
 
 from cli import generate, main, print_report
 from prompts import AppSpec
@@ -15,14 +15,14 @@ from prompts import AppSpec
 class EndToEndTest(TempDirTest):
     def generate(self, **overrides):
         spec = make_spec(self.root / "acme-shop", **overrides)
-        return spec, generate(spec, FIXTURE_TEMPLATES, run_post=False, git=True, tool=self.root / "tool")
+        return spec, generate(spec, FIXTURE_TEMPLATES, run_post=False, git=True, tool=self.root / "tool", knowledge=FIXTURE_KNOWLEDGE)
 
     def test_full_system_is_generated_filled_checked_and_committed(self):
         spec, report = self.generate()
         repo = spec.target
         # every part landed in its folder
         self.assertEqual(["server", "admin", "sdk", "sdk", "kmp", "kmp", "workspace"], [r.kind for r in report.results])
-        for folder in ("ACME-Server", "ACME-Admin-Dashboard", "acme-storage", "acme-otp", "ACME-Mobile-Customer", "ACME-Mobile-Merchant"):
+        for folder in ("ACME-Server", "ACME-Admin-Dashboard", "acme-shop-storage", "acme-shop-otp", "ACME-Mobile-Customer", "ACME-Mobile-Merchant"):
             self.assertTrue((repo / folder).is_dir(), folder)
         # server: sentinels, tokens, renames, skip, binary intact
         pkg = json.loads((repo / "ACME-Server/package.json").read_text(encoding="utf-8"))
@@ -33,13 +33,14 @@ class EndToEndTest(TempDirTest):
         self.assertFalse((repo / "ACME-Server/debug.log").exists())
         self.assertIn(b"WAB", (repo / "ACME-Server/assets/logo.png").read_bytes())
         # sdk: common + kind overlay, rename, kinds metadata
-        self.assertIn("// storage:", (repo / "acme-storage/src/storage.ts").read_text(encoding="utf-8"))
-        self.assertIn("// otp:", (repo / "acme-otp/src/otp.ts").read_text(encoding="utf-8"))
-        self.assertIn("OTP overlay README", (repo / "acme-otp/README.md").read_text(encoding="utf-8"))
-        self.assertIn("Common README", (repo / "acme-storage/README.md").read_text(encoding="utf-8"))
-        self.assertEqual({"name": "@acme/storage", "description": "acme-storage: presigned uploads, CDN / signed URLs (S3 + local adapters)",
-                          "prefix": "STO", "kind": "storage"}, json.loads((repo / "acme-storage/package.json").read_text(encoding="utf-8")))
-        self.assertFalse((repo / "acme-storage/node_modules").exists())
+        self.assertIn("// storage:", (repo / "acme-shop-storage/src/storage.ts").read_text(encoding="utf-8"))
+        self.assertIn("// otp:", (repo / "acme-shop-otp/src/otp.ts").read_text(encoding="utf-8"))
+        self.assertIn("OTP overlay README", (repo / "acme-shop-otp/README.md").read_text(encoding="utf-8"))
+        self.assertIn("Common README", (repo / "acme-shop-storage/README.md").read_text(encoding="utf-8"))
+        self.assertEqual({"name": "@acme/storage", "description": "acme-shop-storage: presigned uploads", "prefix": "STO", "kind": "storage",
+                          "title": "Storage", "sibling": "acme-shop-analytics"},
+                         json.loads((repo / "acme-shop-storage/package.json").read_text(encoding="utf-8")))
+        self.assertFalse((repo / "acme-shop-storage/node_modules").exists())
         # kmp: project/ layer only, package path rename, sentinels incl. hosts, targeted edit, binary untouched
         app = repo / "ACME-Mobile-Merchant"
         self.assertFalse((app / "README.md").exists())
@@ -63,15 +64,32 @@ class EndToEndTest(TempDirTest):
         guide = (repo / "CLAUDE.md").read_text(encoding="utf-8")
         self.assertIn("Masters: `server`, `admin`, `customer`, `merchant`.", guide)
         self.assertIn("| `ACME-Mobile-Customer/` | Customer app (KMP + Compose Multiplatform, `com.acme.customer`, tasks `CUS`, master `customer`) |", guide)
-        self.assertIn("| `acme-otp/` | SDK `@acme/otp` (ports + adapters, tasks `OTP`, master `server`) |", guide)
+        self.assertIn("| `acme-shop-otp/` | SDK `@acme/otp` (ports + adapters, tasks `OTP`, master `server`) |", guide)
         registry = json.loads((repo / ".claude/projects.json").read_text(encoding="utf-8"))
         self.assertIn("(fixture)", registry["_comment"])
         self.assertEqual(["server", "admin", "customer", "merchant", "storage", "otp"], list(registry["projects"]))
         self.assertEqual(["SRV", "ADM", "CUS", "MER", "STO", "OTP"], [p["prefix"] for p in registry["projects"].values()])
         self.assertIn("| ACME-Mobile-Customer (`com.acme.customer`) | CUS |", (repo / "INTEGRATION.md").read_text(encoding="utf-8"))
-        # starter files only where a template shipped nothing; tasks.py check OK; nothing unresolved
+        # per-project files only where a template shipped nothing, from docs/templates when present; tasks.py check OK
         self.assertIn("ACME-Admin-Dashboard/.claude/session.md", report.created)
         self.assertNotIn("ACME-Admin-Dashboard/docs/ACME_Admin_Tasks.md", report.created)
+        self.assertIn("acme-shop-otp/docs/ACME_Package_Otp_Tasks.md", report.created)
+        backlog = (repo / "acme-shop-otp/docs/ACME_Package_Otp_Tasks.md").read_text(encoding="utf-8")
+        self.assertTrue(backlog.startswith("# acme-shop-otp — Task Backlog\n\n> Pick the next task with `python3 scripts/tasks.py next otp`."))
+        self.assertIn("| OTP-001 | Project scaffold", backlog)
+        self.assertIn("| OTP-002 |", backlog)
+        self.assertNotIn("SRV-0NN", backlog)  # the template's example rows are not copied (check would reject them)
+        self.assertEqual("# ACME-Mobile-Customer — Rules for AI Agents\n\n- Branching: master `customer`.\n",
+                         (repo / "ACME-Mobile-Customer/CLAUDE.md").read_text(encoding="utf-8"))
+        self.assertIn("### CUS-NNN — <title>\n- Branch: `feat/cus-NNN-<key>`", (repo / "ACME-Mobile-Customer/.claude/session.md").read_text(encoding="utf-8"))
+        self.assertIn("Memory", (repo / "ACME-Server/.claude/memory.md").read_text(encoding="utf-8"))  # built-in starter (no doc template)
+        # knowledge copied and linked; vendored skills copied verbatim
+        self.assertEqual(["docs/knowledge/LESSONS.md", "docs/knowledge/PLAYBOOKS.md"], report.knowledge)
+        self.assertIn("# Lessons (fixture)", (repo / "docs/knowledge/LESSONS.md").read_text(encoding="utf-8"))
+        readme = (repo / "README.md").read_text(encoding="utf-8")
+        self.assertIn("# Acme Shop — Workspace", readme)
+        self.assertIn("[`PLAYBOOKS.md`](docs/knowledge/PLAYBOOKS.md)", readme)
+        self.assertIn("__SYSTEM_NAME__ stays a literal", (repo / ".claude/skills/demo/SKILL.md").read_text(encoding="utf-8"))
         self.assertEqual((True, "OK"), (report.check_ok, report.check_output))
         self.assertEqual({}, report.unresolved)
         self.assertEqual({}, report.sentinel_left)
@@ -85,6 +103,9 @@ class EndToEndTest(TempDirTest):
         log = subprocess.run(["git", "log", "--oneline", "--format=%s"], cwd=repo, capture_output=True, text=True, check=True).stdout
         self.assertEqual("Acme Shop: system generated by SYSTEM_SETUP\n", log)
         self.assertEqual("main", subprocess.run(["git", "branch", "--show-current"], cwd=repo, capture_output=True, text=True, check=True).stdout.strip())
+        branches = subprocess.run(["git", "branch", "--format=%(refname:short)"], cwd=repo, capture_output=True, text=True, check=True).stdout.split()
+        self.assertEqual(["admin", "customer", "main", "merchant", "server"], sorted(branches))
+        self.assertTrue(any("git push -u origin main server admin customer merchant" in step for step in report.steps))
         self.assertEqual("", subprocess.run(["git", "status", "--porcelain"], cwd=repo, capture_output=True, text=True, check=True).stdout)
         self.assertTrue(report.ok)
         with redirect_stdout(io.StringIO()) as out:
@@ -97,7 +118,7 @@ class EndToEndTest(TempDirTest):
         registry = json.loads((spec.target / ".claude/projects.json").read_text(encoding="utf-8"))
         self.assertEqual(["shop", "payments"], list(registry["projects"]))
         self.assertEqual(("SHO", "PAY"), (registry["projects"]["shop"]["prefix"], registry["projects"]["payments"]["prefix"]))
-        self.assertEqual("acme-payments/docs/ACME_Package_Payments_Tasks.md", registry["projects"]["payments"]["backlog"])
+        self.assertEqual("acme-shop-payments/docs/ACME_Package_Payments_Tasks.md", registry["projects"]["payments"]["backlog"])
         self.assertEqual(["server", "shop"], spec.masters())
         self.assertTrue(report.check_ok, report.check_output)
         self.assertEqual({}, report.unresolved)
@@ -129,14 +150,15 @@ class CliMainTest(TempDirTest):
                 "--npm-scope", "@beta", "--target", str(target), "--app", "Customer:customer", "--sdk", "otp,storage",
                 "--dev-api-url", "https://api-dev.beta.io", "--prod-api-url", "https://api.beta.io", "--dev-web-url",
                 "https://app-dev.beta.io", "--prod-web-url", "https://app.beta.io", "--team-id", "ABCDE12345",
-                "--github-owner", "beta-inc", "--templates", str(FIXTURE_TEMPLATES), "--no-git"]
+                "--github-owner", "beta-inc", "--templates", str(FIXTURE_TEMPLATES), "--knowledge", str(FIXTURE_KNOWLEDGE), "--no-git"]
         with redirect_stdout(io.StringIO()) as out:
             code = main(argv)
         self.assertEqual(0, code, out.getvalue())
         self.assertIn("TEAM_ID = ABCDE12345", (target / "BETA-Mobile-Customer/iosApp/Configuration/Config.xcconfig").read_text(encoding="utf-8"))
         self.assertIn("API_BASE_URL = https:/$()/api-dev.beta.io", (target / "BETA-Mobile-Customer/iosApp/Configuration/Dev.xcconfig").read_text(encoding="utf-8"))
-        self.assertTrue((target / "beta-otp/src/otp.ts").is_file())
+        self.assertTrue((target / "beta-store-otp/src/otp.ts").is_file())
         self.assertIn("tasks.py check: OK", out.getvalue())
+        self.assertIn("knowledge: docs/knowledge/LESSONS.md", out.getvalue())
         with redirect_stdout(io.StringIO()) as out:
             self.assertEqual(0, main(["--list-templates", "--templates", str(FIXTURE_TEMPLATES)]))
         self.assertEqual(5, out.getvalue().count("ready"))
@@ -147,7 +169,6 @@ class CliMainTest(TempDirTest):
                          "--templates", str(FIXTURE_TEMPLATES)])
         self.assertEqual(2, code)
         self.assertIn("Package root", out.getvalue())
-        from _support import TOOL_ROOT
         with redirect_stdout(io.StringIO()) as out:
             code = main(["--yes", "--name", "Beta", "--target", str(TOOL_ROOT / "templates" / "generated"),
                          "--templates", str(FIXTURE_TEMPLATES), "--no-git"])

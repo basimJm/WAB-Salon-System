@@ -33,7 +33,7 @@ class ValidatorTest(unittest.TestCase):
     def test_urls_team_id_and_sdk_names(self):
         self.assertIsNone(validate_url("https://api-dev.acme.io"))
         self.assertIsNone(validate_url("http://localhost:4000"))
-        for bad in ("api.acme.io", "ftp://x.io", "https://", "https://x.io/", "https://x.io?a=1"):
+        for bad in ("api.acme.io", "ftp://x.io", "https://", "https://x.io/", "https://x.io?a=1", "https://x.io/v1"):
             self.assertIsNotNone(validate_url(bad), bad)
         self.assertIsNone(validate_team_id(""))
         self.assertIsNone(validate_team_id("ABCDE12345"))
@@ -68,7 +68,7 @@ class DerivedNamesTest(unittest.TestCase):
         self.assertEqual(("ACME-Server", "ACME-Admin-Dashboard"), (spec.server_dir, spec.admin_dir))
         self.assertEqual("ACME-Mobile-Customer", spec.app_dir(spec.apps[0]))
         self.assertEqual("com.acme.merchant", spec.app_package(spec.apps[1]))
-        self.assertEqual("acme-storage", spec.sdk_dir("storage"))
+        self.assertEqual("acme-shop-storage", spec.sdk_dir("storage"))
         self.assertEqual("@acme/otp", spec.sdk_package("otp"))
         self.assertEqual({"customer": "CUS", "merchant": "MER"}, spec.app_prefixes())
         self.assertEqual(["server", "admin", "customer", "merchant"], spec.masters())
@@ -91,7 +91,7 @@ class DerivedNamesTest(unittest.TestCase):
                     "__SYSTEM_PREFIX__": "ACME", "__PACKAGE_ROOT__": "com.acme", "__NPM_SCOPE__": "@acme",
                     "__SERVER_DIR__": "ACME-Server", "__ADMIN_DIR__": "ACME-Admin-Dashboard",
                     "__APP_DIR_1__": "ACME-Mobile-Customer", "__APP_NAME_2__": "Merchant", "__APP_PACKAGE_2__": "com.acme.merchant",
-                    "__SDK_DIR_STORAGE__": "acme-storage", "__SDK_DIR_otp__": "acme-otp", "__OWNER_GITHUB__": "acme-inc",
+                    "__SDK_DIR_STORAGE__": "acme-shop-storage", "__SDK_DIR_otp__": "acme-shop-otp", "__SDK_DIR_analytics__": "acme-shop-analytics", "__OWNER_GITHUB__": "acme-inc",
                     "__REPO_NAME__": "acme-shop", "__YEAR__": "2026", "__DATE__": "2026-10-28", "__APPLE_TEAM_ID__": ""}
         for token, value in expected.items():
             self.assertEqual(value, values[token], token)
@@ -99,7 +99,7 @@ class DerivedNamesTest(unittest.TestCase):
         self.assertEqual(("Customer", "com.acme.customer", "com/acme/customer", "Customer", "CUS"),
                          (app["__APP_NAME__"], app["__APP_PACKAGE__"], app["__APP_PACKAGE_PATH__"], app["__APP_PROJECT__"], app["__APP_PREFIX__"]))
         sdk = spec.sdk_values("otp")
-        self.assertEqual(("otp", "OTP", "acme-otp", "@acme/otp", "OTP"),
+        self.assertEqual(("otp", "OTP", "acme-shop-otp", "@acme/otp", "OTP"),
                          (sdk["__SDK_NAME__"], sdk["__SDK_TITLE__"], sdk["__SDK_DIR__"], sdk["__SDK_PACKAGE__"], sdk["__SDK_PREFIX__"]))
 
 

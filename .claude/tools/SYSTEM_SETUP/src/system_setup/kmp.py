@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Dict, List
 
-from engine import Result, instantiate
+from engine import EngineError, Result, instantiate, verification_errors
 from manifest import Manifest
 from prompts import AppSpec, Spec
 
@@ -47,7 +47,16 @@ def app_token_values(spec: Spec, app: AppSpec) -> Dict[str, str]:
 
 
 def instantiate_apps(manifest: Manifest, repo_root: Path, spec: Spec) -> List[Result]:
-    return [instantiate(manifest, repo_root, app_token_values(spec, app), spec.part_values()) for app in spec.apps]
+    """One app per AppSpec; a sentinel left in any path or text file of the app is an error (as in the snapshot's
+    instantiate.py `verify`), never a warning."""
+    results = []
+    for app in spec.apps:
+        result = instantiate(manifest, repo_root, app_token_values(spec, app), spec.part_values())
+        errors = verification_errors(result)
+        if errors:
+            raise EngineError(f"kmp {spec.app_dir(app)}: sentinels left after instantiation:\n  " + "\n  ".join(errors))
+        results.append(result)
+    return results
 
 
 def identity_leftovers(app_root: Path) -> List[str]:

@@ -98,8 +98,10 @@ class TemplateSelectionTest(TempDirTest):
     def test_sdk_kinds_override_dir_prefix_and_title(self):
         spec = self.spec(sdks=["otp", "storage"])
         apply_sdk_kinds(spec, load_manifest(FIXTURE_TEMPLATES / "sdk"))
-        self.assertEqual(("aa-otp", "OTP", "OTP", "aa-storage", "STO", "Storage"),
+        self.assertEqual(("a-otp", "OTP", "Otp", "a-storage", "STO", "Storage"),
                          (spec.sdk_dir("otp"), spec.sdk_prefix("otp"), spec.sdk_title_of("otp"),
                           spec.sdk_dir("storage"), spec.sdk_prefix("storage"), spec.sdk_title_of("storage")))
         apply_sdk_kinds(self.spec(sdks=["analytics"]), None)  # no manifest: derived names stay
         self.assertEqual("ANA", self.spec(sdks=["analytics"]).sdk_prefix("analytics"))
+        self.assertEqual(("kinds/otp", "kinds/notifications", "presigned uploads"),
+                         (spec.sdk_layer("otp"), spec.sdk_layer("notifications"), spec.sdk_description("storage")))

@@ -6,8 +6,8 @@ from pathlib import PurePosixPath
 
 from _support import TOOL_ROOT, TempDirTest
 
-from engine import (EngineError, check_target, expand_blocks, instantiate, leftovers, matches_any, render_path,
-                    render_text, substitute_sentinels, substitute_tokens)
+from engine import (EngineError, check_target, expand_blocks, instantiate, layer_dirs, leftovers, matches_any, render_path,
+                    render_text, sentinel_leftovers, substitute_sentinels, substitute_tokens, template_files, verification_errors)
 from manifest import load_manifest, parse_manifest
 
 VALUES = {"__SYSTEM_PREFIX__": "ACME", "__SYSTEM_NAME__": "Acme Shop", "__APP_PACKAGE__": "com.acme.customer",
@@ -32,7 +32,8 @@ class SubstitutionTest(TempDirTest):
         values = {"__SYSTEM_PREFIX__": "ACME", "__APP_PROJECT__": "Customer", "__APP_DIR_2__": "ACME-Mobile-Merchant"}
         self.assertEqual("ACME_Customer_Tasks.md / ACME-Mobile-Merchant",
                          substitute_tokens("__SYSTEM_PREFIX_____APP_PROJECT___Tasks.md / __APP_DIR_2__", values))
-        self.assertEqual(["__APP_DIR_3__", "__UNKNOWN__"], leftovers("x __UNKNOWN__ y __APP_DIR_3__ __not_a_token__"))
+        self.assertEqual(["__APP_DIR_3__", "__SDK_DIR_analytics__", "__UNKNOWN__"],
+                         leftovers("x __UNKNOWN__ y __APP_DIR_3__ __not_a_token__ __SDK_DIR_analytics__ __init__"))
 
     def test_each_blocks_repeat_per_app_and_sdk_and_vanish_when_empty(self):
         text = "| Project |\n__EACH_APP__\n| __APP_DIR__ (__APP_PREFIX__) |\n__END_EACH__\n__EACH_SDK__\n| __SDK_DIR__ |\n__END_EACH__\nend\n"
@@ -126,3 +127,85 @@ class TargetTest(TempDirTest):
             check_target(self.root / "full", self.root / "tool")
         with self.assertRaises(EngineError):
             check_target(self.root / "full/x.txt", self.root / "tool")
+
+
+class LayerTest(TempDirTest):
+    def test_sdk_layers_overlay_common_with_the_kind_and_render_the_layer_token(self):
+        self.write("sdk/TEMPLATE.json", json.dumps({"kind": "sdk", "description": "t", "placeholders": [],
+                                                    "kinds": {"otp": {"dir": "kinds/otp", "prefix": "OTP", "title": "OTP"}}}))
+        self.write("sdk/common/README.md", "common")
+        self.write("sdk/common/src/index.ts", "common index")
+        self.write("sdk/kinds/otp/README.md", "otp overlay")
+        self.write("sdk/kinds/otp/src/otp.ts", "otp only")
+        m = load_manifest(self.root / "sdk")
+        self.assertEqual(["common", "__SDK_LAYER__"], m.layers)  # kinds[].dir names the overlay folder
+        values = {"__SDK_NAME__": "otp", "__SDK_DIR__": "x-otp", "__SDK_LAYER__": "kinds/otp"}
+        self.assertEqual([self.root / "sdk/common", self.root / "sdk/kinds/otp"], layer_dirs(m, values))
+        files = dict(template_files(m, values))
+        self.assertEqual(self.root / "sdk/kinds/otp/README.md", files[PurePosixPath("README.md")])
+        self.assertEqual({"README.md", "src/index.ts", "src/otp.ts"}, {str(k) for k in files})
+        with self.assertRaises(EngineError):
+            layer_dirs(m, {"__SDK_DIR__": "x-otp", "__SDK_NAME__": "otp"})  # layer token without a value
+        with self.assertRaises(EngineError):
+            layer_dirs(m, {"__SDK_LAYER__": "kinds/storage", "__SDK_DIR__": "x"})  # no such kind folder
+        result = instantiate(m, self.root / "repo", values)
+        self.assertEqual("otp overlay", (self.root / "repo/x-otp/README.md").read_text(encoding="utf-8"))
+        self.assertEqual("common index", (self.root / "repo/x-otp/src/index.ts").read_text(encoding="utf-8"))
+        self.assertEqual(3, len(result.files))
+
+    def test_kmp_project_layer_is_used_only_when_present(self):
+        self.write("kmp/TEMPLATE.json", json.dumps({"kind": "kmp", "description": "t", "placeholders": []}))
+        self.write("kmp/README.md", "about the template")
+        self.assertEqual(["."], load_manifest(self.root / "kmp").layers)
+        self.write("kmp/project/settings.gradle.kts", "x")
+        m = load_manifest(self.root / "kmp")
+        self.assertEqual(["project"], m.layers)
+        self.assertEqual([PurePosixPath("settings.gradle.kts")], [rel for rel, _ in template_files(m)])
+        self.write("kmp/TEMPLATE.json", json.dumps({"kind": "kmp", "description": "t", "placeholders": [], "layers": ["."]}))
+        self.assertEqual({"README.md", "TEMPLATE.json", "project/settings.gradle.kts"} - {"TEMPLATE.json"},
+                         {str(rel) for rel, _ in template_files(load_manifest(self.root / "kmp"))})
+
+
+class TargetedAndSentinelTest(TempDirTest):
+    def test_targeted_edit_renders_its_token_and_fails_loudly(self):
+        edit = {"file": "src/com/acme/shop/Config.kt", "placeholder": "__REALTIME_NAMESPACE__",
+                "find": 'NS = "/app"', "replace_with": 'NS = "__REALTIME_NAMESPACE__"'}
+        self.write("kmp/TEMPLATE.json", json.dumps({"kind": "kmp", "description": "t", "placeholders": [], "layers": ["."],
+                                                    "rename_paths": {"com/acme/shop": "__APP_PACKAGE_PATH__"}, "targeted": [edit]}))
+        self.write("kmp/src/com/acme/shop/Config.kt", 'NS = "/app"\nPACKET = "40/app,"\n')
+        values = {"__APP_DIR__": "App", "__APP_PACKAGE_PATH__": "io/beta/store", "__REALTIME_NAMESPACE__": "/store"}
+        instantiate(load_manifest(self.root / "kmp"), self.root / "repo", values)
+        self.assertEqual('NS = "/store"\nPACKET = "40/app,"\n', (self.root / "repo/App/src/io/beta/store/Config.kt").read_text(encoding="utf-8"))
+        with self.assertRaises(EngineError):  # no value for the placeholder
+            instantiate(load_manifest(self.root / "kmp"), self.root / "repo2", {"__APP_DIR__": "App", "__APP_PACKAGE_PATH__": "io/beta/store"})
+        self.write("kmp/src/com/acme/shop/Config.kt", 'NS = "/other"\n')
+        with self.assertRaises(EngineError):  # find text missing
+            instantiate(load_manifest(self.root / "kmp"), self.root / "repo3", values)
+
+    def test_sentinel_leftovers_are_reported_unless_the_value_is_the_literal(self):
+        sentinels = {"api.example.com": "__PROD_API_HOST__", "Acme Shop": "__APP_NAME__"}
+        self.assertEqual(["Acme Shop"], sentinel_leftovers("Acme Shop at api.example.com", sentinels,
+                                                           {"__PROD_API_HOST__": "api.example.com", "__APP_NAME__": "Beta"}))
+        self.write("kmp/TEMPLATE.json", json.dumps({"kind": "kmp", "description": "t", "placeholders": [], "layers": ["."],
+                                                    "sentinels": {"Acme Shop": "__APP_NAME__"}}))
+        self.write("kmp/a.txt", "Acme Shop\n")
+        self.write("kmp/b.txt", "Acme Shop in a line, and AcmeShop too\n")  # 'Acme Shop' replaced; AcmeShop is not a sentinel here
+        result = instantiate(load_manifest(self.root / "kmp"), self.root / "repo", {"__APP_DIR__": "App", "__APP_NAME__": "Beta"})
+        self.assertEqual({}, result.sentinel_left)
+        result = instantiate(load_manifest(self.root / "kmp"), self.root / "repo2", {"__APP_DIR__": "App", "__APP_NAME__": "Acme Shop"})
+        self.assertEqual({}, result.sentinel_left)  # same identity chosen: not a leftover
+
+    def test_sentinel_left_in_a_path_is_reported_and_kmp_fails_loudly(self):
+        self.write("kmp/TEMPLATE.json", json.dumps({"kind": "kmp", "description": "t", "placeholders": [], "layers": ["."],
+                                                    "sentinels": {"AcmeShop": "__APP_PROJECT__"}}))  # no rename_paths on purpose
+        self.write("kmp/iosApp/AcmeShop/Info.plist", "ok")
+        result = instantiate(load_manifest(self.root / "kmp"), self.root / "repo", {"__APP_DIR__": "App", "__APP_PROJECT__": "Beta"})
+        self.assertEqual({"App/iosApp/AcmeShop/Info.plist": ["AcmeShop"]}, result.sentinel_left)
+        self.assertEqual(["App/iosApp/AcmeShop/Info.plist: AcmeShop"], verification_errors(result))
+        from kmp import instantiate_apps
+        from _support import make_spec
+        from prompts import AppSpec
+        spec = make_spec(self.root / "repo2", apps=[AppSpec("Beta", "beta")], sdks=[])
+        with self.assertRaises(EngineError) as caught:
+            instantiate_apps(load_manifest(self.root / "kmp"), spec.target, spec)
+        self.assertIn("sentinels left", str(caught.exception))

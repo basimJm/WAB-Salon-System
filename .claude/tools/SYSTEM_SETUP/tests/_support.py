@@ -10,6 +10,7 @@ from pathlib import Path
 TESTS_DIR = Path(__file__).resolve().parent
 TOOL_ROOT = TESTS_DIR.parent
 FIXTURE_TEMPLATES = TESTS_DIR / "fixtures" / "templates"
+FIXTURE_KNOWLEDGE = TESTS_DIR / "fixtures" / "knowledge"
 sys.path.insert(0, str(TOOL_ROOT / "src" / "system_setup"))
 
 from prompts import AppSpec, Spec  # noqa: E402

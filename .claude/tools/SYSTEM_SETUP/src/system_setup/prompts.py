@@ -84,8 +84,8 @@ def validate_url(value: str) -> Optional[str]:
     parts = urlsplit(value)
     if parts.scheme not in ("http", "https") or not parts.netloc:
         return "use a full http(s) URL (e.g. https://api.acme.io)"
-    if parts.query or parts.fragment or value.endswith("/"):
-        return "no query, fragment or trailing slash"
+    if parts.path or parts.query or parts.fragment:
+        return "scheme and host only, no path, query, fragment or trailing slash (the apps derive the bare host from it)"
     return None
 
 
@@ -167,12 +167,6 @@ def package_segment(slug: str) -> str:
     return segment if segment and segment[0].isalpha() and segment not in KOTLIN_KEYWORDS else f"app{segment}"
 
 
-def substitute_simple(text: str, prefix: str, slug: str) -> str:
-    """The few tokens an sdk `kinds[].dir` may use before the full value map exists."""
-    return (text.replace("__SYSTEM_PREFIX_LOWER__", prefix.lower()).replace("__SYSTEM_PREFIX__", prefix)
-            .replace("__SYSTEM_SLUG__", slug))
-
-
 def unique_prefix(wanted: str, taken: List[str], name: str) -> str:
     """CUS for 'customer'; on a clash tries other letters of the name, then digits."""
     if wanted not in taken:
@@ -239,7 +233,8 @@ class Spec:
     owner_github: str = "owner"
     repo_name: str = ""
     today: _dt.date = field(default_factory=_dt.date.today)
-    # Per-SDK overrides from templates/sdk/TEMPLATE.json `kinds` (name -> {dir, prefix, title}); derived names otherwise.
+    # Per-SDK metadata from templates/sdk/TEMPLATE.json `kinds` (name -> {prefix, title, dir = overlay folder,
+    # description}); derived names when absent.
     sdk_overrides: Dict[str, Dict[str, str]] = field(default_factory=dict)
 
     # --- derived names (one place, used by every template kind) ---
@@ -269,12 +264,18 @@ class Spec:
         return f"/{app.slug}"
 
     def _sdk_override(self, sdk: str, key: str, default: str) -> str:
-        value = self.sdk_overrides.get(sdk, {}).get(key, "")
-        return substitute_simple(value, self.prefix, self.slug) if value else default
+        return self.sdk_overrides.get(sdk, {}).get(key) or default
 
     def sdk_dir(self, sdk: str) -> str:
-        """`acme-storage` for prefix ACME (WAB: `wab-storage`), unless the sdk template names the folder."""
-        return self._sdk_override(sdk, "dir", f"{self.prefix.lower()}-{sdk}")
+        """`<slug>-<kind>`: `acme-storage` for the slug `acme` (the sdk template's `__SDK_DIR_<kind>__`)."""
+        return f"{self.slug}-{sdk}"
+
+    def sdk_layer(self, sdk: str) -> str:
+        """Overlay folder inside the sdk template: `kinds.<kind>.dir` when declared, else `kinds/<kind>`."""
+        return self._sdk_override(sdk, "dir", f"kinds/{sdk}")
+
+    def sdk_description(self, sdk: str) -> str:
+        return self._sdk_override(sdk, "description", SDK_DESCRIPTIONS.get(sdk, sdk))
 
     def sdk_prefix(self, sdk: str) -> str:
         """`STO`, `OTP`, `PAY`, `NOT`, `ANA` (3 letters, upper), unless the sdk template names it."""
@@ -354,7 +355,7 @@ class Spec:
                 f"__APP_PROJECT_{index}__": app.project,
                 f"__APP_PREFIX_{index}__": prefixes[app.slug],
             })
-        for sdk in self.sdks:
+        for sdk in sorted(set(SDK_CATALOG) | set(self.sdks)):  # a package may name a sibling even when it is not chosen
             upper = sdk.upper()
             values[f"__SDK_DIR_{upper}__"] = self.sdk_dir(sdk)
             values[f"__SDK_DIR_{sdk}__"] = self.sdk_dir(sdk)
@@ -389,7 +390,8 @@ class Spec:
             "__SDK_DIR__": self.sdk_dir(sdk),
             "__SDK_PACKAGE__": self.sdk_package(sdk),
             "__SDK_PREFIX__": self.sdk_prefix(sdk),
-            "__SDK_DESCRIPTION__": SDK_DESCRIPTIONS.get(sdk, sdk),
+            "__SDK_DESCRIPTION__": self.sdk_description(sdk),
+            "__SDK_LAYER__": self.sdk_layer(sdk),
         }
 
     def part_values(self) -> Dict[str, List[Dict[str, str]]]:
