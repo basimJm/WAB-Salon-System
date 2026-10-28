@@ -4,7 +4,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Suspense } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { buildRoutes } from '@/app/routes';
-import { DESIGN_SYSTEM_PATH } from '@/constants/routes';
+import { DESIGN_SYSTEM_PATH, HOME_ROUTE } from '@/constants/routes';
 
 import { MIN_PASSWORD_LENGTH, MOCK_OTP_CODE, OTP_LENGTH } from '@/constants/auth';
 import { NAV_ITEMS } from '@/constants/nav';
@@ -52,35 +52,35 @@ describe('login validation', () => {
   });
 
   it.each([
-    ['/bookings?x=1', '/bookings?x=1'],
-    ['//evil.example', '/live'],
-    ['https://evil.example', '/live'],
-    ['/\\evil', '/live'],
-    [null, '/live'],
+    ['/items?x=1', '/items?x=1'],
+    ['//evil.example', HOME_ROUTE],
+    ['https://evil.example', HOME_ROUTE],
+    ['/\\evil', HOME_ROUTE],
+    [null, HOME_ROUTE],
   ])('safeRedirect(%s) -> %s', (input, expected) => {
-    expect(safeRedirect(input, '/live')).toBe(expected);
+    expect(safeRedirect(input, HOME_ROUTE)).toBe(expected);
   });
 });
 
 describe('routing & auth guard', () => {
   it('redirects anonymous users to login keeping the target', async () => {
-    const { router } = renderRoutes('/bookings?tab=pending');
+    const { router } = renderRoutes('/items?status=ACTIVE');
     await screen.findByRole('heading', { name: en.login.title });
     expect(router.state.location.pathname).toBe(ROUTES.login);
     expect(router.state.location.search).toBe(
-      `?next=${encodeURIComponent('/bookings?tab=pending')}`,
+      `?next=${encodeURIComponent('/items?status=ACTIVE')}`,
     );
   });
 
   it('two-step login lands on the requested page', async () => {
-    const { router } = renderRoutes(`${ROUTES.login}?next=${encodeURIComponent(ROUTES.bookings)}`);
+    const { router } = renderRoutes(`${ROUTES.login}?next=${encodeURIComponent(ROUTES.alerts)}`);
     await userEvent.type(await screen.findByLabelText(en.login.email), 'admin@example.test');
     await userEvent.type(screen.getByLabelText(en.login.password), PASSWORD);
     await userEvent.click(screen.getByRole('button', { name: en.login.continue }));
     await userEvent.type(await screen.findByLabelText(en.login.code), MOCK_OTP_CODE);
     await userEvent.click(screen.getByRole('button', { name: en.login.verify }));
-    await waitFor(() => expect(router.state.location.pathname).toBe(ROUTES.bookings));
-    expect(await screen.findByRole('heading', { name: en.nav.bookings })).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe(ROUTES.alerts));
+    expect(await screen.findByRole('heading', { name: en.nav.alerts })).toBeInTheDocument();
   });
 
   it('shows field errors without calling the repository, and a localized error for a wrong code', async () => {
@@ -111,9 +111,9 @@ describe('routing & auth guard', () => {
       </Suspense>,
       container,
     );
-    await screen.findByRole('heading', { name: en.nav.liveOverview });
+    await screen.findByRole('heading', { name: en.nav.items });
     const nav = screen.getByRole('complementary', { name: en.nav.label });
-    // Design sidebar: one row per module (a link, or a button that opens a group); no group is open on /live.
+    // Design sidebar: one row per module (a link, or a button that opens a group); no group is open on the home page.
     expect(nav.querySelectorAll('nav > a, nav > .app-navgroup > button')).toHaveLength(
       NAV_ITEMS.length,
     );
@@ -122,7 +122,7 @@ describe('routing & auth guard', () => {
   it('logout clears the session and returns to login', async () => {
     const container = makeContainer();
     await signIn(container);
-    const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.bookings] });
+    const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.items] });
     renderWithApp(
       <Suspense fallback={null}>
         <RouterProvider router={router} />
@@ -165,7 +165,7 @@ describe('responsive shell', () => {
     try {
       const container = makeContainer();
       await signIn(container);
-      const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.bookings] });
+      const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.items] });
       renderWithApp(
         <Suspense fallback={null}>
           <RouterProvider router={router} />
@@ -173,7 +173,7 @@ describe('responsive shell', () => {
         container,
       );
       const drawer =
-        (await screen.findByRole('heading', { name: en.nav.bookings })) &&
+        (await screen.findByRole('heading', { name: en.nav.items })) &&
         document.querySelector('aside');
       expect(drawer).toHaveAttribute('inert');
       await userEvent.click(screen.getByRole('button', { name: en.topbar.openMenu }));
@@ -190,7 +190,7 @@ describe('preferences', () => {
   it('language toggle flips direction, localizes and persists', async () => {
     const container = makeContainer();
     await signIn(container);
-    const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.bookings] });
+    const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.items] });
     renderWithApp(
       <Suspense fallback={null}>
         <RouterProvider router={router} />
@@ -203,13 +203,13 @@ describe('preferences', () => {
     expect(document.documentElement).toHaveAttribute('dir', 'ltr');
     expect(document.documentElement).toHaveAttribute('lang', 'en');
     expect(window.localStorage.getItem(STORAGE_KEYS.language)).toBe('en');
-    expect(await screen.findByRole('heading', { name: en.nav.bookings })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: en.nav.items })).toBeInTheDocument();
   });
 
   it('theme toggle sets data-theme and persists', async () => {
     const container = makeContainer();
     await signIn(container);
-    const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.bookings] });
+    const router = createMemoryRouter(buildRoutes(true), { initialEntries: [ROUTES.items] });
     renderWithApp(
       <Suspense fallback={null}>
         <RouterProvider router={router} />

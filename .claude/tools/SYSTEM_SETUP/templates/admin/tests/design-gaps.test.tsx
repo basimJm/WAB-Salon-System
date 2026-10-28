@@ -3,7 +3,6 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useTranslation } from 'react-i18next';
 import { describe, expect, it } from 'vitest';
-import { bannerPhase } from '@/domain/banners/banners';
 import { formatRelative } from '@/domain/shared/relativeTime';
 import { SectionCard } from '@/presentation/components/core/SectionCard';
 import { CardGrid } from '@/presentation/components/data/CardGrid';
@@ -12,7 +11,7 @@ import { SearchField } from '@/presentation/components/form/SearchField';
 import { ListPage } from '@/presentation/components/templates/ListPage';
 import { AlertsBell } from '@/presentation/layout/AlertsBell';
 import SettingsPage from '@/presentation/settings/SettingsPage';
-import { ANALYTICS_STRINGS } from '@/locales/lazy/analytics';
+import { ITEMS_STRINGS } from '@/locales/lazy/items';
 import { useLazyStrings } from '@/presentation/hooks/useLazyStrings';
 import en from '@/locales/en';
 import { makeContainer, renderWithApp } from './helpers/render';
@@ -29,23 +28,6 @@ describe('formatRelative (bell rows)', () => {
 
   it('reads a future instant (clock skew) as now', () => {
     expect(formatRelative('2026-10-26T12:05:00Z', NOW, 'en')).toBe('this minute');
-  });
-});
-
-describe('bannerPhase (banner card badge)', () => {
-  const at = { startAt: '2026-10-01T21:00:00.000Z', endAt: '2026-11-01T22:00:00.000Z' };
-  it('is inactive when switched off, whatever the dates', () => {
-    expect(bannerPhase({ ...at, active: false }, NOW)).toBe('INACTIVE');
-  });
-  it('is scheduled before the start, active inside, ended from the end instant', () => {
-    expect(bannerPhase({ ...at, active: true }, new Date('2026-09-30T00:00:00Z'))).toBe(
-      'SCHEDULED',
-    );
-    expect(bannerPhase({ ...at, active: true }, NOW)).toBe('ACTIVE');
-    expect(bannerPhase({ ...at, active: true }, new Date(at.endAt))).toBe('ENDED');
-  });
-  it('treats a missing day as no limit', () => {
-    expect(bannerPhase({ startAt: '', endAt: '', active: true }, NOW)).toBe('ACTIVE');
   });
 });
 
@@ -79,8 +61,8 @@ describe('top-bar bell dropdown (design Topbar)', () => {
   it('a row opens its subject', async () => {
     bell();
     await userEvent.click(screen.getByRole('button', { name: 'Alerts 3' }));
-    await userEvent.click(await screen.findByRole('link', { name: /Alert 2/ }));
-    expect(screen.getByTestId('where')).toHaveTextContent('/finance/refunds');
+    await userEvent.click(await screen.findByRole('link', { name: /Alert 3/ }));
+    expect(screen.getByTestId('where')).toHaveTextContent('/items/64d100000000000000000001');
   });
 
   it('"View all" goes to the alerts list', async () => {
@@ -118,15 +100,15 @@ describe('list card header (design Blocks table card)', () => {
   it('draws the search box and the Export button inside the card header', () => {
     renderWithApp(
       <ListPage
-        title="Customers"
-        search={<SearchField label="Search customers" onSearch={() => undefined} />}
+        title="Items"
+        search={<SearchField label="Search items" onSearch={() => undefined} />}
         exportMenu={<ExportMenu onExport={() => Promise.resolve()} />}
-        table={{ caption: 'Customers', columns: [], rows: [], rowKey: () => '' }}
+        table={{ caption: 'Items', columns: [], rows: [], rowKey: () => '' }}
       />,
     );
     const head = document.querySelector<HTMLElement>('.app-listcard__head');
     if (!head) throw new Error('no list card header');
-    expect(within(head).getByRole('searchbox', { name: 'Search customers' })).toBeInTheDocument();
+    expect(within(head).getByRole('searchbox', { name: 'Search items' })).toBeInTheDocument();
     expect(within(head).getByRole('button', { name: 'Export' })).toHaveClass('app-cardbtn');
   });
 
@@ -134,7 +116,7 @@ describe('list card header (design Blocks table card)', () => {
     const rows = [{ id: 'a' }, { id: 'b' }];
     const grid = (extra: object) => (
       <CardGrid
-        caption="Banners"
+        caption="Cards"
         rows={rows}
         rowKey={(r) => r.id}
         renderCard={(r) => <article aria-label={r.id}>{r.id}</article>}
@@ -147,8 +129,8 @@ describe('list card header (design Blocks table card)', () => {
     const loading = renderWithApp(grid({ loading: true }));
     expect(document.querySelector('[aria-busy="true"]')).not.toBeNull();
     loading.unmount();
-    const empty = renderWithApp(grid({ rows: [], emptyTitle: 'No banners' }));
-    expect(screen.getByText('No banners')).toBeInTheDocument();
+    const empty = renderWithApp(grid({ rows: [], emptyTitle: 'No cards' }));
+    expect(screen.getByText('No cards')).toBeInTheDocument();
     empty.unmount();
     renderWithApp(grid({ error: new Error('x'), onRetry: () => undefined }));
     expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument();
@@ -159,45 +141,44 @@ describe('section card (design card header bar)', () => {
   it('is a region named by its title, with subtitle, actions and footer', () => {
     renderWithApp(
       <SectionCard
-        title="Booking rules"
-        subtitle="Applies to new bookings"
+        title="Sign-in rules"
+        subtitle="Applies to new sessions"
         actions={<button type="button">Act</button>}
         footer="Saved"
       >
         body
       </SectionCard>,
     );
-    const region = screen.getByRole('region', { name: 'Booking rules' });
+    const region = screen.getByRole('region', { name: 'Sign-in rules' });
     expect(within(region).getByRole('heading', { level: 2 })).toHaveClass(
       'app-section-card__title',
     );
-    expect(within(region).getByText('Applies to new bookings')).toBeInTheDocument();
+    expect(within(region).getByText('Applies to new sessions')).toBeInTheDocument();
     expect(within(region).getByRole('button', { name: 'Act' })).toBeInTheDocument();
     expect(within(region).getByText('Saved').tagName).toBe('FOOTER');
   });
 
   it('settings groups are section cards with the design header', async () => {
     renderWithApp(<SettingsPage />);
-    const heading = await screen.findByRole('heading', { name: 'Discovery' });
+    const heading = await screen.findByRole('heading', { name: 'Verification code (OTP)' });
     expect(heading.closest('.app-section-card__head')).not.toBeNull();
   });
 });
 
 function LazyProbe() {
-  useLazyStrings(ANALYTICS_STRINGS);
-  useLazyStrings(ANALYTICS_STRINGS);
+  useLazyStrings(ITEMS_STRINGS);
+  useLazyStrings(ITEMS_STRINGS);
   const { t, i18n } = useTranslation();
-  return <output>{`${t('analytics.noData')}|${i18n.t('analytics.noData', { lng: 'ar' })}`}</output>;
+  return <output>{`${t('items.empty')}|${i18n.t('items.empty', { lng: 'ar' })}`}</output>;
 }
 
 describe('lazy locale areas', () => {
-  it('the analytics strings are not in the entry bundle languages', () => {
-    expect('analytics' in en).toBe(false);
-    expect('bookings' in en).toBe(false);
+  it('the item strings are not in the entry bundle languages', () => {
+    expect('items' in en).toBe(false);
   });
 
   it('useLazyStrings adds both languages once, before the first t() call', () => {
     renderWithApp(<LazyProbe />);
-    expect(screen.getByRole('status')).toHaveTextContent('No data yet|لا توجد بيانات بعد');
+    expect(screen.getByRole('status')).toHaveTextContent('No items yet|لا توجد عناصر بعد');
   });
 });

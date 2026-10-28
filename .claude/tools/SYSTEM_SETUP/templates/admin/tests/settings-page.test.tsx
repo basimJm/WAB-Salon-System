@@ -9,72 +9,70 @@ const box = (name: RegExp) => screen.findByRole<HTMLInputElement>('textbox', { n
 async function setup() {
   const container = makeContainer();
   renderWithApp(<SettingsPage />, container);
-  await box(/Nearby search radius/);
+  await box(/Code length/);
   return container;
 }
 
 describe('SettingsPage', () => {
-  it('shows the three core groups with the effective values and defaults', async () => {
+  it('shows the first tab with the effective values and defaults', async () => {
     await setup();
-    for (const g of ['Discovery', 'Booking rules', 'Verification code (OTP)'])
-      expect(screen.getByRole('heading', { name: g })).toBeInTheDocument();
-    expect(await box(/Time slot interval/)).toHaveValue('15');
-    expect(await box(/Reminders before the appointment/)).toHaveValue('60, 15');
-    expect(screen.getAllByText('Default').length).toBeGreaterThan(5);
+    expect(screen.getByRole('heading', { name: 'Verification code (OTP)' })).toBeInTheDocument();
+    expect(await box(/Code length/)).toHaveValue('6');
+    expect(await box(/Wait before resending/)).toHaveValue('60');
+    expect(screen.getAllByText('Default').length).toBeGreaterThan(3);
   });
 
   it('validates as you type and blocks saving', async () => {
     await setup();
-    const radius = await box(/Nearby search radius/);
-    await userEvent.clear(radius);
+    const length = await box(/Code length/);
+    await userEvent.clear(length);
     expect(await screen.findByText('Enter a value')).toBeInTheDocument();
-    await userEvent.type(radius, '999');
-    expect(screen.getByText('Must be at most 200')).toBeInTheDocument();
-    await userEvent.clear(radius);
-    await userEvent.type(radius, '2.5');
+    await userEvent.type(length, '999');
+    expect(screen.getByText('Must be at most 10')).toBeInTheDocument();
+    await userEvent.clear(length);
+    await userEvent.type(length, '2.5');
     expect(screen.getByText('Whole numbers only')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
   });
 
   it('saving asks for a reason, sends the changed keys, then shows them as changed', async () => {
     await setup();
-    const radius = await box(/Nearby search radius/);
-    await userEvent.clear(radius);
-    await userEvent.type(radius, '25');
+    const length = await box(/Code length/);
+    await userEvent.clear(length);
+    await userEvent.type(length, '8');
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByText('Save 1 changed settings')).toBeInTheDocument();
-    await userEvent.type(within(dialog).getByRole('textbox'), 'Wider search in Aqaba');
+    await userEvent.type(within(dialog).getByRole('textbox'), 'Longer codes for everyone');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(await screen.findByText('Changed')).toBeInTheDocument();
-    expect(await box(/Nearby search radius/)).toHaveValue('25');
+    expect(await box(/Code length/)).toHaveValue('8');
   });
 
   it('"Use default" puts the default back in the box', async () => {
     await setup();
-    const slot = await box(/Time slot interval/);
-    await userEvent.clear(slot);
-    await userEvent.type(slot, '30');
-    const row = slot.closest('.app-setting') as HTMLElement;
+    const resend = await box(/Wait before resending/);
+    await userEvent.clear(resend);
+    await userEvent.type(resend, '90');
+    const row = resend.closest('.app-setting') as HTMLElement;
     await userEvent.click(within(row).getByRole('button', { name: 'Use default' }));
-    expect(slot).toHaveValue('15');
+    expect(resend).toHaveValue('60');
   });
 
-  it('list values reject repeats and sort largest first on save', async () => {
+  it('security and limits tabs hold the other groups; list and object settings save as one value', async () => {
     await setup();
-    const reminders = await box(/Reminders before the appointment/);
+    await userEvent.click(screen.getByRole('tab', { name: 'Accounts and security' }));
+    expect(await box(/Idle sign-out/)).toHaveValue('172800');
+    await userEvent.click(screen.getByRole('tab', { name: 'Limits and alerts' }));
+    const reminders = await box(/Escalation reminders/);
+    expect(reminders).toHaveValue('60, 15');
     await userEvent.clear(reminders);
     await userEvent.type(reminders, '15, 15');
     expect(screen.getByText('Do not repeat a value')).toBeInTheDocument();
-  });
-
-  it('security and limits tabs hold the other groups; object settings save as one value', async () => {
-    await setup();
-    await userEvent.click(screen.getByRole('tab', { name: 'Accounts and security' }));
-    expect(await box(/Grace period before an account is deleted/)).toHaveValue('30');
-    await userEvent.click(screen.getByRole('tab', { name: 'Limits and alerts' }));
-    const failures = await box(/Payment failures that raise an alert/);
+    await userEvent.clear(reminders);
+    await userEvent.type(reminders, '60, 15');
+    const failures = await box(/Failed background jobs that raise an alert/);
     expect(failures).toHaveValue('5');
     expect(screen.getByText('Asia/Amman')).toBeInTheDocument();
     expect(screen.getByText('JOD')).toBeInTheDocument();
@@ -85,9 +83,9 @@ describe('SettingsPage', () => {
     await userEvent.type(within(dialog).getByRole('textbox'), 'More tolerance');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(await box(/Payment failures that raise an alert/)).toHaveValue('8');
-    // the other members of the object kept their values
-    expect(await box(/Payment failure rate that raises an alert/)).toHaveValue('20');
+    expect(await box(/Failed background jobs that raise an alert/)).toHaveValue('8');
+    // the other member of the object kept its value
+    expect(await box(/Window for that count/)).toHaveValue('60');
   });
 
   it('shows the error state with retry when settings cannot be loaded', async () => {

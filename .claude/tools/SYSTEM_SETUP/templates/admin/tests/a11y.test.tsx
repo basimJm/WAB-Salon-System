@@ -6,7 +6,7 @@ import { axeViolations } from './helpers/axe';
 import { makeContainer, renderRoutes, signInContainer } from './helpers/render';
 
 const LANGUAGES_UNDER_TEST: readonly Language[] = ['ar', 'en'];
-const SIGNED_IN_PAGES = [ROUTES.about, '/design-system', ROUTES.bookings, '/missing-page'];
+const SIGNED_IN_PAGES = [ROUTES.about, '/design-system', ROUTES.items, '/missing-page'];
 
 describe('accessibility (axe-core)', () => {
   it.each(LANGUAGES_UNDER_TEST)('login page has no violations (%s)', async (language) => {

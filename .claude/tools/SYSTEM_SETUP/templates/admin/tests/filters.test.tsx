@@ -166,10 +166,10 @@ describe('FiltersSection (gallery)', () => {
         <FiltersSection />
       </main>,
     );
-    await userEvent.selectOptions(screen.getByLabelText('City'), 'irbid');
-    expect(screen.getByText('City: Irbid')).toBeVisible();
-    await userEvent.click(screen.getByRole('button', { name: 'Remove filter City: Irbid' }));
-    expect(screen.queryByText('City: Irbid')).toBeNull();
+    await userEvent.selectOptions(screen.getByLabelText('Region'), 'irbid');
+    expect(screen.getByText('Region: South')).toBeVisible();
+    await userEvent.click(screen.getByRole('button', { name: 'Remove filter Region: South' }));
+    expect(screen.queryByText('Region: South')).toBeNull();
     await userEvent.selectOptions(screen.getByLabelText('Period'), 'thisMonth');
     expect(screen.getByText('This month', { selector: 'span span' })).toBeVisible();
     await userEvent.click(screen.getByRole('button', { name: 'Clear all' }));

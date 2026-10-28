@@ -1,12 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
-import { BRAND_ICON_URL, SEARCH_SHORTCUT_HINT } from '@/constants/ui';
+import { BRAND_ICON_URL, BRAND_MARK, BRAND_TAGLINE } from '@/constants/ui';
 import { ICON_STROKE_WIDTH } from '@/constants/icons';
 import { Icon } from '@/presentation/components/core/Icon';
 import { TextField } from '@/presentation/components/form/TextField';
-import { GlobalSearch } from '@/presentation/components/layout/GlobalSearch';
 import { ListPage } from '@/presentation/components/templates/ListPage';
 import { AdminAvatar } from '@/presentation/layout/AdminAvatar';
 import { Sidebar } from '@/presentation/layout/Sidebar';
@@ -16,11 +15,11 @@ import { axeViolations } from './helpers/axe';
 import { renderWithApp } from './helpers/render';
 
 const ADMIN = { name: 'Laith Hassan', email: 'laith@example.test' };
-const at = (ui: React.ReactElement, path = '/live') => (
+const at = (ui: React.ReactElement, path = '/items') => (
   <MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>
 );
 
-describe('design shell: sidebar (WAB Admin Sidebar)', () => {
+describe('design shell: sidebar', () => {
   const dock = (props: Partial<React.ComponentProps<typeof Sidebar>> = {}) =>
     renderWithApp(
       at(<Sidebar mode="docked" collapsed={false} open onNavigate={() => undefined} {...props} />),
@@ -29,8 +28,11 @@ describe('design shell: sidebar (WAB Admin Sidebar)', () => {
   it('shows the app icon, wordmark, admin chip and the admin card with email', () => {
     dock({ admin: ADMIN, onToggleCollapse: () => undefined });
     const aside = screen.getByRole('complementary', { name: 'Main navigation' });
-    expect(within(aside).getByRole('img', { name: 'WAB' })).toHaveAttribute('src', BRAND_ICON_URL);
-    expect(within(aside).getByText('WEDDING & BEAUTY')).toBeVisible();
+    expect(within(aside).getByRole('img', { name: BRAND_MARK })).toHaveAttribute(
+      'src',
+      BRAND_ICON_URL,
+    );
+    expect(within(aside).getByText(BRAND_TAGLINE)).toBeVisible();
     expect(within(aside).getByText(ADMIN.email)).toBeVisible();
     expect(within(aside).getByText('L')).toBeVisible();
   });
@@ -50,16 +52,13 @@ describe('design shell: sidebar (WAB Admin Sidebar)', () => {
 
   it('the current module is the gradient row; a group with the current page is tinted', () => {
     renderWithApp(
-      at(
-        <Sidebar mode="docked" collapsed={false} open onNavigate={() => undefined} />,
-        '/bookings',
-      ),
+      at(<Sidebar mode="docked" collapsed={false} open onNavigate={() => undefined} />, '/items'),
     );
-    expect(screen.getByRole('link', { name: 'Bookings' })).toHaveClass('app-navitem--active');
+    expect(screen.getByRole('link', { name: 'Items' })).toHaveClass('app-navitem--active');
   });
 });
 
-describe('design shell: top bar (WAB Admin Topbar)', () => {
+describe('design shell: top bar', () => {
   const bar = (onLogout = vi.fn()) =>
     renderWithApp(
       at(
@@ -94,20 +93,6 @@ describe('design shell: top bar (WAB Admin Topbar)', () => {
 });
 
 describe('design kit pieces', () => {
-  it('Cmd/Ctrl+K focuses the global search; the hint is shown', () => {
-    renderWithApp(<GlobalSearch search={() => Promise.resolve({})} onSelect={() => undefined} />);
-    expect(screen.getByText(SEARCH_SHORTCUT_HINT)).toBeInTheDocument();
-    const box = screen.getByRole('combobox');
-    fireEvent.keyDown(document, { key: 'k', metaKey: true });
-    expect(box).toHaveFocus();
-    box.blur();
-    fireEvent.keyDown(document, { key: 'K', ctrlKey: true });
-    expect(box).toHaveFocus();
-    box.blur();
-    fireEvent.keyDown(document, { key: 'k' });
-    expect(box).not.toHaveFocus();
-  });
-
   it('AdminAvatar shows the first letter (upper case) or nothing', () => {
     const { container, rerender } = render(<AdminAvatar name="  laith" />);
     expect(container.textContent).toBe('L');
@@ -148,11 +133,11 @@ describe('design kit pieces', () => {
   it('ListPage puts the table in a card with the title and the server total', () => {
     renderWithApp(
       <ListPage
-        title="Bookings"
+        title="Items"
         table={{
-          caption: 'Bookings',
+          caption: 'Items',
           columns: [{ key: 'id', header: 'Ref', render: (r: { id: string }) => r.id }],
-          rows: [{ id: 'WAB-1' }],
+          rows: [{ id: 'ITEM-1' }],
           rowKey: (r) => r.id,
         }}
         pagination={{

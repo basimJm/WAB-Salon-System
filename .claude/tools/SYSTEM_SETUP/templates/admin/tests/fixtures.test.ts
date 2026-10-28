@@ -17,20 +17,6 @@ const WITHOUT_FIXTURE: Readonly<Record<string, string>> = {
   postAuthVerifyOtp: 'login runs on MockAuthRepository (mock mode)',
   postAuthRefresh: 'login runs on MockAuthRepository (mock mode)',
   postAuthLogout: 'login runs on MockAuthRepository (mock mode)',
-  getLocationsCountriesById: 'no screen reads one record: the list carries every field',
-  getLocationsCitiesById: 'no screen reads one record: the list carries every field',
-  getLocationsAreasById: 'no screen reads one record: the list carries every field',
-  getContentPagesById: 'no screen reads one record: the list carries every field',
-  getContentFaqsById: 'no screen reads one record: the list carries every field',
-  getContentContactInfoById: 'no screen reads one record: the list carries every field',
-  getAppConfigVersionsById: 'no screen reads one record: the list carries every field',
-  getAppConfigMaintenanceById: 'no screen reads one record: the list carries every field',
-  getBannersById: 'no screen reads one record: the list carries every field',
-  getCatalogServicesById: 'no screen reads one record: the list carries every field',
-  getRefundsById: 'no screen reads one record: the list carries every field',
-  getPayoutsById: 'no screen reads one record: the list carries every field',
-  getSubscriptionsBySalonId: 'no screen reads one record: the list carries every field',
-  getCampaignsById: 'no screen reads one record: the list carries every field',
   getAuditLogsById: 'no screen reads one record: the list carries every field',
 };
 
@@ -77,6 +63,6 @@ describe('mock fixtures', () => {
       ).toBe(true);
       checked.push(op.id);
     }
-    expect(checked.length).toBeGreaterThan(20);
+    expect(checked.length).toBeGreaterThan(5);
   });
 });

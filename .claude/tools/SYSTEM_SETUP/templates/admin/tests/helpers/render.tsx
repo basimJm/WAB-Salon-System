@@ -18,33 +18,11 @@ import { ApiClient } from '@/data/api/ApiClient';
 import { createMockRoutes } from '@/data/mock/fixtures';
 import { createMockTransport } from '@/data/mock/mockTransport';
 import { createScenarioStore } from '@/data/mock/scenarios';
-import { RemoteAppConfigRepository } from '@/data/appconfig/RemoteAppConfigRepository';
-import { RemoteContentRepository } from '@/data/content/RemoteContentRepository';
-import { RemoteBannersRepository } from '@/data/banners/RemoteBannersRepository';
-import { RemoteUploadsRepository } from '@/data/uploads/RemoteUploadsRepository';
-import { fakePutFile } from '@/data/uploads/putFile';
-import { RemoteCatalogRepository } from '@/data/catalog/RemoteCatalogRepository';
-import { RemoteApplicationsRepository } from '@/data/applications/RemoteApplicationsRepository';
-import { RemoteCustomersRepository } from '@/data/customers/RemoteCustomersRepository';
-import { RemoteBookingsRepository } from '@/data/bookings/RemoteBookingsRepository';
-import { RemoteReviewsRepository } from '@/data/reviews/RemoteReviewsRepository';
-import { RemoteTransactionsRepository } from '@/data/transactions/RemoteTransactionsRepository';
-import { RemoteRefundsRepository } from '@/data/refunds/RemoteRefundsRepository';
-import { RemotePayoutsRepository } from '@/data/payouts/RemotePayoutsRepository';
-import { RemoteSubscriptionsRepository } from '@/data/subscriptions/RemoteSubscriptionsRepository';
-import { RemotePlacementsRepository } from '@/data/placements/RemotePlacementsRepository';
-import { RemoteCampaignsRepository } from '@/data/campaigns/RemoteCampaignsRepository';
 import { RemoteAlertsRepository } from '@/data/alerts/RemoteAlertsRepository';
-import { RemoteAnalyticsRepository } from '@/data/analytics/RemoteAnalyticsRepository';
-import { RemoteSalonEditRepository } from '@/data/salonEdit/RemoteSalonEditRepository';
-import { RemoteSearchRepository } from '@/data/search/RemoteSearchRepository';
-import { RemoteProfileRepository } from '@/data/profile/RemoteProfileRepository';
-import { RemoteReportsRepository } from '@/data/reports/RemoteReportsRepository';
 import { RemoteAuditRepository } from '@/data/audit/RemoteAuditRepository';
 import { RemoteExportsRepository } from '@/data/exports/RemoteExportsRepository';
-import { RemoteSalonsRepository } from '@/data/salons/RemoteSalonsRepository';
-import { RemoteBranchesRepository } from '@/data/branches/RemoteBranchesRepository';
-import { RemoteLocationsRepository } from '@/data/locations/RemoteLocationsRepository';
+import { RemoteItemsRepository } from '@/data/items/RemoteItemsRepository';
+import { RemoteProfileRepository } from '@/data/profile/RemoteProfileRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
 import { HttpClient } from '@/infrastructure/http/HttpClient';
@@ -80,32 +58,11 @@ export function makeContainer(
     repositories: {
       auth,
       settings: new RemoteSettingsRepository(api),
-      locations: new RemoteLocationsRepository(api),
-      appConfig: new RemoteAppConfigRepository(api),
-      content: new RemoteContentRepository(api),
-      banners: new RemoteBannersRepository(api),
-      catalog: new RemoteCatalogRepository(api),
-      salons: new RemoteSalonsRepository(api),
-      branches: new RemoteBranchesRepository(api),
+      items: new RemoteItemsRepository(api),
       exports: new RemoteExportsRepository(api),
       audit: new RemoteAuditRepository(api),
-      reports: new RemoteReportsRepository(api),
-      analytics: new RemoteAnalyticsRepository(api),
       alerts: new RemoteAlertsRepository(api),
       profile: new RemoteProfileRepository(api),
-      search: new RemoteSearchRepository(api),
-      salonEdit: new RemoteSalonEditRepository(api),
-      campaigns: new RemoteCampaignsRepository(api),
-      placements: new RemotePlacementsRepository(api),
-      subscriptions: new RemoteSubscriptionsRepository(api),
-      payouts: new RemotePayoutsRepository(api),
-      refunds: new RemoteRefundsRepository(api),
-      transactions: new RemoteTransactionsRepository(api),
-      reviews: new RemoteReviewsRepository(api),
-      bookings: new RemoteBookingsRepository(api),
-      customers: new RemoteCustomersRepository(api),
-      applications: new RemoteApplicationsRepository(api),
-      uploads: new RemoteUploadsRepository(api, fakePutFile),
     },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };

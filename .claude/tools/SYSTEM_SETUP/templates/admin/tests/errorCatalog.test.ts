@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { ERROR_CODES, ERROR_CODE_KIND, isErrorCode } from '@/constants/errorCatalog';
 import { ERROR_KINDS } from '@/constants/errors';
@@ -13,16 +13,19 @@ import { ROOT } from './helpers/files';
 const ARABIC = /[؀-ۿ]/;
 const PLACEHOLDER = /\{\{\s*\w+\s*\}\}/g;
 
+/** The server's domain document, when the server project sits next to this one (monorepo layout). */
+const DOMAIN_DOC = `${ROOT}/../BUSINESS_DOMAIN.md`;
+
 /** The code list of BUSINESS_DOMAIN.md §11, read from the document itself. */
 function domainCodes(): string[] {
-  const doc = readFileSync(`${ROOT}/../BUSINESS_DOMAIN.md`, 'utf8');
+  const doc = readFileSync(DOMAIN_DOC, 'utf8');
   const section = doc.slice(doc.indexOf('## 11. Error Codes'), doc.indexOf('## 12.'));
   const block = section.split('```')[1] ?? '';
   return block.match(/\b[A-Z][A-Z_]{3,}\b/g) ?? [];
 }
 
 describe('error catalog', () => {
-  it('lists exactly the codes of BUSINESS_DOMAIN.md §11', () => {
+  it.skipIf(!existsSync(DOMAIN_DOC))('lists exactly the codes of BUSINESS_DOMAIN.md §11', () => {
     expect([...ERROR_CODES].sort()).toEqual(domainCodes().sort());
   });
 
@@ -48,9 +51,9 @@ describe('error catalog', () => {
   });
 
   it('recognises codes and rejects look-alikes', () => {
-    expect(isErrorCode('SLOT_TAKEN')).toBe(true);
+    expect(isErrorCode('ITEM_NAME_TAKEN')).toBe(true);
     expect(isErrorCode('toString')).toBe(false);
-    expect(isErrorCode('slot_taken')).toBe(false);
+    expect(isErrorCode('item_name_taken')).toBe(false);
     expect(isErrorCode(undefined)).toBe(false);
   });
 });
@@ -66,8 +69,8 @@ describe('error handling by code', () => {
   });
 
   it('AppError points at the specific message for a known code, the generic one otherwise', () => {
-    expect(new AppError({ kind: 'conflict', code: 'SLOT_TAKEN' }).messageKey).toBe(
-      'errors.codes.SLOT_TAKEN',
+    expect(new AppError({ kind: 'conflict', code: 'ITEM_NAME_TAKEN' }).messageKey).toBe(
+      'errors.codes.ITEM_NAME_TAKEN',
     );
     expect(new AppError({ kind: 'conflict', code: 'WHO_KNOWS' }).messageKey).toBe(
       'errors.conflict',

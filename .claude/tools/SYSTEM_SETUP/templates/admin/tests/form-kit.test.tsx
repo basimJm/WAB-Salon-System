@@ -142,12 +142,12 @@ describe('SearchField', () => {
     const input = screen.getByRole('searchbox', { name: 'Search' });
     fireEvent.change(input, { target: { value: 'sal' } });
     await act(() => vi.advanceTimersByTimeAsync(300));
-    fireEvent.change(input, { target: { value: ' salon ' } });
+    fireEvent.change(input, { target: { value: ' plan ' } });
     await act(() => vi.advanceTimersByTimeAsync(499));
     expect(onSearch).not.toHaveBeenCalled();
     await act(() => vi.advanceTimersByTimeAsync(1));
     expect(onSearch).toHaveBeenCalledTimes(1);
-    expect(onSearch).toHaveBeenCalledWith('salon');
+    expect(onSearch).toHaveBeenCalledWith('plan');
   });
 
   it('clears with the button and with Escape, and searches for the empty query', async () => {
@@ -203,13 +203,13 @@ describe('FormActions', () => {
 describe('FormsSection (useZodForm end to end)', () => {
   it('shows translated errors for an empty submit, then accepts a valid form', async () => {
     renderWithApp(<FormsSection />);
-    await userEvent.type(screen.getByLabelText('Service name'), 'Hair');
+    await userEvent.type(screen.getByLabelText('Item name'), 'Plan');
     await userEvent.click(screen.getByRole('button', { name: 'Save' }));
     expect((await screen.findAllByText('This field is required')).length).toBeGreaterThan(0);
 
     await userEvent.type(screen.getByLabelText('Price'), '0');
-    await userEvent.click(screen.getByRole('combobox', { name: 'City' }));
-    await userEvent.click(screen.getByRole('option', { name: 'Amman' }));
+    await userEvent.click(screen.getByRole('combobox', { name: 'Region' }));
+    await userEvent.click(screen.getByRole('option', { name: 'North' }));
     await userEvent.type(screen.getByLabelText('Seats'), '4');
     fireEvent.change(screen.getByLabelText('Starts'), { target: { value: '2026-10-10' } });
     fireEvent.change(screen.getByLabelText('Ends'), { target: { value: '2026-10-10' } });
@@ -225,7 +225,7 @@ describe('FormsSection (useZodForm end to end)', () => {
 
   it('Cancel resets the form to its defaults', async () => {
     renderWithApp(<FormsSection />);
-    const name = screen.getByLabelText('Service name');
+    const name = screen.getByLabelText('Item name');
     await userEvent.type(name, 'Hair');
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(name).toHaveValue('');

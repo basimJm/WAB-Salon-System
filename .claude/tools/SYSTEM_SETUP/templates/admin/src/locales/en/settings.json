@@ -13,7 +13,8 @@
       "adminAuth": "Admin sign-in",
       "tokens": "Sessions",
       "pagination": "Page sizes",
-      "alerts": "Alert thresholds"
+      "alerts": "Alert thresholds",
+      "platform": "Platform"
     },
     "unit": {
       "minutes": "minutes",
@@ -48,7 +49,9 @@
       "alerts_crashesPerHour": "App crashes per hour that raise an alert",
       "timezone": "Time zone",
       "currency": "Currency",
-      "alerts_jobFailuresPerHour": "Failed background jobs per hour that raise an alert"
+      "alerts_jobFailures_count": "Failed background jobs that raise an alert",
+      "alerts_jobFailures_windowMin": "Window for that count",
+      "alerts_escalationMinutes": "Escalation reminders for an unacknowledged alert (comma separated)"
     },
     "notSet": "Not set",
     "tabsLabel": "Settings sections",

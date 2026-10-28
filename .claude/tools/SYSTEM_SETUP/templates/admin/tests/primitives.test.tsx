@@ -64,12 +64,12 @@ describe('primitives', () => {
   it('Link routes inside the app and hardens external links; unsafe links become text', () => {
     render(
       <MemoryRouter>
-        <Link to="/salons">Salons</Link>
+        <Link to="/items">Items</Link>
         <Link href="https://example.com">Docs</Link>
         <Link href="javascript:alert(1)">Bad</Link>
       </MemoryRouter>,
     );
-    expect(screen.getByRole('link', { name: 'Salons' })).toHaveAttribute('href', '/salons');
+    expect(screen.getByRole('link', { name: 'Items' })).toHaveAttribute('href', '/items');
     const ext = screen.getByRole('link', { name: 'Docs' });
     expect(ext).toHaveAttribute('target', '_blank');
     expect(ext).toHaveAttribute('rel', 'noopener noreferrer');

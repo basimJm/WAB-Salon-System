@@ -42,15 +42,15 @@ describe('parseSetting', () => {
     ['0', 'min'],
     ['500', 'max'],
   ])('rejects "%s" as %s', (text, error) =>
-    expect(parseSetting(text, def('discovery.nearbyRadiusKm'))).toEqual({ ok: false, error }),
+    expect(parseSetting(text, def('admin.maxFailedLogins'))).toEqual({ ok: false, error }),
   );
 
   it('accepts a whole number inside the bounds, trimmed', () => {
-    expect(parseSetting(' 12 ', def('discovery.nearbyRadiusKm'))).toEqual({ ok: true, value: 12 });
+    expect(parseSetting(' 12 ', def('admin.maxFailedLogins'))).toEqual({ ok: true, value: 12 });
   });
 
   it('lists: comma separated, sorted largest first, no repeats, each inside the bounds', () => {
-    const d = def('booking.reminderMinutes');
+    const d = def('alerts.escalationMinutes');
     expect(parseSetting('15, 60', d)).toEqual({ ok: true, value: [60, 15] });
     expect(parseSetting('15,15', d)).toEqual({ ok: false, error: 'list' });
     expect(parseSetting(' , ', d)).toEqual({ ok: false, error: 'required' });

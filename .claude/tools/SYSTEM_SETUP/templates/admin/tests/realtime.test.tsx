@@ -25,10 +25,10 @@ describe('fake realtime client', () => {
   it('delivers events to subscribers until they unsubscribe', () => {
     const client = new FakeRealtimeClient();
     const seen = vi.fn();
-    const off = client.on('booking.updated', seen);
-    client.emit('booking.updated', { id: 1 });
+    const off = client.on('item.updated', seen);
+    client.emit('item.updated', { id: 1 });
     off();
-    client.emit('booking.updated', { id: 2 });
+    client.emit('item.updated', { id: 2 });
     expect(seen).toHaveBeenCalledOnce();
     expect(seen).toHaveBeenCalledWith({ id: 1 });
   });
@@ -65,7 +65,7 @@ describe('invalidation bus', () => {
 
 describe('hooks and indicator', () => {
   function Probe({ onEvent, signedIn }: { onEvent: (p: unknown) => void; signedIn: boolean }) {
-    useRealtime('booking.updated', onEvent);
+    useRealtime('item.updated', onEvent);
     useRealtimeConnection(signedIn);
     return <LiveIndicator />;
   }
@@ -80,7 +80,7 @@ describe('hooks and indicator', () => {
   it('connects while signed in, shows Live, forwards events, and disconnects on unmount', () => {
     const { fake, onEvent } = setup(true);
     expect(screen.getByRole('status', { name: 'Live updates' })).toHaveTextContent('Live');
-    act(() => fake.emit('booking.updated', { id: 'b1' }));
+    act(() => fake.emit('item.updated', { id: 'b1' }));
     expect(onEvent).toHaveBeenCalledWith({ id: 'b1' });
     act(() => fake.setStatus('reconnecting'));
     expect(screen.getByRole('status')).toHaveTextContent('Reconnecting');

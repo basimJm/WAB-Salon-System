@@ -16,7 +16,7 @@ test('charts (English): all six types render inside their box, View data shows t
     expect(box!.width).toBeGreaterThan(100);
     expect(box!.height).toBeGreaterThan(50);
   }
-  await expect(card.getByRole('img', { name: 'Bookings, last 7 days' })).toBeVisible();
+  await expect(card.getByRole('img', { name: 'Items, last 7 days' })).toBeVisible();
 
   const line = card.locator('figure.app-chart').first();
   await line.getByRole('button', { name: 'View data' }).click();
@@ -25,7 +25,7 @@ test('charts (English): all six types render inside their box, View data shows t
 
   const download = page.waitForEvent('download');
   await line.getByRole('button', { name: 'Export CSV' }).click();
-  expect((await download).suggestedFilename()).toBe('bookings-line.csv');
+  expect((await download).suggestedFilename()).toBe('items-line.csv');
 
   const heat = card.locator('table.app-heatmap');
   await expect(heat.locator('td.app-heat--4').first()).toBeVisible();

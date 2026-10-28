@@ -10,12 +10,12 @@ import {
   type ExportJob,
 } from '@/domain/exports/exports';
 import ExportsPage from '@/presentation/exports/ExportsPage';
-import TransactionsPage from '@/presentation/transactions/TransactionsPage';
+import ItemsPage from '@/presentation/items/ItemsPage';
 import { makeContainer, renderWithApp } from './helpers/render';
 
 const job = (status: ExportJob['status']): ExportJob => ({
   id: '1',
-  kind: 'TRANSACTIONS',
+  kind: 'ITEMS',
   format: 'CSV',
   params: {},
   status,
@@ -80,7 +80,7 @@ describe('export button', () => {
     const opened = vi.spyOn(window, 'open').mockReturnValue(null);
     renderWithApp(
       <MemoryRouter>
-        <TransactionsPage />
+        <ItemsPage />
       </MemoryRouter>,
       makeContainer(),
     );
@@ -97,8 +97,8 @@ describe('export button', () => {
   });
 });
 
-describe('real export jobs (ADM-079)', () => {
-  it('reads CUSTOMERS and SALONS jobs as the server sends them (no params key)', () => {
+describe('real export jobs', () => {
+  it('reads ITEMS and AUDIT_LOGS jobs as the server sends them (no params key)', () => {
     const real = (kind: string) => ({
       id: '64c100000000000000000009',
       kind,
@@ -110,11 +110,11 @@ describe('real export jobs (ADM-079)', () => {
       finishedAt: '2026-10-25T08:00:02.000Z',
       downloadUrl: null,
     });
-    const parsed = exportListSchema().parse([real('CUSTOMERS'), real('SALONS')]);
+    const parsed = exportListSchema().parse([real('ITEMS'), real('AUDIT_LOGS')]);
     expect(parsed.map((j) => [j.kind, j.params])).toEqual([
-      ['CUSTOMERS', {}],
-      ['SALONS', {}],
+      ['ITEMS', {}],
+      ['AUDIT_LOGS', {}],
     ]);
-    expect(EXPORT_KINDS).toEqual(expect.arrayContaining(['CUSTOMERS', 'SALONS']));
+    expect(EXPORT_KINDS).toEqual(expect.arrayContaining(['ITEMS', 'AUDIT_LOGS']));
   });
 });

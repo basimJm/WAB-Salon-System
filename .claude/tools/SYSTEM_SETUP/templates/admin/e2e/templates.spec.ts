@@ -10,11 +10,11 @@ test('page templates (English): list, detail tabs, timeline times in Amman, JSON
   const card = page.locator('.app-card[aria-label="Page templates"]');
   await card.scrollIntoViewIfNeeded();
 
-  await expect(card.getByRole('heading', { level: 1, name: 'Bookings' })).toBeVisible();
-  await expect(card.getByRole('table', { name: 'Bookings' })).toBeVisible();
+  await expect(card.getByRole('heading', { level: 1, name: 'Items' })).toBeVisible();
+  await expect(card.getByRole('table', { name: 'Items' })).toBeVisible();
   await expect(card.getByText('1–10 of 23')).toBeVisible();
 
-  const detailTitle = card.getByRole('heading', { level: 1, name: 'WAB-7K2M9Q' });
+  const detailTitle = card.getByRole('heading', { level: 1, name: 'ITEM-7K2M9Q' });
   await expect(detailTitle).toBeVisible();
   await card.getByRole('tab', { name: 'Status history' }).click();
   const items = card.getByRole('list', { name: 'Status history' }).getByRole('listitem');
@@ -24,7 +24,7 @@ test('page templates (English): list, detail tabs, timeline times in Amman, JSON
 
   await card.getByRole('tab', { name: 'Raw data' }).click();
   const json = card.getByRole('region', { name: 'Raw data' });
-  await expect(json).toContainText('SALON_SET_OFFLINE');
+  await expect(json).toContainText('ITEM_ARCHIVE');
   const summary = json.locator('summary').nth(1);
   await summary.click();
   await expect(json.locator('details').nth(1)).not.toHaveAttribute('open', '');

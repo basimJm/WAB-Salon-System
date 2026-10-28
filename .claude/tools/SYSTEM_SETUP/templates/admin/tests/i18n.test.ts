@@ -31,7 +31,7 @@ const LATIN_BY_DESIGN = new Set([
   'export.chip.XLSX',
   'export.chip.CSV',
   'export.chip.PDF',
-  'analytics.noValue',
+  'common.none',
 ]);
 
 describe('locale area files', () => {

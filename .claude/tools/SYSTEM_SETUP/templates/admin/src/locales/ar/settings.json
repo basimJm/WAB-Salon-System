@@ -13,7 +13,8 @@
       "adminAuth": "تسجيل دخول المشرفين",
       "tokens": "الجلسات",
       "pagination": "حجم الصفحة",
-      "alerts": "حدود التنبيهات"
+      "alerts": "حدود التنبيهات",
+      "platform": "المنصة"
     },
     "unit": {
       "minutes": "دقيقة",
@@ -48,7 +49,9 @@
       "alerts_crashesPerHour": "انهيارات التطبيق في الساعة التي تطلق تنبيهًا",
       "timezone": "المنطقة الزمنية",
       "currency": "العملة",
-      "alerts_jobFailuresPerHour": "المهام الخلفية الفاشلة في الساعة التي تطلق تنبيهًا"
+      "alerts_jobFailures_count": "المهام الخلفية الفاشلة التي تطلق تنبيهًا",
+      "alerts_jobFailures_windowMin": "نافذة احتساب ذلك العدد",
+      "alerts_escalationMinutes": "تذكيرات التصعيد لتنبيه لم يُطَّلع عليه (مفصولة بفواصل)"
     },
     "notSet": "غير محدد",
     "tabsLabel": "أقسام الإعدادات",

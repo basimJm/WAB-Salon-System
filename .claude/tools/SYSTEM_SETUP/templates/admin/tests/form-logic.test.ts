@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   VALIDATION_KEYS,
   endAfterStart,
-  jodAmount,
+  moneyAmount,
   localDateString,
   requiredText,
 } from '@/domain/shared/validation';
@@ -79,12 +79,12 @@ describe('validation blocks', () => {
     ['-1', false],
     ['1e3', false],
     ['٥', false],
-  ])('jodAmount accepts %j: %s', (value, ok) =>
-    expect(jodAmount().safeParse(value).success).toBe(ok),
+  ])('moneyAmount accepts %j: %s', (value, ok) =>
+    expect(moneyAmount().safeParse(value).success).toBe(ok),
   );
 
-  it('jodAmount({positive}) rejects zero and empty', () => {
-    const schema = jodAmount({ positive: true });
+  it('moneyAmount({positive}) rejects zero and empty', () => {
+    const schema = moneyAmount({ positive: true });
     expect(messages(schema.safeParse('0.000'))).toContain(VALIDATION_KEYS.notPositive);
     expect(messages(schema.safeParse(''))).toContain(VALIDATION_KEYS.required);
     expect(schema.safeParse('0.001').success).toBe(true);

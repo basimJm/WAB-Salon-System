@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { BRANCH_STATUSES } from '@/domain/shared/branches';
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import {
@@ -33,24 +32,12 @@ function queryEnum(path: string, name: string): string[] {
   return values;
 }
 
-/** Enum values straight from the server contract; kinds not in a query filter come from BUSINESS_DOMAIN §2 / the DTOs. */
+/** Enum values straight from the server contract; kinds not in a query filter come from the DTOs. */
 const EXPECTED: Record<StatusKind, string[]> = {
-  booking: queryEnum('/bookings', 'status'),
-  payment: queryEnum('/bookings', 'paymentStatus'),
-  refund: ['NONE', ...queryEnum('/refunds', 'status')],
-  transaction: queryEnum('/transactions', 'status'),
-  review: queryEnum('/reviews', 'status'),
-  customer: queryEnum('/customers', 'status'),
-  salon: queryEnum('/salons', 'state'),
-  subscription: queryEnum('/subscriptions', 'status'),
-  payout: queryEnum('/payouts', 'status'),
-  catalogRequest: queryEnum('/catalog/requests', 'status'),
-  campaign: queryEnum('/campaigns', 'status'),
-  placement: queryEnum('/recommended', 'status'),
+  item: queryEnum('/items', 'status'),
   alert: queryEnum('/alerts', 'status'),
   alertSeverity: ['INFO', 'WARNING', 'CRITICAL'],
   export: ['QUEUED', 'RUNNING', 'DONE', 'FAILED'],
-  branch: [...BRANCH_STATUSES],
 };
 
 const labels = (tree: unknown, kind: string): Record<string, string> =>
@@ -98,39 +85,38 @@ describe('status registry', () => {
   });
 
   it('matches the business meaning: failures red, success green, waiting amber', () => {
-    expect(STATUS_TONES.booking.PENDING).toBe('amber');
-    expect(STATUS_TONES.booking.APPROVED).toBe('green');
-    expect(STATUS_TONES.refund.REFUND_FAILED).toBe('rose');
-    expect(STATUS_TONES.transaction.FAILED).toBe('rose');
-    expect(STATUS_TONES.salon.LIVE).toBe('green');
+    expect(STATUS_TONES.item.ACTIVE).toBe('green');
+    expect(STATUS_TONES.item.INACTIVE).toBe('amber');
+    expect(STATUS_TONES.item.ARCHIVED).toBe('grey');
+    expect(STATUS_TONES.export.FAILED).toBe('rose');
     expect(STATUS_TONES.alertSeverity.CRITICAL).toBe('rose');
   });
 });
 
 describe('domain helpers', () => {
   it('toneOf falls back to the neutral tone for unknown values and kinds', () => {
-    expect(toneOf('booking', 'SOMETHING_NEW')).toBe(UNKNOWN_STATUS_TONE);
+    expect(toneOf('item', 'SOMETHING_NEW')).toBe(UNKNOWN_STATUS_TONE);
     expect(toneOf('nope' as StatusKind, 'X')).toBe(UNKNOWN_STATUS_TONE);
-    expect(isKnownStatus('booking', 'PENDING')).toBe(true);
-    expect(isKnownStatus('booking', 'pending')).toBe(false);
+    expect(isKnownStatus('item', 'ACTIVE')).toBe(true);
+    expect(isKnownStatus('item', 'active')).toBe(false);
     expect(statusValues('nope' as StatusKind)).toEqual([]);
   });
 });
 
 describe('StatusBadge', () => {
   it('shows the translated label with the registry tone', () => {
-    renderWithApp(<StatusBadge kind="booking" value="NO_SHOW" />);
-    const badge = screen.getByText('No-show');
+    renderWithApp(<StatusBadge kind="export" value="FAILED" />);
+    const badge = screen.getByText('Failed');
     expect(badge).toHaveClass('app-badge--rose');
   });
 
   it('translates to Arabic', () => {
-    renderWithApp(<StatusBadge kind="booking" value="NO_SHOW" />, undefined, 'ar');
-    expect(screen.getByText('لم يحضر')).toBeVisible();
+    renderWithApp(<StatusBadge kind="item" value="ARCHIVED" />, undefined, 'ar');
+    expect(screen.getByText('مؤرشف')).toBeVisible();
   });
 
   it('shows an unknown value as it is, in the neutral tone, without throwing', () => {
-    renderWithApp(<StatusBadge kind="booking" value="FUTURE_STATE" />);
+    renderWithApp(<StatusBadge kind="item" value="FUTURE_STATE" />);
     expect(screen.getByText('FUTURE_STATE')).toHaveClass('app-badge--grey');
   });
 

@@ -15,7 +15,8 @@ export const MOCK_SETTING_DEFAULTS: Readonly<Record<string, unknown>> = {
   'pagination.adminPageSize': 25,
   'alerts.api5xxRatePct': 2,
   'alerts.crashesPerHour': 10,
-  'alerts.jobFailuresPerHour': 5,
+  'alerts.jobFailures': { count: 5, windowMin: 60 },
+  'alerts.escalationMinutes': [60, 15],
   timezone: 'Asia/Amman',
   currency: 'JOD',
 };

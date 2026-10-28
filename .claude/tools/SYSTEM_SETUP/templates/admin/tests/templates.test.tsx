@@ -36,8 +36,8 @@ describe('ListPage', () => {
   it('lays out header, filters, toolbar, table and pagination in that order', () => {
     renderWithApp(
       <ListPage
-        title="Salons"
-        subtitle="All salons"
+        title="Items"
+        subtitle="All items"
         actions={<button type="button">New</button>}
         filters={{
           controls: <button type="button">filter control</button>,
@@ -49,7 +49,7 @@ describe('ListPage', () => {
       />,
     );
     const order = [
-      screen.getByRole('heading', { level: 1, name: 'Salons' }),
+      screen.getByRole('heading', { level: 1, name: 'Items' }),
       screen.getByRole('button', { name: 'filter control' }),
       screen.getByText('2 selected'),
       screen.getByRole('table'),
@@ -60,12 +60,12 @@ describe('ListPage', () => {
         order[i - 1]!.compareDocumentPosition(order[i]!) & Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
     }
-    expect(screen.getByText('All salons')).toBeVisible();
+    expect(screen.getByText('All items')).toBeVisible();
     expect(screen.getByRole('button', { name: 'New' })).toBeVisible();
   });
 
   it('omits the filter bar and the toolbar when not given', () => {
-    renderWithApp(<ListPage title="Salons" table={table} />);
+    renderWithApp(<ListPage title="Items" table={table} />);
     expect(screen.queryByRole('region', { name: 'Filters' })).toBeNull();
     expect(screen.queryByRole('status')).toBeNull();
   });
@@ -76,7 +76,7 @@ describe('ListPage', () => {
     ['failed', { error: new Error('x'), rows: [] as Row[] }],
   ])('hides the pagination while %s', (_name, extra) => {
     renderWithApp(
-      <ListPage title="Salons" table={{ ...table, ...extra }} pagination={pagination} />,
+      <ListPage title="Items" table={{ ...table, ...extra }} pagination={pagination} />,
     );
     expect(screen.queryByRole('navigation', { name: 'Pagination' })).toBeNull();
   });
@@ -88,7 +88,7 @@ describe('DetailPage', () => {
     { id: 'b', label: 'History', content: <p>history body</p> },
   ];
   const base = {
-    title: 'WAB-1',
+    title: 'ITEM-1',
     tabs,
     activeTab: 'a',
     onTabChange: () => undefined,
@@ -103,19 +103,16 @@ describe('DetailPage', () => {
           status={<span>STATUS</span>}
           actions={<button type="button">Approve</button>}
           aside={<p>side facts</p>}
-          back={{ to: '/bookings', label: 'Bookings' }}
+          back={{ to: '/items', label: 'Items' }}
         />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('heading', { level: 1, name: 'WAB-1' })).toBeVisible();
+    expect(screen.getByRole('heading', { level: 1, name: 'ITEM-1' })).toBeVisible();
     expect(screen.getByText('STATUS')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Approve' })).toBeVisible();
     expect(screen.getByText('overview body')).toBeVisible();
     expect(screen.getByText('side facts')).toBeVisible();
-    expect(screen.getByRole('link', { name: 'Back to Bookings' })).toHaveAttribute(
-      'href',
-      '/bookings',
-    );
+    expect(screen.getByRole('link', { name: 'Back to Items' })).toHaveAttribute('href', '/items');
   });
 
   it('changes tab through the callback', async () => {
@@ -146,7 +143,7 @@ describe('Timeline', () => {
     {
       id: '2',
       title: 'Approved',
-      actor: 'Salon',
+      actor: 'System',
       at: '2026-10-12T09:40:00Z',
       tone: 'green' as const,
     },
@@ -158,7 +155,7 @@ describe('Timeline', () => {
     const items = within(screen.getByRole('list', { name: 'History' })).getAllByRole('listitem');
     expect(items).toHaveLength(2);
     expect(items[0]).toHaveTextContent('Approved');
-    expect(items[0]).toHaveTextContent('Salon ·');
+    expect(items[0]).toHaveTextContent('System ·');
     expect(items[0]).toHaveTextContent(/12:40/);
     expect(items[1]).toHaveTextContent('Because');
     expect(items[1]!.querySelector('time')).toHaveAttribute('datetime', '2026-10-11T18:20:00Z');
@@ -231,11 +228,11 @@ describe('TemplatesSection (gallery)', () => {
         </main>
       </MemoryRouter>,
     );
-    expect(screen.getByRole('table', { name: 'Bookings' })).toBeVisible();
+    expect(screen.getByRole('table', { name: 'Items' })).toBeVisible();
     await userEvent.click(screen.getByRole('tab', { name: 'Status history' }));
-    expect(screen.getByText('Customer did not arrive within 30 minutes')).toBeVisible();
+    expect(screen.getByText('Record archived after 30 days without activity')).toBeVisible();
     await userEvent.click(screen.getByRole('tab', { name: 'Raw data' }));
-    expect(screen.getByRole('region', { name: 'Raw data' })).toHaveTextContent('SALON_SET_OFFLINE');
+    expect(screen.getByRole('region', { name: 'Raw data' })).toHaveTextContent('ITEM_ARCHIVE');
     expect(await axeViolations()).toEqual([]);
   });
 });

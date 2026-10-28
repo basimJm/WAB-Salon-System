@@ -147,7 +147,7 @@ describe('shell sign out and login notice', () => {
     await auth.login('a@b.co');
     container.session.set(await auth.verifyOtp('a@b.co', '123456'));
     const token = container.session.get()?.refreshToken;
-    renderRoutes('/bookings', { container });
+    renderRoutes('/items', { container });
     await userEvent.click(await screen.findByRole('button', { name: /Demo Admin|a@b/ }));
     await userEvent.click(await screen.findByRole('menuitem', { name: 'Sign out' }));
     await screen.findByRole('heading', { name: 'Sign in' });

@@ -8,7 +8,7 @@ import { renderWithApp } from './helpers/render';
 
 describe('design table cells', () => {
   it.each([
-    ['Noor Salon', 'N'],
+    ['Noor Studio', 'N'],
     ['  laith', 'L'],
     ['ليث', 'ل'],
     ['', ''],
@@ -17,9 +17,9 @@ describe('design table cells', () => {
   });
 
   it('EntityCell shows the initial, the name, a second line and a badge', () => {
-    renderWithApp(<EntityCell name="Noor Salon" sub="+962790000301" badge={<em>new</em>} />);
+    renderWithApp(<EntityCell name="Noor Studio" sub="+962790000301" badge={<em>new</em>} />);
     expect(screen.getByText('N')).toHaveClass('app-entity__initial');
-    expect(screen.getByText('Noor Salon')).toHaveClass('app-entity__name');
+    expect(screen.getByText('Noor Studio')).toHaveClass('app-entity__name');
     expect(screen.getByText('+962790000301')).toHaveClass('app-entity__sub');
     expect(screen.getByText('new')).toBeInTheDocument();
   });
@@ -36,8 +36,8 @@ describe('design table cells', () => {
 
 describe('design header and KPI blocks', () => {
   it('PageHeader shows badges next to the title', () => {
-    renderWithApp(<PageHeader title="Bookings" badges={<span>Live</span>} />);
-    expect(screen.getByRole('heading', { level: 1, name: 'Bookings' }).parentElement).toHaveClass(
+    renderWithApp(<PageHeader title="Items" badges={<span>Live</span>} />);
+    expect(screen.getByRole('heading', { level: 1, name: 'Items' }).parentElement).toHaveClass(
       'app-pageheader__titlerow',
     );
     expect(screen.getByText('Live')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('design row tint', () => {
   it('rows that need attention get the alert class, others do not', () => {
     renderWithApp(
       <DataTable
-        caption="Transactions"
+        caption="Records"
         columns={[
           { key: 'id', header: 'Ref', render: (r: { id: string; failed: boolean }) => r.id },
         ]}

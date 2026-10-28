@@ -15,7 +15,7 @@ test('table v2 (English): select page, bulk bar, columns, density, paging, expor
   await card.getByRole('button', { name: 'Clear selection' }).click();
   await expect(card.getByText('25 selected')).toHaveCount(0);
 
-  await card.getByRole('checkbox', { name: 'Select Salon 2', exact: true }).check();
+  await card.getByRole('checkbox', { name: 'Select Item 2', exact: true }).check();
   await expect(card.getByText('1 selected')).toBeVisible();
   await card.getByRole('button', { name: 'Approve selected' }).click();
 

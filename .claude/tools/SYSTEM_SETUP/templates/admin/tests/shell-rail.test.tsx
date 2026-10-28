@@ -20,8 +20,8 @@ describe('tablet shell = icon rail', () => {
   const open = async () => {
     const container = makeContainer();
     await signInContainer(container);
-    renderRoutes(ROUTES.bookings, { container });
-    await screen.findByRole('heading', { name: en.nav.bookings });
+    renderRoutes(ROUTES.items, { container });
+    await screen.findByRole('heading', { name: en.nav.items });
     const aside = document.querySelector('aside');
     if (!aside) throw new Error('no sidebar');
     return aside;

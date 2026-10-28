@@ -1,19 +1,24 @@
 import { expect, test } from '@playwright/test';
 import { noHorizontalScroll, signIn } from './helpers.ts';
 
-test('shell (English): breadcrumbs on a sub-page, sub-menu on wide screens, admin menu', async ({
+test('shell (English): active module, collapsible sidebar on wide screens, admin menu', async ({
   page,
 }) => {
-  await signIn(page, '/finance/refunds');
+  await signIn(page, '/items');
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
-  const crumbs = page.getByRole('navigation', { name: 'Breadcrumbs' });
-  await expect(crumbs.getByRole('link', { name: 'Finance' })).toBeVisible();
-  await expect(crumbs.locator('[aria-current="page"]')).toHaveText('Refunds');
+  await expect(page.getByRole('heading', { level: 1, name: 'Items' })).toBeVisible();
+  await expect(page.getByRole('link', { name: /^Items/ })).toHaveClass(/app-navitem--active/);
 
   if ((page.viewportSize()?.width ?? 0) >= 1024) {
-    await expect(page.getByRole('link', { name: 'Reconciliation' })).toBeVisible();
-    await page.getByRole('button', { name: 'Collapse Finance' }).click();
-    await expect(page.getByRole('link', { name: 'Reconciliation' })).toHaveCount(0);
+    const aside = page.locator('aside');
+    await page
+      .getByRole('button', { name: /collapse or expand the sidebar|expand the sidebar|collapse/i })
+      .click();
+    await expect(aside).toHaveClass(/app-sidebar--collapsed/);
+    await page
+      .getByRole('button', { name: /collapse or expand the sidebar|expand the sidebar|collapse/i })
+      .click();
+    await expect(aside).not.toHaveClass(/app-sidebar--collapsed/);
   }
   await page.locator('.app-topbar').getByRole('button').filter({ hasText: /\S/ }).last().click();
   await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible();

@@ -47,10 +47,10 @@ describe('TextField', () => {
 
 describe('KpiCard', () => {
   it('shows positive and negative deltas and a skeleton while loading', () => {
-    const { rerender } = app(<KpiCard label="Bookings" value="12" deltaPercent={-4} />);
+    const { rerender } = app(<KpiCard label="Items" value="12" deltaPercent={-4} />);
     expect(screen.getByText('4%')).toBeInTheDocument();
     expect(document.querySelector('.app-kpi__delta--down')).not.toBeNull();
-    rerender(<KpiCard label="Bookings" value="12" loading />);
+    rerender(<KpiCard label="Items" value="12" loading />);
     expect(screen.queryByText('12')).toBeNull();
   });
 });

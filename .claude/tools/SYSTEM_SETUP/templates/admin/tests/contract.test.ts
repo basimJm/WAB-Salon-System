@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -15,21 +15,26 @@ import { CONTRACT_FILES, SERVER_SPEC_FILE } from '../scripts/lib/contractFiles.t
 import { OPERATIONS } from '../src/data/contract/generated/operations';
 import {
   components,
-  getSalonsDataSchema,
+  getItemsDataSchema,
   postAuthLoginBodySchema,
   postAuthLoginDataSchema,
 } from '../src/data/contract/generated/dto';
 import { ROOT } from './helpers/files';
 
 const text = (file: string) => readFileSync(join(ROOT, file), 'utf8');
-const serverText = text(SERVER_SPEC_FILE);
+// The server project is a sibling checkout; without it the committed snapshot is the contract of record.
+const hasServerSpec = existsSync(join(ROOT, SERVER_SPEC_FILE));
+const serverText = text(hasServerSpec ? SERVER_SPEC_FILE : CONTRACT_FILES.snapshot);
 const spec = JSON.parse(serverText) as Spec;
 const METHODS = ['get', 'post', 'put', 'patch', 'delete'];
 
 describe('contract snapshot', () => {
-  it('equals the server spec (run `npm run api:sync` when the server changed)', () => {
-    expect(text(CONTRACT_FILES.snapshot)).toBe(serverText);
-  });
+  it.skipIf(!hasServerSpec)(
+    'equals the server spec (run `npm run api:sync` when the server changed)',
+    () => {
+      expect(text(CONTRACT_FILES.snapshot)).toBe(serverText);
+    },
+  );
 
   it('generated files are exactly what the generator produces now, and carry the spec hash', () => {
     const sha = sha256(serverText);
@@ -38,7 +43,7 @@ describe('contract snapshot', () => {
     expect(text(CONTRACT_FILES.dto)).toContain(`${SHA_MARKER} ${sha}`);
   });
 
-  it('`npm run api:check` passes on the repository', () => {
+  it.skipIf(!hasServerSpec)('`npm run api:check` passes on the repository', () => {
     expect(() =>
       execFileSync('node', ['scripts/api-sync.ts', '--check'], { cwd: ROOT, stdio: 'pipe' }),
     ).not.toThrow();
@@ -57,19 +62,19 @@ describe('operations', () => {
 
   it.each([
     ['post', '/admin/v1/auth/login', 'postAuthLogin'],
-    ['get', '/admin/v1/salons/{id}', 'getSalonsById'],
-    ['patch', '/admin/v1/locations/countries/{id}', 'patchLocationsCountriesById'],
-    ['post', '/admin/v1/bookings/{id}/status', 'postBookingsByIdStatus'],
+    ['get', '/admin/v1/items/{id}', 'getItemsById'],
+    ['patch', '/admin/v1/items/{id}', 'patchItemsById'],
+    ['post', '/admin/v1/alerts/{id}/acknowledge', 'postAlertsByIdAcknowledge'],
     ['get', '/admin/v1/audit-logs', 'getAuditLogs'],
   ] as const)('%s %s is named %s', (method, path, id) => {
     expect(operationId(method, path)).toBe(id);
   });
 
   it('marks paginated lists with meta and records the success status', () => {
-    expect(OPERATIONS.getSalons.hasMeta).toBe(true);
+    expect(OPERATIONS.getItems.hasMeta).toBe(true);
     expect(OPERATIONS.postAuthLogin.hasMeta).toBe(false);
     expect(OPERATIONS.postAuthLogin.hasBody).toBe(true);
-    expect(OPERATIONS.getSalons.hasQuery).toBe(true);
+    expect(OPERATIONS.getItems.hasQuery).toBe(true);
     expect(OPERATIONS.postAuthLogin.status).toBe(200);
   });
 
@@ -110,20 +115,15 @@ describe('generated DTOs behave like the server contract', () => {
   it('handles nullable fields and enums in list items, and shared components', () => {
     const item = {
       id: '1',
-      name: 'Salon',
-      gender: 'FEMALE',
-      state: 'LIVE',
-      cityId: null,
-      areaId: null,
-      rating: { avg: 4.5, count: 3 },
-      subscriptionStatus: null,
-      recommended: false,
-      bookings30d: 0,
-      deletionRequestedAt: null,
+      name: 'Starter plan',
+      description: null,
+      status: 'ACTIVE',
       createdAt: '2026-10-14T10:00:00.000Z',
+      updatedAt: '2026-10-14T10:00:00.000Z',
+      updatedBy: null,
     };
-    expect(getSalonsDataSchema().safeParse([item]).success).toBe(true);
-    expect(getSalonsDataSchema().safeParse([{ ...item, state: 'NOPE' }]).success).toBe(false);
+    expect(getItemsDataSchema().safeParse([item]).success).toBe(true);
+    expect(getItemsDataSchema().safeParse([{ ...item, status: 'NOPE' }]).success).toBe(false);
     expect(components.PaginationMeta().safeParse({ page: 1, pageSize: 25, total: 0 }).success).toBe(
       true,
     );

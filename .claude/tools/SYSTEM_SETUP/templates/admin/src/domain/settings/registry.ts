@@ -22,7 +22,18 @@ const row = (
   unit?: SettingUnit,
 ): SettingDefinition => ({ key, group, kind: 'int', min, max, ...(unit ? { unit } : {}) });
 
+const member = (
+  key: string,
+  field: string,
+  bounds: Bounds,
+  unit?: SettingUnit,
+): SettingDefinition => ({
+  ...row(key, 'alerts', bounds, unit),
+  field,
+});
+
 const PERCENT: Bounds = [0, 100];
+const JOB_FAILURES = 'alerts.jobFailures';
 
 /**
  * Every editable key the server exposes under `GET /settings` (timezone and currency are shown read-only).
@@ -46,7 +57,16 @@ export const SETTING_DEFINITIONS: readonly SettingDefinition[] = [
   row('pagination.adminPageSize', 'pagination', [5, 100]),
   row('alerts.api5xxRatePct', 'alerts', PERCENT, 'percent'),
   row('alerts.crashesPerHour', 'alerts', [1, 10000]),
-  row('alerts.jobFailuresPerHour', 'alerts', [1, 10000]),
+  member(JOB_FAILURES, 'count', [1, 1000]),
+  member(JOB_FAILURES, 'windowMin', [1, 1440], 'minutes'),
+  {
+    key: 'alerts.escalationMinutes',
+    group: 'alerts',
+    kind: 'intList',
+    unit: 'minutes',
+    min: 1,
+    max: 10080,
+  },
 ];
 
 /** Read-only platform facts shown next to the editable ones. */

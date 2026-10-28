@@ -73,17 +73,11 @@ describe('ChartFrame', () => {
 describe('LineChart', () => {
   it('draws one line and one point per value for every series, with tooltips and a legend', () => {
     renderWithApp(
-      <LineChart
-        title="Bookings"
-        categoryHeader="Day"
-        labels={labels}
-        series={series}
-        filename="f"
-      />,
+      <LineChart title="Items" categoryHeader="Day" labels={labels} series={series} filename="f" />,
     );
     expect(document.querySelectorAll('polyline')).toHaveLength(2);
     expect(document.querySelectorAll('circle')).toHaveLength(6);
-    expect(screen.getByRole('img', { name: 'Bookings' })).toBeVisible();
+    expect(screen.getByRole('img', { name: 'Items' })).toBeVisible();
     expect(screen.getByText('Created · Tue: 20', { selector: 'title' })).toBeInTheDocument();
     expect(screen.getAllByRole('listitem').map((li) => li.textContent)).toEqual([
       'Created',
@@ -93,13 +87,7 @@ describe('LineChart', () => {
 
   it('the data table has the category column and one column per series', async () => {
     renderWithApp(
-      <LineChart
-        title="Bookings"
-        categoryHeader="Day"
-        labels={labels}
-        series={series}
-        filename="f"
-      />,
+      <LineChart title="Items" categoryHeader="Day" labels={labels} series={series} filename="f" />,
     );
     await userEvent.click(screen.getByRole('button', { name: 'View data' }));
     expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toEqual([
@@ -179,7 +167,7 @@ describe('DonutChart', () => {
         headers={['Status', 'Count', 'Share']}
         data={data}
         filename="f"
-        centerLabel="bookings"
+        centerLabel="items"
       />,
     );
     expect(document.querySelectorAll('svg path')).toHaveLength(2);

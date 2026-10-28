@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EnvRibbon } from '@/presentation/layout/EnvRibbon';
 import { ENV_KEYS } from '@/constants/env';
-import { ROUTES } from '@/constants/routes';
+import { HOME_ROUTE, ROUTES } from '@/constants/routes';
 import { buildAppConfig } from '@/infrastructure/config/appConfig';
 import ar from '@/locales/ar';
 import en from '@/locales/en';
@@ -95,7 +95,7 @@ describe('About page', () => {
   it('is reachable from the admin menu in the top bar', async () => {
     const container = containerFor('dev-debug');
     await signInContainer(container);
-    renderRoutes(ROUTES.liveOverview, { container });
+    renderRoutes(HOME_ROUTE, { container });
     await userEvent.click(await screen.findByRole('button', { name: /Demo Admin|admin@/ }));
     await userEvent.click(await screen.findByRole('menuitem', { name: en.topbar.about }));
     expect(await screen.findByRole('heading', { name: en.about.title })).toBeInTheDocument();

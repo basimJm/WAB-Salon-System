@@ -17,7 +17,7 @@ const bodyRows = () => screen.getAllByRole('row').length - 1;
 
 describe('audit rules', () => {
   it('humanizes actions and detects a diff', () => {
-    expect(humanizeAction('SALON_SET_OFFLINE')).toBe('Salon set offline');
+    expect(humanizeAction('ITEM_SET_INACTIVE')).toBe('Item set inactive');
     expect(humanizeAction('X')).toBe('X');
     expect(hasDiff({ before: { a: 1 } })).toBe(true);
     expect(hasDiff({})).toBe(false);
@@ -28,7 +28,7 @@ describe('AuditPage', () => {
   it('lists records newest data with reason and IP', async () => {
     open();
     await waitFor(() => expect(bodyRows()).toBe(3));
-    expect(screen.getByText('Salon set offline')).toBeInTheDocument();
+    expect(screen.getByText('Item update')).toBeInTheDocument();
     expect(screen.getAllByText('203.0.113.7').length).toBe(3);
   });
 
@@ -36,18 +36,18 @@ describe('AuditPage', () => {
     open();
     await waitFor(() => expect(bodyRows()).toBe(3));
     expect(screen.getByText('Read-only')).toBeInTheDocument();
-    expect(screen.getByText('SALON_SET_OFFLINE')).toHaveClass('app-cell2__code');
+    expect(screen.getByText('ITEM_UPDATE')).toHaveClass('app-cell2__code');
     expect(screen.getByRole('columnheader', { name: 'Device' })).toBeInTheDocument();
   });
 
   it('opening a record shows the before / after values; one without them says so', async () => {
     open();
-    await userEvent.click(await screen.findByText('Salon set offline'));
+    await userEvent.click(await screen.findByText('Item update'));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByLabelText('Before')).toBeInTheDocument();
     expect(within(dialog).getByLabelText('After')).toBeInTheDocument();
     await userEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
-    await userEvent.click(await screen.findByText('Review approve'));
+    await userEvent.click(await screen.findByText('Admin login'));
     expect(
       await screen.findByText('This action stored no before / after values.'),
     ).toBeInTheDocument();
@@ -56,7 +56,7 @@ describe('AuditPage', () => {
   it('filters by entity type', async () => {
     open();
     await waitFor(() => expect(bodyRows()).toBe(3));
-    await userEvent.type(screen.getByLabelText('Entity type'), 'review');
+    await userEvent.type(screen.getByLabelText('Entity type'), 'ADMIN');
     await waitFor(() => expect(bodyRows()).toBe(1));
   });
 

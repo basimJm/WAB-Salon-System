@@ -12,7 +12,7 @@ test('form kit: search debounces, combobox picks by keyboard, validation message
   const card = page.locator('.app-card[aria-label="Form kit"]');
   await card.scrollIntoViewIfNeeded();
 
-  const search = card.getByRole('searchbox', { name: 'Search salons' });
+  const search = card.getByRole('searchbox', { name: 'Search items' });
   await search.fill('sal');
   await expect(card.getByText(/Type to search/)).toBeVisible();
   await expect(card.getByText('Searching for “sal”')).toBeVisible({

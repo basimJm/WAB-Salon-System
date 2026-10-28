@@ -262,8 +262,8 @@ describe('TableSection (gallery)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }));
     expect(screen.queryByText('25 selected')).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: 'Columns' }));
-    await userEvent.click(screen.getByRole('checkbox', { name: 'City' }));
-    expect(screen.queryByRole('columnheader', { name: 'City' })).toBeNull();
+    await userEvent.click(screen.getByRole('checkbox', { name: 'Region' }));
+    expect(screen.queryByRole('columnheader', { name: 'Region' })).toBeNull();
     expect(await axeViolations()).toEqual([]);
   });
 });
