@@ -3,6 +3,7 @@ package com.fab.wab.customer.core.common
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 
 class TimeFormatTest {
 
@@ -32,6 +33,16 @@ class TimeFormatTest {
     fun formatsInstantsInAmman() {
         assertEquals(DateTimeText("18/10/2026", "1:00 PM"), TimeFormat.instantText("2026-10-18T10:00:00.000Z", "AM", "PM"))
         assertNull(TimeFormat.instantText("soon", "AM", "PM"))
+    }
+
+    @Test
+    fun businessZoneIsLoadedOnceAndUsedByDefault() {
+        assertEquals(BusinessTime.ZONE_ID, BusinessTime.zone.id)
+        assertSame(BusinessTime.zone, BusinessTime.zone)
+        assertEquals(
+            TimeFormat.instantText("2026-10-18T10:00:00.000Z", "AM", "PM"),
+            TimeFormat.instantText("2026-10-18T10:00:00.000Z", "AM", "PM", zoneId = "Asia/Amman"),
+        )
     }
 
     @Test

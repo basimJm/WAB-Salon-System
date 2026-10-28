@@ -3,6 +3,7 @@
 package com.fab.wab.merchant.core.common
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -43,7 +44,14 @@ object TimeFormat {
     /** An ISO instant (stored UTC) shown in the business time zone: date "18/10/2026" and 12-hour time. */
     fun instantText(iso: String, am: String, pm: String, zoneId: String = BusinessTime.ZONE_ID): DateTimeText? {
         val instant = runCatching { Instant.parse(iso.trim()) }.getOrNull() ?: return null
-        val local = instant.toLocalDateTime(TimeZone.of(zoneId))
+        return localText(instant.toLocalDateTime(BusinessTime.zoneOf(zoneId)), am, pm)
+    }
+
+    /** Same as the ISO overload without the text round trip (lists and calendar blocks format many instants per frame). */
+    fun instantText(instant: kotlin.time.Instant, am: String, pm: String, zone: TimeZone = BusinessTime.zone): DateTimeText =
+        localText(instant.toLocalDateTime(zone), am, pm)
+
+    private fun localText(local: LocalDateTime, am: String, pm: String): DateTimeText {
         val date = local.date.toString().split(DATE_SEPARATOR).reversed().joinToString(DISPLAY_DATE_SEPARATOR)
         val hhmm = local.hour.toString().padStart(MINUTE_DIGITS, PAD) + SEPARATOR + local.minute.toString().padStart(MINUTE_DIGITS, PAD)
         return DateTimeText(date = date, time = to12Hour(hhmm, am, pm) ?: hhmm)
@@ -63,6 +71,12 @@ object BusinessTime {
     fun nowInstant(): kotlinx.datetime.Instant = kotlinx.datetime.Instant.fromEpochMilliseconds(SystemClock.now().toEpochMilliseconds())
 
     const val ZONE_ID = "Asia/Amman"
+
+    /** The business zone, resolved once (time-zone lookups read the platform tz database, slow on iOS). */
+    val zone: TimeZone by lazy { TimeZone.of(ZONE_ID) }
+
+    /** [zone] for the business id, otherwise a fresh lookup. */
+    fun zoneOf(zoneId: String): TimeZone = if (zoneId == ZONE_ID) zone else TimeZone.of(zoneId)
 }
 
 data class DateTimeText(val date: String, val time: String)

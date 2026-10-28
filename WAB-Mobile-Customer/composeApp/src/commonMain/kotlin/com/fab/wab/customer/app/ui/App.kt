@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -163,6 +164,10 @@ fun App(androidContext: Any?) {
         }
     }
 
+    // CUS-097: installed once per tracker, not as a side effect of every recomposition of the app root.
+    val tracker = koinInject<AnalyticsTracker>()
+    val analyticsTracker = remember(tracker) { tracker.also(ActionAnalytics::install) }
+
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection,
     ) {
@@ -170,7 +175,7 @@ fun App(androidContext: Any?) {
             LocalImageLoader provides imageLoader,
             LocalAppLocale provides languageState.code,
             LocalDarkTheme provides isDarkTheme,
-            LocalAnalyticsTracker provides koinInject<AnalyticsTracker>().also(ActionAnalytics::install),
+            LocalAnalyticsTracker provides analyticsTracker,
         ) {
             when (val gate = state.gate) {
                 null -> AppTheme { SplashScreen(state, mainViewModel::onEvent) }
@@ -198,16 +203,7 @@ fun App(androidContext: Any?) {
                     DeepLinkEffect(koinInject<DeepLinkStore>(), navController)
                     val sessionState by koinInject<SessionStore>().state.collectAsStateWithLifecycle(initialValue = null)
                     RealtimeConnectionEffect(koinInject<RealtimeClient>(), isSignedIn = sessionState?.isSignedIn == true)
-                    val tabs = rootNavItems()
-                    val backStackEntry by navController.currentBackStackEntryAsState()
-                    val hierarchyRoutes = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()
-                    val currentTab = RootTab.forRoutesOrNull(hierarchyRoutes)
-                    AppNavScaffold(
-                        items = tabs,
-                        selectedId = (currentTab ?: RootTab.DEFAULT).id,
-                        onSelect = { id -> navController.switchRootTab(RootTab.fromId(id)) },
-                        navigationVisible = currentTab != null,
-                    ) {
+                    RootNavScaffold(navController) {
                         NotificationHost {
                             val notificationManager = rememberNotificationManager()
 
@@ -242,4 +238,23 @@ fun App(androidContext: Any?) {
             }
         }
     }
+}
+
+/**
+ * The tab scaffold of the signed-in shell. CUS-097: the back stack is read here, so a navigation recomposes only
+ * this scaffold, not the whole app root with its providers and effects.
+ */
+@Composable
+private fun RootNavScaffold(navController: NavHostController, content: @Composable () -> Unit) {
+    val tabs = rootNavItems()
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val hierarchyRoutes = backStackEntry?.destination?.hierarchy?.map { it.route }?.toList().orEmpty()
+    val currentTab = RootTab.forRoutesOrNull(hierarchyRoutes)
+    AppNavScaffold(
+        items = tabs,
+        selectedId = (currentTab ?: RootTab.DEFAULT).id,
+        onSelect = { id -> navController.switchRootTab(RootTab.fromId(id)) },
+        navigationVisible = currentTab != null,
+        content = content,
+    )
 }

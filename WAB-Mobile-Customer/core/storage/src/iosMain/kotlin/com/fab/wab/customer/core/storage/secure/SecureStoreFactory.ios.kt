@@ -8,4 +8,4 @@ import platform.Foundation.NSBundle
 
 /** Keychain items are scoped by the app's bundle identifier (dev and prod bundles never share a session). */
 actual fun createSecureKeyValueStore(dataStore: DataStore<Preferences>): SecureKeyValueStore =
-    KeychainSecureStore(service = NSBundle.mainBundle.bundleIdentifier.orEmpty())
+    OffMainSecureStore(KeychainSecureStore(service = NSBundle.mainBundle.bundleIdentifier.orEmpty()))

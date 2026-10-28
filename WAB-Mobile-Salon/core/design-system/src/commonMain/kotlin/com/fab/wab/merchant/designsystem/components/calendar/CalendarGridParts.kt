@@ -19,9 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -93,13 +95,19 @@ internal fun BoxScope.ShadeBox(shade: CalendarShadeUi, window: TimeWindow, hourH
             .offset(y = hourHeight * top)
             .height(hourHeight * height)
             .clip(RectangleShape)
-            .drawBehind {
-                val step = stroke.toPx() * HATCH_STEP_FACTOR
+            // Hatch lines built once per size (drawWithCache), drawn as one path (MER-079, skill: cache drawing allocations).
+            .drawWithCache {
+                val width = stroke.toPx()
+                val step = width * HATCH_STEP_FACTOR
+                val lines = Path()
                 var x = -size.height
                 while (x < size.width) {
-                    drawLine(hatch, Offset(x, size.height), Offset(x + size.height, 0f), strokeWidth = stroke.toPx())
+                    lines.moveTo(x, size.height)
+                    lines.lineTo(x + size.height, 0f)
                     x += step
                 }
+                val pen = Stroke(width = width)
+                onDrawBehind { drawPath(lines, hatch, style = pen) }
             },
         contentAlignment = Alignment.TopCenter,
     ) {
@@ -140,16 +148,13 @@ internal fun BoxScope.BlockBox(block: CalendarBlockUi, window: TimeWindow, hourH
             .alpha(if (style.faded) AppTheme.alpha.disabled else 1f)
             .clip(shape)
             .background(style.container)
-            .drawBehind {
+            .then(
                 if (outline != Color.Unspecified) {
-                    val dash = if (style.dashed && !block.isBride) PathEffect.dashPathEffect(floatArrayOf(DASH_ON, DASH_OFF)) else null
-                    drawRoundRect(
-                        outline,
-                        style = Stroke(width = borderWidth.toPx(), pathEffect = dash),
-                        cornerRadius = CornerRadius(borderWidth.toPx() * DASH_OFF),
-                    )
-                }
-            }
+                    Modifier.blockOutline(outline, dashed = style.dashed && !block.isBride, borderWidth)
+                } else {
+                    Modifier
+                },
+            )
             .then(if (onClick != null) Modifier.appClickable(role = Role.Button, onClick = onClick) else Modifier)
             .padding(horizontal = AppTheme.spacing.space6, vertical = AppTheme.spacing.space4),
         horizontalAlignment = if (compact) Alignment.CenterHorizontally else Alignment.Start,
@@ -188,3 +193,11 @@ private fun BlockText(block: CalendarBlockUi, color: Color) {
 }
 
 private const val TIME_LABEL_LINES = 2
+
+/** Bride / dashed-status outline; the stroke and dash effect are allocated once per size, not on every draw. */
+private fun Modifier.blockOutline(color: Color, dashed: Boolean, width: Dp): Modifier = drawWithCache {
+    val px = width.toPx()
+    val pen = Stroke(width = px, pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(DASH_ON, DASH_OFF)) else null)
+    val corner = CornerRadius(px * DASH_OFF)
+    onDrawBehind { drawRoundRect(color, style = pen, cornerRadius = corner) }
+}

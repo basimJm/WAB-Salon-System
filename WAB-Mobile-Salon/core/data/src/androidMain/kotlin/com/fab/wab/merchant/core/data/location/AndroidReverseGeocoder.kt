@@ -17,14 +17,31 @@ import kotlinx.coroutines.withContext
 private const val ARABIC = "ar"
 private const val MAX_RESULTS = 1
 
-/** Platform `Geocoder` (no API key); the async listener on Android 13+, the blocking call on IO before that. */
+/**
+ * Platform `Geocoder` (no API key); the async listener on Android 13+ (result or error), the blocking call on IO before
+ * that. The map picker bounds the wait.
+ */
 class AndroidReverseGeocoder(private val context: Context) : ReverseGeocoder {
     override suspend fun addressOf(point: LocationData, language: String): String? {
         if (!Geocoder.isPresent()) return null
         val geocoder = Geocoder(context, Locale.forLanguageTag(language))
         val address = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             suspendCancellableCoroutine { continuation ->
-                geocoder.getFromLocation(point.latitude, point.longitude, MAX_RESULTS) { found -> continuation.resume(found.firstOrNull()) }
+                // onError (Android 14+) must answer too: without it a failing geocoder never resumed (MER-079).
+                val listener = object : Geocoder.GeocodeListener {
+                    override fun onGeocode(addresses: MutableList<Address>) {
+                        if (continuation.isActive) continuation.resume(addresses.firstOrNull())
+                    }
+
+                    override fun onError(errorMessage: String?) {
+                        if (continuation.isActive) continuation.resume(null)
+                    }
+                }
+                try {
+                    geocoder.getFromLocation(point.latitude, point.longitude, MAX_RESULTS, listener)
+                } catch (ignored: IllegalArgumentException) {
+                    continuation.resume(null)
+                }
             }
         } else {
             withContext(Dispatchers.IO) { legacyLookup(geocoder, point) }

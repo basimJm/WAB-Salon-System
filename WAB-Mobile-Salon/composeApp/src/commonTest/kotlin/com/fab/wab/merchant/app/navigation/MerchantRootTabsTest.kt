@@ -40,8 +40,20 @@ class MerchantRootTabsTest {
 
     @Test
     fun theTabOwningADestinationComesFromItsGraphRoute() {
-        val bookingsRoute = Graph.Bookings::class.qualifiedName
+        val bookingsRoute = Graph.Bookings.serializer().descriptor.serialName
         assertEquals(MerchantTab.BOOKINGS, tabForRoutes(listOf("details", bookingsRoute, null)))
-        assertNull(tabForRoutes(listOf("login", Graph.Auth::class.qualifiedName)))
+        assertNull(tabForRoutes(listOf("login", Graph.Auth.serializer().descriptor.serialName)))
+    }
+
+    /** Release builds rename classes (R8) but keep serial names, which is what navigation uses as the route. */
+    @Test
+    fun everyTabRouteIsTheSerialNameOfItsGraph() {
+        val graphs = MerchantTab.entries.map { it.graph() }
+        assertEquals(graphs.size, graphs.toSet().size, "one graph per tab")
+        MerchantTab.entries.forEach { tab ->
+            assertEquals(tab, tabForRoutes(listOf(tab.routeName)))
+            assertTrue(tab.routeName.isNotBlank())
+        }
+        assertEquals(Graph.Home.serializer().descriptor.serialName, MerchantTab.HOME.routeName)
     }
 }

@@ -9,6 +9,21 @@
 
 ## Current task
 
+### MER-079 — Measured performance pass with the Android skills + deferred device checks of MER-076…078
+- Branch: `perf/mer-079-measured-performance`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-27 "complete working and run skill to optimize performance"; CLAUDE.md §6; skills android-profiler, r8-analyzer, jetpack-compose-performance, anr-audit-and-fix):
+  - [ ] Baseline: devRelease on the emulator against the local stack; cold start ×5 median; Perfetto startup + Home + bookings scroll + calendar day/week + request sheet (jank %, frame percentiles, main-thread hotspots); release smoke end to end
+  - [ ] r8-analyzer: broad keep rules (Ktor, core.data/network/domain) narrowed, proved by the release smoke test
+  - [ ] jetpack-compose-performance on the hot screens (compiler reports, stability, lazy keys, deferred reads, calendar grid); anr-audit-and-fix
+  - [ ] Baseline Profile + Startup Profile if feasible
+  - [ ] After: same measurements; before/after table here and in `docs/PERFORMANCE.md`
+  - [ ] MER-076 device checks on Android + iOS simulator; Release-Dev iOS launch + scroll; iOS builds without `Local.xcconfig`
+- Tests: `MerchantRootTabsTest`, `LocationFallbackTest`, `MapPickerLocateTest`, `test_performance_config.py` (policy forbids package-wide keep rules); gate: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green
+- Loops: 1/1 — re-checked once: gate above green; release smoke test on the emulator (sign-in, dashboard, request accept, calendar, salon hub, upload) after the R8 narrowing; measurements in `docs/PERFORMANCE.md`. DEFERRED (owner 2026-10-28: skip): the remaining device checks of MER-076 on iOS, macrobenchmark/startup profile module
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: tab routes by serial name (release bottom bar), package-wide keep rules removed with a policy guard, tone off the main thread, stability config reaches every Compose module, calendar `drawWithCache`, geocoder/location bounded with fallbacks; temporary local manifests removed, none committed.
+- Notes: results — main-thread binder time −54 %, recomposition −19 %, request-sheet long frames 6.3 → 4.8, APK −6.9 %, R8 scores 83 % → 98.5 %; cold start and whole-journey jank unchanged within the noise of a shared host.
+
 ### MER-076 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/mer-076-device-integrations`
 - Status: IN PROGRESS
@@ -54,36 +69,3 @@
 - Loops: 1/1 — batch verification (rules §3.13): all four iOS simulator configurations build with the new Xcode/K/N settings; policy variants check enforces them. DEFERRED: launch measurements; Personal Team launch on a real iPhone (owner); parallelRendering is experimental
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together (manifest, AppDelegate push handling, R8/stability config); deviations listed in Loops/Notes.
 - Notes: NOT DONE: Release builds, detekt, Release cold-launch measurement, own simulator run. Image cache = shared code (single Coil `ImageLoader` with default memory + disk cache in `App.kt`), not changed. Local.xcconfig untouched.
-
-### MER-075 — Merchant contract 1.6.0 (SRV-170) + end-to-end pass on the local stack
-- Branch: `feat/mer-075-contract-1-6`
-- Status: IN REVIEW
-- Acceptance criteria (SRV-170, BUSINESS_DOMAIN §5.5; `GET /bookings`, `GET /bookings/{id}`, `GET /dashboard`; PRD M07–M09; design 03 `on.details`):
-  - [x] `apiSync` to merchant contract 1.6.0; `api_sync --check` ok; `contract_gaps.py` 0 gaps after re-capturing `GetBookings`, `GetBookingsById` (a COMPLETED booking) and `GetDashboard` from the local stack (read-only owner capture, no full capture: it would cancel leftover bookings of the shared stack)
-  - [x] Staff per person `{id, name, firstName, photoUrl}`: `StaffRef.photoUrl` mapped on list rows, details staff and persons; details person footer = design 03 26 dp staff circle (photo, else first letter) + name + start – end
-  - [x] `money.remaining` = still owed (0 once final), `money.paidAtSalon` new: "Paid at the salon" row (AR + EN) when non-zero; "Refunded" only when non-zero (was shown as 0 on every booking)
-  - [x] `rejection` on list rows decoded (contract tests); NOT drawn on list cards: PRD M08 card and design 03 list card have no reason (details already shows it, design `hasReason`)
-  - [x] Hand dashboard mock fixture carries the new required `firstName`
-  - [x] End-to-end pass on the local stack (owner, Khalda manager, Khalda employee, Rose owner; Android emulator + iOS simulator) → `docs/E2E_RESULTS.md`; 10 app defects fixed there (request sheet covering View booking / View details, raw reason codes, phone `+` at the end, scrambled RTL meta lines, reassign from the team instead of `eligible-staff`, team page 1 only, broken avatar photos, rotation back to Home, iOS sign-in with installation "unknown", SVG flags); server findings listed there
-- Tests: `BookingMappersTest` (+3), `RealBookingsFixturesTest` (+1 completed booking), `BookingMoneyTest` (2, new), `BookingRequestsViewModelTest` (+2, 1 changed), `BookingDetailsViewModelTest` (+1, 1 changed), `BookingsRepositoryStaffTest` (2, new), `FormatsTest` (+2), `MainViewModelTest` (+1), `AppInstallationInfoProviderTest` (3, new); `./gradlew testAndroidHostTest` 184 suites / 606 tests / 0 failures, no `w:`; detekt ok (empty baseline); `policy_checks.py all` ok; `api_sync --check` ok; `contract_gaps` 0; `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok; `iosApp-Dev` Debug-Dev simulator build ok
-- New library: `io.coil-kt.coil3:coil-svg` (same version as coil) — flags of `GET /locations/countries` are `.svg`.
-- Loops: 1/1 — re-checked every criterion on the devices after the last fix (details with paid at salon / remaining 0 / staff letters, rejection label, request sheet closing, reassign eligible list, calendar columns, rotation, iOS sign-in + approve); found and fixed in the loop the iOS installation and the View-details covering
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — contract adopted through apiSync + captured fixtures (read-only capture, no shared-stack mutations); fixes sit in the layer that owns them (VM state, repository paging, design-system formats/avatars, shell session holder); AR + EN texts; no hardcoded values (design constants file). DEVIATIONS: the full capture script was not run (it cancels leftover bookings of the shared stack) — only the three changed reads were re-captured; SVG flags not seen drawn (local flag object 404); `ALREADY_HANDLED` only by unit tests (socket refresh wins on device); notifications inbox and bank-details save not re-run this pass; landscape/EN/dark checked on Home and details only; iOS covered sign-in, Home, request sheet, details, approve, bookings list (no landscape/dark on iOS); the merchant debug build was also installed once on the customer agent's emulator by an `installDevDebug` without a serial (no data changed there).
-
-### MER-074 — Design as drawn, no Liquid Glass
-- Branch: `feat/mer-074-flat-design`
-- Branched: (from `fix/mer-073-otp-screen`)
-- Status: IN REVIEW
-- Acceptance criteria (owner 2026-10-26 "ignore liquid glass effect and implement the design as is"; `design/WAB Merchant 01…08 *.dc.html`, `tv()` colours):
-  - [x] Glass removed from the merchant design system: `components/glass` (AppGlassSurface, liquidGlass, glassBackground, press-scale, Haze backdrop), `GlassTokens`, glass previews + tests, `haze` dependency; `AppTheme.glass` → `AppTheme.surfaces` (`SurfaceTokens`: `--card/--surface/--soft` + `--line` 1 dp, state border 1.5 dp)
-  - [x] One flat primitive set (`components/surface`): `cardBackground(tone, stateBorder)` (card fill gets the line edge, tinted fills none), `barBackground(edge)`, `AppSurface`, `appClickable` (ripple); all 30 call sites in core + features moved
-  - [x] Colours = design `tv()`: `--surface` #F8F7FB / #1F2340, `--soft` #F3EEFB / #2C2553 (were translucent violet)
-  - [x] Tab bar = design: attached `var(--card)` bar with `border-top` line, items `padding:6px 0;gap:3px`, 22 dp icon, 11 sp 700/500 accent/faint, no pill; content sits above it (no floating inset); rail in landscape with the same flat items and a content-side edge
-  - [x] Top bar = design: plain 22 dp back chevron (no circle), `padding:0 10px`, centered title; icon buttons = 46 dp `radius:14` card + line (Home bell, filter, calendar arrows)
-  - [x] Buttons: gradient primary + violet shadow, disabled = `var(--soft)` + faint text (not dimmed); secondary/outlined = card + line; chips = `chipS` (36 dp, radius 11, soft + 1.5 dp #A855F7 selected, card + line otherwise, 12.5/600 ink); segmented tabs = `segS` (surface track, 4 dp gap, radius 11, gradient selected, muted others, 12.5/600); fields = card + 1.5 dp line / accent focus / danger error; toast, dialog, OTP boxes flat
-  - [x] Screens checked against the design: Home (greeting above the Playfair 19 name, pending card 1.5 dp #D8B4FE border + soft shadow, KPI tiles on `--surface`/`--soft`), Salon hub (salon card radius 20, 2-column tiles radius 18 with 40 dp soft icon box, 14/700 title, 11.5 sub, `padding:8px 20px`, gap 10), Finance (gradient payout card 30/700 + divider, info on `--surface`), notifications (unread = `--soft` without edge), bookings, calendar, more, profile, services, team, policies, bank details
-  - [x] M10 request sheet keyed by request id: Back no longer leaves an invisible scrim that swallows the next tap (found while touring)
-  - [x] `CLAUDE.md` module map + §4 rule rewritten (design files as drawn, no Liquid Glass, owner 2026-10-26); README, detekt allowed locals, catalog comment
-- Tests: `SurfaceTokensTest` (2: design colours per tone light/dark; opaque fills, 1 dp line < 1.5 dp state border); `GlassTokensTest` removed with the glass code; `./gradlew testAndroidHostTest` 181 suites / 589 tests / 0 failures; `policy_checks.py all` ok; detekt ok (empty baseline); `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok
-- Loops: 1/1 — re-checked each criterion on the emulator (Pixel 8 Pro, local stack; Lamar owner, Khalda employee, Rose owner): AR RTL light + dark, landscape rail, employee 4-tab bar; found and fixed in the loop: invisible request-sheet scrim, hub tiles in one column (design: 2), flat finance card (design: gradient), detekt line lengths
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — change made once in the design system (tokens + one primitive file), screens follow; customer app untouched; no hardcoded values (constants files carry the design CSS). DEVIATIONS: EN LTR checked on auth/OTP only (tab screens toured in Arabic); only Home, Salon hub, Finance, Bookings, Calendar, More compared with the design file side by side (profile/services/team/policies/bank looked at, not measured); previews not re-rendered in the IDE; no iOS simulator run (framework link only).

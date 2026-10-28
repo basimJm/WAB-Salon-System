@@ -9,6 +9,7 @@ import com.fab.wab.merchant.core.ui.permission.AppPermission
 import com.fab.wab.merchant.core.ui.permission.PermissionFlow
 import com.fab.wab.merchant.core.ui.permission.PermissionManager
 import com.fab.wab.merchant.core.ui.permission.PermissionStatus
+import com.fab.wab.merchant.designsystem.components.map.GEOCODE_TIMEOUT_MS
 import com.fab.wab.merchant.designsystem.components.map.LOCATE_TIMEOUT_MS
 import com.fab.wab.merchant.designsystem.components.map.MapNotice
 import com.fab.wab.merchant.designsystem.components.map.MapPickerAction
@@ -46,12 +47,17 @@ class MapPickerLocateTest {
         override suspend fun fetchPlaceDetails(placeId: String): PlacePrediction? = null
     }
 
-    private class Harness(scope: TestScope, val permissions: Permissions, location: suspend () -> LocationData?) {
+    private class Harness(
+        scope: TestScope,
+        val permissions: Permissions,
+        geocoder: ReverseGeocoder = ReverseGeocoder { _, _ -> "Mecca St" },
+        location: suspend () -> LocationData?,
+    ) {
         var map: MapPickerUi? = null
         val handler = MapPickerHandler(
             MapPickerController(
                 MapPickerDependencies(
-                    geocoder = ReverseGeocoder { _, _ -> "Mecca St" },
+                    geocoder = geocoder,
                     places = NoPlaces,
                     location = object : DeviceLocationProvider {
                         override suspend fun currentLocation(): LocationData? = location()
@@ -119,5 +125,20 @@ class MapPickerLocateTest {
         assertEquals(MapNotice.NOT_FOUND, harness.map?.notice)
         assertFalse(harness.map?.locating ?: true)
         assertEquals(LocationData(31.0, 35.0), harness.map?.target)
+    }
+
+    @Test
+    fun aGeocoderThatNeverAnswersStopsResolvingSoTheLocationCanBeConfirmed() = runTest(StandardTestDispatcher()) {
+        val silent = ReverseGeocoder { _, _ -> awaitCancellation() }
+        val harness = Harness(this, Permissions(PermissionStatus.GRANTED), geocoder = silent) { here }
+        harness.locate()
+        runCurrent()
+        assertEquals(true, harness.map?.resolving)
+        assertFalse(harness.map?.canConfirm ?: true)
+        advanceTimeBy(GEOCODE_TIMEOUT_MS + 1)
+        runCurrent()
+        assertFalse(harness.map?.resolving ?: true)
+        assertEquals(true, harness.map?.canConfirm)
+        assertEquals(here, harness.map?.target)
     }
 }

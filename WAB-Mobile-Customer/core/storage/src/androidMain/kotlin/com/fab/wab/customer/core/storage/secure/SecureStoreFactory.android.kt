@@ -9,4 +9,4 @@ import com.fab.wab.customer.core.security.SecureKeyValueStore
 private const val KEY_ALIAS = "wab_customer_session"
 
 actual fun createSecureKeyValueStore(dataStore: DataStore<Preferences>): SecureKeyValueStore =
-    EncryptedPreferencesSecureStore(dataStore, KeystoreCipher(KEY_ALIAS))
+    OffMainSecureStore(EncryptedPreferencesSecureStore(dataStore, KeystoreCipher(KEY_ALIAS)))
