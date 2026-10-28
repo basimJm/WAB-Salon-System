@@ -13,9 +13,9 @@ import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
- * Fused location: one fresh fix (`getCurrentLocation`), else the last known one. Every failure (no Play services,
- * permission revoked meanwhile, no fix) answers null instead of throwing or waiting forever; the map picker bounds
- * the wait and explains.
+ * Fused location: one fresh fix (`getCurrentLocation`, bounded by [FRESH_FIX_TIMEOUT_MS]), else the last known one.
+ * Every failure (no Play services, permission revoked meanwhile, no fix) answers null instead of throwing or waiting
+ * forever; the map picker bounds the whole wait and explains.
  */
 class DeviceLocationProviderAndroid(private val context: Context) : DeviceLocationProvider {
 
@@ -24,10 +24,14 @@ class DeviceLocationProviderAndroid(private val context: Context) : DeviceLocati
     override suspend fun currentLocation(): LocationData? = try {
         val client = LocationServices.getFusedLocationProviderClient(context)
         val cancellation = CancellationTokenSource()
-        val fresh = client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cancellation.token).awaitOrNull {
-            cancellation.cancel()
-        }
-        (fresh ?: client.lastLocation.awaitOrNull())?.toData()
+        freshOrLastKnown(
+            fresh = {
+                client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cancellation.token).awaitOrNull {
+                    cancellation.cancel()
+                }
+            },
+            lastKnown = { client.lastLocation.awaitOrNull() },
+        )?.toData()
     } catch (ignored: SecurityException) {
         null
     }

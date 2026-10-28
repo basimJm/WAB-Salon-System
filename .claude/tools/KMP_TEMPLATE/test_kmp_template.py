@@ -95,7 +95,7 @@ class PropertiesTest(unittest.TestCase):
 
 class StripAndRenameTest(TempDir):
     def test_only_the_sample_feature_stays(self):
-        self.write("settings.gradle.kts", 'include(\n    ":core:ui",\n    ":feature:sample:di",\n    ":feature:home:di",\n    ":feature:salon-x:data",\n)\n')
+        self.write("settings.gradle.kts", 'include(\n    ":baselineprofile",\n    ":core:ui",\n    ":feature:sample:di",\n    ":feature:home:di",\n    ":feature:salon-x:data",\n)\n')
         self.write("build-logic/convention/src/main/kotlin/x/ComposeAppPlugin.kt",
                    'val FEATURE_MODULES = listOf(\n    ":feature:sample:di",\n    ":feature:home:di",\n)\n')
         strip_features(self.root)
@@ -104,6 +104,7 @@ class StripAndRenameTest(TempDir):
         self.assertIn(":core:ui", settings)
         self.assertNotIn(":feature:home", settings)
         self.assertNotIn(":feature:salon-x", settings)
+        self.assertNotIn(":baselineprofile", settings)
         plugin = (self.root / "build-logic/convention/src/main/kotlin/x/ComposeAppPlugin.kt").read_text(encoding="utf-8")
         self.assertIn(":feature:sample:di", plugin)
         self.assertNotIn(":feature:home", plugin)

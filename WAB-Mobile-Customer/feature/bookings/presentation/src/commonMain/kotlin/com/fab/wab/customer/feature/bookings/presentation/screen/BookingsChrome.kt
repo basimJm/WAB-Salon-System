@@ -18,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
@@ -150,15 +150,13 @@ internal fun BookingsShimmerCard(height: Dp, modifier: Modifier = Modifier) {
 }
 
 /** Design: `border-top:1px dashed var(--line)` separators inside person and payment cards. */
-internal fun Modifier.dashedTopBorder(color: Color, width: Dp): Modifier = drawBehind {
+internal fun Modifier.dashedTopBorder(color: Color, width: Dp): Modifier = drawWithCache {
+    // CUS-097: dash effect and end points built once per size, not on every frame of a scroll.
     val stroke = width.toPx()
-    drawLine(
-        color = color,
-        start = Offset(0f, stroke / BookingsDesign.strokeCenterDivisor),
-        end = Offset(size.width, stroke / BookingsDesign.strokeCenterDivisor),
-        strokeWidth = stroke,
-        pathEffect = PathEffect.dashPathEffect(floatArrayOf(BookingsDesign.dashLength, BookingsDesign.dashGap)),
-    )
+    val start = Offset(0f, stroke / BookingsDesign.strokeCenterDivisor)
+    val end = Offset(size.width, stroke / BookingsDesign.strokeCenterDivisor)
+    val dash = PathEffect.dashPathEffect(floatArrayOf(BookingsDesign.dashLength, BookingsDesign.dashGap))
+    onDrawBehind { drawLine(color = color, start = start, end = end, strokeWidth = stroke, pathEffect = dash) }
 }
 
 /** Design: `width:42px;height:42px;border-radius:12px` tinted icon button (Call / WhatsApp on S15). */
