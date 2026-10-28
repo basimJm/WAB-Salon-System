@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
@@ -20,16 +21,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -181,8 +177,10 @@ fun AppNavScaffold(
 }
 
 /**
- * Content fills the window and is the glass backdrop; the bar floats over its bottom edge. The bar's measured height
- * (with its insets and gap) is published as [LocalFloatingBarPadding] so screens keep their last items reachable.
+ * Content fills the window and is the glass backdrop; the bar floats over its bottom edge. The bar's height (with its
+ * insets and gap) is published as [LocalFloatingBarPadding] so screens keep their last items reachable. CUS-097: the
+ * height is computed from the same tokens the bar is built from ([floatingBarHeight]) instead of measured after the
+ * first frame, which re-composed the whole navigation host (a static local) one frame after every start.
  */
 @Composable
 private fun FloatingBarLayout(
@@ -191,14 +189,22 @@ private fun FloatingBarLayout(
     modifier: Modifier = Modifier,
     bar: @Composable (Modifier) -> Unit,
 ) {
-    val density = LocalDensity.current
-    var barHeight by remember { mutableStateOf(Dp.Hairline) }
+    val barHeight = floatingBarHeight(
+        itemHeight = AppTheme.sizes.bottomBarHeight,
+        verticalPadding = AppTheme.spacing.space8,
+        bottomGap = AppTheme.glass.tabBarBottomGap,
+        navigationBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    )
     Box(modifier.fillMaxSize()) {
         CompositionLocalProvider(LocalFloatingBarPadding provides barHeight) {
             Box(Modifier.fillMaxSize().glassSource(source).consumeWindowInsets(WindowInsets.navigationBars)) { body() }
         }
         CompositionLocalProvider(LocalGlassSource provides source) {
-            bar(Modifier.align(Alignment.BottomCenter).onSizeChanged { barHeight = with(density) { it.height.toDp() } })
+            bar(Modifier.align(Alignment.BottomCenter))
         }
     }
 }
+
+/** Height [AppBottomBar] takes over the content: item row + its vertical padding, the gap and the navigation bar. */
+internal fun floatingBarHeight(itemHeight: Dp, verticalPadding: Dp, bottomGap: Dp, navigationBarInset: Dp): Dp =
+    itemHeight + verticalPadding + verticalPadding + bottomGap + navigationBarInset
