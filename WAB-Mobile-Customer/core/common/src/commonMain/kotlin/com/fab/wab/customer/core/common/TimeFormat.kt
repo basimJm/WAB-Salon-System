@@ -43,7 +43,7 @@ object TimeFormat {
     /** An ISO instant (stored UTC) shown in the business time zone: date "18/10/2026" and 12-hour time. */
     fun instantText(iso: String, am: String, pm: String, zoneId: String = BusinessTime.ZONE_ID): DateTimeText? {
         val instant = runCatching { Instant.parse(iso.trim()) }.getOrNull() ?: return null
-        val local = instant.toLocalDateTime(TimeZone.of(zoneId))
+        val local = instant.toLocalDateTime(if (zoneId == BusinessTime.ZONE_ID) BusinessTime.zone else TimeZone.of(zoneId))
         val date = local.date.toString().split(DATE_SEPARATOR).reversed().joinToString(DISPLAY_DATE_SEPARATOR)
         val hhmm = local.hour.toString().padStart(MINUTE_DIGITS, PAD) + SEPARATOR + local.minute.toString().padStart(MINUTE_DIGITS, PAD)
         return DateTimeText(date = date, time = to12Hour(hhmm, am, pm) ?: hhmm)
@@ -63,6 +63,9 @@ object BusinessTime {
     fun nowInstant(): kotlinx.datetime.Instant = kotlinx.datetime.Instant.fromEpochMilliseconds(SystemClock.now().toEpochMilliseconds())
 
     const val ZONE_ID = "Asia/Amman"
+
+    /** The business zone, loaded once (CUS-097: `TimeZone.of` reads tz data, notably on Kotlin/Native). */
+    val zone: TimeZone by lazy { TimeZone.of(ZONE_ID) }
 }
 
 data class DateTimeText(val date: String, val time: String)

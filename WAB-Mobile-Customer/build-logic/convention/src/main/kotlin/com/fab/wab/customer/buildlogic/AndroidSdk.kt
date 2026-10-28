@@ -9,6 +9,17 @@ internal object AndroidSdk {
     const val TARGET_SDK = 36
     const val MIN_SDK = 26
     const val NAMESPACE_ROOT = "com.fab.wab.customer"
+
+    /** Build flavor dimension: one flavor per environment (CLAUDE.md §5). */
+    const val ENVIRONMENT_DIMENSION = "environment"
+
+    /** The flavor the `:baselineprofile` module profiles (dev and prod run the same code). */
+    const val PROFILE_ENVIRONMENT = "dev"
+
+    /** CUS-097: the app the `:baselineprofile` module profiles, and the lowest API that can collect a profile. */
+    const val APP_PROJECT_PATH = ":androidApp"
+    const val BASELINE_PROFILE_PROJECT_PATH = ":baselineprofile"
+    const val BASELINE_PROFILE_MIN_SDK = 28
 }
 
 /** `:core:design-system` -> `com.fab.wab.customer.core.designsystem` (Android namespaces allow no dashes). */

@@ -31,7 +31,6 @@ import com.fab.wab.customer.feature.booking.presentation.resources.booking_staff
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_staff_not_selected
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -54,7 +53,7 @@ internal fun dayMonthText(date: LocalDate): String =
 /** Local date of an ISO instant in the business time zone (Asia/Amman); null when unparsable. */
 internal fun localDateOf(iso: String?): LocalDate? = iso
     ?.let { runCatching { Instant.parse(it.trim()) }.getOrNull() }
-    ?.toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID))
+    ?.toLocalDateTime(BusinessTime.zone)
     ?.date
 
 /** 12-hour time of an ISO instant ("10:00 AM"); null when unparsable. */

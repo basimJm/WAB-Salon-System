@@ -23,6 +23,7 @@ dependencies {
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.compose.compiler.gradlePlugin)
+    compileOnly(libs.baselineprofile.gradlePlugin)
 }
 
 gradlePlugin {
@@ -58,6 +59,10 @@ gradlePlugin {
         register("featurePresentation") {
             id = "com.fab.wab.customer.feature.presentation"
             implementationClass = "com.fab.wab.customer.buildlogic.KmpFeaturePresentationPlugin"
+        }
+        register("baselineProfile") {
+            id = "com.fab.wab.customer.baseline.profile"
+            implementationClass = "com.fab.wab.customer.buildlogic.BaselineProfilePlugin"
         }
         register("featureDi") {
             id = "com.fab.wab.customer.feature.di"

@@ -20,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -178,16 +178,14 @@ private fun NearestLocationOff(onEnable: () -> Unit, modifier: Modifier = Modifi
             .fillMaxWidth()
             .clip(shape)
             .background(colors.surface)
-            .drawBehind {
-                val stroke = hairline.toPx()
-                drawRoundRect(
-                    color = line,
-                    cornerRadius = CornerRadius(DiscoveryDesign.SALON_CARD_RADIUS.toPx()),
-                    style = Stroke(
-                        stroke,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(DiscoveryDesign.DASH_LENGTH, DiscoveryDesign.DASH_GAP)),
-                    ),
+            .drawWithCache {
+                // CUS-097: stroke and dash effect built once per size; the scrolled feed redraws this on every frame.
+                val stroke = Stroke(
+                    hairline.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(DiscoveryDesign.DASH_LENGTH, DiscoveryDesign.DASH_GAP)),
                 )
+                val corner = CornerRadius(DiscoveryDesign.SALON_CARD_RADIUS.toPx())
+                onDrawBehind { drawRoundRect(color = line, cornerRadius = corner, style = stroke) }
             }
             .padding(horizontal = AppTheme.spacing.space20, vertical = DiscoveryDesign.NEAR_OFF_PADDING_V),
         horizontalAlignment = Alignment.CenterHorizontally,
