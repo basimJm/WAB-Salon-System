@@ -9,3 +9,12 @@
 -dontwarn org.slf4j.**
 -dontwarn java.lang.management.**
 -dontwarn javax.naming.**
+
+# CUS-097: class NAMES read at runtime (names only; R8 still shrinks and optimizes the members).
+# - RootTab.routeName compares `Graph::class.qualifiedName` with NavDestination.route (the serial name): an
+#   obfuscated graph name hid the bottom tab bar in release builds.
+# - AnalyticsCatalog.screenNameOf (`Screen::class.simpleName`) and the action owner (`ViewModel::class.simpleName`)
+#   become analytics parameters.
+-keepattributes InnerClasses,EnclosingMethod
+-keepnames class com.fab.wab.customer.core.navigation.route.**
+-keepnames class * extends com.fab.wab.customer.core.mvi.BaseViewModel

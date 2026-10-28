@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -59,7 +60,10 @@ internal fun HomeBanners(banners: List<HomeBanner>, onAction: (UiAction) -> Unit
         if (banners.size <= 1) return@LaunchedEffect
         while (true) {
             delay(DiscoveryDesign.BANNER_AUTO_SWIPE_MS.toLong())
-            pagerState.animateScrollToPage(nextBannerIndex(pagerState.currentPage, banners.size))
+            // CUS-097: never fight the user's own swipe with an animation.
+            if (!pagerState.isScrollInProgress) {
+                pagerState.animateScrollToPage(nextBannerIndex(pagerState.currentPage, banners.size))
+            }
         }
     }
     Box(
@@ -85,13 +89,20 @@ internal fun HomeBanners(banners: List<HomeBanner>, onAction: (UiAction) -> Unit
             )
         }
         if (banners.size > 1) {
-            Row(
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = DiscoveryDesign.BANNER_DOT_BOTTOM),
-                horizontalArrangement = Arrangement.spacedBy(DiscoveryDesign.BANNER_DOT_GAP),
-            ) {
-                repeat(banners.size) { index -> BannerDot(active = index == pagerState.currentPage) }
-            }
+            BannerDots(pagerState, banners.size, Modifier.align(Alignment.BottomCenter))
         }
+    }
+}
+
+/** CUS-097: the current page is read here, so a page change recomposes the dots only, not the pager and its images. */
+@Composable
+private fun BannerDots(pagerState: PagerState, count: Int, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.padding(bottom = DiscoveryDesign.BANNER_DOT_BOTTOM),
+        horizontalArrangement = Arrangement.spacedBy(DiscoveryDesign.BANNER_DOT_GAP),
+    ) {
+        val current = pagerState.currentPage
+        repeat(count) { index -> BannerDot(active = index == current) }
     }
 }
 
