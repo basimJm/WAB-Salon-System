@@ -1,5 +1,10 @@
 import { MS_PER_SECOND } from '../constants/defaults';
-import { HEADERS, UPLOAD_METHOD, type RejectionReason, type Visibility } from '../constants/storage';
+import {
+  HEADERS,
+  UPLOAD_METHOD,
+  type RejectionReason,
+  type Visibility,
+} from '../constants/storage';
 import type { ResolvedConfig } from '../config/options';
 import type {
   ConfirmUploadRequest,

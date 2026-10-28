@@ -1,5 +1,10 @@
 /** The shared kernel: identical in every `__SYSTEM_SLUG__-*` SDK. Kinds re-export it from `index.ts`. */
-export { ENVIRONMENTS, KERNEL_ERROR_CODES, type Environment, type KernelErrorCode } from './constants/codes';
+export {
+  ENVIRONMENTS,
+  KERNEL_ERROR_CODES,
+  type Environment,
+  type KernelErrorCode,
+} from './constants/codes';
 export {
   DEFAULT_RETRY,
   DEFAULT_TIMEOUT_MS,

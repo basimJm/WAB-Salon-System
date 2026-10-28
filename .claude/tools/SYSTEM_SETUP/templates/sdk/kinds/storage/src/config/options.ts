@@ -42,7 +42,10 @@ const s3Schema = z
   })
   .strict();
 
-const ttlSchema = z.object({ maxTtlSec: positiveInt.max(MAX_PRESIGN_TTL_SEC) }).partial().strict();
+const ttlSchema = z
+  .object({ maxTtlSec: positiveInt.max(MAX_PRESIGN_TTL_SEC) })
+  .partial()
+  .strict();
 
 const optionsSchema = z
   .object({
@@ -96,7 +99,8 @@ const INJECTED = ['logger', 'fetch', 'now'];
 
 const crossFieldIssues = (o: z.infer<typeof optionsSchema>): ConfigIssue[] => {
   const issues: ConfigIssue[] = [];
-  if (o.provider === 's3' && !o.s3) issues.push({ path: 's3', message: 'required for provider s3' });
+  if (o.provider === 's3' && !o.s3)
+    issues.push({ path: 's3', message: 'required for provider s3' });
   if (o.s3 && o.s3.publicBucket === o.s3.privateBucket && o.environment === 'prod')
     issues.push({ path: 's3.privateBucket', message: 'must differ from publicBucket in prod' });
   return issues.concat(

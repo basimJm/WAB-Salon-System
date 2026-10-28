@@ -1,4 +1,4 @@
-import type { StorageProvider } from '../types';
+import type { ConfirmUploadResult, StorageProvider, UploadTarget } from '../types';
 import { MemoryStorage } from './memory';
 
 export type StorageCall = keyof StorageProvider;
@@ -17,11 +17,15 @@ export class FakeStorage extends MemoryStorage {
     return this.failWith === undefined ? work() : Promise.reject(this.failWith);
   }
 
-  override createUploadUrl(...args: Parameters<StorageProvider['createUploadUrl']>) {
+  override createUploadUrl(
+    ...args: Parameters<StorageProvider['createUploadUrl']>
+  ): Promise<UploadTarget> {
     return this.guard('createUploadUrl', () => super.createUploadUrl(...args));
   }
 
-  override confirmUpload(...args: Parameters<StorageProvider['confirmUpload']>) {
+  override confirmUpload(
+    ...args: Parameters<StorageProvider['confirmUpload']>
+  ): Promise<ConfirmUploadResult> {
     return this.guard('confirmUpload', () => super.confirmUpload(...args));
   }
 
@@ -30,7 +34,7 @@ export class FakeStorage extends MemoryStorage {
     return super.getPublicUrl(key);
   }
 
-  override getSignedUrl(...args: Parameters<StorageProvider['getSignedUrl']>) {
+  override getSignedUrl(...args: Parameters<StorageProvider['getSignedUrl']>): Promise<string> {
     return this.guard('getSignedUrl', () => super.getSignedUrl(...args));
   }
 
@@ -38,7 +42,7 @@ export class FakeStorage extends MemoryStorage {
     return this.guard('read', () => super.read(key));
   }
 
-  override write(...args: Parameters<StorageProvider['write']>) {
+  override write(...args: Parameters<StorageProvider['write']>): Promise<void> {
     return this.guard('write', () => super.write(...args));
   }
 

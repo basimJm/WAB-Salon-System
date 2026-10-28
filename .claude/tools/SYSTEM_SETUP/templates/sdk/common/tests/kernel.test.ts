@@ -93,10 +93,12 @@ describe('logger', () => {
       ['warn', 'w', { a: 1 }],
       ['error', 'e', { secret: '[redacted]' }],
     ]);
-    expect(noopLogger.debug('x')).toBeUndefined();
-    expect(noopLogger.info('x')).toBeUndefined();
-    expect(noopLogger.warn('x')).toBeUndefined();
-    expect(noopLogger.error('x')).toBeUndefined();
+    expect(() => {
+      noopLogger.debug('x');
+      noopLogger.info('x');
+      noopLogger.warn('x');
+      noopLogger.error('x');
+    }).not.toThrow();
   });
 });
 
@@ -116,14 +118,15 @@ describe('retry', () => {
         ? Promise.reject(new SdkError('R', 'again', { retryable: true }))
         : Promise.resolve('ok');
     };
-    await expect(withRetry(flaky, policy, instant, (attempt) => retries.push(attempt))).resolves.toBe(
-      'ok',
-    );
+    await expect(
+      withRetry(flaky, policy, instant, (attempt) => retries.push(attempt)),
+    ).resolves.toBe('ok');
     expect(retries).toEqual([1, 2]);
     await expect(
       withRetry(() => Promise.reject(new Error('plain')), policy, instant),
     ).rejects.toThrow('plain');
-    const always = (): Promise<never> => Promise.reject(new SdkError('R', 'x', { retryable: true }));
+    const always = (): Promise<never> =>
+      Promise.reject(new SdkError('R', 'x', { retryable: true }));
     await expect(withRetry(always, policy, instant)).rejects.toMatchObject({ code: 'R' });
     expect(isRetryable(new SdkError('R', 'x', { retryable: true }))).toBe(true);
     expect(isRetryable('nope')).toBe(false);
@@ -197,8 +200,12 @@ describe('config helpers', () => {
     expect(prodIssues({ environment: 'prod', provider: 'real', devOnlyProviders: [] })).toEqual([]);
   });
   it('throws a config error listing the issues', () => {
-    expect(() => throwIfIssues([], 'x')).not.toThrow();
-    expect(() => throwIfIssues([{ path: 'p', message: 'm' }], 'kind')).toThrow(
+    expect(() => {
+      throwIfIssues([], 'x');
+    }).not.toThrow();
+    expect(() => {
+      throwIfIssues([{ path: 'p', message: 'm' }], 'kind');
+    }).toThrow(
       expect.objectContaining({
         code: KERNEL_ERROR_CODES.CONFIG_INVALID,
         message: 'Invalid kind options: p (m)',

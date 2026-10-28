@@ -51,13 +51,13 @@ export const parseOptions = <S extends z.ZodType>(
 ): z.output<S> => {
   const parsed = schema.safeParse(plain);
   if (parsed.success) return parsed.data;
-  const fields = [...new Set(parsed.error.issues.map((issue) => issue.path.join('.')))];
+  const fields = [...new Set(parsed.error.issues.map((issue) => issue.path.join('.')))].sort();
   throw configError(`Invalid ${what} options: ${fields.join(', ')}`, { fields });
 };
 
 /** Drops injected objects (loggers, stores, clocks) so the schema sees plain data only. */
 export const plainOptions = (
-  options: Readonly<Record<string, unknown>>,
+  options: object,
   injected: readonly string[],
 ): Record<string, unknown> =>
   Object.fromEntries(Object.entries(options).filter(([name]) => !injected.includes(name)));

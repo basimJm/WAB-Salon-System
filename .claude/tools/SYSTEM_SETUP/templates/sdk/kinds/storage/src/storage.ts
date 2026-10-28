@@ -1,15 +1,20 @@
 import { FakeStorage } from './adapters/fake';
 import { MemoryStorage } from './adapters/memory';
 import { S3Storage } from './adapters/s3';
-import { resolveConfig, type ResolvedConfig, type StorageOptions } from './config/options';
+import {
+  resolveConfig,
+  type FetchLike,
+  type ResolvedConfig,
+  type StorageOptions,
+} from './config/options';
 import { configError } from './errors';
 import type { StorageProvider } from './types';
 
 const buildS3 = (config: ResolvedConfig): S3Storage => {
   /* istanbul ignore next -- resolveConfig already guarantees it; kept for the type checker */
   if (!config.s3) throw configError('s3 options are required', { fields: ['s3'] });
-  const fetchImpl = config.fetch ?? (globalThis.fetch as typeof globalThis.fetch | undefined);
-  if (fetchImpl === undefined) throw configError('a fetch implementation is required', { fields: ['fetch'] });
+  // Node >= 22 always has a global fetch; `options.fetch` overrides it (tests, proxies).
+  const fetchImpl: FetchLike = config.fetch ?? globalThis.fetch;
   return new S3Storage({ ...config, s3: config.s3 }, { fetch: fetchImpl });
 };
 

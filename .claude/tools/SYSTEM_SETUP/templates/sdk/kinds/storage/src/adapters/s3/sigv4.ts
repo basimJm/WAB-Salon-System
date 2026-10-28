@@ -27,12 +27,15 @@ export const encodeRfc3986 = (value: string): string =>
 
 /** `20261028T101500Z` */
 export const amzDate = (date: Date): string =>
-  date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  date
+    .toISOString()
+    .replace(/[-:]/g, '')
+    .replace(/\.\d{3}/, '');
 
 const canonicalQuery = (params: readonly (readonly [string, string])[]): string =>
   params
     .map(([k, v]) => [encodeRfc3986(k), encodeRfc3986(v)] as const)
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .sort((a, b) => (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]) ? -1 : 1))
     .map(([k, v]) => `${k}=${v}`)
     .join('&');
 
@@ -116,8 +119,9 @@ export const signHeaders = (
   };
   if (scope.credentials.sessionToken !== undefined)
     headers[HEADERS.amzSecurityToken] = scope.credentials.sessionToken;
-  const names = Object.keys(headers).sort();
-  const canonicalHeaders = names.map((n) => `${n}:${headers[n]?.trim() ?? ''}\n`).join('');
+  const entries = Object.entries(headers).sort(([a], [b]) => (a < b ? -1 : 1));
+  const names = entries.map(([name]) => name);
+  const canonicalHeaders = entries.map(([n, v]) => `${n}:${v.trim()}\n`).join('');
   const canonicalRequest = [
     request.method,
     canonicalPath(request.url.pathname),

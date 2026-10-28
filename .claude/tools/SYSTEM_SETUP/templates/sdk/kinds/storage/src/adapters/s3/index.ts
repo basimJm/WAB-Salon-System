@@ -73,7 +73,8 @@ export class S3Storage implements StorageProvider {
   }
 
   objectUrl(visibility: Visibility, key: string): URL {
-    const bucket = visibility === 'PUBLIC' ? this.config.s3.publicBucket : this.config.s3.privateBucket;
+    const bucket =
+      visibility === 'PUBLIC' ? this.config.s3.publicBucket : this.config.s3.privateBucket;
     const path = encodeKey(key);
     if (this.config.s3.endpoint !== undefined && this.config.s3.forcePathStyle)
       return new URL(`${this.config.s3.endpoint.replace(/\/+$/, '')}/${bucket}/${path}`);
@@ -95,7 +96,12 @@ export class S3Storage implements StorageProvider {
       const expiresAt = new Date(
         this.config.now().getTime() + request.expiresInSec * MS_PER_SECOND,
       );
-      return { url, method: UPLOAD_METHOD, headers: { [HEADERS.contentType]: request.contentType }, expiresAt };
+      return {
+        url,
+        method: UPLOAD_METHOD,
+        headers: { [HEADERS.contentType]: request.contentType },
+        expiresAt,
+      };
     });
   }
 
@@ -166,7 +172,9 @@ export class S3Storage implements StorageProvider {
     );
     for (let start = 0; start < targets.length; start += DELETE_CONCURRENCY)
       await Promise.all(
-        targets.slice(start, start + DELETE_CONCURRENCY).map((url) => this.send(METHODS.delete, url)),
+        targets
+          .slice(start, start + DELETE_CONCURRENCY)
+          .map((url) => this.send(METHODS.delete, url)),
       );
   }
 
