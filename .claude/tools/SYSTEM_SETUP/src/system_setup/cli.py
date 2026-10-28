@@ -20,8 +20,8 @@ from manifest import KINDS, Manifest, ManifestError, available_kinds, load_manif
 from prompts import (SDK_CATALOG, SDK_DESCRIPTIONS, Spec, ask, parse_apps, prefix_from, slug_from, split_list,  # noqa: E402
                      validate_app_specs, validate_github_name, validate_npm_scope, validate_package, validate_prefix,
                      validate_required, validate_sdk_names, validate_team_id, validate_url)
-from workspace import (ensure_project_files, git_init, next_steps, projects_registry, run_tasks_check,  # noqa: E402
-                       write_registry)
+from workspace import (ensure_project_files, git_init, next_steps, projects_registry, registry_shipped,  # noqa: E402
+                       run_tasks_check, workspace_values, write_registry)
 
 YES = ("y", "yes")
 DEFAULT_PACKAGE_ROOT = "com.example"
@@ -43,6 +43,13 @@ class Report:
         merged: Dict[str, List[str]] = {}
         for result in self.results:
             merged.update(result.unresolved)
+        return merged
+
+    @property
+    def sentinel_left(self) -> Dict[str, List[str]]:
+        merged: Dict[str, List[str]] = {}
+        for result in self.results:
+            merged.update(result.sentinel_left)
         return merged
 
     @property
@@ -158,13 +165,25 @@ def load_templates(root: Path, kinds: List[str]) -> Dict[str, Manifest]:
     return manifests
 
 
+def apply_sdk_kinds(spec: Spec, manifest: Optional[Manifest]) -> None:
+    """The sdk template's `kinds` decide which SDKs exist and may name their folder/prefix/title."""
+    if manifest is None or not manifest.kinds:
+        return
+    unknown = [sdk for sdk in spec.sdks if sdk not in manifest.kinds]
+    if unknown:
+        raise ManifestError(f"the sdk template has no kind(s) {', '.join(unknown)}; it ships: {', '.join(sorted(manifest.kinds))}")
+    spec.sdk_overrides = {sdk: dict(manifest.kinds[sdk]) for sdk in spec.sdks}
+
+
 def generate(spec: Spec, templates: Path, run_post: bool = False, git: bool = True,
              tool: Optional[Path] = None) -> Report:
     check_target(spec.target, tool or tool_root())
     manifests = load_templates(templates, needed_kinds(spec))
+    apply_sdk_kinds(spec, manifests.get("sdk"))
     spec.target.mkdir(parents=True, exist_ok=True)
     report = Report()
     values, parts = spec.token_values(), spec.part_values()
+    registry = projects_registry(spec)
     if "server" in manifests:
         report.results.append(instantiate(manifests["server"], spec.target, values, parts))
     if "admin" in manifests:
@@ -179,9 +198,9 @@ def generate(spec: Spec, templates: Path, run_post: bool = False, git: bool = Tr
             left = identity_leftovers(result.dest)
             if left:
                 report.identity_left[spec.app_dir(app)] = left
-    report.results.append(instantiate(manifests["workspace"], spec.target, values, parts))
-    registry = projects_registry(spec)
-    write_registry(spec.target, registry)
+    report.results.append(instantiate(manifests["workspace"], spec.target, dict(values, **workspace_values(spec, registry)), parts))
+    if not registry_shipped(spec.target, registry):
+        write_registry(spec.target, registry)
     report.created = ensure_project_files(spec.target, registry)
     if run_post:
         for result in report.results:
@@ -215,6 +234,10 @@ def print_report(report: Report, run_post: bool) -> None:
         print("\nUnresolved tokens (fix the template or the answers):")
         for rel, tokens in sorted(report.unresolved.items()):
             print(f"  {rel}: {', '.join(tokens)}")
+    if report.sentinel_left:
+        print("\nSentinel literals left in rendered files (the template's TEMPLATE.json maps them, but the text still has them):")
+        for rel, literals in sorted(report.sentinel_left.items()):
+            print(f"  {rel}: {', '.join(literals)}")
     for app_dir, rest in report.identity_left.items():
         print(f"\n{app_dir} still mentions the kmp sentinel identity in {len(rest)} file(s): " + ", ".join(rest[:10]))
     commands = [(r.kind, c) for r in report.results for c in r.post_generate]
@@ -243,7 +266,11 @@ def main(argv: List[str]) -> int:
             print(f"  {kind:9} {'ready' if kind in found else 'missing'}")
         return 0
     print("SYSTEM_SETUP — new multi-project system\n")
-    spec = collect(args)
+    try:
+        spec = collect(args)
+    except SystemExit as stop:  # a flag failed its validator
+        print(stop)
+        return 2
     print(f"\nCreating {describe(spec)}")
     if not args.yes and ask("Continue? (y/n)", "y").lower() not in YES:
         print("Cancelled.")

@@ -1,10 +1,52 @@
 {
   "kind": "sdk",
-  "description": "Fixture: one SDK package, instantiated once per chosen SDK",
-  "placeholders": ["__NPM_SCOPE__", "__SDK_NAME__", "__SDK_DIR__", "__SDK_PACKAGE__", "__SDK_PREFIX__", "__SDK_DESCRIPTION__"],
-  "sentinels": {"wab-sdk": "__SDK_DIR__", "@wab/sdk": "__SDK_PACKAGE__"},
-  "rename_paths": {"sdk_name": "__SDK_NAME__"},
-  "skip": [],
-  "post_generate": ["npm install"],
+  "description": "Fixture: one SDK package per chosen kind: common/ files + kinds/<name>/ overlay",
+  "placeholders": [
+    "__SYSTEM_NAME__",
+    "__NPM_SCOPE__",
+    "__SDK_NAME__",
+    "__SDK_KIND__",
+    "__SDK_KIND_TITLE__",
+    "__SDK_DIR__",
+    "__SDK_PACKAGE__",
+    "__SDK_PREFIX__",
+    "__SDK_DESCRIPTION__",
+    "__SERVER_DIR__"
+  ],
+  "kinds": {
+    "storage": {
+      "dir": "__SYSTEM_PREFIX_LOWER__-storage",
+      "prefix": "STO",
+      "title": "Storage"
+    },
+    "otp": {
+      "dir": "__SYSTEM_PREFIX_LOWER__-otp",
+      "prefix": "OTP",
+      "title": "OTP"
+    },
+    "notifications": {
+      "dir": "__SYSTEM_PREFIX_LOWER__-notifications",
+      "prefix": "NOT",
+      "title": "Notifications"
+    },
+    "payments": {
+      "dir": "__SYSTEM_PREFIX_LOWER__-payments",
+      "prefix": "PAY",
+      "title": "Payments"
+    }
+  },
+  "sentinels": {
+    "wab-sdk": "__SDK_DIR__",
+    "@wab/sdk": "__SDK_PACKAGE__"
+  },
+  "rename_paths": {
+    "sdk_name": "__SDK_NAME__"
+  },
+  "skip": [
+    "node_modules/**"
+  ],
+  "post_generate": [
+    "npm install"
+  ],
   "binary_globs": []
 }
