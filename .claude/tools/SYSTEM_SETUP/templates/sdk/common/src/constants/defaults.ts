@@ -1,4 +1,4 @@
-export const SDK_NAME = '__SDK_DIR__';
+export const SDK_NAME = '__SYSTEM_SLUG__-__SDK_KIND__';
 
 /** Adapter names every kind offers; production refuses both. */
 export const FAKE_PROVIDER = 'fake';

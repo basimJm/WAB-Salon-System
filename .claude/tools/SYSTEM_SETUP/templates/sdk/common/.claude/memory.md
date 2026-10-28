@@ -1,4 +1,4 @@
-# __SDK_DIR__ — Memory (durable facts; keep short, replace instead of append)
+# __SYSTEM_SLUG__-__SDK_KIND__ — Memory (durable facts; keep short, replace instead of append)
 
 > Loaded on every turn while working in this folder: only facts that save a future session an investigation (decisions, paths, commands, gotchas). Nothing that the code, git history or the backlog already records.
 

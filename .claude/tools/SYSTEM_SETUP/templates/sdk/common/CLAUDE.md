@@ -1,7 +1,7 @@
-# __SDK_DIR__ — Guide for AI Agents
+# __SYSTEM_SLUG__-__SDK_KIND__ — Guide for AI Agents
 
 > Auto-loaded with this file (never read them with a tool): the rules, the technical document, the
-> session and the memory below. Per task: take the next `TODO` row of `docs/__SDK_KIND_TITLE___Tasks.md`
+> session and the memory below. Per task: take the next `TODO` row of `docs/__SDK_TITLE___Tasks.md`
 > whose `Needs` are all `DONE`; read only the BRD section it names. Branch `feat/__SDK_PREFIX__-NNN-<key>`
 > from the server master; PR into it.
 
@@ -10,12 +10,12 @@
 - Technical implementation document (keep it current): @.claude/Integration.md
 - Session (current task): @.claude/session.md
 - Memory (durable facts): @.claude/memory.md
-- Business requirements: `docs/__SDK_KIND_TITLE___BRD.md`
+- Business requirements: `docs/__SDK_TITLE___BRD.md`
 - Repo-wide context already in context: the root `CLAUDE.md` and `.claude/rules.md` of `__REPO_NAME__`;
   `../__SERVER_DIR__` is the consumer this package must satisfy.
 
 ## What this package is
-`__NPM_SCOPE__/__SDK_KIND__`: __SDK_KIND_TITLE__ for __SYSTEM_NAME__ behind one interface (port). Every
+`__NPM_SCOPE__/__SDK_KIND__`: __SDK_TITLE__ for __SYSTEM_NAME__ behind one interface (port). Every
 vendor, fake and local adapter sits behind that port and is chosen by configuration.
 
 ## Who you are when you work here
@@ -40,4 +40,4 @@ gate) · `npm run test:loop` · `npm run verify` (all of the above; run before e
 2. Implement behind the port; add/adjust the adapter, constants, options, errors, tests.
 3. Run `npm run verify`.
 4. Update `Integration.md` (and its changelog table).
-5. Record `Loops: 1/1` + `Review: PASSED` in `.claude/session.md`, set the task status in `docs/__SDK_KIND_TITLE___Tasks.md`, commit, push the branch, open the PR.
+5. Record `Loops: 1/1` + `Review: PASSED` in `.claude/session.md`, set the task status in `docs/__SDK_TITLE___Tasks.md`, commit, push the branch, open the PR.

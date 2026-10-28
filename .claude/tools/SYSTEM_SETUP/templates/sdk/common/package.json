@@ -1,7 +1,7 @@
 {
   "name": "__NPM_SCOPE__/__SDK_KIND__",
   "version": "0.1.0",
-  "description": "__SDK_KIND_TITLE__ SDK for __SYSTEM_NAME__: ports + adapters, provider independent, no business rules.",
+  "description": "__SDK_TITLE__ SDK for __SYSTEM_NAME__: ports + adapters, provider independent, no business rules.",
   "license": "UNLICENSED",
   "engines": {
     "node": ">=22"
@@ -58,7 +58,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/__OWNER_GITHUB__/__REPO_NAME__.git",
-    "directory": "__SDK_DIR__"
+    "directory": "__SYSTEM_SLUG__-__SDK_KIND__"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

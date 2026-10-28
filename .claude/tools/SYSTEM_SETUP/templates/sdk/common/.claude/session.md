@@ -1,9 +1,9 @@
-# __SDK_DIR__ — Session
+# __SYSTEM_SLUG__-__SDK_KIND__ — Session
 
-> Loaded on every turn while working in this folder. Keep the current task block + the last 2 blocks (git history keeps the rest). Backlog: `docs/__SDK_KIND_TITLE___Tasks.md`. Cross-project view: the root `.claude/session.md` of `__REPO_NAME__`.
+> Loaded on every turn while working in this folder. Keep the current task block + the last 2 blocks (git history keeps the rest). Backlog: `docs/__SDK_TITLE___Tasks.md`. Cross-project view: the root `.claude/session.md` of `__REPO_NAME__`.
 
 ## Integration status (one glance)
-- Scaffold generated (kernel, ports, fake + memory adapters, tests, loop, smoke). Real adapters: see `docs/__SDK_KIND_TITLE___Tasks.md`.
+- Scaffold generated (kernel, ports, fake + memory adapters, tests, loop, smoke). Real adapters: see `docs/__SDK_TITLE___Tasks.md`.
 
 ## Current task
 

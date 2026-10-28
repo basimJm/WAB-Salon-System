@@ -1,4 +1,4 @@
-# __SDK_DIR__ — Rules (mandatory, every task)
+# __SYSTEM_SLUG__-__SDK_KIND__ — Rules (mandatory, every task)
 
 > Rules for every `__SYSTEM_SLUG__-*` SDK package. They never relax; a package may add stricter ones.
 
