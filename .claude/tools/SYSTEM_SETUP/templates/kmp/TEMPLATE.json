@@ -151,7 +151,7 @@
       "placeholder": "__REALTIME_NAMESPACE__",
       "find": "const val APP_NAMESPACE = \"/app\"",
       "replace_with": "const val APP_NAMESPACE = \"__REALTIME_NAMESPACE__\"",
-      "why": "'/app' is too short to replace globally (Socket.IO protocol tests use '40/app,' packets as fixed test data)."
+      "why": "'/app' is too short to replace globally (Socket.IO protocol tests use '40/app,' packets as fixed test data). SocketIoRealtimeClientTest therefore pins `namespace = TEST_NAMESPACE` (\"/app\") on its RealtimeConfig instead of relying on the default; a test that depended on the default broke with any other namespace (found with Beta Store, fixed in the snapshot 2026-10-28)."
     }
   ],
   "not_in_snapshot": {

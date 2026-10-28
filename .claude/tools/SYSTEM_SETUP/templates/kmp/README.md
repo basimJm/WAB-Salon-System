@@ -54,7 +54,7 @@ is the human copy. Counts are files containing the literal.
 | `TEAMID0000` | `__APPLE_TEAM_ID__` | 1 | `Config.xcconfig` `TEAM_ID` (`DEVELOPMENT_TEAM = $(TEAM_ID)`) |
 | `/app/v1` | `__API_PREFIX__` | 9 | `AuthEndpoints.kt`, its test, `api_sync.py` `NAMESPACE_PREFIX`, `capture_remote_fixtures.py`, two CI tests, README/CLAUDE/memory |
 | `WAB-Server` | `__SERVER_DIR__` | 7 | `apiSync` default spec path `../WAB-Server/docs/api/openapi.customer.json` and KDoc comments |
-| `const val APP_NAMESPACE = "/app"` | `__REALTIME_NAMESPACE__` (**targeted edit**) | 1 | `core/realtime/.../RealtimeConfig.kt` only. `/app` is never replaced globally: `SocketIoProtocolTest` uses `40/app,` packets as fixed protocol test data |
+| `const val APP_NAMESPACE = "/app"` | `__REALTIME_NAMESPACE__` (**targeted edit**) | 1 | `core/realtime/.../RealtimeConfig.kt` only. `/app` is never replaced globally: `SocketIoProtocolTest` and `SocketIoRealtimeClientTest` use `40/app,` packets as fixed protocol test data (the client test pins `namespace = TEST_NAMESPACE` on its `RealtimeConfig`, so any configured default works) |
 
 Derived values: `__APP_PACKAGE_DASHED__` = package with `-`, `__APP_PACKAGE_PATH__` = package with `/`,
 `__*_HOST__` = host of the matching URL (URLs must be `https://<host>` with no path). `__APP_DIR__`, `__SYSTEM_NAME__`
