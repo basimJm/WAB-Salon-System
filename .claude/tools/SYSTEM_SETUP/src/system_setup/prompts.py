@@ -19,6 +19,8 @@ SDK_DESCRIPTIONS = {
 APP_PREFIX_LENGTH = 3
 FIXED_PREFIXES = {"server": "SRV", "admin": "ADM"}
 MAIN_BRANCH = "main"
+API_VERSION_SEGMENT = "v1"
+URL_TOKENS = ("__DEV_API_URL__", "__PROD_API_URL__", "__DEV_WEB_URL__", "__PROD_WEB_URL__")
 
 PACKAGE_RE = re.compile(r"^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$")
 SLUG_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
@@ -143,9 +145,25 @@ def sdk_title(sdk: str) -> str:
     return sdk.upper() if len(sdk) <= APP_PREFIX_LENGTH else sdk.capitalize()
 
 
+def sdk_prefix_from(sdk: str) -> str:
+    """'storage' -> 'STO', 'otp' -> 'OTP' (task ids, WAB style)."""
+    return prefix_from(sdk)
+
+
+def host_of(url: str) -> str:
+    """`https://api-dev.acme.io` -> `api-dev.acme.io` (xcconfig files keep only the host as a literal)."""
+    return urlsplit(url).netloc
+
+
 def package_segment(slug: str) -> str:
     segment = re.sub(r"[^a-z0-9]", "", slug.lower())
     return segment if segment and segment[0].isalpha() and segment not in KOTLIN_KEYWORDS else f"app{segment}"
+
+
+def substitute_simple(text: str, prefix: str, slug: str) -> str:
+    """The few tokens an sdk `kinds[].dir` may use before the full value map exists."""
+    return (text.replace("__SYSTEM_PREFIX_LOWER__", prefix.lower()).replace("__SYSTEM_PREFIX__", prefix)
+            .replace("__SYSTEM_SLUG__", slug))
 
 
 def unique_prefix(wanted: str, taken: List[str], name: str) -> str:
@@ -214,6 +232,8 @@ class Spec:
     owner_github: str = "owner"
     repo_name: str = ""
     today: _dt.date = field(default_factory=_dt.date.today)
+    # Per-SDK overrides from templates/sdk/TEMPLATE.json `kinds` (name -> {dir, prefix, title}); derived names otherwise.
+    sdk_overrides: Dict[str, Dict[str, str]] = field(default_factory=dict)
 
     # --- derived names (one place, used by every template kind) ---
     @property
@@ -234,21 +254,51 @@ class Spec:
     def app_package(self, app: AppSpec) -> str:
         return f"{self.package_root}.{package_segment(app.slug)}"
 
+    def app_api_prefix(self, app: AppSpec) -> str:
+        """`/customer/v1`: the REST namespace of the app (one per client, own token scope)."""
+        return f"/{app.slug}/{API_VERSION_SEGMENT}"
+
+    def app_realtime_namespace(self, app: AppSpec) -> str:
+        return f"/{app.slug}"
+
+    def _sdk_override(self, sdk: str, key: str, default: str) -> str:
+        value = self.sdk_overrides.get(sdk, {}).get(key, "")
+        return substitute_simple(value, self.prefix, self.slug) if value else default
+
     def sdk_dir(self, sdk: str) -> str:
-        """`acme-storage` for prefix ACME (WAB: `wab-storage`)."""
-        return f"{self.prefix.lower()}-{sdk}"
+        """`acme-storage` for prefix ACME (WAB: `wab-storage`), unless the sdk template names the folder."""
+        return self._sdk_override(sdk, "dir", f"{self.prefix.lower()}-{sdk}")
+
+    def sdk_prefix(self, sdk: str) -> str:
+        """`STO`, `OTP`, `PAY`, `NOT`, `ANA` (3 letters, upper), unless the sdk template names it."""
+        return self._sdk_override(sdk, "prefix", sdk_prefix_from(sdk))
+
+    def sdk_title_of(self, sdk: str) -> str:
+        return self._sdk_override(sdk, "title", sdk_title(sdk))
 
     def sdk_package(self, sdk: str) -> str:
         return f"{self.npm_scope}/{sdk}"
 
     def app_prefixes(self) -> Dict[str, str]:
-        taken = list(FIXED_PREFIXES.values()) + [sdk.upper() for sdk in self.sdks]
+        taken = list(FIXED_PREFIXES.values()) + [self.sdk_prefix(sdk) for sdk in self.sdks]
         result: Dict[str, str] = {}
         for app in self.apps:
             prefix = unique_prefix(prefix_from(app.slug), taken, app.slug)
             taken.append(prefix)
             result[app.slug] = prefix
         return result
+
+    def all_prefixes(self) -> Dict[str, str]:
+        """Project key -> task prefix for every chosen part (unique by construction)."""
+        prefixes: Dict[str, str] = {}
+        if self.with_server:
+            prefixes["server"] = FIXED_PREFIXES["server"]
+        if self.with_admin:
+            prefixes["admin"] = FIXED_PREFIXES["admin"]
+        prefixes.update(self.app_prefixes())
+        for sdk in self.sdks:
+            prefixes[sdk] = self.sdk_prefix(sdk)
+        return prefixes
 
     def masters(self) -> List[str]:
         """One master branch per project: server (also every SDK), admin, one per app. `main` belongs to the owner."""
@@ -282,8 +332,10 @@ class Spec:
             "__DATE__": self.today.isoformat(),
             "__APPS_LIST__": ", ".join(app.slug for app in self.apps),
             "__SDKS_LIST__": ", ".join(self.sdks),
-            "__MASTERS_LIST__": ", ".join(self.masters()),
+            "__MASTERS_LIST__": ", ".join(f"`{m}`" for m in self.masters()),
         }
+        for token in URL_TOKENS:
+            values[token.replace("_URL__", "_HOST__")] = host_of(values[token])
         prefixes = self.app_prefixes()
         for index, app in enumerate(self.apps, start=1):
             values.update({
@@ -300,6 +352,7 @@ class Spec:
             values[f"__SDK_DIR_{upper}__"] = self.sdk_dir(sdk)
             values[f"__SDK_DIR_{sdk}__"] = self.sdk_dir(sdk)
             values[f"__SDK_PACKAGE_{upper}__"] = self.sdk_package(sdk)
+            values[f"__SDK_PREFIX_{upper}__"] = self.sdk_prefix(sdk)
         return values
 
     def app_values(self, app: AppSpec) -> Dict[str, str]:
@@ -311,19 +364,24 @@ class Spec:
             "__APP_DIR__": self.app_dir(app),
             "__APP_PACKAGE__": self.app_package(app),
             "__APP_PACKAGE_PATH__": self.app_package(app).replace(".", "/"),
+            "__APP_PACKAGE_DASHED__": self.app_package(app).replace(".", "-"),
             "__APP_PROJECT__": app.project,
             "__APP_PREFIX__": self.app_prefixes()[app.slug],
             "__APP_MASTER__": app.slug,
+            "__API_PREFIX__": self.app_api_prefix(app),
+            "__REALTIME_NAMESPACE__": self.app_realtime_namespace(app),
         }
 
     def sdk_values(self, sdk: str) -> Dict[str, str]:
         """Contextual tokens while the sdk template is instantiated for one SDK."""
         return {
             "__SDK_NAME__": sdk,
-            "__SDK_TITLE__": sdk_title(sdk),
+            "__SDK_KIND__": sdk,
+            "__SDK_TITLE__": self.sdk_title_of(sdk),
+            "__SDK_KIND_TITLE__": self.sdk_title_of(sdk),
             "__SDK_DIR__": self.sdk_dir(sdk),
             "__SDK_PACKAGE__": self.sdk_package(sdk),
-            "__SDK_PREFIX__": sdk.upper(),
+            "__SDK_PREFIX__": self.sdk_prefix(sdk),
             "__SDK_DESCRIPTION__": SDK_DESCRIPTIONS.get(sdk, sdk),
         }
 

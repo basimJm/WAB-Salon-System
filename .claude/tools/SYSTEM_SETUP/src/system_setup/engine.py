@@ -1,7 +1,10 @@
 """Template engine: copies a template tree, substitutes sentinels and tokens in text files, renames paths.
 
-Order inside a text file: repeated blocks are expanded, then sentinels (longest literal first) become tokens, then every
-token becomes its value. Files matching `binary_globs` (and files that are not UTF-8) are copied byte for byte.
+A template is read layer by layer (`layers` in TEMPLATE.json, e.g. sdk = `common/` then `kinds/<name>/`, kmp =
+`project/`; default = the template root); a later layer overlays the earlier ones. Order inside a text file: repeated
+blocks are expanded, then sentinels (longest literal first) become tokens, then every token becomes its value. Files
+matching `binary_globs` (and files that are not UTF-8) are copied byte for byte. `targeted` edits run last, on the
+written files. Every sentinel literal still present in a rendered text file is reported (never silently kept).
 """
 from __future__ import annotations
 
@@ -11,9 +14,9 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
-from typing import Dict, Iterable, List, Mapping, Optional
+from typing import Dict, Iterable, List, Mapping, Optional, Tuple
 
-from manifest import MANIFEST_NAME, TOKEN_RE, Manifest
+from manifest import MANIFEST_NAME, Manifest
 
 ALWAYS_SKIP = (".git", "__pycache__", ".DS_Store")
 BLOCK_RE = re.compile(r"^[^\S\n]*__EACH_(APP|SDK)__[^\n]*\n(.*?)^[^\S\n]*__END_EACH__[^\n]*\n?", re.M | re.S)
@@ -32,6 +35,7 @@ class Result:
     binaries: List[Path] = field(default_factory=list)
     overwritten: List[Path] = field(default_factory=list)
     unresolved: Dict[str, List[str]] = field(default_factory=dict)
+    sentinel_left: Dict[str, List[str]] = field(default_factory=dict)
     post_generate: List[str] = field(default_factory=list)
 
 
@@ -79,6 +83,11 @@ def leftovers(text: str) -> List[str]:
     return sorted(set(LEFTOVER_RE.findall(text)))
 
 
+def sentinel_leftovers(text: str, sentinels: Mapping[str, str], values: Mapping[str, str]) -> List[str]:
+    """Sentinel literals still in a rendered text, ignoring literals a token legitimately rendered to (same value)."""
+    return sorted(literal for literal, token in sentinels.items() if literal in text and values.get(token) != literal)
+
+
 # ---------- selection ----------
 
 def matches_any(rel: PurePosixPath, globs: Iterable[str]) -> bool:
@@ -99,15 +108,33 @@ def is_skipped(rel: PurePosixPath, manifest: Manifest) -> bool:
     return matches_any(rel, manifest.skip)
 
 
-def template_files(manifest: Manifest) -> List[PurePosixPath]:
-    files = []
-    for path in sorted(manifest.root.rglob("*")):
-        if not path.is_file() and not path.is_symlink():
-            continue
-        rel = PurePosixPath(path.relative_to(manifest.root).as_posix())
-        if not is_skipped(rel, manifest):
-            files.append(rel)
-    return files
+def layer_dirs(manifest: Manifest, values: Mapping[str, str]) -> List[Path]:
+    """The template folders to copy, in overlay order; tokens in a layer name (`kinds/__SDK_NAME__`) are rendered."""
+    dirs = []
+    for layer in manifest.layers or ["."]:
+        rendered = substitute_tokens(layer, values)
+        if "__" in rendered:
+            raise EngineError(f"{manifest.kind}: layer {layer!r} needs a value for its token(s)")
+        folder = (manifest.root / rendered).resolve()
+        if manifest.root.resolve() not in (folder, *folder.parents):
+            raise EngineError(f"{manifest.kind}: layer {layer!r} leaves the template")
+        if not folder.is_dir():
+            raise EngineError(f"{manifest.kind}: layer {layer!r} not found in {manifest.root}")
+        dirs.append(folder)
+    return dirs
+
+
+def template_files(manifest: Manifest, values: Optional[Mapping[str, str]] = None) -> List[Tuple[PurePosixPath, Path]]:
+    """(relative output path, source file) for every file of every layer; a later layer replaces an earlier one."""
+    chosen: Dict[PurePosixPath, Path] = {}
+    for folder in layer_dirs(manifest, values or {}):
+        for path in sorted(folder.rglob("*")):
+            if not path.is_file() and not path.is_symlink():
+                continue
+            rel = PurePosixPath(path.relative_to(folder).as_posix())
+            if not is_skipped(rel, manifest):
+                chosen[rel] = path
+    return sorted(chosen.items())
 
 
 def resolve_dest(manifest: Manifest, repo_root: Path, values: Mapping[str, str]) -> Path:
@@ -127,8 +154,7 @@ def instantiate(manifest: Manifest, repo_root: Path, values: Mapping[str, str],
     """Writes one template into `repo_root` (under the manifest's dest). Returns what it did."""
     dest = resolve_dest(manifest, repo_root, values)
     result = Result(kind=manifest.kind, dest=dest)
-    for rel in template_files(manifest):
-        source = manifest.root / Path(*rel.parts)
+    for rel, source in template_files(manifest, values):
         out_rel = render_path(rel, manifest, values)
         out = dest / Path(*out_rel.parts)
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -156,11 +182,30 @@ def instantiate(manifest: Manifest, repo_root: Path, values: Mapping[str, str],
                 rest = leftovers(rendered)
                 if rest:
                     result.unresolved[str(out.relative_to(repo_root))] = rest
+                left = sentinel_leftovers(rendered, manifest.sentinels, values)
+                if left:
+                    result.sentinel_left[str(out.relative_to(repo_root))] = left
                 result.files.append(out)
         shutil.copymode(source, out)
-    result.post_generate = [substitute_tokens(substitute_sentinels(cmd, manifest.sentinels), values)
-                            for cmd in manifest.post_generate]
+    apply_targeted(manifest, dest, values)
+    result.post_generate = [render_text(cmd, manifest, values) for cmd in manifest.post_generate]
     return result
+
+
+def apply_targeted(manifest: Manifest, dest: Path, values: Mapping[str, str]) -> None:
+    """`targeted` edits: exact `find` -> `replace_with` (tokens rendered) in one written file; missing text = error."""
+    for edit in manifest.targeted:
+        rel = render_path(PurePosixPath(edit["file"]), manifest, values)
+        path = dest / Path(*rel.parts)
+        if not path.is_file():
+            raise EngineError(f"{manifest.kind}: targeted edit file {rel} was not generated")
+        text = path.read_text(encoding="utf-8")
+        if edit["find"] not in text:
+            raise EngineError(f"{manifest.kind}: targeted edit text not found in {rel}: {edit['find']!r}")
+        replacement = substitute_tokens(edit["replace_with"], values)
+        if edit["placeholder"] in replacement:
+            raise EngineError(f"{manifest.kind}: no value for {edit['placeholder']} (targeted edit in {rel})")
+        path.write_text(text.replace(edit["find"], replacement), encoding="utf-8")
 
 
 def run_post_generate(result: Result) -> List[str]:

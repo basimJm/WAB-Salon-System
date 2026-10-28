@@ -1,7 +1,9 @@
 """Validators, derived names, the Spec token values and the `ask` seam."""
 from __future__ import annotations
 
+import io
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from _support import make_spec
@@ -109,7 +111,10 @@ class AskTest(unittest.TestCase):
             prompts.append(prompt)
             return next(answers)
 
-        self.assertEqual("com.acme", ask("Package", "", validate_package, reader))
-        self.assertEqual(3, len(prompts))
-        self.assertEqual("ACME", ask("Prefix", "ACME", validate_prefix, lambda _: ""))
-        self.assertEqual("Prefix [ACME]: ", prompts[0].replace("Package: ", "Prefix [ACME]: ") if False else "Prefix [ACME]: ")
+        with redirect_stdout(io.StringIO()) as out:
+            self.assertEqual("com.acme", ask("Package", "", validate_package, reader))
+        self.assertEqual(["Package: "] * 3, prompts)
+        self.assertEqual(2, out.getvalue().count("✗"))  # two rejected answers, each explained
+        prompts.clear()
+        self.assertEqual("ACME", ask("Prefix", "ACME", validate_prefix, lambda p: prompts.append(p) or ""))
+        self.assertEqual(["Prefix [ACME]: "], prompts)

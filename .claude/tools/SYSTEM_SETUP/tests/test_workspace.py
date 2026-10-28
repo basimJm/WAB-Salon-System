@@ -26,7 +26,7 @@ class RegistryTest(TempDirTest):
                          (projects["admin"]["prefix"], projects["admin"]["master"], projects["admin"]["backlog"]))
         self.assertEqual(("MER", "merchant", "ACME-Mobile-Merchant/docs/ACME_Merchant_Tasks.md"),
                          (projects["merchant"]["prefix"], projects["merchant"]["master"], projects["merchant"]["backlog"]))
-        self.assertEqual(("STORAGE", "server", "acme-storage", "acme-storage/docs/ACME_Package_Storage_Tasks.md"),
+        self.assertEqual(("STO", "server", "acme-storage", "acme-storage/docs/ACME_Package_Storage_Tasks.md"),
                          (projects["storage"]["prefix"], projects["storage"]["master"], projects["storage"]["dir"], projects["storage"]["backlog"]))
         self.assertEqual("acme-otp/docs/ACME_Package_OTP_Tasks.md", projects["otp"]["backlog"])
         self.assertEqual(len(projects), len({p["prefix"] for p in projects.values()}))
@@ -52,7 +52,7 @@ class RegistryTest(TempDirTest):
         self.assertIn("ACME-Server/.claude/session.md", created)
         self.assertIn("acme-otp/docs/ACME_Package_OTP_Tasks.md", created)
         self.assertIn("ACME-Mobile-Customer/docs/ACME_Customer_Tasks.md", created)
-        self.assertEqual("shipped", (self.root / "ACME-Server/docs/ACME_Server_Tasks.md").read_text(encoding="utf-8").split("|")[5].strip())
+        self.assertIn("| SRV-001 | shipped |", (self.root / "ACME-Server/docs/ACME_Server_Tasks.md").read_text(encoding="utf-8"))
         self.assertIn("| OTP-001 |", (self.root / "acme-otp/docs/ACME_Package_OTP_Tasks.md").read_text(encoding="utf-8"))
         self.assertIn("feat/cus-001-scaffold", (self.root / "ACME-Mobile-Customer/docs/ACME_Customer_Tasks.md").read_text(encoding="utf-8"))
         self.assertEqual([], ensure_project_files(self.root, registry))  # idempotent
