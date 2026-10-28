@@ -1,0 +1,112 @@
+{
+  "kind": "kmp",
+  "description": "Generic Kotlin Multiplatform app (Android + iOS, Compose Multiplatform): build-logic convention plugins, core/* modules (design system with Liquid Glass, MVI, Ktor network + auth refresh, mock engine, storage, security, realtime/Socket.IO, analytics, Firebase ports, notifications, navigation, DI), feature/sample, CI policy scripts, detekt, .claude rules/roles/session/memory. Snapshot of KMP_TEMPLATE output with the sentinel identity 'Acme Shop' / com.acme.shop / AcmeShop (see README.md).",
+  "source": {
+    "tool": ".claude/tools/KMP_TEMPLATE/KMP_TEMPLATE",
+    "customer_app_commit": "ec480b04 (origin/customer)",
+    "generated_on": "2026-10-28"
+  },
+  "placeholders": [
+    "__APP_NAME__", "__APP_NAME_AR__", "__APP_PACKAGE__", "__APP_PROJECT__", "__APP_DIR__",
+    "__DEV_API_URL__", "__PROD_API_URL__", "__DEV_WEB_URL__", "__PROD_WEB_URL__", "__APPLE_TEAM_ID__",
+    "__API_PREFIX__", "__REALTIME_NAMESPACE__", "__SYSTEM_NAME__", "__SYSTEM_PREFIX__", "__SERVER_DIR__"
+  ],
+  "derived_placeholders": {
+    "__APP_PACKAGE_DASHED__": "the package with '-' instead of '.', e.g. com-acme-shop (Gradle version-catalog plugin aliases in gradle/libs.versions.toml)",
+    "__APP_PACKAGE_PATH__": "the package with '/' instead of '.', e.g. com/acme/shop (Kotlin source folders and config/policy-baseline.json keys)",
+    "__DEV_API_HOST__": "host of __DEV_API_URL__ (xcconfig writes URLs as https:/$()/host, so only the host is a literal there)",
+    "__PROD_API_HOST__": "host of __PROD_API_URL__",
+    "__DEV_WEB_HOST__": "host of __DEV_WEB_URL__",
+    "__PROD_WEB_HOST__": "host of __PROD_WEB_URL__"
+  },
+  "sentinels": {
+    "Acme Shop": "__APP_NAME__",
+    "متجر أكمي": "__APP_NAME_AR__",
+    "com.acme.shop": "__APP_PACKAGE__",
+    "com-acme-shop": "__APP_PACKAGE_DASHED__",
+    "com/acme/shop": "__APP_PACKAGE_PATH__",
+    "AcmeShop": "__APP_PROJECT__",
+    "https://api-dev.example.com": "__DEV_API_URL__",
+    "https://api.example.com": "__PROD_API_URL__",
+    "https://app-dev.example.com": "__DEV_WEB_URL__",
+    "https://app.example.com": "__PROD_WEB_URL__",
+    "api-dev.example.com": "__DEV_API_HOST__",
+    "api.example.com": "__PROD_API_HOST__",
+    "app-dev.example.com": "__DEV_WEB_HOST__",
+    "app.example.com": "__PROD_WEB_HOST__",
+    "TEAMID0000": "__APPLE_TEAM_ID__",
+    "/app/v1": "__API_PREFIX__",
+    "WAB-Server": "__SERVER_DIR__"
+  },
+  "sentinel_order": "replace the longest literal first (full URLs before bare hosts, com.acme.shop before AcmeShop); plain string replacement, no regex",
+  "sentinel_locations": {
+    "Acme Shop": [
+      "androidApp/src/main/res/values/strings.xml (app_name)", "androidApp/src/dev/res/values/strings.xml (app_name = 'Acme Shop Dev')",
+      "core/design-system/src/commonMain/composeResources/values/strings.xml (brand_name)",
+      "iosApp/Configuration/Dev.xcconfig + Prod.xcconfig (APP_DISPLAY_NAME)", "README.md", "CLAUDE.md", ".claude/{rules,roles,session,memory}.md"
+    ],
+    "متجر أكمي": ["androidApp/src/main/res/values-ar/strings.xml", "androidApp/src/dev/res/values-ar/strings.xml"],
+    "com.acme.shop": [
+      "every Kotlin file (package/import lines) under androidApp, composeApp, core/*, feature/*, build-logic",
+      "every build.gradle.kts (plugin alias `libs.plugins.com.acme.shop.*`, android namespace)", "build-logic/convention/build.gradle.kts (plugin ids)",
+      "gradle/libs.versions.toml (plugin ids)", "gradle.properties (comment: dev id)", "androidApp/build.gradle.kts (applicationId)", "androidApp/proguard-rules.pro", "data-proguard-rules.pro",
+      "androidApp/src/{dev,prod}/google-services.json (placeholder package_name)", "iosApp/Firebase/{dev,prod}/GoogleService-Info.plist (placeholder BUNDLE_ID)",
+      "iosApp/Configuration/Dev.xcconfig + Prod.xcconfig (PRODUCT_BUNDLE_IDENTIFIER = com.acme.shop$(BUNDLE_ID_SUFFIX))", "scripts/api_sync.py (generated package)", "README.md", "CLAUDE.md", ".claude/memory.md"
+    ],
+    "com-acme-shop": ["gradle/libs.versions.toml (plugin alias keys com-acme-shop-*)"],
+    "com/acme/shop": ["directory names src/<sourceSet>/kotlin/com/acme/shop/** (56 folders) and build-logic/.../com/acme/shop/buildlogic", "config/policy-baseline.json (file-path keys)"],
+    "AcmeShop": [
+      "settings.gradle.kts (rootProject.name)", "iosApp/Configuration/Config.xcconfig (PRODUCT_NAME)",
+      "iosApp/iosApp.xcodeproj/project.pbxproj (AcmeShop.app product reference)", "iosApp/iosApp.xcodeproj/xcshareddata/xcschemes/iosApp-Dev.xcscheme + iosApp-Prod.xcscheme (BuildableName)",
+      "iosApp/iosApp/FirebaseBridges.swift (Crashlytics NSError domain)", ".github/workflows/ci.yml", "config/detekt/detekt.yml", "scripts/ci/policy/__init__.py", "scripts/ci/policy_checks.py"
+    ],
+    "https://api-dev.example.com | api-dev.example.com": ["gradle.properties (DEV_API_BASE_URL)", "iosApp/Configuration/Dev.xcconfig (API_BASE_URL = https:/$()/api-dev.example.com)", "README.md"],
+    "https://api.example.com | api.example.com": ["gradle.properties (PROD_API_BASE_URL)", "iosApp/Configuration/Prod.xcconfig (API_BASE_URL)", "README.md", "scripts/ci/tests/test_hardcoded.py (a test literal; any https URL keeps the test valid)"],
+    "https://app-dev.example.com | app-dev.example.com": ["gradle.properties (DEV_WEB_BASE_URL)", "iosApp/Configuration/Dev.xcconfig (WEB_BASE_URL)"],
+    "https://app.example.com | app.example.com": ["gradle.properties (PROD_WEB_BASE_URL)", "iosApp/Configuration/Prod.xcconfig (WEB_BASE_URL)"],
+    "TEAMID0000": ["iosApp/Configuration/Config.xcconfig (TEAM_ID; DEVELOPMENT_TEAM = $(TEAM_ID))"],
+    "/app/v1": [
+      "core/network/src/commonMain/kotlin/com/acme/shop/core/network/auth/AuthEndpoints.kt (REFRESH)", "core/network/src/commonTest/.../AuthRefreshInterceptorTest.kt",
+      "scripts/api_sync.py (NAMESPACE_PREFIX)", "scripts/capture_remote_fixtures.py (PREFIX)", "scripts/ci/tests/test_api_sync.py", "scripts/ci/tests/test_contract_gaps.py", "README.md", "CLAUDE.md", ".claude/memory.md"
+    ],
+    "WAB-Server": ["build.gradle.kts (apiSync task description ../WAB-Server/docs/api/openapi.customer.json)", "scripts/api_sync.py (default spec path)", "KDoc comments in core/network (ErrorEnvelopeDto, AuthEndpoints, RemoteTokenRefreshApi), core/data/BaseResponse.kt, core/realtime tests"]
+  },
+  "rename_paths": {
+    "com/acme/shop": "__APP_PACKAGE_PATH__",
+    "AcmeShop": "__APP_PROJECT__"
+  },
+  "rename_paths_note": "Apply to the path of every file relative to project/ before writing it (no file or folder is literally named AcmeShop today; the rule is kept for forward compatibility). Dev applicationId / iOS dev bundle id = __APP_PACKAGE__ + '.dev' (DEV_APPLICATION_ID_SUFFIX / BUNDLE_ID_SUFFIX), nothing to rename for it.",
+  "targeted": [
+    {
+      "file": "core/realtime/src/commonMain/kotlin/com/acme/shop/core/realtime/RealtimeConfig.kt",
+      "placeholder": "__REALTIME_NAMESPACE__",
+      "find": "const val APP_NAMESPACE = \"/app\"",
+      "replace_with": "const val APP_NAMESPACE = \"__REALTIME_NAMESPACE__\"",
+      "why": "'/app' is too short to replace globally (Socket.IO protocol tests use '40/app,' packets as fixed test data)."
+    }
+  ],
+  "not_in_snapshot": {
+    "__APP_DIR__": "the target folder name; no literal inside the files",
+    "__SYSTEM_NAME__": "no literal; 'WAB' only survives as neutral test data (reference numbers 'WAB-1001', a localization test string) and the lint cache dir name wab-customer-lint",
+    "__SYSTEM_PREFIX__": "no literal (task prefixes are not used inside the app)"
+  },
+  "skip": [
+    "**/build/**", "**/.gradle/**", "**/.kotlin/**", "**/DerivedData/**", "**/xcuserdata/**", "**/.idea/**", "**/local.properties",
+    "**/*.keystore", "**/*.jks", "**/*.p12", "**/.DS_Store", "**/*.log"
+  ],
+  "post_generate": [
+    "python3 -m unittest discover -s scripts/ci/tests -p 'test_*.py'",
+    "python3 scripts/ci/policy_checks.py all",
+    "scripts/ci/run_detekt.sh",
+    "./gradlew testAndroidHostTest",
+    "./gradlew :androidApp:assembleDevDebug",
+    "./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64"
+  ],
+  "binary_globs": [
+    "**/*.png", "**/*.webp", "**/*.jpg", "**/*.jpeg", "**/*.gif", "**/*.ico", "**/*.pdf",
+    "**/*.ttf", "**/*.otf", "**/*.woff", "**/*.woff2",
+    "**/*.jar", "**/*.p12", "**/*.jks", "**/*.keystore", "**/*.zip", "**/*.aar", "**/*.mp4", "**/*.mp3"
+  ],
+  "firebase": "androidApp/src/{dev,prod}/google-services.json and iosApp/Firebase/{dev,prod}/GoogleService-Info.plist are PLACEHOLDERS (Firebase stays off until replaced); after substitution their ids are __APP_PACKAGE__.dev / __APP_PACKAGE__. Real files must never be committed to the template.",
+  "contract": "No OpenAPI spec is shipped (docs/api/openapi.json absent, so the contract check is skipped). `./gradlew apiSync` reads ../__SERVER_DIR__/docs/api/openapi.customer.json by default; pass --spec for another file name."
+}
