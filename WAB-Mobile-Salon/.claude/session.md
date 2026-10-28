@@ -19,10 +19,10 @@
   - [ ] Baseline Profile + Startup Profile if feasible
   - [ ] After: same measurements; before/after table here and in `docs/PERFORMANCE.md`
   - [ ] MER-076 device checks on Android + iOS simulator; Release-Dev iOS launch + scroll; iOS builds without `Local.xcconfig`
-- Tests: pending
-- Loops: 0/1
-- Review: PENDING
-- Notes: pending
+- Tests: `MerchantRootTabsTest`, `LocationFallbackTest`, `MapPickerLocateTest`, `test_performance_config.py` (policy forbids package-wide keep rules); gate: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green
+- Loops: 1/1 — re-checked once: gate above green; release smoke test on the emulator (sign-in, dashboard, request accept, calendar, salon hub, upload) after the R8 narrowing; measurements in `docs/PERFORMANCE.md`. DEFERRED (owner 2026-10-28: skip): the remaining device checks of MER-076 on iOS, macrobenchmark/startup profile module
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: tab routes by serial name (release bottom bar), package-wide keep rules removed with a policy guard, tone off the main thread, stability config reaches every Compose module, calendar `drawWithCache`, geocoder/location bounded with fallbacks; temporary local manifests removed, none committed.
+- Notes: results — main-thread binder time −54 %, recomposition −19 %, request-sheet long frames 6.3 → 4.8, APK −6.9 %, R8 scores 83 % → 98.5 %; cold start and whole-journey jank unchanged within the noise of a shared host.
 
 ### MER-076 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
 - Branch: `fix/mer-076-device-integrations`
