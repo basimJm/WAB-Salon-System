@@ -17,7 +17,7 @@ export function Avatar({ name, src, size = 'md', className }: AvatarProps) {
   const showPicture = src !== undefined && src !== '' && failed !== src;
   return (
     <span
-      className={cx('wab-avatar', `wab-avatar--${size}`, className)}
+      className={cx('app-avatar', `app-avatar--${size}`, className)}
       role="img"
       aria-label={name}
     >

@@ -33,7 +33,7 @@ export const PROD_FORBIDDEN_MARKERS: ReadonlyArray<{
 }> = [
   { marker: 'MockAuthRepository', what: 'mock code' },
   { marker: 'mock-access-token', what: 'mock code' },
-  { marker: 'wab-env-ribbon', what: 'the DEV ribbon' },
+  { marker: 'app-env-ribbon', what: 'the DEV ribbon' },
   { marker: 'designKits', what: 'design-system gallery strings', releaseOnly: true },
 ];
 

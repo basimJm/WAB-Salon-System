@@ -33,7 +33,7 @@ export function SchedulePicker({
   const orderError =
     bothSet && value.end <= value.start ? t(VALIDATION_KEYS.endBeforeStart) : undefined;
   return (
-    <div className="wab-daterange__custom">
+    <div className="app-daterange__custom">
       <DateField
         label={startLabel}
         value={value.start}

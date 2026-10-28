@@ -54,7 +54,7 @@ export const installation = (id) => ({
 });
 const SECRET = process.env.JWT_ACCESS_SECRET ?? 'qa-local-secret-qa-local-secret-qa-local-1234';
 const ADMIN = {
-  email: process.env.ADMIN_EMAIL ?? 'qa.admin@wab.example',
+  email: process.env.ADMIN_EMAIL ?? 'qa.admin@example.test',
   password: process.env.ADMIN_PASSWORD ?? 'QaAdminPass#2026',
 };
 export function adminOtp() {

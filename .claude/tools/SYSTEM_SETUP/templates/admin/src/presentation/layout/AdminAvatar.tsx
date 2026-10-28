@@ -4,7 +4,7 @@ import { cx } from '../utils/cx';
 export function AdminAvatar({ name, small = false }: { name: string; small?: boolean }) {
   const initial = Array.from(name.trim())[0]?.toLocaleUpperCase() ?? '';
   return (
-    <span className={cx('wab-admin-avatar', small && 'wab-admin-avatar--sm')} aria-hidden="true">
+    <span className={cx('app-admin-avatar', small && 'app-admin-avatar--sm')} aria-hidden="true">
       {initial}
     </span>
   );

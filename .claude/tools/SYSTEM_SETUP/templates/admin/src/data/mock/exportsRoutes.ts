@@ -19,7 +19,7 @@ const job = (n: number, kind: ExportKind, format: ApiFormat, status: ExportStatu
   downloadUrl: status === 'DONE' ? 'https://files.example.test/export.xlsx?sig=1' : null, // hardcoded-ok: mock data
 });
 export const MOCK_EXPORTS = [
-  job(1, 'TRANSACTIONS', 'XLSX', 'DONE'),
+  job(1, 'ITEMS', 'XLSX', 'DONE'),
   job(2, 'AUDIT_LOGS', 'CSV', 'FAILED'),
 ];
 

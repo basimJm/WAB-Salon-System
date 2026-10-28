@@ -7,7 +7,7 @@ export function InlineAlert({ error }: { error: unknown }) {
   const { t } = useTranslation();
   const appError = normalizeError(error);
   return (
-    <div className="wab-alert" role="alert">
+    <div className="app-alert" role="alert">
       <Icon name="alert" size="sm" />
       <span>{appError.serverMessage ?? t(appError.messageKey)}</span>
     </div>

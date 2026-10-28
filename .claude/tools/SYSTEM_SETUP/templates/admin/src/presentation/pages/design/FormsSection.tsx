@@ -9,13 +9,13 @@ import { Text } from '../../components/core/Text';
 import { Combobox } from '../../components/form/Combobox';
 import { DateField } from '../../components/form/DateField';
 import { FormActions } from '../../components/form/FormActions';
-import { JodField } from '../../components/form/JodField';
+import { MoneyField } from '../../components/form/MoneyField';
 import { MultiSelect } from '../../components/form/MultiSelect';
 import { NumberField } from '../../components/form/NumberField';
 import { SearchField } from '../../components/form/SearchField';
 import { TextField } from '../../components/form/TextField';
 import { GALLERY_UPDATED_AT } from '@/constants/ui';
-import { VALIDATION_KEYS, endAfterStart, jodAmount, localDateString, requiredText } from '@/domain/shared/validation';
+import { VALIDATION_KEYS, endAfterStart, localDateString, moneyAmount, requiredText } from '@/domain/shared/validation';
 import { errorText, messageOf } from '../../utils/formErrors';
 
 const OPTION_KEYS = ['amman', 'irbid', 'zarqa', 'aqaba'] as const;
@@ -23,7 +23,7 @@ const OPTION_KEYS = ['amman', 'irbid', 'zarqa', 'aqaba'] as const;
 const schema = endAfterStart(
   z.object({
     name: requiredText(3),
-    price: jodAmount({ positive: true }),
+    price: moneyAmount({ positive: true }),
     seats: z.number().int().min(1, VALIDATION_KEYS.required).nullable().refine((v) => v !== null, VALIDATION_KEYS.required),
     city: z.string().min(1, VALIDATION_KEYS.required),
     tags: z.array(z.string()),
@@ -45,21 +45,21 @@ export function FormsSection() {
   const { control, register, handleSubmit, reset, formState } = form;
   const err = (name: keyof z.input<typeof schema>) => errorText(t, messageOf(formState.errors[name]));
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
       <SearchField label={k('search')} onSearch={setQuery} />
       <Text tone="muted">{query === '' ? k('searchIdle') : t('design.forms.searchFor', { query })}</Text>
       <form
-        className="wab-stack"
+        className="app-stack"
         noValidate
         onSubmit={(event) => {
           void handleSubmit(() => setSaved(true))(event);
         }}
       >
-        <div className="wab-grid">
+        <div className="app-grid">
           <TextField label={k('name')} error={err('name')} {...register('name')} />
           <Controller control={control} name="price" render={({ field }) => (
-            <JodField label={k('price')} currencyLabel={k('jod')} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur} error={err('price')} />
+            <MoneyField label={k('price')} currencyLabel={k('currency')} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur} error={err('price')} />
           )} />
           <Controller control={control} name="seats" render={({ field }) => (
             <NumberField label={k('seats')} value={field.value} onValueChange={field.onChange} onBlur={field.onBlur} error={err('seats')} />

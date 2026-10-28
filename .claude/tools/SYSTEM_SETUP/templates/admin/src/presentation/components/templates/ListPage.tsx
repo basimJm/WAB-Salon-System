@@ -56,7 +56,7 @@ export function ListPage<Row>({
     (body.error === undefined || body.error === null) &&
     body.rows.length > 0;
   return (
-    <div className="wab-page wab-stack">
+    <div className="app-page app-stack">
       <PageHeader
         title={title}
         {...(subtitle ? { subtitle } : {})}
@@ -68,19 +68,19 @@ export function ListPage<Row>({
           {filters.controls}
         </FilterBar>
       ) : null}
-      <div className="wab-listcard">
-        <div className="wab-listcard__head">
-          <div className="wab-listcard__titles">
-            <span className="wab-listcard__title">{title}</span>
+      <div className="app-listcard">
+        <div className="app-listcard__head">
+          <div className="app-listcard__titles">
+            <span className="app-listcard__title">{title}</span>
             {showPagination ? (
-              <span className="wab-listcard__count">
+              <span className="app-listcard__count">
                 {formatNumber(pagination.total, language)}
               </span>
             ) : null}
           </div>
-          {search ? <div className="wab-listcard__search">{search}</div> : null}
+          {search ? <div className="app-listcard__search">{search}</div> : null}
           {toolbar ? <TableToolbar {...toolbar} /> : null}
-          {exportMenu ? <div className="wab-listcard__tools">{exportMenu}</div> : null}
+          {exportMenu ? <div className="app-listcard__tools">{exportMenu}</div> : null}
         </div>
         {grid ? <CardGrid {...grid} /> : <DataTable {...table} />}
         {showPagination ? <Pagination {...pagination} /> : null}

@@ -33,21 +33,21 @@ export function FunnelChart({ title, description, headers, steps, filename }: Fu
         ]),
       }}
     >
-      <ol className="wab-funnel" aria-label={title}>
+      <ol className="app-funnel" aria-label={title}>
         {steps.map((step, i) => {
           const share = shares[i];
           return (
-            <li key={step.key} className="wab-funnel__step">
-              <span className="wab-funnel__label">{step.label}</span>
-              <span className="wab-funnel__track">
+            <li key={step.key} className="app-funnel__step">
+              <span className="app-funnel__label">{step.label}</span>
+              <span className="app-funnel__track">
                 <span
-                  className="wab-funnel__bar"
+                  className="app-funnel__bar"
                   style={{ width: pct(share?.widthRatio ?? 0), background: seriesColor(0) }}
                 />
               </span>
-              <span className="wab-funnel__value">
+              <span className="app-funnel__value">
                 {formatNumber(step.value, language)}
-                <span className="wab-funnel__rate">
+                <span className="app-funnel__rate">
                   {' '}
                   · {formatPercent(share?.fromPrevious ?? 0, language)}
                 </span>

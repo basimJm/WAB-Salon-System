@@ -33,9 +33,9 @@ export function CardGrid<Row>({
     return <ErrorState error={error} {...(onRetry ? { onRetry } : {})} />;
   if (loading)
     return (
-      <div className="wab-cardgrid" aria-busy="true" aria-label={caption}>
+      <div className="app-cardgrid" aria-busy="true" aria-label={caption}>
         {Array.from({ length: SKELETON_CARDS }, (_, i) => (
-          <div key={i} className="wab-gridcard wab-gridcard--skeleton">
+          <div key={i} className="app-gridcard app-gridcard--skeleton">
             <Skeleton height="lg" width="full" />
             <Skeleton width="half" />
           </div>
@@ -44,9 +44,9 @@ export function CardGrid<Row>({
     );
   if (rows.length === 0) return <EmptyState title={emptyTitle ?? t('table.empty')} />;
   return (
-    <ul className="wab-cardgrid" aria-label={caption}>
+    <ul className="app-cardgrid" aria-label={caption}>
       {rows.map((row) => (
-        <li key={rowKey(row)} className="wab-cardgrid__cell">
+        <li key={rowKey(row)} className="app-cardgrid__cell">
           {renderCard(row)}
         </li>
       ))}

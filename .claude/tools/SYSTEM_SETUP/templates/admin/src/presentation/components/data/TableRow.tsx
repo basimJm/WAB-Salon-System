@@ -30,9 +30,9 @@ export function TableRow<Row>({
   return (
     <tr
       className={cx(
-        onRowClick && 'wab-table__row--click',
-        checked && 'wab-table__row--selected',
-        alert && 'wab-table__row--alert',
+        onRowClick && 'app-table__row--click',
+        checked && 'app-table__row--selected',
+        alert && 'app-table__row--alert',
       )}
       aria-selected={selection ? checked : undefined}
       {...(onRowClick
@@ -47,7 +47,7 @@ export function TableRow<Row>({
         : {})}
     >
       {selection ? (
-        <td className="wab-table__select">
+        <td className="app-table__select">
           <SelectBox
             label={t('table.selectRow', { name: selection.rowLabel(row) })}
             checked={checked}
@@ -61,7 +61,7 @@ export function TableRow<Row>({
         </td>
       ))}
       {actions ? (
-        <td className="wab-table__actions" onClick={(event) => event.stopPropagation()}>
+        <td className="app-table__actions" onClick={(event) => event.stopPropagation()}>
           {actions(row)}
         </td>
       ) : null}

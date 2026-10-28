@@ -34,7 +34,7 @@ export function IdleWarningDialog({
         </>
       }
     >
-      <p className="wab-modal__text" role="status">
+      <p className="app-modal__text" role="status">
         {t('session.idleText', { seconds: formatNumber(secondsLeft, language) })}
       </p>
     </Modal>

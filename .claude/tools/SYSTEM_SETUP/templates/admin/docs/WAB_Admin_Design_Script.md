@@ -12,7 +12,7 @@
 3. **Desktop web, 1440×900** frames (responsive down to tablet 1024). React web app.
 4. **Primary language: Arabic, RTL** (sidebar on the right). Provide English LTR + Dark mode for: Live Overview, Bookings list, Booking details, User Journey.
 5. **Data-dense but calm:** clear hierarchy, generous whitespace around KPIs, tables with sticky headers.
-6. **Realistic content:** Jordanian names, salons, JOD amounts, Amman areas, reference numbers "WAB-24817", dates in Asia/Amman, 12-hour times.
+6. **Realistic content:** Jordanian names, salons, money amounts, Amman areas, reference numbers "WAB-24817", dates in Asia/Amman, 12-hour times.
 7. **States for every page:** skeleton loading, empty, error with retry, and real-time update indicator ("مباشر" dot).
 8. Name frames with PRD IDs: `A15 Bookings / List / Loading`.
 

@@ -13,7 +13,7 @@ export default function ForbiddenPage() {
       text={t('forbidden.text')}
       icon="shield"
       action={
-        <Link className="wab-link" to={ROUTES.root}>
+        <Link className="app-link" to={ROUTES.root}>
           {t('forbidden.home')}
         </Link>
       }

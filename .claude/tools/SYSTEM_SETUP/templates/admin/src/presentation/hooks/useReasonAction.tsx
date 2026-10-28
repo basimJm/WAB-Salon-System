@@ -8,16 +8,16 @@ export interface ReasonAction {
   dialog: ReactNode;
 }
 
-/** Every audited change of a salon asks for a reason first (Admin PRD §3). */
+/** Every audited admin change asks for a reason first (PRD §3). */
 export function useReasonAction(loading: boolean, destructive = false): ReasonAction {
   const { t } = useTranslation();
   const [run, setRun] = useState<((reason: string) => void) | null>(null);
   const dialog = (
     <ReasonDialog
       open={run !== null}
-      title={t('salonEdit.reasonTitle')}
-      description={t('salonEdit.reasonHint')}
-      confirmLabel={t('salonEdit.confirm')}
+      title={t('reason.title')}
+      description={t('reason.hint')}
+      confirmLabel={t('reason.confirm')}
       destructive={destructive}
       loading={loading}
       onConfirm={(reason) => {

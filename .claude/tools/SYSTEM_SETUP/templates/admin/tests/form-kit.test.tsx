@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DateField } from '@/presentation/components/form/DateField';
 import { Field } from '@/presentation/components/form/Field';
 import { FormActions } from '@/presentation/components/form/FormActions';
-import { JodField } from '@/presentation/components/form/JodField';
+import { MoneyField } from '@/presentation/components/form/MoneyField';
 import { NumberField } from '@/presentation/components/form/NumberField';
 import { SearchField } from '@/presentation/components/form/SearchField';
 import { FormsSection } from '@/presentation/pages/design/FormsSection';
@@ -80,13 +80,13 @@ describe('NumberField', () => {
   });
 });
 
-describe('JodField', () => {
+describe('MoneyField', () => {
   it('limits to three decimals and shows the currency', async () => {
     const onChange = vi.fn();
     function Harness() {
       const [v, setV] = useState('');
       return (
-        <JodField
+        <MoneyField
           label="Price"
           value={v}
           currencyLabel="JOD"

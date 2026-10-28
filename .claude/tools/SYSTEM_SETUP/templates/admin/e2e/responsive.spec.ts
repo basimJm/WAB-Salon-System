@@ -43,7 +43,7 @@ test('login page: switch language and theme at every size, brand panel only on w
   await page.goto(ROUTES.login);
   await expect(page.locator('html')).toHaveAttribute('data-bp', /.+/);
   const bp = await page.locator('html').getAttribute('data-bp');
-  const brandStory = page.locator('.wab-brand__headline');
+  const brandStory = page.locator('.app-brand__headline');
   if (bp === 'expanded') await expect(brandStory).toBeVisible();
   else await expect(brandStory).toBeHidden();
 

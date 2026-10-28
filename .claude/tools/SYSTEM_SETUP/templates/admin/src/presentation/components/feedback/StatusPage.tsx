@@ -14,8 +14,8 @@ export interface StatusPageProps {
 /** Full-page notice for 403 / 404 / 500: same layout for all three. */
 export function StatusPage({ code, title, text, icon = 'alert', action }: StatusPageProps) {
   return (
-    <div className="wab-statuspage">
-      <p className="wab-statuspage__code" aria-hidden="true">
+    <div className="app-statuspage">
+      <p className="app-statuspage__code" aria-hidden="true">
         {code}
       </p>
       <EmptyState title={title} description={text} icon={icon} action={action} />

@@ -12,7 +12,7 @@ import { useLanguage } from '../hooks/useLanguage';
 const SIZE = 25;
 const REFRESH_MS = 3_000;
 
-/** Admin PRD §2 · Export history: what was asked, its state, and a download link while the file is available. */
+/** PRD P04 · Export history: what was asked, its state, and a download link while the file is available. */
 export default function ExportsPage() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -24,11 +24,11 @@ export default function ExportsPage() {
     // Keep looking while something is still being generated.
     refetchInterval: (q) => (q.state.data?.items.some((j) => !isFinished(j)) ? REFRESH_MS : false),
   });
-  const title = t('nav.sub.exports');
+  const title = t('nav.exports');
   const columns: Column<ExportJob>[] = [
     {
       key: 'at',
-      header: t('transactions.at'),
+      header: t('common.at'),
       ltr: true,
       render: (r) => formatInstant(r.createdAt, language, 'dateTime'),
     },
@@ -42,7 +42,7 @@ export default function ExportsPage() {
     },
     {
       key: 'status',
-      header: t('salons.state'),
+      header: t('common.status'),
       render: (r) => <StatusBadge kind="export" value={r.status} />,
     },
     {

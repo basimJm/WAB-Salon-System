@@ -12,8 +12,6 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     conflict: 'تعارض مع بيانات أخرى',
     unprocessable: 'لا يمكن تنفيذ العملية',
     serverError: 'حدث خطأ في الخادم',
-    branchInvalidStatus: 'هذا الإجراء غير مسموح لحالة الفرع الحالية.',
-    branchMainCannotClose: 'لا يمكن إغلاق الفرع الرئيسي. اختر فرعاً رئيسياً آخر أولاً.',
   },
   en: {
     ok: 'Done',
@@ -25,8 +23,6 @@ const MESSAGES: Record<Language, Record<string, string>> = {
     conflict: 'Conflicts with other data',
     unprocessable: 'The action cannot be completed',
     serverError: 'Server error',
-    branchInvalidStatus: "This action is not allowed for the branch's current status.",
-    branchMainCannotClose: 'The main branch cannot be closed. Choose another main branch first.',
   },
 };
 

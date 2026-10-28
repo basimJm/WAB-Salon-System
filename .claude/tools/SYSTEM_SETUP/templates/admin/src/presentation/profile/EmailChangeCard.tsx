@@ -49,8 +49,8 @@ export function EmailChangeCard() {
     bad === k ? t(`profile.emailError.${k}`) : undefined;
   return (
     <Card aria-label={t('profile.changeEmail')}>
-      <h2 className="wab-settings__title">{t('profile.changeEmail')}</h2>
-      <div className="wab-settings__grid">
+      <h2 className="app-settings__title">{t('profile.changeEmail')}</h2>
+      <div className="app-settings__grid">
         <TextField
           label={t('profile.newEmail')}
           type="email"

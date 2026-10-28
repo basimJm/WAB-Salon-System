@@ -1,15 +1,16 @@
 import type { Language } from './i18n';
 
-/** Business time zone: all admin dates and hours are shown in it (Admin PRD §2, BUSINESS_DOMAIN §1). */
+/** Business time zone of the platform: every admin date and hour is shown in it (PRD §2). Change per deployment. */
 export const BUSINESS_TIME_ZONE = 'Asia/Amman';
 
-export const FILS_PER_JOD = 1_000;
-export const JOD_DECIMAL_PLACES = 3;
-/** Most whole-JOD digits whose fils still fit a safe integer. */
-const MAX_WHOLE_DIGITS = String(Math.floor(Number.MAX_SAFE_INTEGER / FILS_PER_JOD)).length;
+/** Money: the API sends decimal strings; the panel computes in integer minor units (never floats). */
+export const MINOR_UNITS_PER_MAJOR = 1_000;
+export const MONEY_DECIMAL_PLACES = 3;
+/** Most whole-unit digits whose minor units still fit a safe integer. */
+const MAX_WHOLE_DIGITS = String(Math.floor(Number.MAX_SAFE_INTEGER / MINOR_UNITS_PER_MAJOR)).length;
 /** `[-]whole[.fraction]`: ASCII digits, no leading zeros, 1-3 decimals when there is a dot. Groups: sign, whole, fraction. */
-export const JOD_STRING_PATTERN = new RegExp(
-  `^(-?)(0|[1-9][0-9]{0,${String(MAX_WHOLE_DIGITS - 1)}})(?:\\.([0-9]{1,${String(JOD_DECIMAL_PLACES)}}))?$`,
+export const MONEY_STRING_PATTERN = new RegExp(
+  `^(-?)(0|[1-9][0-9]{0,${String(MAX_WHOLE_DIGITS - 1)}})(?:\\.([0-9]{1,${String(MONEY_DECIMAL_PLACES)}}))?$`,
 );
 
 /** Intl locales: Arabic UI uses Arabic-Indic digits, English uses Latin digits ("numerals follow the language"). */

@@ -8,14 +8,8 @@
     "download": "Download",
     "empty": "No exports yet",
     "kinds": {
-      "REPORT_DAILY": "Daily report",
-      "REPORT_WEEKLY": "Weekly report",
-      "REPORT_MONTHLY": "Monthly report",
-      "TRANSACTIONS": "Transactions",
-      "AUDIT_LOGS": "Audit log",
-      "BOOKINGS": "Bookings",
-      "CUSTOMERS": "Customers",
-      "SALONS": "Salons"
+      "ITEMS": "Items",
+      "AUDIT_LOGS": "Audit log"
     },
     "failures": {
       "TOO_MANY_ROWS": "Too many rows: narrow the filters",

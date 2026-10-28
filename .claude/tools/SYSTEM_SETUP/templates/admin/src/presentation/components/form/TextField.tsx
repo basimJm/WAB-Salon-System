@@ -25,35 +25,35 @@ export function TextField({
   const id = useId();
   const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
-    <div className={cx('wab-field', error && 'wab-field--error', className)}>
-      <label className="wab-field__label" htmlFor={id}>
+    <div className={cx('app-field', error && 'app-field--error', className)}>
+      <label className="app-field__label" htmlFor={id}>
         {label}
       </label>
-      <div className="wab-field__box">
+      <div className="app-field__box">
         <input
           id={id}
           className={cx(
-            'wab-field__control',
-            endSlot ? 'wab-field__control--with-end' : false,
-            startIcon ? 'wab-field__control--with-start' : false,
+            'app-field__control',
+            endSlot ? 'app-field__control--with-end' : false,
+            startIcon ? 'app-field__control--with-start' : false,
           )}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           {...rest}
         />
         {startIcon ? (
-          <span className="wab-field__start">
+          <span className="app-field__start">
             <Icon name={startIcon} size="sm" />
           </span>
         ) : null}
-        {endSlot ? <span className="wab-field__end">{endSlot}</span> : null}
+        {endSlot ? <span className="app-field__end">{endSlot}</span> : null}
       </div>
       {error ? (
-        <span id={`${id}-error`} className="wab-field__error" role="alert">
+        <span id={`${id}-error`} className="app-field__error" role="alert">
           {error}
         </span>
       ) : hint ? (
-        <span id={`${id}-hint`} className="wab-field__hint">
+        <span id={`${id}-hint`} className="app-field__hint">
           {hint}
         </span>
       ) : null}

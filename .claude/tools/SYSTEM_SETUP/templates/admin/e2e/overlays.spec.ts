@@ -7,7 +7,7 @@ test('overlay kit (English): dialogs, drawer at the end edge, menu keys, toast q
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
-  const card = page.locator('.wab-card[aria-label="Overlay kit"]');
+  const card = page.locator('.app-card[aria-label="Overlay kit"]');
   await card.scrollIntoViewIfNeeded();
 
   await card.getByRole('button', { name: 'Destructive reason' }).click();
@@ -35,9 +35,9 @@ test('overlay kit (English): dialogs, drawer at the end edge, menu keys, toast q
   await expect(card.getByText('Last action: Block')).toBeVisible();
 
   for (let i = 0; i < 5; i += 1) await card.getByRole('button', { name: 'Info toast' }).click();
-  await expect(page.locator('.wab-toast')).toHaveCount(3);
-  await page.locator('.wab-toast').first().getByRole('button', { name: 'Close' }).click();
-  await expect(page.locator('.wab-toast')).toHaveCount(2);
+  await expect(page.locator('.app-toast')).toHaveCount(3);
+  await page.locator('.app-toast').first().getByRole('button', { name: 'Close' }).click();
+  await expect(page.locator('.app-toast')).toHaveCount(2);
   expect(await noHorizontalScroll(page)).toBe(true);
 });
 
@@ -46,7 +46,7 @@ test('overlay kit (Arabic dark): the drawer opens on the left edge and fills the
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
-  const card = page.locator('.wab-card[aria-label="عناصر النوافذ"]');
+  const card = page.locator('.app-card[aria-label="عناصر النوافذ"]');
   await card.scrollIntoViewIfNeeded();
   await card.getByRole('button', { name: 'لوحة جانبية' }).click();
   const drawer = page.getByRole('dialog', { name: 'التفاصيل' });

@@ -39,30 +39,30 @@ export function KpiCard({
 }: KpiCardProps) {
   const positive = deltaPercent !== undefined && deltaPercent >= 0;
   return (
-    <Card className="wab-kpi">
-      <span className="wab-kpi__label">{label}</span>
+    <Card className="app-kpi">
+      <span className="app-kpi__label">{label}</span>
       {loading ? (
         <Skeleton height="lg" />
       ) : (
-        <span className={cx('wab-kpi__value', tone && `wab-kpi__value--${tone}`)}>{value}</span>
+        <span className={cx('app-kpi__value', tone && `app-kpi__value--${tone}`)}>{value}</span>
       )}
-      {!loading && note ? <span className="wab-kpi__note">{note}</span> : null}
+      {!loading && note ? <span className="app-kpi__note">{note}</span> : null}
       {!loading && deltaPercent !== undefined ? (
         <span
-          className={cx('wab-kpi__delta', positive ? 'wab-kpi__delta--up' : 'wab-kpi__delta--down')}
+          className={cx('app-kpi__delta', positive ? 'app-kpi__delta--up' : 'app-kpi__delta--down')}
         >
-          <span className="wab-kpi__chip" dir="ltr">
+          <span className="app-kpi__chip" dir="ltr">
             <span aria-hidden="true">{positive ? ARROW_UP : ARROW_DOWN}</span>
             <span>{Math.abs(deltaPercent)}%</span>
           </span>
-          {deltaLabel ? <span className="wab-kpi__delta-label">{deltaLabel}</span> : null}
+          {deltaLabel ? <span className="app-kpi__delta-label">{deltaLabel}</span> : null}
         </span>
       ) : null}
       {!loading && parts && parts.length > 0 ? (
-        <ul className="wab-kpi__parts">
+        <ul className="app-kpi__parts">
           {parts.map((part) => (
-            <li key={part.key} className="wab-kpi__part">
-              <span className="wab-kpi__dot" aria-hidden="true" />
+            <li key={part.key} className="app-kpi__part">
+              <span className="app-kpi__dot" aria-hidden="true" />
               {part.label} <b>{part.value}</b>
             </li>
           ))}

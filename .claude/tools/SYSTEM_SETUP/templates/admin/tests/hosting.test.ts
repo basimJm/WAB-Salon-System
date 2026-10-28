@@ -18,15 +18,15 @@ import {
 } from '../scripts/lib/hosting.ts';
 
 const origins = {
-  api: 'https://api.wab.example/v1',
-  socket: 'https://api.wab.example',
-  extraConnect: ['https://files.wab.example'],
+  api: 'https://api.example.test/v1',
+  socket: 'https://api.example.test',
+  extraConnect: ['https://files.example.test'],
 };
 
 describe('httpsOrigin', () => {
   it('keeps only the origin and refuses anything but https', () => {
-    expect(httpsOrigin('https://api.wab.example/v1/x?y=1')).toBe('https://api.wab.example');
-    expect(() => httpsOrigin('http://api.wab.example')).toThrow();
+    expect(httpsOrigin('https://api.example.test/v1/x?y=1')).toBe('https://api.example.test');
+    expect(() => httpsOrigin('http://api.example.test')).toThrow();
     expect(() => httpsOrigin('not a url')).toThrow();
   });
 });
@@ -35,9 +35,9 @@ describe('content security policy', () => {
   it('lets the page connect to itself, the API, the socket (https and wss) and the extras', () => {
     expect(connectSources(origins)).toEqual([
       "'self'",
-      'https://api.wab.example',
-      'https://files.wab.example',
-      'wss://api.wab.example',
+      'https://api.example.test',
+      'https://files.example.test',
+      'wss://api.example.test',
     ]);
   });
 
@@ -57,7 +57,7 @@ describe('content security policy', () => {
   });
 
   it('refuses a non-https origin', () => {
-    expect(() => buildCsp({ ...origins, api: 'http://api.wab.example' })).toThrow();
+    expect(() => buildCsp({ ...origins, api: 'http://api.example.test' })).toThrow();
   });
 });
 
@@ -141,7 +141,7 @@ describe('originsFromEnv', () => {
 
 describe('write-hosting script', () => {
   const run = (args: string[], env: Record<string, string>) => {
-    const out = mkdtempSync(join(tmpdir(), 'wab-hosting-'));
+    const out = mkdtempSync(join(tmpdir(), 'app-hosting-'));
     const result = spawnSync(
       process.execPath,
       ['scripts/write-hosting.ts', ...args, '--out', out],
@@ -155,8 +155,8 @@ describe('write-hosting script', () => {
 
   it('writes the files for a prod variant', () => {
     const { out, result } = run(['prod-release'], {
-      VITE_API_BASE_URL: 'https://api.wab.example',
-      VITE_SOCKET_URL: 'https://api.wab.example',
+      VITE_API_BASE_URL: 'https://api.example.test',
+      VITE_SOCKET_URL: 'https://api.example.test',
     });
     expect(result.status).toBe(0);
     expect(readFileSync(join(out, '_headers'), 'utf8')).toContain('connect-src');
@@ -170,7 +170,7 @@ describe('write-hosting script', () => {
         ([k]) => !k.startsWith('VITE_') && k !== 'CSP_CONNECT_EXTRA',
       ),
     );
-    const out = mkdtempSync(join(tmpdir(), 'wab-hosting-'));
+    const out = mkdtempSync(join(tmpdir(), 'app-hosting-'));
     const result = spawnSync(
       process.execPath,
       ['scripts/write-hosting.ts', 'prod-release', '--out', out],

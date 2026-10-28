@@ -34,7 +34,7 @@ export function DateField({
       {(control) => (
         <input
           {...control}
-          className="wab-field__control"
+          className="app-field__control"
           type="date"
           name={name}
           disabled={disabled}

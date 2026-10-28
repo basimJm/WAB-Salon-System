@@ -18,7 +18,7 @@ export function PreferenceSwitches() {
   const { language, setLanguage } = useLanguage();
   const { mode, setMode } = useTheme();
   return (
-    <div className="wab-prefs">
+    <div className="app-prefs">
       <SegmentedControl
         ariaLabel={t('prefs.language')}
         value={language}

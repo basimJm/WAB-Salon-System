@@ -23,7 +23,7 @@ export interface ExternalLinkProps
 export function Link(props: InternalLinkProps | ExternalLinkProps) {
   if ('to' in props) {
     return (
-      <RouterLink to={props.to} className={cx('wab-link', props.className)}>
+      <RouterLink to={props.to} className={cx('app-link', props.className)}>
         {props.children}
       </RouterLink>
     );
@@ -32,7 +32,7 @@ export function Link(props: InternalLinkProps | ExternalLinkProps) {
   if (!isSafeExternalHref(href)) return <span className={className}>{children}</span>;
   return (
     <a
-      className={cx('wab-link', className)}
+      className={cx('app-link', className)}
       href={href}
       target="_blank"
       rel="noopener noreferrer"

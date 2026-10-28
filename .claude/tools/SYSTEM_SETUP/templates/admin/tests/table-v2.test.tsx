@@ -144,7 +144,7 @@ describe('DataTable view options', () => {
         density="compact"
       />,
     );
-    expect(screen.getByRole('table')).toHaveClass('wab-table--compact');
+    expect(screen.getByRole('table')).toHaveClass('app-table--compact');
   });
 
   it('skeleton rows cover the checkbox and action columns too, and select-all is hidden while loading', () => {

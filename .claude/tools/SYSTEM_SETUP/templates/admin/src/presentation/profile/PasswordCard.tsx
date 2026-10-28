@@ -37,8 +37,8 @@ export function PasswordCard() {
       : undefined;
   return (
     <Card aria-label={t('profile.password')}>
-      <h2 className="wab-settings__title">{t('profile.password')}</h2>
-      <div className="wab-settings__grid">
+      <h2 className="app-settings__title">{t('profile.password')}</h2>
+      <div className="app-settings__grid">
         <TextField
           label={t('profile.currentPassword')}
           type="password"

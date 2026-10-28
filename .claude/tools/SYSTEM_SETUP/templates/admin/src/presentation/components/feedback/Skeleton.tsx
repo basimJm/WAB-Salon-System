@@ -9,7 +9,7 @@ export interface SkeletonProps {
 export function Skeleton({ height = 'md', width = 'full' }: SkeletonProps) {
   return (
     <span
-      className={cx('wab-skeleton', `wab-skeleton--${height}`, `wab-skeleton--${width}`)}
+      className={cx('app-skeleton', `app-skeleton--${height}`, `app-skeleton--${width}`)}
       aria-hidden="true"
     />
   );

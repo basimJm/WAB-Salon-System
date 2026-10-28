@@ -66,7 +66,7 @@ describe('Sidebar sub-menus and counters', () => {
       'aria-expanded',
       'true',
     );
-    expect(screen.getByRole('link', { name: 'Refunds' })).toHaveClass('wab-navsub--active');
+    expect(screen.getByRole('link', { name: 'Refunds' })).toHaveClass('app-navsub--active');
     expect(screen.queryByRole('link', { name: 'Traffic & users' })).toBeNull();
   });
 

@@ -1,6 +1,6 @@
 # Design audit (ADM-011)
 
-Sources: `design/WAB Admin 01…09 *.dc.html` (screens), `Blocks` / `Overlay` / `Sidebar` / `Topbar` (shared parts), `wab-admin-kit.js` (helpers and tokens), `docs/WAB_Admin_Design_Script.md`. The PRD wins over the design on behaviour. Tick the boxes in the owning task, not here.
+Sources: `design/WAB Admin 01…09 *.dc.html` (screens), `Blocks` / `Overlay` / `Sidebar` / `Topbar` (shared parts), `app-admin-kit.js` (helpers and tokens), `docs/WAB_Admin_Design_Script.md`. The PRD wins over the design on behaviour. Tick the boxes in the owning task, not here.
 
 ## 1. Design frames to PRD pages
 
@@ -31,7 +31,7 @@ Sources: `design/WAB Admin 01…09 *.dc.html` (screens), `Blocks` / `Overlay` / 
 | `drawer` | side drawers (RTL aware) | none | ADM-017 |
 | `toast` | toasts | `Toast` | exists; queue ADM-017 |
 | `spark` | sparkline | none | ADM-019 |
-| `jod`, `n`, `nice`, `short` | money and number formats | `formatJodAmount`, `formatNumber` | done (ADM-008) |
+| `jod`, `n`, `nice`, `short` | money and number formats | `formatMoneyAmount`, `formatNumber` | done (ADM-008) |
 | `tm`, `dt` formats | times in Amman, 12-hour | `formatInstant` | done (ADM-008) |
 | `ini` | initials for avatars | none | `Avatar` ADM-012 |
 | `go`, `navTo`, `href` | in-app navigation | React Router | exists |
@@ -63,7 +63,7 @@ Sources: `design/WAB Admin 01…09 *.dc.html` (screens), `Blocks` / `Overlay` / 
 
 ## 4. Token deltas
 
-Compared `wab-admin-kit.js` (`TONES`, theme variables, chart palette) with `src/design/tokens/colors.ts`: the six badge tones (light and dark), the status colors, the accent and the six chart colors are identical. No token change is needed. Fonts (Playfair Display for headings, Poppins for Latin text, IBM Plex Sans Arabic for Arabic) and radii are already cloned (T-024). Two items to add when their components arrive: the `livePulse` / `rowFlash` animations (ADM-018, with reduced-motion support) and chart series colors by name (ADM-019).
+Compared `app-admin-kit.js` (`TONES`, theme variables, chart palette) with `src/design/tokens/colors.ts`: the six badge tones (light and dark), the status colors, the accent and the six chart colors are identical. No token change is needed. Fonts (Playfair Display for headings, Poppins for Latin text, IBM Plex Sans Arabic for Arabic) and radii are already cloned (T-024). Two items to add when their components arrive: the `livePulse` / `rowFlash` animations (ADM-018, with reduced-motion support) and chart series colors by name (ADM-019).
 
 ## 5. Gaps list (what is missing, in build order)
 

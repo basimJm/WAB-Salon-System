@@ -28,10 +28,10 @@ export function Button({
     <button
       type={type}
       className={cx(
-        'wab-btn',
-        `wab-btn--${variant}`,
-        `wab-btn--${size}`,
-        block && 'wab-btn--block',
+        'app-btn',
+        `app-btn--${variant}`,
+        `app-btn--${size}`,
+        block && 'app-btn--block',
         className,
       )}
       disabled={disabled || loading}

@@ -3,8 +3,8 @@
     "title": "Design system",
     "subtitle": "Base components in every state.",
     "kpis": "KPI cards",
-    "kpiBookings": "Bookings today",
-    "kpiFailures": "Payment failures",
+    "kpiBookings": "Items created today",
+    "kpiFailures": "Failed jobs",
     "kpiLoading": "Loading card",
     "vsLastWeek": "vs last week",
     "primary": "Primary",
@@ -28,16 +28,16 @@
     "tabC": "Empty",
     "tabD": "Error",
     "tabE": "Empty state",
-    "table": "Demo bookings table",
+    "table": "Demo items table",
     "colRef": "Reference",
-    "colName": "Customer",
+    "colName": "Owner",
     "colAmount": "Amount",
     "row1": "Layla Haddad",
     "row2": "Omar Nasser",
     "retried": "Retrying",
     "emptyTitle": "Nothing here yet",
     "emptyText": "Items will appear here.",
-    "dialogTitle": "Cancel booking",
+    "dialogTitle": "Archive item",
     "dialogText": "Admin actions need a reason and are written to the audit log.",
     "confirm": "Confirm",
     "done": "Done",
@@ -47,7 +47,7 @@
       "rose": "Rejected",
       "grey": "Draft",
       "purple": "Completed",
-      "violet": "Recommended"
+      "violet": "Featured"
     },
     "primitives": {
       "title": "Primitives",
@@ -56,9 +56,9 @@
       "danger": "Error text",
       "heading": "Heading",
       "avatar": "Layth Al-Hasan",
-      "link": "Open salons",
+      "link": "Open items",
       "external": "Documentation",
-      "chip": "Amman",
+      "chip": "Region A",
       "chipRemovable": "Active filter",
       "removeChip": "Remove filter",
       "tooltipTrigger": "Hover or focus me",
@@ -70,25 +70,25 @@
     },
     "forms": {
       "title": "Form kit",
-      "search": "Search salons",
+      "search": "Search items",
       "searchIdle": "Type to search (applied after you stop typing)",
       "searchFor": "Searching for “{{query}}”",
-      "name": "Service name",
+      "name": "Item name",
       "price": "Price",
-      "jod": "JOD",
       "seats": "Seats",
-      "city": "City",
+      "city": "Region",
       "tags": "Tags",
       "start": "Starts",
       "end": "Ends",
       "saved": "Saved (demo only, nothing was sent)",
       "updatedBy": "Layth Al-Hasan",
       "option": {
-        "amman": "Amman",
-        "irbid": "Irbid",
-        "zarqa": "Zarqa",
-        "aqaba": "Aqaba"
-      }
+        "amman": "North",
+        "irbid": "South",
+        "zarqa": "East",
+        "aqaba": "West"
+      },
+      "currency": "USD"
     },
     "statuses": {
       "title": "Status badges"
@@ -96,30 +96,30 @@
     "table2": {
       "title": "Data table v2",
       "colId": "ID",
-      "colName": "Salon",
-      "colCity": "City",
+      "colName": "Item",
+      "colCity": "Region",
       "colState": "State",
-      "salon": "Salon",
       "open": "Open",
       "bulkApprove": "Approve selected",
       "exported": "Export requested ({{count}})",
       "city": {
-        "amman": "Amman",
-        "irbid": "Irbid",
-        "zarqa": "Zarqa",
-        "aqaba": "Aqaba"
+        "amman": "North",
+        "irbid": "South",
+        "zarqa": "East",
+        "aqaba": "West"
       },
-      "pagination": "Data table v2 pagination"
+      "pagination": "Data table v2 pagination",
+      "item": "Item"
     },
     "filters": {
       "title": "Filter kit",
-      "city": "City",
-      "anyCity": "Any city",
+      "city": "Region",
+      "anyCity": "Any region",
       "exported": "Exports requested: {{list}}",
       "cities": {
-        "amman": "Amman",
-        "irbid": "Irbid",
-        "zarqa": "Zarqa"
+        "amman": "North",
+        "irbid": "South",
+        "zarqa": "East"
       }
     },
     "overlays": {
@@ -142,7 +142,7 @@
       "discard": "Discard",
       "reasonTitle": "Approve with a reason",
       "reasonDangerTitle": "Block this account",
-      "reasonDangerText": "The customer is signed out and notified.",
+      "reasonDangerText": "The account is signed out and notified.",
       "block": "Block",
       "drawerTitle": "Details",
       "drawerText": "Side panel content goes here.",

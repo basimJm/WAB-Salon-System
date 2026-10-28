@@ -4,7 +4,7 @@ import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 
-type Kind = 'PAYMENT_FAILURE_SPIKE' | 'REFUND_FAILED' | 'SALON_APPLICATION';
+type Kind = dto.getAlertsData[number]['kind'];
 type Subject = dto.getAlertsData[number]['entityType'];
 const alert = (
   n: number,
@@ -15,11 +15,10 @@ const alert = (
   id: `64c3${String(n).padStart(20, '0')}`,
   kind,
   severity,
-  // Contract 1.4.0+: `title` in the request language, `titles` in both (SRV-150).
   title: `Alert ${String(n)}`,
   titles: { ar: `تنبيه ${String(n)}`, en: `Alert ${String(n)}` },
   entityType,
-  entityId: entityType ? '64f000000000000000000001' : null,
+  entityId: entityType ? '64d100000000000000000001' : null,
   data: {} as Record<string, unknown>,
   status: 'NEW' as 'NEW' | 'ACKNOWLEDGED',
   emailedAt: null as string | null,
@@ -27,10 +26,9 @@ const alert = (
   createdAt: `2026-10-1${String(n)}T08:00:00.000Z`,
 });
 export const MOCK_ALERTS = [
-  alert(1, 'PAYMENT_FAILURE_SPIKE', 'CRITICAL', null),
-  // Subjects as the contract enum (UPPER_SNAKE, SRV-150).
-  alert(2, 'REFUND_FAILED', 'WARNING', 'REFUND'),
-  alert(3, 'SALON_APPLICATION', 'INFO', 'SALON'),
+  alert(1, 'ERROR_RATE_SPIKE', 'CRITICAL', null),
+  alert(2, 'JOB_FAILED', 'WARNING', null),
+  alert(3, 'ITEM_FLAGGED', 'INFO', 'ITEM'),
 ];
 
 export function alertsRoutes(): readonly MockRoute[] {

@@ -117,7 +117,7 @@ describe('bundle gate', () => {
   });
 
   it('prod builds must not contain the DEV ribbon; dev builds may', () => {
-    const files = [file('index-abc.js', 10, 'className:"wab-env-ribbon"')];
+    const files = [file('index-abc.js', 10, 'className:"app-env-ribbon"')];
     expect(run(files, 'prod-release').join()).toContain('DEV ribbon');
     expect(run(files, 'prod-debug').join()).toContain('DEV ribbon');
     expect(run(files, 'dev-release')).toEqual([]);

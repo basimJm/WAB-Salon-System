@@ -10,26 +10,26 @@ export function BrandPanel() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   return (
-    <aside className="wab-brand">
-      <span className="wab-brand__ring wab-brand__ring--top" aria-hidden="true" />
-      <span className="wab-brand__ring wab-brand__ring--bottom" aria-hidden="true" />
-      <div className="wab-brand__top">
-        <img className="wab-brand__icon" src={BRAND_ICON_URL} alt={BRAND_MARK} />
-        <div className="wab-brand__names">
-          <div className="wab-brand__wordmark">
-            <span className="wab-brand__mark">{BRAND_MARK}</span>
-            <span className="wab-brand__tagline" dir="ltr">
+    <aside className="app-brand">
+      <span className="app-brand__ring app-brand__ring--top" aria-hidden="true" />
+      <span className="app-brand__ring app-brand__ring--bottom" aria-hidden="true" />
+      <div className="app-brand__top">
+        <img className="app-brand__icon" src={BRAND_ICON_URL} alt={BRAND_MARK} />
+        <div className="app-brand__names">
+          <div className="app-brand__wordmark">
+            <span className="app-brand__mark">{BRAND_MARK}</span>
+            <span className="app-brand__tagline" dir="ltr">
               {BRAND_TAGLINE}
             </span>
           </div>
-          <span className="wab-brand__admin">{t('login.brand.chip')}</span>
+          <span className="app-brand__admin">{t('login.brand.chip')}</span>
         </div>
       </div>
-      <div className="wab-brand__copy">
-        <h2 className="wab-brand__headline">{t('login.brand.headline')}</h2>
-        <p className="wab-brand__text">{t('login.brand.text')}</p>
+      <div className="app-brand__copy">
+        <h2 className="app-brand__headline">{t('login.brand.headline')}</h2>
+        <p className="app-brand__text">{t('login.brand.text')}</p>
       </div>
-      <p className="wab-brand__security">
+      <p className="app-brand__security">
         <Icon name="shield" size="sm" />
         {t('login.brand.security', { days: formatNumber(SESSION_IDLE_DAYS, language) })}
       </p>

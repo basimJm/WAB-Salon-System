@@ -18,9 +18,9 @@ describe('design table cells', () => {
 
   it('EntityCell shows the initial, the name, a second line and a badge', () => {
     renderWithApp(<EntityCell name="Noor Salon" sub="+962790000301" badge={<em>new</em>} />);
-    expect(screen.getByText('N')).toHaveClass('wab-entity__initial');
-    expect(screen.getByText('Noor Salon')).toHaveClass('wab-entity__name');
-    expect(screen.getByText('+962790000301')).toHaveClass('wab-entity__sub');
+    expect(screen.getByText('N')).toHaveClass('app-entity__initial');
+    expect(screen.getByText('Noor Salon')).toHaveClass('app-entity__name');
+    expect(screen.getByText('+962790000301')).toHaveClass('app-entity__sub');
     expect(screen.getByText('new')).toBeInTheDocument();
   });
 
@@ -38,7 +38,7 @@ describe('design header and KPI blocks', () => {
   it('PageHeader shows badges next to the title', () => {
     renderWithApp(<PageHeader title="Bookings" badges={<span>Live</span>} />);
     expect(screen.getByRole('heading', { level: 1, name: 'Bookings' }).parentElement).toHaveClass(
-      'wab-pageheader__titlerow',
+      'app-pageheader__titlerow',
     );
     expect(screen.getByText('Live')).toBeInTheDocument();
   });
@@ -48,8 +48,8 @@ describe('design header and KPI blocks', () => {
     const { unmount } = renderWithApp(
       <KpiCard label="Payments" value="64" deltaPercent={-3.2} parts={parts} />,
     );
-    expect(screen.getByText('payment.succeeded').closest('li')).toHaveClass('wab-kpi__part');
-    expect(screen.getByText('3.2%').closest('.wab-kpi__delta')).toHaveClass('wab-kpi__delta--down');
+    expect(screen.getByText('payment.succeeded').closest('li')).toHaveClass('app-kpi__part');
+    expect(screen.getByText('3.2%').closest('.app-kpi__delta')).toHaveClass('app-kpi__delta--down');
     unmount();
     renderWithApp(<KpiCard label="Payments" value="64" loading parts={parts} />);
     expect(screen.queryByText('payment.succeeded')).toBeNull();
@@ -72,8 +72,8 @@ describe('design row tint', () => {
         rowAlert={(r) => r.failed}
       />,
     );
-    expect(screen.getByText('TX-1').closest('tr')).toHaveClass('wab-table__row--alert');
-    expect(screen.getByText('TX-2').closest('tr')).not.toHaveClass('wab-table__row--alert');
+    expect(screen.getByText('TX-1').closest('tr')).toHaveClass('app-table__row--alert');
+    expect(screen.getByText('TX-2').closest('tr')).not.toHaveClass('app-table__row--alert');
   });
 
   it('a single rating shows no count', () => {

@@ -4,7 +4,7 @@ import { ROUTES } from '../src/constants/routes.ts';
 import { noHorizontalScroll, signIn } from './helpers.ts';
 
 const { version } = JSON.parse(readFileSync('package.json', 'utf8')) as { version: string };
-const RIBBON = '.wab-env-ribbon';
+const RIBBON = '.app-env-ribbon';
 
 test('dev build: the DEV ribbon shows on login and inside the app, and never blocks clicks', async ({
   page,
@@ -25,7 +25,7 @@ test('about page shows the real version and a build id, in Arabic RTL then Engli
   await signIn(page, ROUTES.about);
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await expect(page.locator('h1')).toHaveText('حول هذا الإصدار');
-  const values = page.locator('.wab-about__value');
+  const values = page.locator('.app-about__value');
   await expect(values.nth(0)).toHaveText(version);
   await expect(values.nth(1)).toHaveText(/^[A-Za-z0-9._-]+$/);
   await expect(values.nth(3)).toHaveText('dev-debug');

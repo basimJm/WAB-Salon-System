@@ -1,6 +1,6 @@
-# Netlify: set "Base directory" to WAB-Admin-Dashboard in the site settings.
+# Netlify: set "Base directory" to __ADMIN_DIR__ in the site settings.
 # Production needs the public values VITE_API_BASE_URL and VITE_SOCKET_URL (https) in the site's environment variables;
-# add CSP_CONNECT_EXTRA (comma list) for the storage host presigned uploads go to.
+# add CSP_CONNECT_EXTRA (comma list) for any other https origin the browser must call.
 # Previews and branch deploys build dev-release, which calls the dev API (VITE_API_BASE_URL / VITE_SOCKET_URL, or the
 # placeholders in .env.dev). Only the dev-debug build (`npm run dev`) uses the built-in mock data.
 

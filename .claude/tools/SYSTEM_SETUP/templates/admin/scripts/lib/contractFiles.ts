@@ -1,5 +1,5 @@
-/** Server's generated admin OpenAPI document (the contract of record until `contracts/` exists). */
-export const SERVER_SPEC_FILE = '../WAB-Server/docs/api/openapi.admin.json';
+/** The server's generated admin OpenAPI document: the contract of record (sibling project of this one). */
+export const SERVER_SPEC_FILE = '../__SERVER_DIR__/docs/api/openapi.admin.json';
 
 /** Files owned by `npm run api:sync`; paths are relative to the admin project root. */
 export const CONTRACT_FILES = {

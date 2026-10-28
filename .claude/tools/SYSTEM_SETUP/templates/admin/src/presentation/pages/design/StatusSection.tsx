@@ -10,10 +10,10 @@ import { Text } from '../../components/core/Text';
 export function StatusSection() {
   const { t } = useTranslation();
   return (
-    <Card className="wab-stack" aria-label={t('design.statuses.title')}>
+    <Card className="app-stack" aria-label={t('design.statuses.title')}>
       <Heading level={2}>{t('design.statuses.title')}</Heading>
       {STATUS_KINDS.map((kind) => (
-        <div key={kind} className="wab-row">
+        <div key={kind} className="app-row">
           <Text tone="muted" strong>
             {kind}
           </Text>

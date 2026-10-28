@@ -121,7 +121,7 @@ describe('StatusBadge', () => {
   it('shows the translated label with the registry tone', () => {
     renderWithApp(<StatusBadge kind="booking" value="NO_SHOW" />);
     const badge = screen.getByText('No-show');
-    expect(badge).toHaveClass('wab-badge--rose');
+    expect(badge).toHaveClass('app-badge--rose');
   });
 
   it('translates to Arabic', () => {
@@ -131,7 +131,7 @@ describe('StatusBadge', () => {
 
   it('shows an unknown value as it is, in the neutral tone, without throwing', () => {
     renderWithApp(<StatusBadge kind="booking" value="FUTURE_STATE" />);
-    expect(screen.getByText('FUTURE_STATE')).toHaveClass('wab-badge--grey');
+    expect(screen.getByText('FUTURE_STATE')).toHaveClass('app-badge--grey');
   });
 
   it('gallery section renders every registered status accessibly', async () => {
@@ -141,7 +141,7 @@ describe('StatusBadge', () => {
       </main>,
     );
     const total = STATUS_KINDS.reduce((sum, kind) => sum + statusValues(kind).length, 0);
-    expect(document.querySelectorAll('.wab-badge')).toHaveLength(total);
+    expect(document.querySelectorAll('.app-badge')).toHaveLength(total);
     expect(await axeViolations()).toEqual([]);
   });
 });

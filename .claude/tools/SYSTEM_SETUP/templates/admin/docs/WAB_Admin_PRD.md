@@ -27,9 +27,9 @@ A **React web application** for a **single administrator** with full permissions
 - **React** single-page web app, desktop-first, responsive down to tablet.
 - Talks to the backend (Node.js + TypeScript + Express + Mongoose, MongoDB, Redis) via admin APIs under a dedicated namespace (e.g., `/admin/v1`) with a separate admin token scope.
 - **Real-time:** Socket.IO (admin room).
-- **Email alerts and admin OTP:** Nodemailer + Gmail SMTP (through the `wab-notifications` server package).
+- **Email alerts and admin OTP:** Nodemailer + Gmail SMTP (through the `app-notifications` server package).
 - **Files:** AWS S3 + CDN; private documents (salon licenses) only through short-lived signed URLs.
-- **Analytics source:** Firebase Analytics + Crashlytics raw data exported to **BigQuery**, queried by the backend (`wab-analytics` package); server-side events stored in MongoDB.
+- **Analytics source:** Firebase Analytics + Crashlytics raw data exported to **BigQuery**, queried by the backend (`app-analytics` package); server-side events stored in MongoDB.
 
 ### 2.2 Tech Stack
 > **TBD — provided later by the product owner as a template.**
@@ -67,7 +67,7 @@ A **React web application** for a **single administrator** with full permissions
 2. **Crashes** — Firebase Crashlytics exported to BigQuery.
 3. **Server events** — produced by the backend (OTP, payments, refunds, jobs, API errors, admin actions) and stored in MongoDB.
 
-The backend (`wab-analytics` package) queries BigQuery and MongoDB and exposes aggregated and raw data to the panel. Pre-aggregated tables (scheduled queries) back the dashboards. Common fields:
+The backend (`app-analytics` package) queries BigQuery and MongoDB and exposes aggregated and raw data to the panel. Pre-aggregated tables (scheduled queries) back the dashboards. Common fields:
 
 | Field | Description |
 |---|---|

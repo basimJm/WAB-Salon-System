@@ -33,11 +33,11 @@ export default function ProfilePage() {
         skeleton={<Skeleton height="lg" />}
       >
         {profile ? (
-          <div className="wab-settings">
+          <div className="app-settings">
             <Card aria-label={t('profile.account')}>
-              <h2 className="wab-settings__title">{t('profile.account')}</h2>
+              <h2 className="app-settings__title">{t('profile.account')}</h2>
               <KeyValue
-                placeholder={t('salons.none')}
+                placeholder={t('common.none')}
                 items={[
                   {
                     key: '0',

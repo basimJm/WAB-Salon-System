@@ -99,7 +99,7 @@ describe('generated DTOs behave like the server contract', () => {
   });
 
   it('enforces request limits from the spec', () => {
-    const ok = { email: 'admin@wab.jo', password: 'secret' };
+    const ok = { email: 'admin@example.test', password: 'secret' };
     expect(postAuthLoginBodySchema().safeParse(ok).success).toBe(true);
     expect(postAuthLoginBodySchema().safeParse({ ...ok, email: 'not-an-email' }).success).toBe(
       false,

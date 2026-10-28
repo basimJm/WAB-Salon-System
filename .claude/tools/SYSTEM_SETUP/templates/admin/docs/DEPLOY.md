@@ -25,7 +25,7 @@ Cloudflare reads the same `_headers` and `_redirects` files that `scripts/write-
 | Build output directory | `dist/prod-release` |
 | Node version | 22 (`.node-version` is committed) |
 
-Environment variables (Settings -> Variables and Secrets, plain text, Production): `VITE_API_BASE_URL` and `VITE_SOCKET_URL` (both `https://wab-server-dev.onrender.com` for now). Optional: `VITE_DEFAULT_LANGUAGE`, `CSP_CONNECT_EXTRA`. Without them the values in `.env.prod` are used. Preview deployments (other branches) can use the build command with `build:dev-release` and `dev-release`.
+Environment variables (Settings -> Variables and Secrets, plain text, Production): `VITE_API_BASE_URL` and `VITE_SOCKET_URL` (both `https://app-server-dev.onrender.com` for now). Optional: `VITE_DEFAULT_LANGUAGE`, `CSP_CONNECT_EXTRA`. Without them the values in `.env.prod` are used. Preview deployments (other branches) can use the build command with `build:dev-release` and `dev-release`.
 
 **Without Git (one command, about a minute):**
 
@@ -43,7 +43,7 @@ The panel is then at `https://<project-name>.pages.dev`. Add that origin to the 
 
 1. New site from Git, repository `WAB-Salon-System`, **Base directory** `WAB-Admin-Dashboard`. The build command and publish folder come from `netlify.toml`.
 2. Site settings → Environment variables: `VITE_API_BASE_URL`, `VITE_SOCKET_URL` (and `CSP_CONNECT_EXTRA` if needed) for the production context.
-3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed `.env.dev` / `.env.prod` hold the base URLs (both `https://wab-server-dev.onrender.com` for now); change them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
+3. Production branch: `main` (builds `prod-release`). Deploy previews and branch deploys build `dev-release`, which calls the **dev API**. The committed `.env.dev` / `.env.prod` hold the base URLs (both `https://app-server-dev.onrender.com` for now); change them, or set the environment variables in the site settings (they win). Only `npm run dev` (dev-debug) uses the built-in mock data.
 4. Add the custom domain in Domain management; HTTPS is automatic. The headers include HSTS.
 
 ## Vercel

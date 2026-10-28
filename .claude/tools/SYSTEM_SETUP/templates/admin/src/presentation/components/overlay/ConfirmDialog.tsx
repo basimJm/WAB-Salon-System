@@ -49,7 +49,7 @@ export function ConfirmDialog({
         </>
       }
     >
-      {description ? <p className="wab-modal__text">{description}</p> : null}
+      {description ? <p className="app-modal__text">{description}</p> : null}
     </Modal>
   );
 }

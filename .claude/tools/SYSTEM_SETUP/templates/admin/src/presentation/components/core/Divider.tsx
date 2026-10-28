@@ -9,7 +9,7 @@ export function Divider({
 }) {
   return (
     <hr
-      className={cx('wab-divider', vertical && 'wab-divider--vertical', className)}
+      className={cx('app-divider', vertical && 'app-divider--vertical', className)}
       aria-orientation={vertical ? 'vertical' : undefined}
     />
   );

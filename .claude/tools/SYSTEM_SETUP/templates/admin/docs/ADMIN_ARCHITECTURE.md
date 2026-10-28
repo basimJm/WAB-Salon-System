@@ -28,7 +28,7 @@ Imports point inward only. `presentation` never imports `data`; it reaches repos
 2. The controller asks a repository (interface in `domain/<feature>`) through TanStack Query.
 3. The repository implementation in `data/<feature>` is chosen once, in `src/app/container.ts`, by `VITE_DATA_SOURCE` (`remote` or `mock`; the mock is compiled out of prod builds).
 4. `HttpClient` (`src/infrastructure/http/HttpClient.ts`) adds the token and `Accept-Language`, applies a timeout, retries idempotent calls on transient statuses, validates the envelope with zod and maps failures to `AppError`.
-5. The mapper turns the validated DTO into a domain entity (money stays a JOD string, times stay UTC instants).
+5. The mapper turns the validated DTO into a domain entity (money stays a money string, times stay UTC instants).
 6. The controller returns state (loading, empty, error, data); the page renders it with base components.
 
 ## 3. Contract tooling
@@ -41,7 +41,7 @@ Everything thrown becomes an `AppError` (`src/infrastructure/errors/AppError.ts`
 
 ## 5. Shared kernel (`src/domain/shared`)
 
-`Page`, `Result`, branded ids, money (JOD decimal strings and integer fils, never floats), time (UTC instants, Asia/Amman display, 12-hour) and formatters whose digits follow the language (ADR-0003).
+`Page`, `Result`, branded ids, money (money decimal strings and integer minor units, never floats), time (UTC instants, Asia/Amman display, 12-hour) and formatters whose digits follow the language (ADR-0003).
 
 ## 6. Environments and variants
 

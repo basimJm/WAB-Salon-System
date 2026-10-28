@@ -37,7 +37,7 @@ export function Combobox({
     <Field label={label} error={error} hint={hint}>
       {(control) => (
         <div
-          className="wab-combobox"
+          className="app-combobox"
           onBlur={(event) => {
             box.onBlur(event);
             onBlur?.(event);
@@ -45,7 +45,7 @@ export function Combobox({
         >
           <input
             {...control}
-            className="wab-field__control"
+            className="app-field__control"
             role="combobox"
             name={name}
             disabled={disabled}

@@ -38,7 +38,7 @@ function PlatformFacts({
   );
 }
 
-/** Admin PRD A28 (core): discovery, booking rules and OTP. Every save asks for a reason and is audited. */
+/** PRD P06 · Settings from the registry (`domain/settings/registry.ts`). Every save asks for a reason and is audited. */
 export default function SettingsPage() {
   const { t } = useTranslation();
   const toast = useToast();
@@ -73,7 +73,7 @@ export default function SettingsPage() {
         onRetry={() => void query.refetch()}
         skeleton={<Skeleton height="lg" />}
       >
-        <form onSubmit={onSubmit} noValidate className="wab-settings">
+        <form onSubmit={onSubmit} noValidate className="app-settings">
           <Tabs
             ariaLabel={t('settings.tabsLabel')}
             activeId={tab}
@@ -82,10 +82,10 @@ export default function SettingsPage() {
               id,
               label: t(`settings.tab.${id}`),
               content: (
-                <div className="wab-settings">
+                <div className="app-settings">
                   {groups.map((group) => (
                     <SectionCard key={group} title={t(`settings.group.${group}`)}>
-                      <div className="wab-settings__grid">
+                      <div className="app-settings__grid">
                         {draft.rows
                           .filter((r) => r.def.group === group)
                           .map((row) => (

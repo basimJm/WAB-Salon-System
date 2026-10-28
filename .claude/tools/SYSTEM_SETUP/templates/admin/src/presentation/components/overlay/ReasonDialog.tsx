@@ -59,7 +59,7 @@ export function ReasonDialog({
         </>
       }
     >
-      {description ? <p className="wab-modal__text">{description}</p> : null}
+      {description ? <p className="app-modal__text">{description}</p> : null}
       <TextArea
         label={t('reason.label')}
         value={reason}

@@ -26,7 +26,7 @@ export interface AuditRepository {
   list(query: AuditQuery): Promise<Page<AuditLog>>;
 }
 
-/** `SALON_SET_OFFLINE` -> `Salon set offline` when there is no translation for the action. */
+/** `ITEM_SET_INACTIVE` -> `Item set inactive` when there is no translation for the action. */
 export const humanizeAction = (action: string): string => {
   const words = action.toLowerCase().split('_').join(' ');
   return words.charAt(0).toUpperCase() + words.slice(1);

@@ -15,7 +15,7 @@ test('shell (English): breadcrumbs on a sub-page, sub-menu on wide screens, admi
     await page.getByRole('button', { name: 'Collapse Finance' }).click();
     await expect(page.getByRole('link', { name: 'Reconciliation' })).toHaveCount(0);
   }
-  await page.locator('.wab-topbar').getByRole('button').filter({ hasText: /\S/ }).last().click();
+  await page.locator('.app-topbar').getByRole('button').filter({ hasText: /\S/ }).last().click();
   await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeVisible();
   await page.keyboard.press('Escape');
   expect(await noHorizontalScroll(page)).toBe(true);

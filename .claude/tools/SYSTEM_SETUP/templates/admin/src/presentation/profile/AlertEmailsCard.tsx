@@ -40,7 +40,7 @@ export function AlertEmailsCard({ profile }: { profile: AdminProfile }) {
   };
   return (
     <Card aria-label={t('profile.alerts')}>
-      <h2 className="wab-settings__title">{t('profile.alerts')}</h2>
+      <h2 className="app-settings__title">{t('profile.alerts')}</h2>
       <TextArea
         label={t('profile.alertsLabel')}
         dir="ltr"

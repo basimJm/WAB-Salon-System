@@ -19,7 +19,7 @@ export function SettingRowField({ row, onText, onUseDefault }: SettingRowFieldPr
   const id = settingId(row.id);
   const unit = def.unit ? ` (${t(`settings.unit.${def.unit}`)})` : '';
   return (
-    <div className="wab-setting">
+    <div className="app-setting">
       <TextField
         label={`${t(`settings.key.${id}`)}${unit}`}
         value={row.text}
@@ -31,7 +31,7 @@ export function SettingRowField({ row, onText, onUseDefault }: SettingRowFieldPr
         }
         hint={t('settings.default', { value: settingToText(row.fallback) })}
       />
-      <div className="wab-row wab-setting__meta">
+      <div className="app-row app-setting__meta">
         <Badge tone={row.canReset ? 'amber' : 'grey'}>
           {t(row.canReset ? 'settings.overridden' : 'settings.isDefault')}
         </Badge>

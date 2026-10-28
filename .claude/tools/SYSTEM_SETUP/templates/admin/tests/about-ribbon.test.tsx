@@ -36,7 +36,7 @@ describe('EnvRibbon', () => {
   it.each(['prod-debug', 'prod-release'])('renders nothing in %s', (variant) => {
     renderWithApp(<EnvRibbon />, containerFor(variant, REMOTE));
     expect(screen.queryByRole('status')).toBeNull();
-    expect(document.querySelector('.wab-env-ribbon')).toBeNull();
+    expect(document.querySelector('.app-env-ribbon')).toBeNull();
   });
 
   it('renders nothing when the bundler flag is off, even for a dev config', () => {
@@ -96,7 +96,7 @@ describe('About page', () => {
     const container = containerFor('dev-debug');
     await signInContainer(container);
     renderRoutes(ROUTES.liveOverview, { container });
-    await userEvent.click(await screen.findByRole('button', { name: /WAB Admin|admin@/ }));
+    await userEvent.click(await screen.findByRole('button', { name: /Demo Admin|admin@/ }));
     await userEvent.click(await screen.findByRole('menuitem', { name: en.topbar.about }));
     expect(await screen.findByRole('heading', { name: en.about.title })).toBeInTheDocument();
   });

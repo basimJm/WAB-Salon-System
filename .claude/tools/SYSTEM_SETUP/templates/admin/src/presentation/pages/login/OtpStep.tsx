@@ -26,20 +26,20 @@ function OtpBoxes({ code, error, onCode }: Pick<OtpStepProps, 'code' | 'error' |
   useEffect(() => inputRef.current?.focus(), []);
   const digits = Array.from({ length: OTP_LENGTH }, (_, i) => code[i] ?? '');
   return (
-    <div className={cx('wab-field', error && 'wab-field--error')}>
-      <label className="wab-sr-only" htmlFor={id}>
+    <div className={cx('app-field', error && 'app-field--error')}>
+      <label className="app-sr-only" htmlFor={id}>
         {t('login.code')}
       </label>
-      <div className="wab-otp">
+      <div className="app-otp">
         {digits.map((digit, i) => (
           <span
             // Fixed number of positional boxes: the position is the identity.
             key={`box-${String(i)}`}
             aria-hidden="true"
             className={cx(
-              'wab-otp__box',
-              digit !== '' && 'wab-otp__box--filled',
-              i === Math.min(code.length, OTP_LENGTH - 1) && 'wab-otp__box--current',
+              'app-otp__box',
+              digit !== '' && 'app-otp__box--filled',
+              i === Math.min(code.length, OTP_LENGTH - 1) && 'app-otp__box--current',
             )}
           >
             {digit}
@@ -48,7 +48,7 @@ function OtpBoxes({ code, error, onCode }: Pick<OtpStepProps, 'code' | 'error' |
         <input
           id={id}
           ref={inputRef}
-          className="wab-field__control wab-otp__input"
+          className="app-field__control app-otp__input"
           inputMode="numeric"
           autoComplete="one-time-code"
           dir="ltr"
@@ -60,7 +60,7 @@ function OtpBoxes({ code, error, onCode }: Pick<OtpStepProps, 'code' | 'error' |
         />
       </div>
       {error ? (
-        <span id={`${id}-error`} className="wab-field__error wab-otp__error" role="alert">
+        <span id={`${id}-error`} className="app-field__error app-otp__error" role="alert">
           {error}
         </span>
       ) : null}
@@ -85,12 +85,12 @@ export function OtpStep({
   };
   return (
     <>
-      <p className="wab-login__lead">
+      <p className="app-login__lead">
         {t('login.codeSubtitle', { length: OTP_LENGTH, minutes: OTP_VALID_MINUTES })}{' '}
-        <bdi className="wab-login__email">{maskEmail(email)}</bdi>
+        <bdi className="app-login__email">{maskEmail(email)}</bdi>
       </p>
       <OtpBoxes code={code} error={error} onCode={onCode} />
-      <div className="wab-login__resend">
+      <div className="app-login__resend">
         <span>{t('login.noCode')}</span>
         {remaining > 0 ? (
           <span aria-live="polite" dir="ltr">

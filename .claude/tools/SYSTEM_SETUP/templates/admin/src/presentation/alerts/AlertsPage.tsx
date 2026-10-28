@@ -20,7 +20,7 @@ import { useLanguage } from '../hooks/useLanguage';
 
 const OPTIONS = { filterKeys: ['status', 'kind'] };
 
-/** Admin PRD A27 · Alerts, newest first: severity, kind, link to the subject, acknowledge. */
+/** PRD P05 · Alerts, newest first: severity, kind, link to the subject, acknowledge. */
 export default function AlertsPage() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -67,17 +67,17 @@ export default function AlertsPage() {
     },
     {
       key: 'at',
-      header: t('transactions.at'),
+      header: t('common.at'),
       ltr: true,
       render: (r) => formatInstant(r.createdAt, language, 'dateTime'),
     },
     {
       key: 'status',
-      header: t('salons.state'),
+      header: t('common.status'),
       render: (r) => <StatusBadge kind="alert" value={r.status} />,
     },
   ];
-  const all = { value: '', label: t('appConfig.all') };
+  const all = { value: '', label: t('common.all') };
   const data = query.data;
   return (
     <ListPage
@@ -89,7 +89,7 @@ export default function AlertsPage() {
             ? [
                 {
                   key: 'status',
-                  label: `${t('salons.state')}: ${t(`status.alert.${status}`)}`,
+                  label: `${t('common.status')}: ${t(`status.alert.${status}`)}`,
                   onRemove: () => list.setFilter('status', []),
                 },
               ]
@@ -108,7 +108,7 @@ export default function AlertsPage() {
         controls: (
           <>
             <Select
-              label={t('salons.state')}
+              label={t('common.status')}
               value={status ?? ''}
               options={[
                 all,

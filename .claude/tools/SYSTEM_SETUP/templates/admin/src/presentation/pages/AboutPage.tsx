@@ -28,11 +28,11 @@ export default function AboutPage() {
         }
       />
       <Card>
-        <dl className="wab-about">
+        <dl className="app-about">
           {rows.map(([label, value]) => (
-            <div key={label} className="wab-about__row">
-              <dt className="wab-about__label">{label}</dt>
-              <dd className="wab-about__value" dir="ltr">
+            <div key={label} className="app-about__row">
+              <dt className="app-about__label">{label}</dt>
+              <dd className="app-about__value" dir="ltr">
                 {value}
               </dd>
             </div>

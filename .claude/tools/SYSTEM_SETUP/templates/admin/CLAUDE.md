@@ -58,7 +58,7 @@ src/
 
 ## 3. Design System
 
-- Tokens are cloned from the WAB customer design system (`design/wab-admin-kit.js`): add or change a color, size or font only in `src/design/tokens/`. `buildCssVars()` turns tokens into CSS custom properties; stylesheets use `var(--…)` only (a test fails if a stylesheet uses an undefined variable).
+- Tokens are cloned from the WAB customer design system (`design/app-admin-kit.js`): add or change a color, size or font only in `src/design/tokens/`. `buildCssVars()` turns tokens into CSS custom properties; stylesheets use `var(--…)` only (a test fails if a stylesheet uses an undefined variable).
 - Use logical CSS (`inline-start/end`, `margin-inline`) so RTL/LTR and light/dark work without overrides. Mirror direction-bearing icons with `directional`.
 - Every base component handles: loading (skeleton), empty, error with retry, disabled, focus-visible, keyboard, and an accessible name. Reuse `src/presentation/components/` before writing a new one; extend the dev-only gallery (`/design-system`) with each new component state.
 - Layout classes come from `useViewport()` (`compact` < 640, `medium` < 1024, `expanded`), exposed as `data-bp` / `data-orientation` on `<html>`.

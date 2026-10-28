@@ -21,17 +21,17 @@ export function Field({ label, error, hint, className, children }: FieldProps) {
   const id = useId();
   const messageId = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
-    <div className={cx('wab-field', error && 'wab-field--error', className)}>
-      <label className="wab-field__label" htmlFor={id}>
+    <div className={cx('app-field', error && 'app-field--error', className)}>
+      <label className="app-field__label" htmlFor={id}>
         {label}
       </label>
       {children({ id, 'aria-invalid': error ? true : undefined, 'aria-describedby': messageId })}
       {error ? (
-        <span id={`${id}-error`} className="wab-field__error" role="alert">
+        <span id={`${id}-error`} className="app-field__error" role="alert">
           {error}
         </span>
       ) : hint ? (
-        <span id={`${id}-hint`} className="wab-field__hint">
+        <span id={`${id}-hint`} className="app-field__hint">
           {hint}
         </span>
       ) : null}

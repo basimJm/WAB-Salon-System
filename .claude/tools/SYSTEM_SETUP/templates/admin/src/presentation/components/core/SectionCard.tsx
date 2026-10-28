@@ -26,18 +26,18 @@ export function SectionCard({
 }: SectionCardProps) {
   const titleId = useId();
   return (
-    <section className={cx('wab-card wab-section-card', className)} aria-labelledby={titleId}>
-      <header className="wab-section-card__head">
-        <div className="wab-section-card__titles">
-          <h2 id={titleId} className="wab-section-card__title">
+    <section className={cx('app-card app-section-card', className)} aria-labelledby={titleId}>
+      <header className="app-section-card__head">
+        <div className="app-section-card__titles">
+          <h2 id={titleId} className="app-section-card__title">
             {title}
           </h2>
-          {subtitle ? <p className="wab-section-card__sub">{subtitle}</p> : null}
+          {subtitle ? <p className="app-section-card__sub">{subtitle}</p> : null}
         </div>
-        {actions ? <div className="wab-section-card__actions">{actions}</div> : null}
+        {actions ? <div className="app-section-card__actions">{actions}</div> : null}
       </header>
-      <div className="wab-section-card__body">{children}</div>
-      {footer ? <footer className="wab-section-card__foot">{footer}</footer> : null}
+      <div className="app-section-card__body">{children}</div>
+      {footer ? <footer className="app-section-card__foot">{footer}</footer> : null}
     </section>
   );
 }

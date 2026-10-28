@@ -7,15 +7,9 @@
     "acknowledge": "Acknowledge",
     "empty": "No alerts",
     "kinds": {
-      "PAYMENT_FAILURE_SPIKE": "Payment failures",
-      "REFUND_FAILED": "Refund failed",
-      "REFUND_DELAYED": "Refund delayed",
-      "SUBSCRIPTION_ENDING": "Subscription ending",
-      "SUBSCRIPTION_EXPIRED": "Subscription expired",
-      "SALON_APPLICATION": "New salon application",
-      "REVIEW_PENDING": "Review waiting",
-      "CATALOG_REQUEST": "Catalog request",
-      "SALON_DELETION_REQUEST": "Salon deletion request"
+      "ERROR_RATE_SPIKE": "Server error rate",
+      "JOB_FAILED": "Background job failed",
+      "ITEM_FLAGGED": "Item flagged"
     }
   }
 }

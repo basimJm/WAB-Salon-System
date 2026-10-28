@@ -29,7 +29,7 @@ export function TableHead<Row>({
     <thead>
       <tr>
         {selectAll ? (
-          <th scope="col" className="wab-table__select">
+          <th scope="col" className="app-table__select">
             <SelectBox
               label={t('table.selectAll')}
               checked={selectAll.state === 'all'}
@@ -51,7 +51,7 @@ export function TableHead<Row>({
               {c.sortable && onSortChange ? (
                 <button
                   type="button"
-                  className="wab-table__sort"
+                  className="app-table__sort"
                   onClick={() =>
                     onSortChange({ key: c.key, direction: nextDirection(sort, c.key) })
                   }
@@ -68,8 +68,8 @@ export function TableHead<Row>({
           );
         })}
         {hasActions ? (
-          <th scope="col" className="wab-table__actions">
-            <span className="wab-sr-only">{actionsHeader}</span>
+          <th scope="col" className="app-table__actions">
+            <span className="app-sr-only">{actionsHeader}</span>
           </th>
         ) : null}
       </tr>

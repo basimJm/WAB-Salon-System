@@ -56,7 +56,7 @@ export function DateRangePicker({
     `${localizeDigits(range.from, language)} – ${localizeDigits(range.to, language)}`;
 
   return (
-    <div className="wab-daterange">
+    <div className="app-daterange">
       <Select
         label={t('dateRange.label')}
         value={value.preset}
@@ -64,7 +64,7 @@ export function DateRangePicker({
         onChange={(event) => pickPreset(event.target.value as DatePreset)}
       />
       {value.preset === 'custom' ? (
-        <div className="wab-daterange__custom">
+        <div className="app-daterange__custom">
           <DateField
             label={t('dateRange.from')}
             value={shown.from}
@@ -80,7 +80,7 @@ export function DateRangePicker({
           />
         </div>
       ) : null}
-      <p className="wab-daterange__summary" aria-live="polite">
+      <p className="app-daterange__summary" aria-live="polite">
         {fmt(value)}
         {previous ? ` · ${t('dateRange.versus')} ${fmt(previous)}` : ''}
       </p>

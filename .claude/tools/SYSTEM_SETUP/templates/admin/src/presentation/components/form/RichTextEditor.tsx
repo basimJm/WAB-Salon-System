@@ -75,8 +75,8 @@ export function RichTextEditor({
   return (
     <Field label={label} error={error} hint={hint}>
       {(control) => (
-        <div className="wab-richtext">
-          <div className="wab-row" role="toolbar" aria-label={t('richText.toolbar')}>
+        <div className="app-richtext">
+          <div className="app-row" role="toolbar" aria-label={t('richText.toolbar')}>
             {TOOLS.map((tool) => (
               <Button key={tool} size="sm" variant="secondary" onClick={() => format(tool)}>
                 {t(`richText.tool.${tool}`)}
@@ -86,16 +86,16 @@ export function RichTextEditor({
           <textarea
             {...control}
             ref={area}
-            className="wab-field__control wab-field__control--area"
+            className="app-field__control app-field__control--area"
             lang={language}
             dir={direction}
             rows={rows}
             value={markdown}
             onChange={(event) => edit(event.target.value)}
           />
-          <div className="wab-richtext__preview-label">{t('richText.preview')}</div>
+          <div className="app-richtext__preview-label">{t('richText.preview')}</div>
           <div
-            className="wab-richtext__preview"
+            className="app-richtext__preview"
             lang={language}
             dir={direction}
             aria-label={t('richText.preview')}

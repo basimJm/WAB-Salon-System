@@ -45,7 +45,7 @@ export function NumberField({
       {(control) => (
         <input
           {...control}
-          className="wab-field__control"
+          className="app-field__control"
           name={name}
           disabled={disabled}
           inputMode={decimals > 0 ? 'decimal' : 'numeric'}

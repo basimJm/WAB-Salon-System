@@ -45,7 +45,7 @@ export function Popover({
   return (
     <div
       role="presentation"
-      className="wab-popover"
+      className="app-popover"
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
       }}
@@ -91,7 +91,7 @@ export function Popover({
           id={panelId}
           role={panelRole}
           aria-label={label}
-          className={cx('wab-popover__panel', panelClassName)}
+          className={cx('app-popover__panel', panelClassName)}
         >
           {children(close)}
         </div>

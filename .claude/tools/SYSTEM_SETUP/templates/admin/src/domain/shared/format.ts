@@ -2,8 +2,8 @@ import type { Language } from '../../constants/i18n';
 import {
   BUSINESS_TIME_ZONE,
   INTL_LOCALES,
-  JOD_DECIMAL_PLACES,
-  JOD_STRING_PATTERN,
+  MONEY_DECIMAL_PLACES,
+  MONEY_STRING_PATTERN,
 } from '../../constants/kernel';
 import { formatNumber, localizeDigits } from './numbers';
 import { parseInstant } from './time';
@@ -19,16 +19,16 @@ function decimalSeparator(language: Language): string {
 }
 
 /**
- * Display text for a JOD amount string, e.g. `1234.5` -> "1,234.500" / "١٬٢٣٤٫٥٠٠".
+ * Display text for a money amount string, e.g. `1234.5` -> "1,234.500" / "١٬٢٣٤٫٥٠٠".
  * Works on the string (BigInt for the whole part), so no amount ever passes through a float.
  * The currency name is added by the caller from the locale files.
  */
-export function formatJodAmount(amount: string, language: Language): string {
-  const match = JOD_STRING_PATTERN.exec(amount);
-  if (!match) throw new RangeError('not a valid JOD amount');
+export function formatMoneyAmount(amount: string, language: Language): string {
+  const match = MONEY_STRING_PATTERN.exec(amount);
+  if (!match) throw new RangeError('not a valid money amount');
   const [, sign = '', whole = '0', fraction = ''] = match;
   const wholeText = new Intl.NumberFormat(INTL_LOCALES[language]).format(BigInt(whole));
-  const fractionText = localizeDigits(fraction.padEnd(JOD_DECIMAL_PLACES, '0'), language);
+  const fractionText = localizeDigits(fraction.padEnd(MONEY_DECIMAL_PLACES, '0'), language);
   const isZero = /^0*$/.test(whole + fraction);
   const signText = sign && !isZero ? '-' : '';
   return `${signText}${wholeText}${decimalSeparator(language)}${fractionText}`;

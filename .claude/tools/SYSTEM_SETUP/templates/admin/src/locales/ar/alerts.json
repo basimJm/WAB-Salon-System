@@ -7,15 +7,9 @@
     "acknowledge": "تم الاطلاع",
     "empty": "لا توجد تنبيهات",
     "kinds": {
-      "PAYMENT_FAILURE_SPIKE": "فشل المدفوعات",
-      "REFUND_FAILED": "فشل الاسترداد",
-      "REFUND_DELAYED": "تأخر الاسترداد",
-      "SUBSCRIPTION_ENDING": "اشتراك ينتهي",
-      "SUBSCRIPTION_EXPIRED": "اشتراك منتهٍ",
-      "SALON_APPLICATION": "طلب صالون جديد",
-      "REVIEW_PENDING": "تقييم بانتظار المراجعة",
-      "CATALOG_REQUEST": "طلب خدمة للكتالوج",
-      "SALON_DELETION_REQUEST": "طلب حذف صالون"
+      "ERROR_RATE_SPIKE": "ارتفاع أخطاء الخادم",
+      "JOB_FAILED": "فشل مهمة خلفية",
+      "ITEM_FLAGGED": "عنصر مُعلَّم"
     }
   }
 }

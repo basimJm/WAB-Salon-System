@@ -22,10 +22,10 @@ export interface FilterBarProps {
 export function FilterBar({ children, active = [], onClearAll }: FilterBarProps) {
   const { t } = useTranslation();
   return (
-    <section className="wab-filterbar" aria-label={t('filters.title')}>
-      <div className="wab-filterbar__controls">{children}</div>
+    <section className="app-filterbar" aria-label={t('filters.title')}>
+      <div className="app-filterbar__controls">{children}</div>
       {active.length > 0 ? (
-        <ul className="wab-filterbar__chips" aria-label={t('filters.active')}>
+        <ul className="app-filterbar__chips" aria-label={t('filters.active')}>
           {active.map((filter) => (
             <li key={filter.key}>
               <Chip

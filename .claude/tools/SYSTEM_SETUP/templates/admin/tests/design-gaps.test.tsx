@@ -73,7 +73,7 @@ describe('top-bar bell dropdown (design Topbar)', () => {
     expect(await within(panel).findByText('Alert 1')).toBeInTheDocument();
     expect(within(panel).getByText(/^Critical · /)).toBeInTheDocument();
     expect(within(panel).getAllByRole('listitem')).toHaveLength(3);
-    expect(panel.querySelector('.wab-bell__dot--rose')).not.toBeNull();
+    expect(panel.querySelector('.app-bell__dot--rose')).not.toBeNull();
   });
 
   it('a row opens its subject', async () => {
@@ -124,10 +124,10 @@ describe('list card header (design Blocks table card)', () => {
         table={{ caption: 'Customers', columns: [], rows: [], rowKey: () => '' }}
       />,
     );
-    const head = document.querySelector<HTMLElement>('.wab-listcard__head');
+    const head = document.querySelector<HTMLElement>('.app-listcard__head');
     if (!head) throw new Error('no list card header');
     expect(within(head).getByRole('searchbox', { name: 'Search customers' })).toBeInTheDocument();
-    expect(within(head).getByRole('button', { name: 'Export' })).toHaveClass('wab-cardbtn');
+    expect(within(head).getByRole('button', { name: 'Export' })).toHaveClass('app-cardbtn');
   });
 
   it('a grid body renders cards, its loading, empty and error states', () => {
@@ -169,7 +169,7 @@ describe('section card (design card header bar)', () => {
     );
     const region = screen.getByRole('region', { name: 'Booking rules' });
     expect(within(region).getByRole('heading', { level: 2 })).toHaveClass(
-      'wab-section-card__title',
+      'app-section-card__title',
     );
     expect(within(region).getByText('Applies to new bookings')).toBeInTheDocument();
     expect(within(region).getByRole('button', { name: 'Act' })).toBeInTheDocument();
@@ -179,7 +179,7 @@ describe('section card (design card header bar)', () => {
   it('settings groups are section cards with the design header', async () => {
     renderWithApp(<SettingsPage />);
     const heading = await screen.findByRole('heading', { name: 'Discovery' });
-    expect(heading.closest('.wab-section-card__head')).not.toBeNull();
+    expect(heading.closest('.app-section-card__head')).not.toBeNull();
   });
 });
 

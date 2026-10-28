@@ -7,7 +7,7 @@ test('filter kit (English): chips, presets, custom range validation, compare, ex
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
-  const card = page.locator('.wab-card[aria-label="Filter kit"]');
+  const card = page.locator('.app-card[aria-label="Filter kit"]');
   await card.scrollIntoViewIfNeeded();
 
   await card.getByLabel('City', { exact: true }).selectOption('irbid');
@@ -36,7 +36,7 @@ test('filter kit (Arabic dark): export menu stays inside the viewport and the pa
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
-  const card = page.locator('.wab-card[aria-label="عناصر التصفية"]');
+  const card = page.locator('.app-card[aria-label="عناصر التصفية"]');
   await card.scrollIntoViewIfNeeded();
   await card.getByRole('button', { name: 'تصدير' }).click();
   const panel = card.getByRole('group', { name: 'تصدير' });

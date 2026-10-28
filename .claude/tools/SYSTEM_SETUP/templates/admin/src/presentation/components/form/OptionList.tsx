@@ -26,12 +26,12 @@ export function OptionList({
   return (
     <ul
       id={listId}
-      className="wab-options"
+      className="app-options"
       role="listbox"
       aria-multiselectable={multiple || undefined}
     >
       {options.length === 0 ? (
-        <li className="wab-options__empty" role="presentation">
+        <li className="app-options__empty" role="presentation">
           {t('form.noOptions')}
         </li>
       ) : (
@@ -44,8 +44,8 @@ export function OptionList({
             role="option"
             aria-selected={isSelected(option.value)}
             className={cx(
-              'wab-options__item',
-              index === activeIndex && 'wab-options__item--active',
+              'app-options__item',
+              index === activeIndex && 'app-options__item--active',
             )}
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => onPick(option)}

@@ -47,7 +47,7 @@ export function LineChart({
       }}
     >
       <svg
-        className="wab-chart__svg"
+        className="app-chart__svg"
         viewBox={`0 0 ${String(CHART_WIDTH)} ${String(CHART_HEIGHT)}`}
         role="img"
         aria-label={title}
@@ -56,10 +56,10 @@ export function LineChart({
         {series.map((s, index) => {
           const points = linePoints(s.values, top, area);
           return (
-            <g key={s.key} className="wab-chart__series" style={{ color: seriesColor(index) }}>
-              <polyline points={pointsAttribute(points)} className="wab-chart__line" />
+            <g key={s.key} className="app-chart__series" style={{ color: seriesColor(index) }}>
+              <polyline points={pointsAttribute(points)} className="app-chart__line" />
               {points.map((p, i) => (
-                <circle key={i} cx={p.x} cy={p.y} r={3} className="wab-chart__dot">
+                <circle key={i} cx={p.x} cy={p.y} r={3} className="app-chart__dot">
                   <title>{`${s.label} · ${labels[i] ?? ''}: ${formatNumber(s.values[i] ?? 0, language)}`}</title>
                 </circle>
               ))}

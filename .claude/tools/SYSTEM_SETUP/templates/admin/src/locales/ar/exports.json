@@ -8,14 +8,8 @@
     "download": "تنزيل",
     "empty": "لا توجد عمليات تصدير بعد",
     "kinds": {
-      "REPORT_DAILY": "تقرير يومي",
-      "REPORT_WEEKLY": "تقرير أسبوعي",
-      "REPORT_MONTHLY": "تقرير شهري",
-      "TRANSACTIONS": "المعاملات",
-      "AUDIT_LOGS": "سجل التدقيق",
-      "BOOKINGS": "الحجوزات",
-      "CUSTOMERS": "العملاء",
-      "SALONS": "الصالونات"
+      "ITEMS": "العناصر",
+      "AUDIT_LOGS": "سجل الأفعال"
     },
     "failures": {
       "TOO_MANY_ROWS": "عدد الصفوف كبير: ضيّق عوامل التصفية",

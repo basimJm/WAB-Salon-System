@@ -46,9 +46,9 @@ export function CohortHeatmap({
         ]),
       }}
     >
-      <div className="wab-table-wrap">
-        <table className="wab-heatmap">
-          <caption className="wab-sr-only">{title}</caption>
+      <div className="app-table-wrap">
+        <table className="app-heatmap">
+          <caption className="app-sr-only">{title}</caption>
           <thead>
             <tr>
               <th scope="col">{cohortHeader}</th>
@@ -66,11 +66,11 @@ export function CohortHeatmap({
                 {columnLabels.map((label, i) => {
                   const value = row.values[i] ?? null;
                   return value === null ? (
-                    <td key={label} className="wab-heat wab-heat--none" />
+                    <td key={label} className="app-heat app-heat--none" />
                   ) : (
                     <td
                       key={label}
-                      className={`wab-heat wab-heat--${String(heatShade(value, min, max))}`}
+                      className={`app-heat app-heat--${String(heatShade(value, min, max))}`}
                     >
                       {formatPercent(value, language)}
                     </td>

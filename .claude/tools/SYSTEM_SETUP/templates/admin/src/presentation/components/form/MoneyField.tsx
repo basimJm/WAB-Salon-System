@@ -1,11 +1,11 @@
 import type { FocusEventHandler } from 'react';
-import { JOD_DECIMAL_PLACES } from '@/constants/kernel';
+import { MONEY_DECIMAL_PLACES } from '@/constants/kernel';
 import { sanitizeDecimal } from '../../utils/numericInput';
 import { Field } from './Field';
 
-export interface JodFieldProps {
+export interface MoneyFieldProps {
   label: string;
-  /** JOD decimal string (`"12.500"`), `""` when empty. Never a float. */
+  /** money decimal string (`"12.500"`), `""` when empty. Never a float. */
   value: string;
   onValueChange: (value: string) => void;
   /** Currency name shown after the input (translated by the caller). */
@@ -17,8 +17,8 @@ export interface JodFieldProps {
   onBlur?: FocusEventHandler<HTMLInputElement>;
 }
 
-/** Money input: edits a JOD string with at most 3 decimals; validation (positive, range) lives in the schema. */
-export function JodField({
+/** Money input: edits a money string with at most 3 decimals; validation (positive, range) lives in the schema. */
+export function MoneyField({
   label,
   value,
   onValueChange,
@@ -28,14 +28,14 @@ export function JodField({
   name,
   disabled,
   onBlur,
-}: JodFieldProps) {
+}: MoneyFieldProps) {
   return (
     <Field label={label} error={error} hint={hint}>
       {(control) => (
-        <div className="wab-field__box">
+        <div className="app-field__box">
           <input
             {...control}
-            className="wab-field__control wab-field__control--with-end"
+            className="app-field__control app-field__control--with-end"
             name={name}
             disabled={disabled}
             inputMode="decimal"
@@ -45,12 +45,12 @@ export function JodField({
             onBlur={onBlur}
             onChange={(event) =>
               onValueChange(
-                sanitizeDecimal(event.target.value, { maxDecimals: JOD_DECIMAL_PLACES }),
+                sanitizeDecimal(event.target.value, { maxDecimals: MONEY_DECIMAL_PLACES }),
               )
             }
           />
           {currencyLabel ? (
-            <span className="wab-field__end wab-field__unit">{currencyLabel}</span>
+            <span className="app-field__end app-field__unit">{currencyLabel}</span>
           ) : null}
         </div>
       )}

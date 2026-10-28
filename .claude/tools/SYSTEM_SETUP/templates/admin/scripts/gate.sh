@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.." || exit 1
 : "${VITE_SOCKET_URL:=https://api.example.com}"
 export VITE_API_BASE_URL VITE_SOCKET_URL
 
-LOG="${TMPDIR:-/tmp}/wab-admin-gate.log"
+LOG="${TMPDIR:-/tmp}/admin-gate.log"
 
 step() {
   name="$1"

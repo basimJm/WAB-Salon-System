@@ -29,7 +29,7 @@ export function FiltersSection() {
     { key: 'range', label: t(`dateRange.preset.${range.preset}`), onRemove: () => setRange(initialRangeValue(now)) },
   ];
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
       <FilterBar
         active={active}

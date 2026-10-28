@@ -26,15 +26,15 @@ export function ChartFrame({ title, description, table, filename, children }: Ch
   const [showData, setShowData] = useState(false);
   const tableId = useId();
   return (
-    <figure className="wab-chart">
-      <figcaption className="wab-chart__head">
+    <figure className="app-chart">
+      <figcaption className="app-chart__head">
         <div>
           <Heading level={2} look={3}>
             {title}
           </Heading>
           {description ? <Text tone="muted">{description}</Text> : null}
         </div>
-        <div className="wab-row">
+        <div className="app-row">
           <Button
             variant="secondary"
             size="sm"
@@ -55,9 +55,9 @@ export function ChartFrame({ title, description, table, filename, children }: Ch
       </figcaption>
       {children}
       {showData ? (
-        <div className="wab-table-wrap" id={tableId}>
-          <table className="wab-table">
-            <caption className="wab-sr-only">{title}</caption>
+        <div className="app-table-wrap" id={tableId}>
+          <table className="app-table">
+            <caption className="app-sr-only">{title}</caption>
             <thead>
               <tr>
                 {table.headers.map((h) => (

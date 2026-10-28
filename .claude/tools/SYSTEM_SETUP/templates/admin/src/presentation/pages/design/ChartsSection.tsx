@@ -36,9 +36,9 @@ export function ChartsSection() {
   const k = (key: string) => t(`designKits.charts.${key}`);
   const labels = DAYS.map((d) => k(`days.${d}`));
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
-      <div className="wab-row">
+      <div className="app-row">
         <span>{k('trend')}</span>
         <Sparkline values={CREATED} label={k('trendLabel')} />
       </div>
@@ -46,7 +46,7 @@ export function ChartsSection() {
         title={k('lineTitle')}
         categoryHeader={k('day')}
         labels={labels}
-        filename="bookings-line"
+        filename="items-line"
         series={[
           { key: 'created', label: k('created'), values: CREATED },
           { key: 'cancelled', label: k('cancelled'), values: CANCELLED },
@@ -56,7 +56,7 @@ export function ChartsSection() {
         title={k('barTitle')}
         categoryHeader={k('day')}
         labels={labels}
-        filename="bookings-bar"
+        filename="items-bar"
         series={[
           { key: 'created', label: k('created'), values: CREATED },
           { key: 'cancelled', label: k('cancelled'), values: CANCELLED },
@@ -67,7 +67,7 @@ export function ChartsSection() {
         title={k('stackedTitle')}
         categoryHeader={k('day')}
         labels={labels}
-        filename="bookings-stacked"
+        filename="items-stacked"
         series={[
           { key: 'created', label: k('created'), values: CREATED },
           { key: 'cancelled', label: k('cancelled'), values: CANCELLED },
@@ -76,14 +76,14 @@ export function ChartsSection() {
       <DonutChart
         title={k('donutTitle')}
         headers={[k('status'), k('count'), k('share')]}
-        centerLabel={k('bookings')}
-        filename="booking-statuses"
+        centerLabel={k('items')}
+        filename="item-statuses"
         data={STATUS_COUNTS.map(([key, value]) => ({ key, value, label: k(`statuses.${key}`) }))}
       />
       <FunnelChart
         title={k('funnelTitle')}
         headers={[k('step'), k('count'), k('ofFirst'), k('ofPrevious')]}
-        filename="booking-funnel"
+        filename="onboarding-funnel"
         steps={FUNNEL_COUNTS.map(([key, value]) => ({ key, value, label: k(`steps.${key}`) }))}
       />
       <CohortHeatmap

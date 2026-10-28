@@ -12,7 +12,7 @@ export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const MOCK_OTP_CODE = '123456';
 export const MOCK_LATENCY_MS = 400;
 export const MOCK_OTP_TTL_MS = 10 * 60 * 1000;
-export const MOCK_ADMIN = { id: 'admin-1', name: 'WAB Admin' } as const;
+export const MOCK_ADMIN = { id: 'admin-1', name: 'Demo Admin' } as const;
 export const MOCK_TOKEN = 'mock-access-token';
 
 /** Mock session lifetimes (dev builds): short access token so the refresh path is exercised. */

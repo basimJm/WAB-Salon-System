@@ -9,11 +9,11 @@ export function LiveIndicator() {
   if (status === 'idle') return null;
   return (
     <span
-      className={cx('wab-live', `wab-live--${status}`)}
+      className={cx('app-live', `app-live--${status}`)}
       role="status"
       aria-label={t('realtime.label')}
     >
-      <span className="wab-live__dot" aria-hidden="true" />
+      <span className="app-live__dot" aria-hidden="true" />
       {t(`realtime.${status}`)}
     </span>
   );

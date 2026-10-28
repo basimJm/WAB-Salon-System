@@ -17,7 +17,7 @@ export function RichTextSection() {
   const [pages, setPages] = useState<LocalizedHtml>(GALLERY_SAMPLE_PAGES);
   const [schedule, setSchedule] = useState<Schedule>({ start: '2026-10-14', end: '2026-10-21' });
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
       <LocalizedRichTextEditor label={k('page')} value={pages} onChange={setPages} />
       <SchedulePicker

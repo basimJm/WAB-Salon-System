@@ -23,7 +23,7 @@ for (const [first, last, n, gender] of customers) {
   await api('customer', 'POST', '/auth/register', {
     firstName: first,
     lastName: last,
-    email: `${first.toLowerCase()}@wab.example`,
+    email: `${first.toLowerCase()}@example.test`,
     gender,
     cityId,
     areaId,

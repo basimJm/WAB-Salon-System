@@ -17,7 +17,7 @@ import { makeContainer } from './helpers/render';
 
 const NOW = 1_000_000;
 const MIN = 60_000;
-const KEY = 'wab.admin.session';
+const KEY = 'admin.session';
 const session = (over: Partial<Session> = {}): Session => ({
   accessToken: 'a1',
   admin: { id: '1', name: 'A', email: 'a@b.co' },

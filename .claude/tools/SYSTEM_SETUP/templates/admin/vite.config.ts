@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     resolve: { alias: { '@': SOURCE_DIR } },
     define: {
-      __WAB_ENV__: JSON.stringify(publicEnv),
+      __APP_ENV__: JSON.stringify(publicEnv),
       __BUILD_VARIANT__: JSON.stringify(variant.name),
       __ALLOW_MOCK__: JSON.stringify(variant.allowMock),
       __APP_VERSION__: JSON.stringify(build.version),

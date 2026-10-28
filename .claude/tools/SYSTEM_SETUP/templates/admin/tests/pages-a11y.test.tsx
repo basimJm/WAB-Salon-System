@@ -56,7 +56,7 @@ describe.each(LANGUAGES)('module screens in %s', (language) => {
     expect(document.documentElement.getAttribute('dir')).toBe(language === 'ar' ? 'rtl' : 'ltr');
     // let the list/chart queries answer, then check the real content, not the skeleton
     await waitFor(
-      () => expect(document.querySelector('[aria-busy="true"], .wab-skeleton')).toBeNull(),
+      () => expect(document.querySelector('[aria-busy="true"], .app-skeleton')).toBeNull(),
       { timeout: 3000 },
     );
     expect(await axeViolations()).toEqual([]);

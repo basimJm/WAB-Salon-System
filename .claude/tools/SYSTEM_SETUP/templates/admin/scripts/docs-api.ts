@@ -11,7 +11,7 @@ import { readOperations, type Spec } from './lib/contract.ts';
 import { CONTRACT_FILES, GENERATED_DIR } from './lib/contractFiles.ts';
 
 const ROOT = process.cwd();
-const TASKS_FILE = 'docs/WAB_Admin_Tasks.md';
+const TASKS_FILE = 'docs/Admin_Tasks.md';
 const SOURCE_DIR = 'src';
 const MOCK_DIR = 'src/data/mock';
 const checkOnly = process.argv.includes('--check');

@@ -21,7 +21,7 @@ export function Tooltip({ content, children }: TooltipProps) {
   const id = useId();
   const [open, setOpen] = useState(false);
   return (
-    <span className="wab-tooltip">
+    <span className="app-tooltip">
       {children({
         'aria-describedby': id,
         onMouseEnter: () => setOpen(true),
@@ -32,7 +32,7 @@ export function Tooltip({ content, children }: TooltipProps) {
           if (event.key === 'Escape') setOpen(false);
         },
       })}
-      <span id={id} role="tooltip" className="wab-tooltip__bubble" hidden={!open}>
+      <span id={id} role="tooltip" className="app-tooltip__bubble" hidden={!open}>
         {content}
       </span>
     </span>

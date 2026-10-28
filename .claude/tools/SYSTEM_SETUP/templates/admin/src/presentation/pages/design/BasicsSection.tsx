@@ -31,14 +31,14 @@ export function BasicsSection() {
   const [crash, setCrash] = useState(false);
   const [idleOpen, setIdleOpen] = useState(false);
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
-      <div className="wab-row" aria-label={k('icons')} role="group">
+      <div className="app-row" aria-label={k('icons')} role="group">
         {ICONS.map((name) => (
           <Icon key={name} name={name} label={name} />
         ))}
       </div>
-      <div className="wab-row">
+      <div className="app-row">
         <IconButton icon="bell" label={k('bell')} badge={3} />
         <IconButton icon="gear" label={k('gear')} disabled />
         <Spinner />
@@ -63,13 +63,13 @@ export function BasicsSection() {
       >
         <p>{k('content')}</p>
       </AsyncView>
-      <button type="button" className="wab-btn wab-btn--secondary wab-btn--sm" onClick={() => setIdleOpen(true)}>
+      <button type="button" className="app-btn app-btn--secondary app-btn--sm" onClick={() => setIdleOpen(true)}>
         {k('idle')}
       </button>
       <IdleWarningDialog open={idleOpen} secondsLeft={45} onStay={() => setIdleOpen(false)} onSignOut={() => setIdleOpen(false)} />
       <TextArea label={k('notes')} rows={3} />
       <StatusPage code="403" title={k('forbiddenTitle')} text={k('forbiddenText')} icon="shield" />
-      <button type="button" className="wab-btn wab-btn--secondary wab-btn--sm" onClick={() => setCrash(true)}>
+      <button type="button" className="app-btn app-btn--secondary app-btn--sm" onClick={() => setCrash(true)}>
         {k('crash')}
       </button>
       <ErrorBoundary>{crash ? <Boom /> : <p>{k('boundaryOk')}</p>}</ErrorBoundary>

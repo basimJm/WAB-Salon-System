@@ -30,12 +30,12 @@ export function SearchField({
     onSearch(query);
   }, [debounced, onSearch]);
   return (
-    <div className="wab-search" role="search">
-      <span className="wab-search__icon">
+    <div className="app-search" role="search">
+      <span className="app-search__icon">
         <Icon name="search" />
       </span>
       <input
-        className="wab-field__control wab-search__input"
+        className="app-field__control app-search__input"
         type="search"
         aria-label={label}
         placeholder={label}
@@ -49,7 +49,7 @@ export function SearchField({
       {text !== '' ? (
         <button
           type="button"
-          className="wab-search__clear"
+          className="app-search__clear"
           aria-label={t('form.clear')}
           onClick={() => setText('')}
         >

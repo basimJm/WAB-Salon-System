@@ -15,16 +15,16 @@ export function Axes({ max, labels }: AxesProps) {
   const ticks = axisTicks(max);
   const top = ticks[ticks.length - 1] ?? 1;
   return (
-    <g className="wab-chart__axes">
+    <g className="app-chart__axes">
       {ticks.map((tick) => {
         const y = yOf(tick, top, area);
         return (
           <g key={tick}>
-            <line x1={area.left} x2={area.right} y1={y} y2={y} className="wab-chart__grid" />
+            <line x1={area.left} x2={area.right} y1={y} y2={y} className="app-chart__grid" />
             <text
               x={area.left - 8}
               y={y}
-              className="wab-chart__tick"
+              className="app-chart__tick"
               textAnchor="end"
               dominantBaseline="middle"
             >
@@ -38,7 +38,7 @@ export function Axes({ max, labels }: AxesProps) {
           key={i}
           x={bandCenter(i, labels.length, area)}
           y={area.bottom + 20}
-          className="wab-chart__tick"
+          className="app-chart__tick"
           textAnchor="middle"
         >
           {labels[i]}

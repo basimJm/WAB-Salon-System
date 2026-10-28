@@ -49,8 +49,8 @@ export function defineEndpoint<TData, TBody = undefined, TQuery = undefined>(
 }
 
 /**
- * A generated query schema whose parameters are all optional, accepting no query at all: the branch-aware salon
- * endpoints leave `?branchId=` out for the main branch, so callers pass `query: undefined`.
+ * A generated query schema whose parameters are all optional, accepting no query at all: callers may pass
+ * `query: undefined` when the list takes no filter.
  */
 export const optionalQuery =
   <T extends z.ZodType>(schema: () => T) =>
@@ -63,7 +63,7 @@ const PLACEHOLDER = /\{([A-Za-z0-9_]+)\}/g;
 export const pathParamNames = (template: string): string[] =>
   [...template.matchAll(PLACEHOLDER)].map((m) => m[1] ?? '');
 
-/** Fills `/salons/{id}` from `{ id }`, encoding each value; a missing value is a programmer error. */
+/** Fills `/items/{id}` from `{ id }`, encoding each value; a missing value is a programmer error. */
 export function buildPath(template: string, params: Readonly<Record<string, string>> = {}): string {
   return template.replace(PLACEHOLDER, (_whole, name: string) => {
     const value = params[name];

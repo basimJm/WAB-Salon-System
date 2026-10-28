@@ -12,7 +12,7 @@ export function Sparkline({ values, label }: SparklineProps) {
   const points = sparklinePoints(values, SPARKLINE_WIDTH, SPARKLINE_HEIGHT);
   return (
     <svg
-      className="wab-sparkline"
+      className="app-sparkline"
       viewBox={`0 0 ${String(SPARKLINE_WIDTH)} ${String(SPARKLINE_HEIGHT)}`}
       role="img"
       aria-label={label}
@@ -20,7 +20,7 @@ export function Sparkline({ values, label }: SparklineProps) {
       {points.length > 1 ? (
         <polyline
           points={pointsAttribute(points)}
-          className="wab-chart__line"
+          className="app-chart__line"
           style={{ color: seriesColor(0) }}
         />
       ) : null}

@@ -14,7 +14,6 @@ import { useRealtimeConnection } from '../hooks/useRealtime';
 import { useShellCounters } from '../hooks/useShellCounters';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
-import { useGlobalSearch } from '../hooks/useGlobalSearch';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
@@ -27,7 +26,6 @@ export function AppShell() {
   const current = useSession();
   const location = useLocation();
   const crumbs = useBreadcrumbs();
-  const search = useGlobalSearch();
   // Design `Sidebar`: under 1180 px the sidebar stays docked as the 76 px icon rail; phones keep the drawer
   // because rail + content overflow a 375 px screen (measured, ADM-099).
   const docked = breakpoint !== 'compact';
@@ -75,7 +73,7 @@ export function AppShell() {
   });
 
   return (
-    <div className="wab-shell" data-docked={docked} data-collapsed={docked && collapsed}>
+    <div className="app-shell" data-docked={docked} data-collapsed={docked && collapsed}>
       <Sidebar
         mode={docked ? 'docked' : 'drawer'}
         collapsed={collapsed}
@@ -88,7 +86,7 @@ export function AppShell() {
       {drawerOpen && !docked ? (
         <button
           type="button"
-          className="wab-backdrop"
+          className="app-backdrop"
           aria-hidden="true"
           tabIndex={-1}
           onClick={() => setDrawerOpen(false)}
@@ -100,7 +98,7 @@ export function AppShell() {
         onStay={stay}
         onSignOut={onLogout}
       />
-      <div className="wab-shell__main">
+      <div className="app-shell__main">
         <Topbar
           adminName={current?.admin.name ?? ''}
           {...(current ? { adminEmail: current.admin.email } : {})}
@@ -110,9 +108,8 @@ export function AppShell() {
           onMenu={onMenu}
           onLogout={onLogout}
           alertCount={counters.alerts}
-          search={search}
         />
-        <main id="main" className="wab-content">
+        <main id="main" className="app-content">
           <Breadcrumbs crumbs={crumbs} />
           <Suspense fallback={<Spinner />}>
             <Outlet />

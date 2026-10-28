@@ -13,12 +13,12 @@ const rule = (selector: string): string => {
 // the browser check measures the result.
 describe('drawer stays inside the viewport', () => {
   it('the drawer overlay has one row exactly the overlay tall', () => {
-    expect(rule('.wab-overlay--drawer')).toContain('grid-template-rows: minmax(0, 1fr)');
+    expect(rule('.app-overlay--drawer')).toContain('grid-template-rows: minmax(0, 1fr)');
   });
 
   it('the drawer fills that row and its body is the scrolling middle row', () => {
-    expect(rule('.wab-drawer')).toContain('height: 100%');
-    expect(rule('.wab-drawer')).toContain('grid-template-rows: auto minmax(0, 1fr) auto');
-    expect(rule('.wab-modal__body')).toContain('overflow-y: auto');
+    expect(rule('.app-drawer')).toContain('height: 100%');
+    expect(rule('.app-drawer')).toContain('grid-template-rows: auto minmax(0, 1fr) auto');
+    expect(rule('.app-modal__body')).toContain('overflow-y: auto');
   });
 });

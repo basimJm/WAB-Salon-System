@@ -47,7 +47,7 @@ describe('primitives', () => {
     );
     const el = screen.getByText('+962');
     expect(el.tagName).toBe('SPAN');
-    expect(el).toHaveClass('wab-text--danger', 'wab-text--md', 'wab-text--strong');
+    expect(el).toHaveClass('app-text--danger', 'app-text--md', 'app-text--strong');
     expect(el).toHaveAttribute('dir', 'ltr');
   });
 
@@ -58,7 +58,7 @@ describe('primitives', () => {
       </Heading>,
     );
     const el = screen.getByRole('heading', { level: 3 });
-    expect(el).toHaveClass('wab-heading--1');
+    expect(el).toHaveClass('app-heading--1');
   });
 
   it('Link routes inside the app and hardens external links; unsafe links become text', () => {
@@ -89,7 +89,7 @@ describe('primitives', () => {
     expect(screen.getByRole('img', { name: 'Layth Al-Hasan' })).toHaveTextContent('LA');
     rerender(<Avatar name="Layth Al-Hasan" src="x.png" size="lg" />);
     expect(document.querySelector('img')).toHaveAttribute('src', 'x.png');
-    expect(screen.getByRole('img', { name: 'Layth Al-Hasan' })).toHaveClass('wab-avatar--lg');
+    expect(screen.getByRole('img', { name: 'Layth Al-Hasan' })).toHaveClass('app-avatar--lg');
   });
 
   it('Avatar falls back to initials when the picture fails, and retries a new picture', () => {

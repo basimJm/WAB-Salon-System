@@ -11,20 +11,20 @@ const isContainer = (v: unknown): v is Record<string, unknown> | unknown[] =>
   typeof v === 'object' && v !== null;
 
 function Leaf({ value }: { value: unknown }) {
-  if (value === null) return <span className="wab-json__null">{String(value)}</span>;
+  if (value === null) return <span className="app-json__null">{String(value)}</span>;
   if (typeof value === 'string')
-    return <span className="wab-json__string">&quot;{value}&quot;</span>;
+    return <span className="app-json__string">&quot;{value}&quot;</span>;
   if (typeof value === 'number' || typeof value === 'boolean')
-    return <span className="wab-json__scalar">{String(value)}</span>;
-  return <span className="wab-json__scalar">{typeof value}</span>;
+    return <span className="app-json__scalar">{String(value)}</span>;
+  return <span className="app-json__scalar">{typeof value}</span>;
 }
 
 function Node({ name, value, depth }: { name?: string; value: unknown; depth: number }) {
   const { t } = useTranslation();
-  const label = name === undefined ? null : <span className="wab-json__key">{name}: </span>;
+  const label = name === undefined ? null : <span className="app-json__key">{name}: </span>;
   if (!isContainer(value)) {
     return (
-      <div className="wab-json__row" dir="ltr">
+      <div className="app-json__row" dir="ltr">
         {label}
         <Leaf value={value} />
       </div>
@@ -32,7 +32,7 @@ function Node({ name, value, depth }: { name?: string; value: unknown; depth: nu
   }
   if (depth >= JSON_MAX_DEPTH) {
     return (
-      <div className="wab-json__row" dir="ltr">
+      <div className="app-json__row" dir="ltr">
         {label}…
       </div>
     );
@@ -44,12 +44,12 @@ function Node({ name, value, depth }: { name?: string; value: unknown; depth: nu
     ? t('json.items', { count: entries.length })
     : t('json.fields', { count: entries.length });
   return (
-    <details className="wab-json__node" open={depth < JSON_OPEN_DEPTH} dir="ltr">
+    <details className="app-json__node" open={depth < JSON_OPEN_DEPTH} dir="ltr">
       <summary>
         {label}
-        <span className="wab-json__summary">{summary}</span>
+        <span className="app-json__summary">{summary}</span>
       </summary>
-      <div className="wab-json__children">
+      <div className="app-json__children">
         {entries.map(([key, child]) => (
           <Node key={key} name={key} value={child} depth={depth + 1} />
         ))}
@@ -62,7 +62,7 @@ function Node({ name, value, depth }: { name?: string; value: unknown; depth: nu
 export function JsonViewer({ value, label }: JsonViewerProps) {
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard reachable
-    <div className="wab-json" role="region" aria-label={label} tabIndex={0}>
+    <div className="app-json" role="region" aria-label={label} tabIndex={0}>
       <Node value={value} depth={0} />
     </div>
   );

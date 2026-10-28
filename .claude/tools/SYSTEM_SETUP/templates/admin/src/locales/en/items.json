@@ -1,0 +1,25 @@
+{
+  "items": {
+    "subtitle": "The sample resource of this panel: every write needs a reason and is audited.",
+    "search": "Search items by name",
+    "add": "New item",
+    "edit": "Edit item",
+    "name": "Name",
+    "description": "Description",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "updatedBy": "Updated by",
+    "id": "Identifier",
+    "empty": "No items yet",
+    "saved": "Item saved",
+    "overview": "Overview",
+    "history": "History",
+    "sections": "Item sections",
+    "action": "Action",
+    "noHistory": "No changes recorded yet",
+    "error": {
+      "name": "Enter a name of up to {{max}} characters",
+      "description": "Keep the description under {{max}} characters"
+    }
+  }
+}

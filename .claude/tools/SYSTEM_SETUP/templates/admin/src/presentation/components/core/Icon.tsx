@@ -13,7 +13,7 @@ export interface IconProps {
 export function Icon({ name, size = 'md', label, directional = false }: IconProps) {
   return (
     <svg
-      className={cx('wab-icon', `wab-icon--${size}`, directional && 'wab-icon--directional')}
+      className={cx('app-icon', `app-icon--${size}`, directional && 'app-icon--directional')}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

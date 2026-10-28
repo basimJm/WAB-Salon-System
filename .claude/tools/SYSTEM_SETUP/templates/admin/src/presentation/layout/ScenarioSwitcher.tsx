@@ -13,10 +13,10 @@ export function ScenarioSwitcher() {
   );
   if (!__ALLOW_MOCK__ || !mock || scenario === null) return null;
   return (
-    <label className="wab-scenario">
-      <span className="wab-sr-only">{t('designKits.scenario')}</span>
+    <label className="app-scenario">
+      <span className="app-sr-only">{t('designKits.scenario')}</span>
       <select
-        className="wab-scenario__select"
+        className="app-scenario__select"
         value={scenario}
         onChange={(e) => mock.scenarios.set(e.target.value as MockScenario)}
       >

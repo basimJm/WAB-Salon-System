@@ -10,8 +10,8 @@ const O = OPERATIONS;
 export function profileRoutes(): readonly MockRoute[] {
   const profile = {
     id: '64a000000000000000000001',
-    email: 'admin@wab.example',
-    alertEmails: ['ops@wab.example'] as string[],
+    email: 'admin@example.test',
+    alertEmails: ['ops@example.test'] as string[],
     lastLoginAt: '2026-10-18T07:30:00.000Z' as string | null,
   };
   let pendingEmail: string | null = null;

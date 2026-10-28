@@ -13,21 +13,21 @@ import { DensityToggle } from '../../components/data/DensityToggle';
 import { Pagination } from '../../components/data/Pagination';
 import { TableToolbar } from '../../components/data/TableToolbar';
 
-interface SalonRow {
+interface ItemRow {
   id: string;
   name: string;
   city: string;
   state: string;
 }
 
-const STATES = ['LIVE', 'OFFLINE', 'APPLICATION_PENDING', 'APPROVED_INCOMPLETE'] as const;
+const STATES = ['ACTIVE', 'INACTIVE', 'ARCHIVED'] as const;
 const CITIES = ['amman', 'irbid', 'zarqa', 'aqaba'] as const;
 const ROW_COUNT = 47;
-const ROWS: readonly SalonRow[] = Array.from({ length: ROW_COUNT }, (_, i) => ({
-  id: `S-${String(1000 + i)}`,
+const ROWS: readonly ItemRow[] = Array.from({ length: ROW_COUNT }, (_, i) => ({
+  id: `I-${String(1000 + i)}`,
   name: `${String(i + 1)}`,
   city: CITIES[i % CITIES.length] ?? 'amman',
-  state: STATES[i % STATES.length] ?? 'LIVE',
+  state: STATES[i % STATES.length] ?? 'ACTIVE',
 }));
 
 /** Gallery section for DataTable v2 (ADM-015): selection, row actions, column picker, density, paging. */
@@ -40,17 +40,17 @@ export function TableSection() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [exported, setExported] = useState(0);
-  const columns = useMemo<readonly Column<SalonRow>[]>(
+  const columns = useMemo<readonly Column<ItemRow>[]>(
     () => [
       { key: 'id', header: k('colId'), render: (r) => r.id, ltr: true, sortable: true },
       {
         key: 'name',
         header: k('colName'),
-        render: (r) => <EntityCell name={`${k('salon')} ${r.name}`} sub={r.id} />,
+        render: (r) => <EntityCell name={`${k('item')} ${r.name}`} sub={r.id} />,
         sortable: true,
       },
       { key: 'city', header: k('colCity'), render: (r) => k(`city.${r.city}`) },
-      { key: 'state', header: k('colState'), render: (r) => <StatusBadge kind="salon" value={r.state} /> },
+      { key: 'state', header: k('colState'), render: (r) => <StatusBadge kind="item" value={r.state} /> },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `k` only wraps `t`, which changes with the language
     [t],
@@ -68,7 +68,7 @@ export function TableSection() {
   }, [sort, page, pageSize]);
 
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
       <TableToolbar
         selectedCount={selected.size}
@@ -98,7 +98,7 @@ export function TableSection() {
         }}
         rowActions={(r) => (
           <Button variant="ghost" size="sm">
-            {k('open')} <span className="wab-sr-only">{r.id}</span>
+            {k('open')} <span className="app-sr-only">{r.id}</span>
           </Button>
         )}
       />

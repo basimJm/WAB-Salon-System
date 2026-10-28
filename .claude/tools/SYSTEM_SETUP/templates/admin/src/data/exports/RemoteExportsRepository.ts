@@ -33,7 +33,7 @@ export class RemoteExportsRepository implements ExportsRepository {
    * the request leaves (a wrong shape is a VALIDATION_ERROR, never a call), so the cast is guarded at runtime.
    */
   request: ExportsRepository['request'] = async (input) =>
-    (await this.api.execute(request, { body: input as dto.postExportsBody })).data;
+    (await this.api.execute(request, { body: input })).data;
 
   get: ExportsRepository['get'] = async (id) =>
     (await this.api.execute(get, { params: { id } })).data;

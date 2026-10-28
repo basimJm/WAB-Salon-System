@@ -19,8 +19,6 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
-import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
-import { useLazyStrings } from '../hooks/useLazyStrings';
 
 const OPTIONS = { filterKeys: ['action', 'entityType', 'entityId', 'admin', 'from', 'to'] };
 
@@ -54,7 +52,7 @@ function Details({ log }: { log: AuditLog }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   return (
-    <div className="wab-stack">
+    <div className="app-stack">
       <KeyValue
         placeholder="—"
         items={[
@@ -65,10 +63,10 @@ function Details({ log }: { log: AuditLog }) {
             value: `${log.entityType} · ${log.entityId}`,
             ltr: true,
           },
-          { key: 'reason', label: t('appConfig.reason'), value: log.reason },
+          { key: 'reason', label: t('reason.label'), value: log.reason },
           {
             key: 'at',
-            label: t('transactions.at'),
+            label: t('common.at'),
             value: formatInstant(log.createdAt, language, 'dateTime'),
             ltr: true,
           },
@@ -78,7 +76,7 @@ function Details({ log }: { log: AuditLog }) {
         ]}
       />
       {hasDiff(log) ? (
-        <div className="wab-row">
+        <div className="app-row">
           <JsonViewer value={log.before ?? null} label={t('audit.before')} />
           <JsonViewer value={log.after ?? null} label={t('audit.after')} />
         </div>
@@ -91,7 +89,6 @@ function Details({ log }: { log: AuditLog }) {
 
 /** Admin PRD A29 · Audit log: every admin action with who, what, why and from where; open one for the before/after diff. */
 export default function AuditPage() {
-  useLazyStrings(BOOKINGS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();
@@ -108,7 +105,7 @@ export default function AuditPage() {
   const columns: Column<AuditLog>[] = [
     {
       key: 'at',
-      header: t('transactions.at'),
+      header: t('common.at'),
       ltr: true,
       render: (r) => formatInstant(r.createdAt, language, 'dateTime'),
     },
@@ -116,9 +113,9 @@ export default function AuditPage() {
       key: 'action',
       header: t('audit.action'),
       render: (r) => (
-        <span className="wab-cell2">
-          <span className="wab-cell2__main">{humanizeAction(r.action)}</span>
-          <bdi className="wab-cell2__code">{r.action}</bdi>
+        <span className="app-cell2">
+          <span className="app-cell2__main">{humanizeAction(r.action)}</span>
+          <bdi className="app-cell2__code">{r.action}</bdi>
         </span>
       ),
     },
@@ -128,14 +125,14 @@ export default function AuditPage() {
       ltr: true,
       render: (r) => `${r.entityType} · ${r.entityId.slice(-6)}`,
     },
-    { key: 'reason', header: t('appConfig.reason'), render: (r) => r.reason },
+    { key: 'reason', header: t('reason.label'), render: (r) => r.reason },
     { key: 'ip', header: t('audit.ip'), ltr: true, render: (r) => r.ip },
     {
       key: 'device',
       header: t('audit.device'),
       ltr: true,
       render: (r) => (
-        <span className="wab-cell-clip" title={r.userAgent}>
+        <span className="app-cell-clip" title={r.userAgent}>
           {r.userAgent}
         </span>
       ),
@@ -184,8 +181,8 @@ export default function AuditPage() {
             ...chip('entityType', t('audit.entityType')),
             ...chip('entityId', t('audit.entityId')),
             ...chip('admin', t('audit.admin')),
-            ...chip('from', t('bookings.from')),
-            ...chip('to', t('bookings.to')),
+            ...chip('from', t('audit.from')),
+            ...chip('to', t('audit.to')),
           ],
           onClearAll: list.clearFilters,
           controls: (
@@ -194,12 +191,12 @@ export default function AuditPage() {
               {text('entityId', t('audit.entityId'))}
               {text('admin', t('audit.admin'))}
               <DateField
-                label={t('bookings.from')}
+                label={t('audit.from')}
                 value={f('from')}
                 onValueChange={(v) => list.setFilter('from', v ? [v] : [])}
               />
               <DateField
-                label={t('bookings.to')}
+                label={t('audit.to')}
                 value={f('to')}
                 onValueChange={(v) => list.setFilter('to', v ? [v] : [])}
               />

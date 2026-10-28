@@ -25,22 +25,22 @@ export interface TimelineProps {
 /** Status history: one row per change, in the order given, times in Asia/Amman with language digits. */
 export function Timeline({ entries, ariaLabel, empty }: TimelineProps) {
   const { language } = useLanguage();
-  if (entries.length === 0) return <p className="wab-timeline__empty">{empty}</p>;
+  if (entries.length === 0) return <p className="app-timeline__empty">{empty}</p>;
   return (
-    <ol className="wab-timeline" aria-label={ariaLabel}>
+    <ol className="app-timeline" aria-label={ariaLabel}>
       {entries.map((entry) => (
-        <li key={entry.id} className="wab-timeline__item">
+        <li key={entry.id} className="app-timeline__item">
           <span
-            className={cx('wab-timeline__dot', `wab-timeline__dot--${entry.tone ?? 'grey'}`)}
+            className={cx('app-timeline__dot', `app-timeline__dot--${entry.tone ?? 'grey'}`)}
             aria-hidden="true"
           />
-          <div className="wab-timeline__body">
-            <p className="wab-timeline__title">{entry.title}</p>
-            <p className="wab-timeline__meta">
+          <div className="app-timeline__body">
+            <p className="app-timeline__title">{entry.title}</p>
+            <p className="app-timeline__meta">
               {entry.actor ? `${entry.actor} · ` : ''}
               <time dateTime={entry.at}>{formatInstant(entry.at, language)}</time>
             </p>
-            {entry.reason ? <p className="wab-timeline__reason">{entry.reason}</p> : null}
+            {entry.reason ? <p className="app-timeline__reason">{entry.reason}</p> : null}
           </div>
         </li>
       ))}

@@ -13,7 +13,7 @@ const TSCONFIG = JSON.stringify({
 
 /** Builds a throwaway `src/` tree and returns the depcruise exit status (0 = clean). */
 function cruise(files: Record<string, string>): number {
-  const dir = mkdtempSync(join(tmpdir(), 'wab-layers-'));
+  const dir = mkdtempSync(join(tmpdir(), 'app-layers-'));
   writeFileSync(join(dir, 'tsconfig.json'), TSCONFIG);
   for (const [path, code] of Object.entries(files)) {
     mkdirSync(join(dir, path, '..'), { recursive: true });

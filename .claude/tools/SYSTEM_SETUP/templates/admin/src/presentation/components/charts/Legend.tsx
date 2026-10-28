@@ -8,11 +8,11 @@ export interface LegendItem {
 /** Colour key for a chart; colours repeat the chart palette by position. */
 export function Legend({ items }: { items: readonly LegendItem[] }) {
   return (
-    <ul className="wab-legend">
+    <ul className="app-legend">
       {items.map((item, index) => (
-        <li key={item.key} className="wab-legend__item">
+        <li key={item.key} className="app-legend__item">
           <span
-            className="wab-legend__swatch"
+            className="app-legend__swatch"
             style={{ background: seriesColor(index) }}
             aria-hidden="true"
           />

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { MAX_TEXT_LENGTH } from '@/constants/ui';
-import { tryParseJod } from './money';
+import { tryParseMoney } from './money';
 import { isLocalDate } from './time';
 
 /**
@@ -11,7 +11,7 @@ export const VALIDATION_KEYS = {
   required: 'validation.required',
   tooLong: 'validation.tooLong',
   tooShort: 'validation.tooShort',
-  invalidJod: 'validation.invalidJod',
+  invalidAmount: 'validation.invalidAmount',
   notPositive: 'validation.notPositive',
   invalidDate: 'validation.invalidDate',
   endBeforeStart: 'validation.endBeforeStart',
@@ -25,13 +25,13 @@ export const requiredText = (min = 1, max = MAX_TEXT_LENGTH) =>
     .min(min, VALIDATION_KEYS.tooShort)
     .max(max, VALIDATION_KEYS.tooLong);
 
-/** A JOD decimal string (up to 3 decimals). `positive` also rejects zero. */
-export const jodAmount = ({ positive = false }: { positive?: boolean } = {}) =>
+/** A money decimal string (up to 3 decimals). `positive` also rejects zero. */
+export const moneyAmount = ({ positive = false }: { positive?: boolean } = {}) =>
   z
     .string()
     .min(1, VALIDATION_KEYS.required)
-    .refine((v) => v === '' || tryParseJod(v) !== undefined, VALIDATION_KEYS.invalidJod)
-    .refine((v) => !positive || (tryParseJod(v) ?? 0) > 0, VALIDATION_KEYS.notPositive);
+    .refine((v) => v === '' || tryParseMoney(v) !== undefined, VALIDATION_KEYS.invalidAmount)
+    .refine((v) => !positive || (tryParseMoney(v) ?? 0) > 0, VALIDATION_KEYS.notPositive);
 
 /** `YYYY-MM-DD` that is a real calendar day. */
 export const localDateString = () =>

@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { OTP_LENGTH } from '@/constants/auth';
 import { SESSION_IDLE_DAYS } from '@/constants/session';
 import { formatNumber } from '@/domain/shared/numbers';
-import { LOGIN_REDIRECT_PARAM, ROUTES } from '@/constants/routes';
+import { HOME_ROUTE, LOGIN_REDIRECT_PARAM } from '@/constants/routes';
 import { useContainer } from '@/app/ContainerContext';
 import { Button } from '../components/core/Button';
 import { Icon } from '../components/core/Icon';
@@ -37,38 +37,38 @@ export default function LoginPage() {
     if (first) {
       await ctrl.submitCredentials(email, password);
     } else if (await ctrl.submitCode(code)) {
-      void navigate(safeRedirect(params.get(LOGIN_REDIRECT_PARAM), ROUTES.liveOverview), {
+      void navigate(safeRedirect(params.get(LOGIN_REDIRECT_PARAM), HOME_ROUTE), {
         replace: true,
       });
     }
   };
 
   return (
-    <div className="wab-login">
+    <div className="app-login">
       <BrandPanel />
-      <main className="wab-login__main">
-        <div className="wab-login__prefs">
+      <main className="app-login__main">
+        <div className="app-login__prefs">
           <PreferenceSwitches />
         </div>
-        <section className="wab-login__card" aria-labelledby="login-title">
+        <section className="app-login__card" aria-labelledby="login-title">
           {first ? null : (
-            <button type="button" className="wab-login__back" onClick={ctrl.back}>
+            <button type="button" className="app-login__back" onClick={ctrl.back}>
               <Icon name="chevronEnd" size="sm" directional />
               {t('common.back')}
             </button>
           )}
-          <div className="wab-login__heading">
-            <h1 id="login-title" className="wab-login__title">
+          <div className="app-login__heading">
+            <h1 id="login-title" className="app-login__title">
               {t(first ? 'login.title' : 'login.codeTitle')}
             </h1>
-            {first ? <p className="wab-login__lead">{t('login.subtitle')}</p> : null}
+            {first ? <p className="app-login__lead">{t('login.subtitle')}</p> : null}
           </div>
           {first && ended ? (
-            <p className="wab-login__notice" role="status">
+            <p className="app-login__notice" role="status">
               {t(`login.ended.${ended}`, { days: formatNumber(SESSION_IDLE_DAYS, language) })}
             </p>
           ) : null}
-          <form className="wab-login__form" onSubmit={(e) => void onSubmit(e)} noValidate>
+          <form className="app-login__form" onSubmit={(e) => void onSubmit(e)} noValidate>
             {first ? (
               <CredentialsStep
                 email={email}

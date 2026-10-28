@@ -49,7 +49,7 @@ export function BarChart({
       }}
     >
       <svg
-        className="wab-chart__svg"
+        className="app-chart__svg"
         viewBox={`0 0 ${String(CHART_WIDTH)} ${String(CHART_HEIGHT)}`}
         role="img"
         aria-label={title}

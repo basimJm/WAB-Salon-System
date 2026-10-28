@@ -23,7 +23,6 @@ import { BasicsSection } from './design/BasicsSection';
 import { ChartsSection } from './design/ChartsSection';
 import { FiltersSection } from './design/FiltersSection';
 import { FormsSection } from './design/FormsSection';
-import { MediaSection } from './design/MediaSection';
 import { OverlaysSection } from './design/OverlaysSection';
 import { PrimitivesSection } from './design/PrimitivesSection';
 import { StatusSection } from './design/StatusSection';
@@ -38,8 +37,8 @@ interface DemoRow {
   amount: string;
 }
 const DEMO_ROWS: readonly DemoRow[] = [
-  { id: 'WAB-24817', name: 'design.row1', amount: '45.500' },
-  { id: 'WAB-24818', name: 'design.row2', amount: '120.000' },
+  { id: 'REF-24817', name: 'design.row1', amount: '45.500' },
+  { id: 'REF-24818', name: 'design.row2', amount: '120.000' },
 ];
 
 /** Dev-only gallery of every base component and state (not routed in prod builds). */
@@ -66,7 +65,7 @@ export default function DesignSystemPage() {
   return (
     <>
       <PageHeader title={t('design.title')} subtitle={t('design.subtitle')} />
-      <section className="wab-grid" aria-label={t('design.kpis')}>
+      <section className="app-grid" aria-label={t('design.kpis')}>
         <KpiCard
           label={t('design.kpiBookings')}
           value="128"
@@ -89,12 +88,11 @@ export default function DesignSystemPage() {
       <OverlaysSection />
       <TemplatesSection />
       <ChartsSection />
-      <MediaSection />
       <RichTextSection />
       <ShellSection />
       <BasicsSection />
-      <Card className="wab-stack">
-        <div className="wab-row">
+      <Card className="app-stack">
+        <div className="app-row">
           <Button>{t('design.primary')}</Button>
           <Button variant="secondary">{t('design.secondary')}</Button>
           <Button variant="ghost">{t('design.ghost')}</Button>
@@ -106,14 +104,14 @@ export default function DesignSystemPage() {
             {t('design.showToast')}
           </Button>
         </div>
-        <div className="wab-row">
+        <div className="app-row">
           {TONE_NAMES.map((tone) => (
             <Badge key={tone} tone={tone}>
               {t(`design.tone.${tone}`)}
             </Badge>
           ))}
         </div>
-        <div className="wab-grid">
+        <div className="app-grid">
           <TextField label={t('design.field')} hint={t('design.hint')} />
           <TextField label={t('design.field')} error={t('design.error')} />
           <Select
@@ -124,7 +122,7 @@ export default function DesignSystemPage() {
             ]}
           />
         </div>
-        <div className="wab-row">
+        <div className="app-row">
           <Toggle label={t('design.checkbox')} />
           <Toggle kind="switch" label={t('design.switch')} />
         </div>

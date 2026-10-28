@@ -59,15 +59,15 @@ function MenuItems({
   };
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- arrow-key navigation of the menu items inside
-    <div ref={list} className="wab-menu" onKeyDown={onKeyDown}>
-      {header ? <div className="wab-menu__header">{header}</div> : null}
+    <div ref={list} className="app-menu" onKeyDown={onKeyDown}>
+      {header ? <div className="app-menu__header">{header}</div> : null}
       {items.map((item) => (
         <button
           key={item.key}
           type="button"
           role="menuitem"
           disabled={item.disabled}
-          className={cx('wab-menu__item', item.danger && 'wab-menu__item--danger')}
+          className={cx('app-menu__item', item.danger && 'app-menu__item--danger')}
           onClick={() => {
             close();
             item.onSelect();

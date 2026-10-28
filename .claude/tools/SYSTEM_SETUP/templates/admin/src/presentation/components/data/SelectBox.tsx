@@ -14,7 +14,7 @@ export function SelectBox({ label, checked, indeterminate = false, onChange }: S
     if (ref.current) ref.current.indeterminate = indeterminate;
   }, [indeterminate]);
   return (
-    <label className="wab-toggle wab-toggle--checkbox wab-select-box">
+    <label className="app-toggle app-toggle--checkbox app-select-box">
       <input
         ref={ref}
         type="checkbox"
@@ -23,7 +23,7 @@ export function SelectBox({ label, checked, indeterminate = false, onChange }: S
         onChange={onChange}
         onClick={(event) => event.stopPropagation()}
       />
-      <span className="wab-toggle__mark" aria-hidden="true" />
+      <span className="app-toggle__mark" aria-hidden="true" />
     </label>
   );
 }

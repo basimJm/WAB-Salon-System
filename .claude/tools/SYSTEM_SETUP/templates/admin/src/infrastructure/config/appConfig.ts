@@ -24,7 +24,7 @@ export function buildAppConfig(
 /** Only `VITE_*` values injected by vite.config.ts (declared in vite-env.d.ts) are visible. */
 export function loadAppConfig(): AppConfig {
   const raw: Record<string, string | undefined> = {};
-  for (const [key, value] of Object.entries(__WAB_ENV__)) {
+  for (const [key, value] of Object.entries(__APP_ENV__)) {
     if (key.startsWith(PUBLIC_ENV_PREFIX)) raw[key] = value;
   }
   const build = parseBuildInfo({ version: __APP_VERSION__, buildId: __BUILD_ID__ });

@@ -5,7 +5,7 @@ import { ErrorState } from '../components/feedback/ErrorState';
 export function RouteErrorPage() {
   const error = useRouteError();
   return (
-    <main className="wab-content">
+    <main className="app-content">
       <ErrorState error={error} onRetry={() => window.location.reload()} />
     </main>
   );

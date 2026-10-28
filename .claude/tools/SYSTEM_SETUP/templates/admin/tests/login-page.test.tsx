@@ -15,7 +15,7 @@ import { App } from '@/app/App';
 import { makeContainer, renderRoutes, renderWithApp } from './helpers/render';
 
 const PASSWORD = 'p'.repeat(MIN_PASSWORD_LENGTH);
-const EMAIL = 'admin@wab.jo';
+const EMAIL = 'admin@example.test';
 
 /** The timer re-arms after each render, so advance one second per act(). */
 async function tick(seconds: number): Promise<void> {
@@ -24,11 +24,11 @@ async function tick(seconds: number): Promise<void> {
 
 describe('maskEmail / formatClock', () => {
   it.each([
-    ['admin@wab.jo', 'a•••n@wab.jo'],
-    ['ab@wab.jo', 'a•••@wab.jo'],
-    ['a@wab.jo', 'a•••@wab.jo'],
+    ['admin@example.test', 'a•••n@example.test'],
+    ['ab@example.test', 'a•••@example.test'],
+    ['a@example.test', 'a•••@example.test'],
     ['not-an-email', 'not-an-email'],
-    ['@wab.jo', '@wab.jo'],
+    ['@example.test', '@example.test'],
   ])('%s -> %s', (input, expected) => expect(maskEmail(input)).toBe(expected));
 
   it.each([
@@ -141,7 +141,7 @@ describe('login form details', () => {
     const code = await toCodeStep();
     expect(code).toHaveFocus();
     expect(screen.getByRole('heading', { name: en.login.codeTitle })).toBeInTheDocument();
-    expect(screen.getByText('a•••n@wab.jo')).toBeInTheDocument();
+    expect(screen.getByText('a•••n@example.test')).toBeInTheDocument();
     expect(screen.getByText(`Resend in ${formatClock(RESEND_SECONDS)}`)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: en.login.resend })).toBeNull();
   });
@@ -195,7 +195,7 @@ describe('login form details', () => {
     await userEvent.type(code, '0'.repeat(OTP_LENGTH));
     await userEvent.click(screen.getByRole('button', { name: en.login.verify }));
     expect(await screen.findByText(en.errors.validation)).toBeInTheDocument();
-    expect(document.querySelector('.wab-alert')).not.toBeNull();
+    expect(document.querySelector('.app-alert')).not.toBeNull();
     expect(screen.getByLabelText(en.login.code)).toBeInTheDocument();
   });
 });

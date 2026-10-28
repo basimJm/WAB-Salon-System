@@ -15,13 +15,13 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
 export function Select({ label, options, error, className, ...rest }: SelectProps) {
   const id = useId();
   return (
-    <div className={cx('wab-field', error && 'wab-field--error', className)}>
-      <label className="wab-field__label" htmlFor={id}>
+    <div className={cx('app-field', error && 'app-field--error', className)}>
+      <label className="app-field__label" htmlFor={id}>
         {label}
       </label>
       <select
         id={id}
-        className="wab-field__control"
+        className="app-field__control"
         aria-invalid={error ? true : undefined}
         {...rest}
       >
@@ -32,7 +32,7 @@ export function Select({ label, options, error, className, ...rest }: SelectProp
         ))}
       </select>
       {error ? (
-        <span className="wab-field__error" role="alert">
+        <span className="app-field__error" role="alert">
           {error}
         </span>
       ) : null}

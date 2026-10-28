@@ -44,7 +44,7 @@ export function DetailPage({
 }: DetailPageProps) {
   const { t } = useTranslation();
   return (
-    <div className="wab-page wab-stack">
+    <div className="app-page app-stack">
       {back ? <Link to={back.to}>{t('detail.backTo', { list: back.label })}</Link> : null}
       <PageHeader
         title={title}
@@ -62,9 +62,9 @@ export function DetailPage({
         {...(onRetry ? { onRetry } : {})}
         skeleton={<Skeleton width="full" />}
       >
-        <div className="wab-detail">
+        <div className="app-detail">
           <Tabs items={tabs} activeId={activeTab} onChange={onTabChange} ariaLabel={tabsLabel} />
-          {aside ? <aside className="wab-detail__aside">{aside}</aside> : null}
+          {aside ? <aside className="app-detail__aside">{aside}</aside> : null}
         </div>
       </AsyncView>
     </div>

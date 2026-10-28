@@ -20,22 +20,22 @@ export function PrimitivesSection() {
   const [chipVisible, setChipVisible] = useState(true);
   const k = (key: string) => t(`design.primitives.${key}`);
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
-      <div className="wab-row">
+      <div className="app-row">
         <Text>{k('text')}</Text>
         <Text tone="muted">{k('muted')}</Text>
         <Text tone="danger" strong>
           {k('danger')}
         </Text>
-        <Link to={ROUTES.salons}>{k('link')}</Link>
+        <Link to={ROUTES.items}>{k('link')}</Link>
         <Link href={GALLERY_EXTERNAL_LINK}>{k('external')}</Link>
       </div>
       <Heading level={3} look={1}>
         {k('heading')}
       </Heading>
       <Divider />
-      <div className="wab-row">
+      <div className="app-row">
         <Avatar name={k('avatar')} size="sm" />
         <Avatar name={k('avatar')} />
         <Avatar name={k('avatar')} size="lg" />

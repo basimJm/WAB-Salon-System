@@ -118,8 +118,8 @@ describe('ExportMenu', () => {
     // Design list-card menu: each format has its file chip (XLS / CSV / PDF, decorative) before the name.
     for (const name of ['Excel (.xlsx)', 'CSV', 'PDF'])
       expect(screen.getByRole('button', { name })).toBeVisible();
-    expect(document.querySelector('.wab-export__chip--xlsx')).toHaveTextContent('XLS');
-    expect(document.querySelector('.wab-export__chip--pdf')).toHaveAttribute('aria-hidden', 'true');
+    expect(document.querySelector('.app-export__chip--xlsx')).toHaveTextContent('XLS');
+    expect(document.querySelector('.app-export__chip--pdf')).toHaveAttribute('aria-hidden', 'true');
     await userEvent.click(screen.getByRole('button', { name: 'CSV' }));
     expect(onExport).toHaveBeenCalledWith('CSV');
     expect(await screen.findByText('Preparing the CSV export…')).toBeVisible();

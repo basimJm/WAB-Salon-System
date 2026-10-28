@@ -18,13 +18,13 @@ export function EntityCell({
   badge?: ReactNode;
 }) {
   return (
-    <span className="wab-entity">
-      <span className="wab-entity__initial" aria-hidden="true">
+    <span className="app-entity">
+      <span className="app-entity__initial" aria-hidden="true">
         {initialOf(name)}
       </span>
-      <span className="wab-entity__text">
-        <span className="wab-entity__name">{name}</span>
-        {sub ? <span className="wab-entity__sub">{sub}</span> : null}
+      <span className="app-entity__text">
+        <span className="app-entity__name">{name}</span>
+        {sub ? <span className="app-entity__sub">{sub}</span> : null}
         {badge}
       </span>
     </span>
@@ -43,11 +43,11 @@ export function RatingCell({
   language: Language;
 }) {
   return (
-    <span className="wab-rating">
+    <span className="app-rating">
       <Icon name="star" size="sm" />
-      <span className="wab-rating__avg">{formatNumber(avg, language)}</span>
+      <span className="app-rating__avg">{formatNumber(avg, language)}</span>
       {count !== undefined ? (
-        <span className="wab-rating__count">({formatNumber(count, language)})</span>
+        <span className="app-rating__count">({formatNumber(count, language)})</span>
       ) : null}
     </span>
   );

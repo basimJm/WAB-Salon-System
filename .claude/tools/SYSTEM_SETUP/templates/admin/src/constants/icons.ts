@@ -1,5 +1,5 @@
 /**
- * SVG path data (24x24 viewBox, stroke icons), copied from the design kit (`design/wab-admin-kit.js` `W.IC`).
+ * SVG path data (24x24 viewBox, stroke icons), copied from the design kit (`design/app-admin-kit.js` `W.IC`).
  * One place so icons are never inlined in components.
  */
 export const ICON_PATHS = {

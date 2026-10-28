@@ -37,7 +37,7 @@ export function ExportMenu({ onExport, formats = EXPORT_FORMATS, disabled }: Exp
     <Popover
       label={label}
       disabled={disabled || busy}
-      triggerClassName="wab-cardbtn"
+      triggerClassName="app-cardbtn"
       trigger={
         <>
           <Icon name="download" size="sm" />
@@ -50,14 +50,14 @@ export function ExportMenu({ onExport, formats = EXPORT_FORMATS, disabled }: Exp
           <button
             key={format}
             type="button"
-            className="wab-menu__item wab-export__item"
+            className="app-menu__item app-export__item"
             onClick={() => {
               close();
               void run(format);
             }}
           >
             <span
-              className={`wab-export__chip wab-export__chip--${format.toLowerCase()}`}
+              className={`app-export__chip app-export__chip--${format.toLowerCase()}`}
               aria-hidden="true"
             >
               {t(`export.chip.${format}`)}

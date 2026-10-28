@@ -2,17 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { toId } from '@/domain/shared/brand';
 import {
   formatInstant,
-  formatJodAmount,
+  formatMoneyAmount,
   formatNumber,
   localizeDigits,
 } from '@/domain/shared/format';
 import {
-  filsToJod,
-  isFils,
-  isJodString,
-  jodToFils,
-  sumJod,
-  tryParseJod,
+  minorToMoney,
+  isMinorUnits,
+  isMoneyString,
+  moneyToMinor,
+  sumMoney,
+  tryParseMoney,
 } from '@/domain/shared/money';
 import { clampPage, mapPage, pageCount, type Page } from '@/domain/shared/page';
 import { attempt, err, mapResult, ok } from '@/domain/shared/result';
@@ -74,7 +74,7 @@ describe('money', () => {
     ['12.500', 12_500],
     ['0.001', 1],
     ['9007199254740.991', Number.MAX_SAFE_INTEGER],
-  ])('%s -> %s fils', (text, fils) => expect(jodToFils(text)).toBe(fils));
+  ])('%s -> %s minor units', (text, minor) => expect(moneyToMinor(text)).toBe(minor));
 
   it.each([
     '',
@@ -90,34 +90,34 @@ describe('money', () => {
     'NaN',
     '9007199254740.992',
   ])('rejects %j', (text) => {
-    expect(tryParseJod(text)).toBeUndefined();
-    expect(isJodString(text)).toBe(false);
-    expect(() => jodToFils(text)).toThrow(RangeError);
+    expect(tryParseMoney(text)).toBeUndefined();
+    expect(isMoneyString(text)).toBe(false);
+    expect(() => moneyToMinor(text)).toThrow(RangeError);
   });
 
   it('allows negatives only when asked, and never returns negative zero', () => {
-    expect(jodToFils('-0.5', { allowNegative: true })).toBe(-500);
-    expect(Object.is(jodToFils('-0.000', { allowNegative: true }), 0)).toBe(true);
-    expect(isJodString(12)).toBe(false);
+    expect(moneyToMinor('-0.5', { allowNegative: true })).toBe(-500);
+    expect(Object.is(moneyToMinor('-0.000', { allowNegative: true }), 0)).toBe(true);
+    expect(isMoneyString(12)).toBe(false);
   });
 
-  it('formats fils as 3-decimal strings and round-trips', () => {
-    expect(filsToJod(12_500)).toBe('12.500');
-    expect(filsToJod(1)).toBe('0.001');
-    expect(filsToJod(-500)).toBe('-0.500');
-    for (const fils of [0, 7, 999, 1000, 123_456_789, -42]) {
-      expect(jodToFils(filsToJod(fils), { allowNegative: true })).toBe(fils);
+  it('formats minor units as 3-decimal strings and round-trips', () => {
+    expect(minorToMoney(12_500)).toBe('12.500');
+    expect(minorToMoney(1)).toBe('0.001');
+    expect(minorToMoney(-500)).toBe('-0.500');
+    for (const minor of [0, 7, 999, 1000, 123_456_789, -42]) {
+      expect(moneyToMinor(minorToMoney(minor), { allowNegative: true })).toBe(minor);
     }
-    expect(() => filsToJod(1.5)).toThrow(RangeError);
-    expect(isFils(1.5)).toBe(false);
+    expect(() => minorToMoney(1.5)).toThrow(RangeError);
+    expect(isMinorUnits(1.5)).toBe(false);
   });
 
   it('sums exactly where floats would drift', () => {
     expect(0.1 + 0.2).not.toBe(0.3);
-    expect(sumJod(['0.100', '0.200'])).toBe('0.300');
-    expect(sumJod([])).toBe('0.000');
-    expect(() => sumJod(['1', 'x'])).toThrow(RangeError);
-    expect(() => sumJod(['9007199254740.991', '0.001'])).toThrow(RangeError);
+    expect(sumMoney(['0.100', '0.200'])).toBe('0.300');
+    expect(sumMoney([])).toBe('0.000');
+    expect(() => sumMoney(['1', 'x'])).toThrow(RangeError);
+    expect(() => sumMoney(['9007199254740.991', '0.001'])).toThrow(RangeError);
   });
 });
 
@@ -176,14 +176,14 @@ describe('formatters', () => {
   });
 
   it('formats JOD with 3 decimals, grouping, and language digits', () => {
-    expect(formatJodAmount('1234.5', 'en')).toBe('1,234.500');
-    expect(formatJodAmount('0.001', 'en')).toBe('0.001');
-    expect(formatJodAmount('-12.5', 'en')).toBe('-12.500');
-    expect(formatJodAmount('-0.000', 'en')).toBe('0.000');
-    expect(formatJodAmount('9007199254740.991', 'en')).toBe('9,007,199,254,740.991');
-    const ar = formatJodAmount('1234.5', 'ar');
+    expect(formatMoneyAmount('1234.5', 'en')).toBe('1,234.500');
+    expect(formatMoneyAmount('0.001', 'en')).toBe('0.001');
+    expect(formatMoneyAmount('-12.5', 'en')).toBe('-12.500');
+    expect(formatMoneyAmount('-0.000', 'en')).toBe('0.000');
+    expect(formatMoneyAmount('9007199254740.991', 'en')).toBe('9,007,199,254,740.991');
+    const ar = formatMoneyAmount('1234.5', 'ar');
     expect(ar).toMatch(/^١.٢٣٤٫٥٠٠$/);
-    expect(() => formatJodAmount('1,5', 'en')).toThrow(RangeError);
+    expect(() => formatMoneyAmount('1,5', 'en')).toThrow(RangeError);
   });
 
   it('shows instants in Amman with a 12-hour clock', () => {

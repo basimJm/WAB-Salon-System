@@ -50,8 +50,8 @@ describe('ProfilePage', () => {
 
   it('shows the account and the saved recipients', async () => {
     open();
-    expect(await screen.findByText('admin@wab.example')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Recipients/)).toHaveValue('ops@wab.example');
+    expect(await screen.findByText('admin@example.test')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Recipients/)).toHaveValue('ops@example.test');
   });
 
   it('saves recipients and rejects an invalid address without calling the server', async () => {
@@ -63,7 +63,7 @@ describe('ProfilePage', () => {
     await user.click(screen.getByRole('button', { name: 'Save recipients' }));
     expect(await screen.findByText(/Not valid email addresses: bad/)).toBeInTheDocument();
     await user.clear(box);
-    await user.type(box, 'new@wab.example');
+    await user.type(box, 'new@example.test');
     await user.click(screen.getByRole('button', { name: 'Save recipients' }));
     expect(await screen.findByText('Alert recipients saved')).toBeInTheDocument();
   });
@@ -71,7 +71,7 @@ describe('ProfilePage', () => {
   it('checks the password form before sending and confirms a change', async () => {
     const user = userEvent.setup();
     open();
-    await screen.findByText('admin@wab.example');
+    await screen.findByText('admin@example.test');
     const [current] = screen.getAllByLabelText('Current password');
     await user.click(screen.getByRole('button', { name: 'Change password' }));
     expect(await screen.findByText('Enter your current password.')).toBeInTheDocument();
@@ -91,12 +91,12 @@ describe('ProfilePage', () => {
   it('changes the email in two steps and shows the new address', async () => {
     const user = userEvent.setup();
     open();
-    await screen.findByText('admin@wab.example');
+    await screen.findByText('admin@example.test');
     await user.type(screen.getByLabelText('New email address'), 'not-an-email');
     await user.click(screen.getByRole('button', { name: 'Send code' }));
     expect(await screen.findByText('Enter a valid email address.')).toBeInTheDocument();
     await user.clear(screen.getByLabelText('New email address'));
-    await user.type(screen.getByLabelText('New email address'), 'new@wab.example');
+    await user.type(screen.getByLabelText('New email address'), 'new@example.test');
     await user.type(screen.getAllByLabelText('Current password')[1] as HTMLElement, 'old-password');
     await user.click(screen.getByRole('button', { name: 'Send code' }));
     const code = await screen.findByLabelText('Verification code');
@@ -106,7 +106,7 @@ describe('ProfilePage', () => {
     await user.clear(code);
     await user.type(code, MOCK_EMAIL_CODE);
     await user.click(screen.getByRole('button', { name: 'Confirm new email' }));
-    await waitFor(() => expect(screen.getByText('new@wab.example')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('new@example.test')).toBeInTheDocument());
   });
 
   it('shows the error state when the server fails', async () => {

@@ -33,8 +33,8 @@ export function Pagination({
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
   return (
-    <nav className="wab-pagination" aria-label={ariaLabel ?? t('table.pagination')}>
-      <span className="wab-pagination__range">
+    <nav className="app-pagination" aria-label={ariaLabel ?? t('table.pagination')}>
+      <span className="app-pagination__range">
         {t('table.range', { from: num(from), to: num(to), total: num(total) })}
       </span>
       <Select
@@ -42,7 +42,7 @@ export function Pagination({
         value={String(pageSize)}
         options={PAGE_SIZE_OPTIONS.map((n) => ({ value: String(n), label: String(n) }))}
         onChange={(e) => onPageSizeChange(Number(e.target.value))}
-        className="wab-pagination__size"
+        className="app-pagination__size"
       />
       <IconButton
         icon="chevronStart"
@@ -51,7 +51,7 @@ export function Pagination({
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
       />
-      <span className="wab-pagination__page">{t('table.pageOf', { page, pages })}</span>
+      <span className="app-pagination__page">{t('table.pageOf', { page, pages })}</span>
       <IconButton
         icon="chevronEnd"
         directional

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-/** Base response envelope from WAB-Server/CLAUDE.md §6. */
+/** Base response envelope of the server API (`{success,message,data,meta?}`). */
 export const metaSchema = z.object({
   page: z.number().int(),
   pageSize: z.number().int(),

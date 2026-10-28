@@ -27,21 +27,21 @@ function BellRow({ alert, onDone }: { alert: Alert; onDone: () => void }) {
   const to = alertLink(alert) ?? ROUTES.alerts;
   const title = alertTitle(alert, language);
   return (
-    <li className="wab-bell__row">
+    <li className="app-bell__row">
       <span
-        className={`wab-bell__dot wab-bell__dot--${STATUS_TONES.alertSeverity[alert.severity]}`}
+        className={`app-bell__dot app-bell__dot--${STATUS_TONES.alertSeverity[alert.severity]}`}
         aria-hidden="true"
       />
-      <RouterLink className="wab-bell__link" to={to} onClick={onDone}>
-        <span className="wab-bell__title">{title}</span>
-        <span className="wab-bell__sub">
+      <RouterLink className="app-bell__link" to={to} onClick={onDone}>
+        <span className="app-bell__title">{title}</span>
+        <span className="app-bell__sub">
           {t(`status.alertSeverity.${alert.severity}`)} ·{' '}
           {formatRelative(alert.createdAt, new Date(), language)}
         </span>
       </RouterLink>
       <button
         type="button"
-        className="wab-bell__read"
+        className="app-bell__read"
         aria-label={`${t('topbar.markRead')}: ${title}`}
         title={t('topbar.markRead')}
         disabled={read.isPending}
@@ -64,27 +64,27 @@ export default function BellPanel({ close }: { close: () => void }) {
   });
   const items = latest.data?.items ?? [];
   return (
-    <div className="wab-bell">
-      <div className="wab-bell__head">
-        <span className="wab-bell__heading">{t('topbar.alerts')}</span>
-        <RouterLink className="wab-bell__all" to={ROUTES.alerts} onClick={close}>
+    <div className="app-bell">
+      <div className="app-bell__head">
+        <span className="app-bell__heading">{t('topbar.alerts')}</span>
+        <RouterLink className="app-bell__all" to={ROUTES.alerts} onClick={close}>
           {t('topbar.viewAll')}
         </RouterLink>
       </div>
       {latest.isPending ? <Spinner /> : null}
       {latest.isError ? (
-        <p className="wab-bell__note" role="alert">
+        <p className="app-bell__note" role="alert">
           {t('topbar.alertsFailed')}{' '}
-          <button type="button" className="wab-bell__retry" onClick={() => void latest.refetch()}>
+          <button type="button" className="app-bell__retry" onClick={() => void latest.refetch()}>
             {t('common.retry')}
           </button>
         </p>
       ) : null}
       {latest.isSuccess && items.length === 0 ? (
-        <p className="wab-bell__note">{t('topbar.noAlerts')}</p>
+        <p className="app-bell__note">{t('topbar.noAlerts')}</p>
       ) : null}
       {items.length > 0 ? (
-        <ul className="wab-bell__list">
+        <ul className="app-bell__list">
           {items.map((a) => (
             <BellRow key={a.id} alert={a} onDone={close} />
           ))}

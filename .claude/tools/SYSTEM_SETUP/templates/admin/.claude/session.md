@@ -59,7 +59,7 @@
 
 - Branch: `feat/adm-098-design-fidelity`
 - Status: IN REVIEW
-- Acceptance criteria (owner 2026-10-26 "implement design as is from its design folder"; design files `WAB Admin 01…09`, `Blocks`, `Sidebar`, `Topbar`, `Overlay`, `wab-admin-kit.js`, `assets/`; PRD wins on behaviour):
+- Acceptance criteria (owner 2026-10-26 "implement design as is from its design folder"; design files `WAB Admin 01…09`, `Blocks`, `Sidebar`, `Topbar`, `Overlay`, `app-admin-kit.js`, `assets/`; PRD wins on behaviour):
   - [x] Shell = `Sidebar` + `Topbar` designs (brand icon/wordmark/chip, gradient active row, group rows, dotted sub-pages, rose counters, admin card + Collapse; page-coloured top bar, search + Cmd/Ctrl+K, EN/ع button, bordered theme/bell, admin menu with avatar + email header)
   - [x] Login = `01 Login` (brand split + rings + app icon, borderless form, field icons, back link, six OTP boxes over one input)
   - [x] Kit = Blocks basics, tokens only: design icon set (stroke 1.8), buttons, badges, KPI card + breakdown, tabs strip, list card (title + total + tools + pager), filter pills, popovers, chart cards, entity/rating cells, alert row tint, two-line code cells, table links

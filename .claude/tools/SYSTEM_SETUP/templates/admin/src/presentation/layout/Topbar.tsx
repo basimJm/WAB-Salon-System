@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
-import { GlobalSearch, type GlobalSearchProps } from '../components/layout/GlobalSearch';
 import { Menu } from '../components/overlay/Menu';
 import { Icon } from '../components/core/Icon';
 import { IconButton } from '../components/core/IconButton';
@@ -19,13 +18,11 @@ export interface TopbarProps {
   menuExpanded: boolean;
   onMenu: () => void;
   onLogout: () => void;
-  /** Global search; the box is shown only when the data source for it exists (global-search task). */
-  search?: GlobalSearchProps['search'];
   /** Alerts still NEW: the bell counter; the bell opens the latest ones (design dropdown). */
   alertCount?: number;
 }
 
-/** Design `WAB Admin Topbar`: search with Cmd+K, language, theme, alerts bell and the admin menu. */
+/** Design `Admin Topbar`: language, theme, alerts bell and the admin menu. */
 export function Topbar({
   adminName,
   adminEmail,
@@ -34,7 +31,6 @@ export function Topbar({
   menuExpanded,
   onMenu,
   onLogout,
-  search,
   alertCount,
 }: TopbarProps) {
   const navigate = useNavigate();
@@ -43,7 +39,7 @@ export function Topbar({
   const { toggle: toggleLanguage } = useLanguage();
   const name = adminName || t('topbar.adminMenu');
   return (
-    <header className="wab-topbar">
+    <header className="app-topbar">
       {showMenuButton ? (
         <IconButton
           icon="menu"
@@ -52,11 +48,10 @@ export function Topbar({
           onClick={onMenu}
         />
       ) : null}
-      {search ? <GlobalSearch search={search} onSelect={(hit) => void navigate(hit.to)} /> : null}
-      <span className="wab-topbar__spacer" />
+      <span className="app-topbar__spacer" />
       <button
         type="button"
-        className="wab-topbtn wab-topbtn--text"
+        className="app-topbtn app-topbtn--text"
         aria-label={t('topbar.language')}
         title={t('topbar.language')}
         onClick={toggleLanguage}
@@ -64,7 +59,7 @@ export function Topbar({
         {t('topbar.otherLanguageShort')}
       </button>
       <IconButton
-        className="wab-topbtn"
+        className="app-topbtn"
         icon={theme === 'dark' ? 'sun' : 'moon'}
         label={t(theme === 'dark' ? 'topbar.lightTheme' : 'topbar.darkTheme')}
         onClick={toggleTheme}
@@ -72,19 +67,19 @@ export function Topbar({
       <AlertsBell count={alertCount ?? 0} />
       <Menu
         label={name}
-        triggerClassName="wab-topbar__admin"
+        triggerClassName="app-topbar__admin"
         trigger={
           <>
             <AdminAvatar name={name} small />
-            <span className="wab-topbar__admin-name">{name}</span>
+            <span className="app-topbar__admin-name">{name}</span>
             <Icon name="chevronDown" size="sm" />
           </>
         }
         header={
           <>
-            <span className="wab-menu__header-name">{name}</span>
+            <span className="app-menu__header-name">{name}</span>
             {adminEmail ? (
-              <span className="wab-menu__header-email" dir="ltr">
+              <span className="app-menu__header-email" dir="ltr">
                 {adminEmail}
               </span>
             ) : null}

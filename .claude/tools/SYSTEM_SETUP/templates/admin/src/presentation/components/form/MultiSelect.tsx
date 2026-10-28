@@ -51,14 +51,14 @@ export function MultiSelect({
     <Field label={label} error={error} hint={hint}>
       {(control) => (
         <div
-          className="wab-combobox"
+          className="app-combobox"
           onBlur={(event) => {
             box.onBlur(event);
             onBlur?.(event);
           }}
         >
           {chosen.length > 0 ? (
-            <div className="wab-row wab-multi__chips">
+            <div className="app-row app-multi__chips">
               {chosen.map((o) => (
                 <Chip
                   key={o.value}
@@ -73,7 +73,7 @@ export function MultiSelect({
           ) : null}
           <input
             {...control}
-            className="wab-field__control"
+            className="app-field__control"
             role="combobox"
             disabled={disabled}
             autoComplete="off"

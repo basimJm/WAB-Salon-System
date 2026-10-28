@@ -111,9 +111,9 @@ export function DataTable<Row>({
   const columnCount = visible.length + (selection ? 1 : 0) + (rowActions ? 1 : 0);
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- scrollable region must be keyboard reachable
-    <div className="wab-table-wrap" tabIndex={0} role="region" aria-label={caption}>
-      <table className={cx('wab-table', `wab-table--${density}`)} aria-busy={loading || undefined}>
-        <caption className="wab-sr-only">{caption}</caption>
+    <div className="app-table-wrap" tabIndex={0} role="region" aria-label={caption}>
+      <table className={cx('app-table', `app-table--${density}`)} aria-busy={loading || undefined}>
+        <caption className="app-sr-only">{caption}</caption>
         <TableHead
           columns={visible}
           sort={sort}

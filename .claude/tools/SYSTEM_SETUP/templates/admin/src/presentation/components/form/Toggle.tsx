@@ -10,9 +10,9 @@ export interface ToggleProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
 export function Toggle({ label, kind = 'checkbox', className, ...rest }: ToggleProps) {
   const id = useId();
   return (
-    <label htmlFor={id} className={cx('wab-toggle', `wab-toggle--${kind}`, className)}>
+    <label htmlFor={id} className={cx('app-toggle', `app-toggle--${kind}`, className)}>
       <input id={id} type="checkbox" role={kind === 'switch' ? 'switch' : undefined} {...rest} />
-      <span className="wab-toggle__mark" aria-hidden="true" />
+      <span className="app-toggle__mark" aria-hidden="true" />
       <span>{label}</span>
     </label>
   );

@@ -14,15 +14,15 @@ export function PageHeader({
   badges?: ReactNode;
 }) {
   return (
-    <header className="wab-pageheader">
-      <div className="wab-pageheader__text">
-        <div className="wab-pageheader__titlerow">
-          <h1 className="wab-pageheader__title">{title}</h1>
+    <header className="app-pageheader">
+      <div className="app-pageheader__text">
+        <div className="app-pageheader__titlerow">
+          <h1 className="app-pageheader__title">{title}</h1>
           {badges}
         </div>
-        {subtitle ? <p className="wab-pageheader__subtitle">{subtitle}</p> : null}
+        {subtitle ? <p className="app-pageheader__subtitle">{subtitle}</p> : null}
       </div>
-      {actions ? <div className="wab-pageheader__actions">{actions}</div> : null}
+      {actions ? <div className="app-pageheader__actions">{actions}</div> : null}
     </header>
   );
 }

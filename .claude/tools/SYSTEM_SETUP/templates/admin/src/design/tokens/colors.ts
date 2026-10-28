@@ -1,4 +1,4 @@
-/** Brand + semantic colors cloned from the WAB design system (design/wab-admin-kit.js). */
+/** Brand + semantic colors of the design system (adjust per product). */
 export const BRAND = {
   primary: '#6D28D9',
   primaryEnd: '#A855F7',

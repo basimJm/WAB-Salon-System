@@ -7,7 +7,7 @@ test('rich text (English): toolbar formats, preview updates, tabs keep their own
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
-  const card = page.locator('.wab-card[aria-label="Rich text and schedule"]');
+  const card = page.locator('.app-card[aria-label="Rich text and schedule"]');
   await card.scrollIntoViewIfNeeded();
 
   await card.getByRole('tab', { name: 'English' }).click();
@@ -38,7 +38,7 @@ test('rich text (Arabic dark): the editor and preview fit the page and keep Arab
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
-  const card = page.locator('.wab-card[aria-label="النص المنسّق والجدولة"]');
+  const card = page.locator('.app-card[aria-label="النص المنسّق والجدولة"]');
   await card.scrollIntoViewIfNeeded();
   const width = page.viewportSize()!.width;
   const preview = await card.getByRole('region', { name: 'المعاينة' }).boundingBox();

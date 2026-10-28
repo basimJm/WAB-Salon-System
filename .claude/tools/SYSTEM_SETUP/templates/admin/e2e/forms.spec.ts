@@ -9,7 +9,7 @@ test('form kit: search debounces, combobox picks by keyboard, validation message
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
   await expect(page.locator('html')).toHaveAttribute('dir', 'ltr');
-  const card = page.locator('.wab-card[aria-label="Form kit"]');
+  const card = page.locator('.app-card[aria-label="Form kit"]');
   await card.scrollIntoViewIfNeeded();
 
   const search = card.getByRole('searchbox', { name: 'Search salons' });
@@ -50,7 +50,7 @@ test('form kit in Arabic dark: multi select chips, listbox stays inside the view
   await signIn(page, DESIGN_SYSTEM_PATH);
   await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
-  const card = page.locator('.wab-card[aria-label="عناصر النماذج"]');
+  const card = page.locator('.app-card[aria-label="عناصر النماذج"]');
   await card.scrollIntoViewIfNeeded();
   const tags = card.getByRole('combobox', { name: 'الوسوم' });
   await tags.click();
@@ -62,6 +62,6 @@ test('form kit in Arabic dark: multi select chips, listbox stays inside the view
   expect(box!.x).toBeGreaterThanOrEqual(0);
   expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width);
   await list.getByRole('option').first().click();
-  await expect(card.locator('.wab-chip')).not.toHaveCount(0);
+  await expect(card.locator('.app-chip')).not.toHaveCount(0);
   expect(await noHorizontalScroll(page)).toBe(true);
 });

@@ -1,4 +1,4 @@
-/** Converts the JSON Schema subset the WAB server emits (OpenAPI 3.1) into zod 4 source code. */
+/** Converts the JSON Schema subset the server emits (OpenAPI 3.1) into zod 4 source code. */
 
 export interface JsonSchema {
   type?: string | string[];

@@ -14,20 +14,20 @@ import { DetailPage } from '../../components/templates/DetailPage';
 import { JsonViewer } from '../../components/templates/JsonViewer';
 import { Timeline, type TimelineEntry } from '../../components/templates/Timeline';
 
-interface BookingRow {
+interface ItemRow {
   id: string;
-  customer: string;
+  owner: string;
   status: string;
 }
-const BOOKINGS: readonly BookingRow[] = [
-  { id: 'WAB-7K2M9Q', customer: 'a', status: 'PENDING' },
-  { id: 'WAB-3F8H1X', customer: 'b', status: 'APPROVED' },
-  { id: 'WAB-9D4T6B', customer: 'c', status: 'NO_SHOW' },
+const ITEMS: readonly ItemRow[] = [
+  { id: 'ITEM-7K2M9Q', owner: 'a', status: 'ACTIVE' },
+  { id: 'ITEM-3F8H1X', owner: 'b', status: 'INACTIVE' },
+  { id: 'ITEM-9D4T6B', owner: 'c', status: 'ARCHIVED' },
 ];
 const AUDIT_PAYLOAD = {
-  action: 'SALON_SET_OFFLINE',
-  before: { state: 'LIVE', offlineReason: null },
-  after: { state: 'OFFLINE', offlineReason: 'maintenance', tags: ['a', 'b'] },
+  action: 'ITEM_ARCHIVE',
+  before: { status: 'ACTIVE', archiveReason: null },
+  after: { status: 'ARCHIVED', archiveReason: 'inactive', tags: ['a', 'b'] },
 };
 const HISTORY: readonly Omit<TimelineEntry, 'title' | 'actor' | 'reason'>[] = [
   { id: 'h3', at: '2026-10-12T13:05:00Z', tone: 'rose' },
@@ -41,10 +41,10 @@ export function TemplatesSection() {
   const k = (key: string) => t(`designKits.templates.${key}`);
   const [tab, setTab] = useState('overview');
   const [page, setPage] = useState(1);
-  const columns: readonly Column<BookingRow>[] = [
+  const columns: readonly Column<ItemRow>[] = [
     { key: 'id', header: k('colRef'), render: (r) => r.id, ltr: true },
-    { key: 'customer', header: k('colCustomer'), render: (r) => k(`customer.${r.customer}`) },
-    { key: 'status', header: k('colStatus'), render: (r) => <StatusBadge kind="booking" value={r.status} /> },
+    { key: 'owner', header: k('colOwner'), render: (r) => k(`owner.${r.owner}`) },
+    { key: 'status', header: k('colStatus'), render: (r) => <StatusBadge kind="item" value={r.status} /> },
   ];
   const entries: TimelineEntry[] = HISTORY.map((h) => ({
     ...h,
@@ -53,7 +53,7 @@ export function TemplatesSection() {
     ...(h.id === 'h3' ? { reason: k('history.h3.reason') } : {}),
   }));
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
       <ListPage
         title={k('listTitle')}
@@ -62,7 +62,7 @@ export function TemplatesSection() {
         table={{
           caption: k('listTitle'),
           columns,
-          rows: BOOKINGS,
+          rows: ITEMS,
           rowKey: (r) => r.id,
         }}
         pagination={{
@@ -77,13 +77,13 @@ export function TemplatesSection() {
       <SectionCard title={k('tabOverview')} subtitle={k('listSubtitle')}>
         <CardGrid
           caption={k('tabOverview')}
-          rows={BOOKINGS}
+          rows={ITEMS}
           rowKey={(r) => r.id}
           renderCard={(r) => (
-            <article className="wab-gridcard">
-              <div className="wab-gridcard__body">
-                <span className="wab-gridcard__title">{r.id}</span>
-                <StatusBadge kind="booking" value={r.status} />
+            <article className="app-gridcard">
+              <div className="app-gridcard__body">
+                <span className="app-gridcard__title">{r.id}</span>
+                <StatusBadge kind="item" value={r.status} />
               </div>
             </article>
           )}
@@ -92,7 +92,7 @@ export function TemplatesSection() {
       <DetailPage
         title={GALLERY_SAMPLE_REF}
         subtitle={k('detailSubtitle')}
-        status={<StatusBadge kind="booking" value="PENDING" />}
+        status={<StatusBadge kind="item" value="ACTIVE" />}
         actions={<Button variant="danger">{k('reject')}</Button>}
         back={{ to: '#', label: k('listTitle') }}
         tabsLabel={k('tabs')}
@@ -115,7 +115,7 @@ export function TemplatesSection() {
           <KeyValue
             placeholder={k('empty')}
             items={[
-              { key: 'salon', label: k('salon'), value: k('salonName') },
+              { key: 'region', label: k('region'), value: k('regionName') },
               { key: 'amount', label: k('amount'), value: '45.500', ltr: true },
               { key: 'note', label: k('note'), value: '' },
             ]}

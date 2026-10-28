@@ -1,5 +1,5 @@
 {
-  "name": "wab-admin-dashboard",
+  "name": "__SYSTEM_SLUG__-admin-dashboard",
   "private": true,
   "version": "0.1.0",
   "type": "module",

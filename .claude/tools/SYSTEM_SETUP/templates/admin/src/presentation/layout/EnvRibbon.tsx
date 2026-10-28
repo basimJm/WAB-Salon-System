@@ -10,7 +10,7 @@ export function EnvRibbon() {
   const { t } = useTranslation();
   if (!__SHOW_ENV_RIBBON__ || config.variant.appEnv !== 'dev') return null;
   return (
-    <div className="wab-env-ribbon" role="status">
+    <div className="app-env-ribbon" role="status">
       {t('env.devRibbon')}
     </div>
   );

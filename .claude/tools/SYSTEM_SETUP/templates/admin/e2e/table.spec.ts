@@ -7,7 +7,7 @@ test('table v2 (English): select page, bulk bar, columns, density, paging, expor
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
-  const card = page.locator('.wab-card[aria-label="Data table v2"]');
+  const card = page.locator('.app-card[aria-label="Data table v2"]');
   await card.scrollIntoViewIfNeeded();
 
   await card.getByRole('checkbox', { name: 'Select all rows on this page' }).check();
@@ -25,7 +25,7 @@ test('table v2 (English): select page, bulk bar, columns, density, paging, expor
   await page.keyboard.press('Escape');
 
   await card.getByRole('radio', { name: 'Compact' }).check();
-  await expect(card.getByRole('table')).toHaveClass(/wab-table--compact/);
+  await expect(card.getByRole('table')).toHaveClass(/app-table--compact/);
 
   await expect(card.getByText('1–25 of 47')).toBeVisible();
   await card.getByRole('button', { name: /next|التالي/i }).click();
@@ -40,7 +40,7 @@ test('table v2 (Arabic dark): popover stays inside the viewport, table scrolls i
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
-  const card = page.locator('.wab-card[aria-label="جدول البيانات v2"]');
+  const card = page.locator('.app-card[aria-label="جدول البيانات v2"]');
   await card.scrollIntoViewIfNeeded();
   await card.getByRole('button', { name: 'الأعمدة' }).click();
   const panel = card.getByRole('group', { name: 'الأعمدة' });

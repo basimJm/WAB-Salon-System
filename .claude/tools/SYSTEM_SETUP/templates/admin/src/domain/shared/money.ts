@@ -1,59 +1,63 @@
-import { FILS_PER_JOD, JOD_DECIMAL_PLACES, JOD_STRING_PATTERN } from '../../constants/kernel';
+import {
+  MINOR_UNITS_PER_MAJOR,
+  MONEY_DECIMAL_PLACES,
+  MONEY_STRING_PATTERN,
+} from '../../constants/kernel';
 import type { Brand } from './brand';
 
-/** A JOD amount exactly as the API sends it: a decimal string with 1-3 decimals. Never a float. */
-export type JodString = Brand<string, 'JodString'>;
+/** A money amount exactly as the API sends it: a decimal string with 1-3 decimals. Never a float. */
+export type MoneyString = Brand<string, 'MoneyString'>;
 
-const FILS_PER_JOD_BIG = BigInt(FILS_PER_JOD);
-const MAX_FILS_BIG = BigInt(Number.MAX_SAFE_INTEGER);
+const MINOR_PER_MAJOR_BIG = BigInt(MINOR_UNITS_PER_MAJOR);
+const MAX_MINOR_BIG = BigInt(Number.MAX_SAFE_INTEGER);
 
-export interface ParseJodOptions {
+export interface ParseMoneyOptions {
   /** Ledger adjustments are signed; prices and payments are not. */
   readonly allowNegative?: boolean;
 }
 
-/** Exact conversion to integer fils, or `undefined` when `text` is not a valid amount. */
-export function tryParseJod(
+/** Exact conversion to integer minor units, or `undefined` when `text` is not a valid amount. */
+export function tryParseMoney(
   text: unknown,
-  { allowNegative = false }: ParseJodOptions = {},
+  { allowNegative = false }: ParseMoneyOptions = {},
 ): number | undefined {
   if (typeof text !== 'string') return undefined;
-  const match = JOD_STRING_PATTERN.exec(text);
+  const match = MONEY_STRING_PATTERN.exec(text);
   if (match === null) return undefined;
   const [, sign = '', whole = '', fraction = ''] = match;
   if (sign !== '' && !allowNegative) return undefined;
   const magnitude =
-    BigInt(whole) * FILS_PER_JOD_BIG + BigInt(fraction.padEnd(JOD_DECIMAL_PLACES, '0'));
-  if (magnitude > MAX_FILS_BIG) return undefined;
+    BigInt(whole) * MINOR_PER_MAJOR_BIG + BigInt(fraction.padEnd(MONEY_DECIMAL_PLACES, '0'));
+  if (magnitude > MAX_MINOR_BIG) return undefined;
   return sign === '' || magnitude === 0n ? Number(magnitude) : -Number(magnitude);
 }
 
-export const isJodString = (value: unknown, options?: ParseJodOptions): value is JodString =>
-  tryParseJod(value, options) !== undefined;
+export const isMoneyString = (value: unknown, options?: ParseMoneyOptions): value is MoneyString =>
+  tryParseMoney(value, options) !== undefined;
 
 /** `"12.5"` -> `12500`. Invalid input is a programmer/data error (the server validated it). */
-export function jodToFils(text: string, options?: ParseJodOptions): number {
-  const fils = tryParseJod(text, options);
-  if (fils === undefined) throw new RangeError('not a valid JOD amount');
-  return fils;
+export function moneyToMinor(text: string, options?: ParseMoneyOptions): number {
+  const minor = tryParseMoney(text, options);
+  if (minor === undefined) throw new RangeError('not a valid money amount');
+  return minor;
 }
 
-export const isFils = (value: unknown): value is number =>
+export const isMinorUnits = (value: unknown): value is number =>
   typeof value === 'number' && Number.isSafeInteger(value);
 
 /** `12500` -> `"12.500"`: always 3 decimals, integer arithmetic only. */
-export function filsToJod(fils: number): JodString {
-  if (!isFils(fils)) throw new RangeError('fils must be a safe integer');
-  const magnitude = Math.abs(fils);
-  const fraction = magnitude % FILS_PER_JOD;
-  const whole = (magnitude - fraction) / FILS_PER_JOD;
-  const sign = fils < 0 ? '-' : '';
-  return `${sign}${String(whole)}.${String(fraction).padStart(JOD_DECIMAL_PLACES, '0')}` as JodString;
+export function minorToMoney(minor: number): MoneyString {
+  if (!isMinorUnits(minor)) throw new RangeError('minor units must be a safe integer');
+  const magnitude = Math.abs(minor);
+  const fraction = magnitude % MINOR_UNITS_PER_MAJOR;
+  const whole = (magnitude - fraction) / MINOR_UNITS_PER_MAJOR;
+  const sign = minor < 0 ? '-' : '';
+  return `${sign}${String(whole)}.${String(fraction).padStart(MONEY_DECIMAL_PLACES, '0')}` as MoneyString;
 }
 
 /** Sums amounts without ever touching floating point. */
-export function sumJod(values: readonly string[], options?: ParseJodOptions): JodString {
-  const total = values.reduce((sum, value) => sum + jodToFils(value, options), 0);
-  if (!isFils(total)) throw new RangeError('sum is out of range');
-  return filsToJod(total);
+export function sumMoney(values: readonly string[], options?: ParseMoneyOptions): MoneyString {
+  const total = values.reduce((sum, value) => sum + moneyToMinor(value, options), 0);
+  if (!isMinorUnits(total)) throw new RangeError('sum is out of range');
+  return minorToMoney(total);
 }

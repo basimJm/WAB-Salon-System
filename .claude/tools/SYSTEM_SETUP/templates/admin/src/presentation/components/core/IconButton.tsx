@@ -28,12 +28,12 @@ export function IconButton({
       type={type}
       aria-label={badge !== undefined && badge > 0 ? `${label} ${String(badge)}` : label}
       title={label}
-      className={cx('wab-iconbtn', className)}
+      className={cx('app-iconbtn', className)}
       {...rest}
     >
       <Icon name={icon} {...(directional ? { directional } : {})} />
       {badge !== undefined && badge > 0 ? (
-        <span className="wab-iconbtn__badge">{badge}</span>
+        <span className="app-iconbtn__badge">{badge}</span>
       ) : null}
     </button>
   );

@@ -26,10 +26,10 @@ export function Text({
   return (
     <Tag
       className={cx(
-        'wab-text',
-        `wab-text--${tone}`,
-        `wab-text--${size}`,
-        strong && 'wab-text--strong',
+        'app-text',
+        `app-text--${tone}`,
+        `app-text--${size}`,
+        strong && 'app-text--strong',
         className,
       )}
       dir={ltr ? 'ltr' : undefined}

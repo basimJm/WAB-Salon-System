@@ -22,7 +22,7 @@
     "resendIn": "Resend in {{time}}",
     "brand": {
       "headline": "Full visibility of the platform, full control of every detail.",
-      "text": "Every screen, booking, payment attempt and user journey — in one place, with a full log of every action.",
+      "text": "Every record, every change and every sign-in — in one place, with a full log of every action.",
       "security": "Secure connection · Two-step verification · Session ends after {{days}} days of inactivity",
       "chip": "Admin panel"
     },

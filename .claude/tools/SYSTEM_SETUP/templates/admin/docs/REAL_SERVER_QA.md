@@ -19,7 +19,7 @@ VITE_API_BASE_URL=http://localhost:4000 VITE_SOCKET_URL=http://localhost:4000 np
 npx vite preview --mode dev-release --outDir dist/dev-release --port 4173
 ```
 
-Sign in at <http://localhost:4173> with `qa.admin@wab.example` / `QaAdminPass#2026`. The sign-in code is emailed by the server; with the fake notifier it is only in memory, so read it from Redis:
+Sign in at <http://localhost:4173> with `qa.admin@example.test` / `QaAdminPass#2026`. The sign-in code is emailed by the server; with the fake notifier it is only in memory, so read it from Redis:
 
 ```bash
 node -e 'import("./qa/lib.mjs").then(async (m) => console.log(m.adminOtp()))'
@@ -38,7 +38,7 @@ Run `npm run api:sync` first: a stale contract hides new server fields and enum 
 
 ```bash
 node qa/socket-check.mjs        # local stack only: handshake refusals, then events from a new application and a cancel
-QA_HOSTED=https://wab-server-dev.onrender.com QA_ORIGINS=http://localhost:4173 node qa/hosted-check.mjs
+QA_HOSTED=https://app-server-dev.onrender.com QA_ORIGINS=http://localhost:4173 node qa/hosted-check.mjs
 ```
 
 `hosted-check` sends no credentials (health, 401/404, CORS preflight, `/admin` websocket handshake). Admin sign-ins are

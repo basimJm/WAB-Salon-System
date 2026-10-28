@@ -56,7 +56,7 @@ describe('SettingsPage', () => {
     const slot = await box(/Time slot interval/);
     await userEvent.clear(slot);
     await userEvent.type(slot, '30');
-    const row = slot.closest('.wab-setting') as HTMLElement;
+    const row = slot.closest('.app-setting') as HTMLElement;
     await userEvent.click(within(row).getByRole('button', { name: 'Use default' }));
     expect(slot).toHaveValue('15');
   });

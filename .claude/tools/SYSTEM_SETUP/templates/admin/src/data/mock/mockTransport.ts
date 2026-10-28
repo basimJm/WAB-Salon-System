@@ -15,7 +15,7 @@ import type { ScenarioStore } from './scenarios';
 
 export interface MockRoute {
   readonly method: string;
-  /** Contract path template, e.g. `/admin/v1/salons/{id}`. */
+  /** Contract path template, e.g. `/admin/v1/items/{id}`. */
   readonly path: string;
   /** Success answer (already typed by the endpoint it was built from). */
   readonly respond: (request: MockRequest) => MockAnswer;
@@ -105,7 +105,7 @@ export class MockBusinessError extends Error {
     readonly status: number,
     readonly code: string,
     readonly fields: readonly string[] = [],
-    /** A message of `messages.ts` when the server words this refusal itself (e.g. the branch ones, SRV-151). */
+    /** A message of `messages.ts` when the server words this refusal itself. */
     readonly messageKey?: string,
   ) {
     super(code);
@@ -176,7 +176,7 @@ function successResponse(answer: MockAnswer, empty: boolean, language: Language)
 export function createMockTransport(options: MockTransportOptions): FetchFn {
   const sleep = options.sleep ?? defaultSleep;
   const latency = options.latencyMs ?? MOCK_LATENCY_MS;
-  // Like a real router, a fixed path (`/salons/applications`) wins over a parameter path (`/salons/{id}`).
+  // Like a real router, a fixed path (`/alerts/count`) wins over a parameter path (`/alerts/{id}`).
   const compiled = options.routes
     .map((route) => ({
       route,

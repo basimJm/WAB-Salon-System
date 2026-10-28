@@ -84,7 +84,7 @@ describe('ConfirmDialog', () => {
     );
     expect(screen.getByText('Text')).toBeVisible();
     const confirm = screen.getByRole('button', { name: 'Do it' });
-    expect(confirm).toHaveClass('wab-btn--primary');
+    expect(confirm).toHaveClass('app-btn--primary');
     await userEvent.click(confirm);
     expect(onConfirm).toHaveBeenCalledTimes(1);
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -102,7 +102,7 @@ describe('ConfirmDialog', () => {
       />,
     );
     const confirm = screen.getByRole('button', { name: /Do it/ });
-    expect(confirm).toHaveClass('wab-btn--danger');
+    expect(confirm).toHaveClass('app-btn--danger');
     expect(confirm).toBeDisabled();
   });
 
@@ -121,8 +121,8 @@ describe('ConfirmDialog', () => {
 
 describe('ReasonDialog variants', () => {
   it.each([
-    [false, 'wab-btn--primary'],
-    [true, 'wab-btn--danger'],
+    [false, 'app-btn--primary'],
+    [true, 'app-btn--danger'],
   ])('destructive=%s uses %s and still requires a reason', async (destructive, className) => {
     const onConfirm = vi.fn();
     renderWithApp(
@@ -191,7 +191,7 @@ describe('Menu', () => {
     const onSelect = vi.fn();
     renderWithApp(<MenuHarness onSelect={onSelect} />);
     await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
-    expect(screen.getByRole('menuitem', { name: 'Delete' })).toHaveClass('wab-menu__item--danger');
+    expect(screen.getByRole('menuitem', { name: 'Delete' })).toHaveClass('app-menu__item--danger');
     expect(screen.getByRole('menuitem', { name: 'Edit' })).toBeDisabled();
     await userEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
     expect(onSelect).not.toHaveBeenCalled();

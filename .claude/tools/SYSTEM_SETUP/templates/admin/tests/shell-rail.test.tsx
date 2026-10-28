@@ -29,7 +29,7 @@ describe('tablet shell = icon rail', () => {
 
   it('docks the sidebar collapsed (no drawer, no menu button) when nothing was saved', async () => {
     const aside = await open();
-    expect(aside).toHaveClass('wab-sidebar--docked', 'wab-sidebar--collapsed');
+    expect(aside).toHaveClass('app-sidebar--docked', 'app-sidebar--collapsed');
     expect(aside).not.toHaveAttribute('inert');
     expect(screen.queryByRole('button', { name: en.topbar.openMenu })).toBeNull();
   });
@@ -37,13 +37,13 @@ describe('tablet shell = icon rail', () => {
   it('the rail expands from its own toggle and remembers the choice', async () => {
     const aside = await open();
     await userEvent.click(screen.getByRole('button', { name: en.nav.expandSidebar }));
-    expect(aside).not.toHaveClass('wab-sidebar--collapsed');
+    expect(aside).not.toHaveClass('app-sidebar--collapsed');
     expect(window.localStorage.getItem(STORAGE_KEYS.sidebarCollapsed)).toBe('false');
   });
 
   it('a saved "expanded" choice wins over the tablet default', async () => {
     window.localStorage.setItem(STORAGE_KEYS.sidebarCollapsed, 'false');
     const aside = await open();
-    expect(aside).not.toHaveClass('wab-sidebar--collapsed');
+    expect(aside).not.toHaveClass('app-sidebar--collapsed');
   });
 });

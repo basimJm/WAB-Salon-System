@@ -8,7 +8,7 @@ test('status badges: every registered kind is shown, in Arabic then English, in 
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   const section = page.locator('[aria-label="شارات الحالة"]');
-  await expect(section.locator('.wab-row')).toHaveCount(STATUS_KINDS.length);
+  await expect(section.locator('.app-row')).toHaveCount(STATUS_KINDS.length);
   await expect(section.getByText('لم يحضر')).toBeVisible();
   expect(await noHorizontalScroll(page)).toBe(true);
 
@@ -16,6 +16,6 @@ test('status badges: every registered kind is shown, in Arabic then English, in 
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
   const english = page.locator('[aria-label="Status badges"]');
   await expect(english.getByText('No-show')).toBeVisible();
-  await expect(english.locator('.wab-badge--rose').first()).toBeVisible();
+  await expect(english.locator('.app-badge--rose').first()).toBeVisible();
   expect(await noHorizontalScroll(page)).toBe(true);
 });

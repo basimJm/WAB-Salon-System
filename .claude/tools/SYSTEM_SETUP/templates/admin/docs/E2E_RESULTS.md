@@ -6,9 +6,9 @@ Owner request: adopt the new server changes and test every admin feature end to 
 
 - Server: local real stack from `qa/stack.sh` (includes SRV-170, admin contract 1.7.0) at `127.0.0.1:4000`, MinIO `:9000`, Redis `:6380`. Not restarted, seeds not re-run.
 - Panel: `dev-release` built with `VITE_API_BASE_URL`/`VITE_SOCKET_URL` = the local server, served with `vite preview` on `localhost:4174`.
-- Admin: `qa.admin@wab.example` (password from `qa/stack.sh`), email OTP read with `qa/lib.mjs adminOtp()`.
+- Admin: `qa.admin@example.test` (password from `qa/stack.sh`), email OTP read with `qa/lib.mjs adminOtp()`.
 - Tools: a Playwright sweep (real Chrome, headless) over every module route plus the first detail page of each record list, in six combinations (AR light 1440, EN dark 1440, AR dark 768, EN light 768, AR light 375, EN dark 375), measuring horizontal overflow, error states, sign-out, console errors/warnings and failed requests; then the actions below driven by hand in the Playwright browser (EN, 1440).
-- Render dev (`wab-server-dev.onrender.com`) was not used (old server; no credentials sent there).
+- Render dev (`app-server-dev.onrender.com`) was not used (old server; no credentials sent there).
 
 ## Results
 
@@ -52,7 +52,7 @@ Owner request: adopt the new server changes and test every admin feature end to 
 | S1 | `POST /admin/v1/bookings/{id}/refund` `{"amount":"1.000","reason":"…"}` on a FULLY_PAID seeded booking (WAB-2Y0C81) | refund created, or a business error (4xx with a code) when the provider cannot refund | `500 INTERNAL`; log: `RangeError: unknown payment session` from `FakePaymentProvider.refund` (seeded payments have no provider session). Errors from the provider should map to a refund failure, not a 500 |
 | S2 | `POST /admin/v1/exports` kind `BOOKINGS` format `CSV` | export READY | export FAILED; worker log `storage request rejected: STORAGE_VALIDATION_FAILED` (XLSX and PDF of the same data succeed) |
 | S3 | `GET /admin/v1/salons/{id}/branches` | `meta` as the contract says (`hasMeta: true`), or the contract without `meta` | `data` only, no `meta` (admin now tolerates both) |
-| S4 | demo seed staff photos, e.g. `http://127.0.0.1:9000/wab-public/demo/members/joury-staff0.jpg` (booking `photoUrl`) | image | `404 application/xml` (object never uploaded) |
+| S4 | demo seed staff photos, e.g. `http://127.0.0.1:9000/app-public/demo/members/joury-staff0.jpg` (booking `photoUrl`) | image | `404 application/xml` (object never uploaded) |
 | S5 | admin `GET /admin/v1/bookings?q=Joury` (a salon name) | PRD A15 lists salon as a filter (served by `salonId`); note only | `q` matches reference (exact) + customer name/phone only; partial references (`BW1JEZ`) do not match |
 | S6 | global limit 300 requests/min/IP | — (observation) | a fast sweep with a full reload per page hit 429; normal in-app navigation stays under it, but several admins behind one IP could reach it |
 

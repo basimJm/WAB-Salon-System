@@ -14,12 +14,12 @@ export function ErrorState({ error, onRetry }: ErrorStateProps) {
   const { t } = useTranslation();
   const appError: AppError = normalizeError(error);
   return (
-    <div className="wab-state wab-state--error" role="alert">
+    <div className="app-state app-state--error" role="alert">
       <Icon name="alert" size="lg" />
-      <h2 className="wab-state__title">{t('errors.title')}</h2>
-      <p className="wab-state__text">{appError.serverMessage ?? t(appError.messageKey)}</p>
+      <h2 className="app-state__title">{t('errors.title')}</h2>
+      <p className="app-state__text">{appError.serverMessage ?? t(appError.messageKey)}</p>
       {appError.traceId ? (
-        <p className="wab-state__trace" dir="ltr">
+        <p className="app-state__trace" dir="ltr">
           {t('errors.traceId')}: {appError.traceId}
         </p>
       ) : null}

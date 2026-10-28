@@ -26,9 +26,9 @@ export function TableToolbar({
   const { t } = useTranslation();
   const { language } = useLanguage();
   return (
-    <div className="wab-table-toolbar">
+    <div className="app-table-toolbar">
       {selectedCount > 0 ? (
-        <div className="wab-row wab-table-toolbar__bulk" role="status">
+        <div className="app-row app-table-toolbar__bulk" role="status">
           <span>{t('table.selected', { count: formatNumber(selectedCount, language) })}</span>
           {bulkActions}
           {onClearSelection ? (
@@ -38,7 +38,7 @@ export function TableToolbar({
           ) : null}
         </div>
       ) : null}
-      <div className="wab-row wab-table-toolbar__tools">
+      <div className="app-row app-table-toolbar__tools">
         {tools}
         {onExport ? (
           <Button variant="secondary" size="sm" onClick={onExport}>

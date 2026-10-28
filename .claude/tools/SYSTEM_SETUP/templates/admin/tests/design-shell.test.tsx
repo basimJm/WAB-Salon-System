@@ -15,7 +15,7 @@ import { OtpStep } from '@/presentation/pages/login/OtpStep';
 import { axeViolations } from './helpers/axe';
 import { renderWithApp } from './helpers/render';
 
-const ADMIN = { name: 'Laith Hassan', email: 'laith@wab.example' };
+const ADMIN = { name: 'Laith Hassan', email: 'laith@example.test' };
 const at = (ui: React.ReactElement, path = '/live') => (
   <MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>
 );
@@ -55,7 +55,7 @@ describe('design shell: sidebar (WAB Admin Sidebar)', () => {
         '/bookings',
       ),
     );
-    expect(screen.getByRole('link', { name: 'Bookings' })).toHaveClass('wab-navitem--active');
+    expect(screen.getByRole('link', { name: 'Bookings' })).toHaveClass('app-navitem--active');
   });
 });
 
@@ -113,14 +113,14 @@ describe('design kit pieces', () => {
     expect(container.textContent).toBe('L');
     rerender(<AdminAvatar name="" small />);
     expect(container.textContent).toBe('');
-    expect(container.firstElementChild).toHaveClass('wab-admin-avatar--sm');
+    expect(container.firstElementChild).toHaveClass('app-admin-avatar--sm');
   });
 
   it('icons use the design stroke width; TextField can show a start icon', () => {
     const { container } = render(<Icon name="grid" />);
     expect(container.querySelector('svg')).toHaveAttribute('stroke-width', ICON_STROKE_WIDTH);
     renderWithApp(<TextField label="Email" startIcon="mail" />);
-    expect(screen.getByLabelText('Email')).toHaveClass('wab-field__control--with-start');
+    expect(screen.getByLabelText('Email')).toHaveClass('app-field__control--with-start');
   });
 
   it('OTP code is one input drawn as six boxes', async () => {
@@ -136,11 +136,11 @@ describe('design kit pieces', () => {
         onResend={() => Promise.resolve(true)}
       />,
     );
-    const boxes = document.querySelectorAll('.wab-otp__box');
+    const boxes = document.querySelectorAll('.app-otp__box');
     expect(boxes).toHaveLength(6);
     expect(boxes[0]).toHaveTextContent('1');
-    expect(boxes[1]).toHaveClass('wab-otp__box--filled');
-    expect(boxes[2]).toHaveClass('wab-otp__box--current');
+    expect(boxes[1]).toHaveClass('app-otp__box--filled');
+    expect(boxes[2]).toHaveClass('app-otp__box--current');
     await userEvent.type(screen.getByLabelText('Verification code'), '3a');
     expect(onCode).toHaveBeenLastCalledWith('12');
   });
@@ -164,6 +164,6 @@ describe('design kit pieces', () => {
         }}
       />,
     );
-    expect(screen.getByText('3,842')).toHaveClass('wab-listcard__count');
+    expect(screen.getByText('3,842')).toHaveClass('app-listcard__count');
   });
 });

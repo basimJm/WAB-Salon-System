@@ -14,12 +14,12 @@ export interface ChipProps {
 
 export function Chip({ children, tone = 'grey', onRemove, removeLabel }: ChipProps) {
   return (
-    <span className={cx('wab-chip', `wab-chip--${tone}`)}>
+    <span className={cx('app-chip', `app-chip--${tone}`)}>
       <span>{children}</span>
       {onRemove ? (
         <button
           type="button"
-          className="wab-chip__remove"
+          className="app-chip__remove"
           onClick={onRemove}
           aria-label={removeLabel}
         >

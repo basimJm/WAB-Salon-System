@@ -69,11 +69,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       {createPortal(
-        <div className="wab-toasts" aria-live="polite">
+        <div className="app-toasts" aria-live="polite">
           {items.map((i) => (
             <div
               key={i.id}
-              className={cx('wab-toast', `wab-toast--${i.tone}`)}
+              className={cx('app-toast', `app-toast--${i.tone}`)}
               role={i.tone === 'error' ? 'alert' : 'status'}
             >
               <span>{i.message}</span>

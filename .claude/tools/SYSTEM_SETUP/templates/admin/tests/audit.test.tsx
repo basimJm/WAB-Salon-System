@@ -36,7 +36,7 @@ describe('AuditPage', () => {
     open();
     await waitFor(() => expect(bodyRows()).toBe(3));
     expect(screen.getByText('Read-only')).toBeInTheDocument();
-    expect(screen.getByText('SALON_SET_OFFLINE')).toHaveClass('wab-cell2__code');
+    expect(screen.getByText('SALON_SET_OFFLINE')).toHaveClass('app-cell2__code');
     expect(screen.getByRole('columnheader', { name: 'Device' })).toBeInTheDocument();
   });
 

@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
   };
 
   return (
-    <div role="radiogroup" aria-label={ariaLabel} className="wab-segmented">
+    <div role="radiogroup" aria-label={ariaLabel} className="app-segmented">
       {options.map((option, index) => {
         const selected = option.value === value;
         return (
@@ -55,7 +55,7 @@ export function SegmentedControl<T extends string>({
             aria-label={iconOnly ? option.label : undefined}
             title={iconOnly ? option.label : undefined}
             tabIndex={selected ? 0 : -1}
-            className={cx('wab-segmented__item', selected && 'wab-segmented__item--on')}
+            className={cx('app-segmented__item', selected && 'app-segmented__item--on')}
             onClick={() => onChange(option.value)}
             onKeyDown={(e) => move(e, index)}
           >

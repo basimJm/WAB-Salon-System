@@ -18,7 +18,7 @@ export const MS_PER_SECOND = 1000;
 /** Largest delay `setTimeout` accepts (2^31 - 1 ms); longer delays fire at once. */
 export const MAX_TIMER_DELAY_MS = 2_147_483_647;
 /** Web Locks name: one refresh at a time across every open tab (a reused refresh token revokes the family). */
-export const SESSION_REFRESH_LOCK = 'wab.admin.session.refresh';
+export const SESSION_REFRESH_LOCK = 'admin.session.refresh';
 
 /** Why a session ended without the admin pressing "Sign out". Shown on the login page. */
 export const SESSION_END_REASONS = ['expired', 'idle'] as const;

@@ -25,9 +25,9 @@ export function OverlaysSection() {
     close();
   };
   return (
-    <Card className="wab-stack" aria-label={k('title')}>
+    <Card className="app-stack" aria-label={k('title')}>
       <Heading level={2}>{k('title')}</Heading>
-      <div className="wab-row">
+      <div className="app-row">
         <Button variant="secondary" onClick={() => setActive('confirm')}>
           {k('openConfirm')}
         </Button>

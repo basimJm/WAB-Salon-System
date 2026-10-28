@@ -17,9 +17,9 @@ export function KeyValue({
   placeholder: string;
 }) {
   return (
-    <dl className="wab-keyvalue">
+    <dl className="app-keyvalue">
       {items.map((item) => (
-        <div key={item.key} className="wab-keyvalue__row">
+        <div key={item.key} className="app-keyvalue__row">
           <dt>{item.label}</dt>
           <dd dir={item.ltr ? 'ltr' : undefined}>
             {item.value === null || item.value === undefined || item.value === ''

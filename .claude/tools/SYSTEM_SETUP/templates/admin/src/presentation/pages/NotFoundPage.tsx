@@ -12,7 +12,7 @@ export default function NotFoundPage() {
       title={t('notFound.title')}
       text={t('notFound.text')}
       action={
-        <Link className="wab-link" to={ROUTES.root}>
+        <Link className="app-link" to={ROUTES.root}>
           {t('notFound.home')}
         </Link>
       }

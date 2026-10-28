@@ -199,7 +199,7 @@ describe('DonutChart', () => {
       />,
     );
     expect(document.querySelectorAll('svg path')).toHaveLength(0);
-    expect(document.querySelector('.wab-chart__empty')).not.toBeNull();
+    expect(document.querySelector('.app-chart__empty')).not.toBeNull();
     await userEvent.click(screen.getByRole('button', { name: 'View data' }));
     expect(screen.getByText('0%', { selector: 'td' })).toBeVisible();
   });
@@ -223,8 +223,8 @@ describe('FunnelChart', () => {
     expect(items).toHaveLength(2);
     expect(items[1]).toHaveTextContent('500');
     expect(items[1]).toHaveTextContent('50%');
-    expect((items[1]!.querySelector('.wab-funnel__bar') as HTMLElement).style.width).toBe('50%');
-    expect((items[0]!.querySelector('.wab-funnel__bar') as HTMLElement).style.width).toBe('100%');
+    expect((items[1]!.querySelector('.app-funnel__bar') as HTMLElement).style.width).toBe('50%');
+    expect((items[0]!.querySelector('.app-funnel__bar') as HTMLElement).style.width).toBe('100%');
   });
 });
 
@@ -243,11 +243,11 @@ describe('CohortHeatmap', () => {
         filename="f"
       />,
     );
-    const cells = [...document.querySelectorAll('td.wab-heat')];
+    const cells = [...document.querySelectorAll('td.app-heat')];
     expect(cells).toHaveLength(6);
-    expect(cells[0]).toHaveClass('wab-heat--4');
-    expect(cells[2]).toHaveClass('wab-heat--0');
-    expect(cells[4]).toHaveClass('wab-heat--none');
+    expect(cells[0]).toHaveClass('app-heat--4');
+    expect(cells[2]).toHaveClass('app-heat--0');
+    expect(cells[4]).toHaveClass('app-heat--none');
     expect(screen.getByRole('rowheader', { name: 'Week 2' })).toBeVisible();
     unmount();
     renderWithApp(

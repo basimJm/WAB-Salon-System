@@ -7,7 +7,7 @@ test('page templates (English): list, detail tabs, timeline times in Amman, JSON
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /switch language|تبديل اللغة/i }).click();
-  const card = page.locator('.wab-card[aria-label="Page templates"]');
+  const card = page.locator('.app-card[aria-label="Page templates"]');
   await card.scrollIntoViewIfNeeded();
 
   await expect(card.getByRole('heading', { level: 1, name: 'Bookings' })).toBeVisible();
@@ -36,10 +36,10 @@ test('page templates (Arabic dark): side panel sits beside the body on wide scre
 }) => {
   await signIn(page, DESIGN_SYSTEM_PATH);
   await page.getByRole('button', { name: /dark theme|الوضع الداكن/i }).click();
-  const card = page.locator('.wab-card[aria-label="قوالب الصفحات"]');
+  const card = page.locator('.app-card[aria-label="قوالب الصفحات"]');
   await card.scrollIntoViewIfNeeded();
-  const aside = card.locator('.wab-detail__aside');
-  const tabs = card.locator('.wab-tabs');
+  const aside = card.locator('.app-detail__aside');
+  const tabs = card.locator('.app-tabs');
   await expect(aside).toBeVisible();
   const a = await aside.boundingBox();
   const t = await tabs.boundingBox();

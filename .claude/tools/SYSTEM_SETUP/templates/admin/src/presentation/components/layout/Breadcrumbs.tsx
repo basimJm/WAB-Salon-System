@@ -13,7 +13,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: readonly Crumb[] }) {
   const { t } = useTranslation();
   if (crumbs.length < 2) return null;
   return (
-    <nav aria-label={t('nav.breadcrumbs')} className="wab-breadcrumbs">
+    <nav aria-label={t('nav.breadcrumbs')} className="app-breadcrumbs">
       <ol>
         {crumbs.map((crumb, index) => {
           const last = index === crumbs.length - 1;
