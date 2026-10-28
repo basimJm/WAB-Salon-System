@@ -47,7 +47,7 @@ Each project: `docs/` (PRD = behaviour source of truth, BRD, Design Script, `*_T
 - Backend: `__SERVER_DIR__/CLAUDE.md` (layers route → middleware → controller → service → repository → schema; one module per client namespace; AR+EN locales; constants, no magic numbers; tests for business rules; regenerate the API docs on every endpoint change and commit them).
 - Mobile: `<app>/CLAUDE.md` (Clean Architecture + MVI, no hardcoding, AR+EN resources, all variants build, file-size limit, portrait + landscape; Firebase, payments and maps behind interfaces).
 - Admin: `__ADMIN_DIR__/CLAUDE.md` (local gate, browser check before every commit, RTL default, server pagination, DTOs regenerated from the contract).
-- SDKs: `<pkg>/.claude/Rules.md` (ports + adapters, dev on localhost, prod strict, `npm run verify` + loop test, `Integration.md` kept current). No business rules inside packages.
+- SDKs (`__SYSTEM_SLUG__-<name>/`, published as `@__SYSTEM_SLUG__/<name>`): `<pkg>/.claude/Rules.md` (ports + adapters, dev on localhost, prod strict, `npm run verify` + loop test, `Integration.md` kept current). No business rules inside packages.
 - Environments dev and prod; gates are local unless the owner enables CI for a project.
 
 ## 6. Open decisions (owner; do not invent answers)

@@ -15,7 +15,7 @@
 | `INTEGRATION.md` | How the parts talk: masters, contracts, edges, auth, real-time/push/jobs/storage, environments, the generated board (§7). |
 | `BUSINESS_DOMAIN.md` | Single source for schemas, enums, rules, state machines, permissions, jobs, settings keys, error codes. |
 | `docs/` | How to write a project's PRD/BRD/backlog and its `.claude/` files; the templates. |
-| `__SERVER_DIR__/`, `__ADMIN_DIR__/`, apps, SDK packages | One folder per project (see `CLAUDE.md` §2 and `INTEGRATION.md` §1). |
+| `__SERVER_DIR__/`, `__ADMIN_DIR__/`, apps, SDK packages (`__SYSTEM_SLUG__-<name>/`) | One folder per project (see `CLAUDE.md` §2 and `INTEGRATION.md` §1). |
 
 ## 2. How a session works
 1. **One project per session.** `cd <project>`; only that project's `CLAUDE.md` + `.claude/{session,memory}.md` load on top of the root files. Nothing else is read up front.
