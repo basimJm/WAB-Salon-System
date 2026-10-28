@@ -10,3 +10,4 @@ docs
 contract
 src/data/contract/generated
 reports
+.claude
