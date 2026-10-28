@@ -52,7 +52,7 @@ export class ProviderUnavailableError extends InternalError {
   }
 }
 
-type Mode = AppConfig['providers']['storage'];
+type Mode = AppConfig['providers'][keyof AppConfig['providers']];
 
 /**
  * Builds the providers named by the config. Fakes are for development and tests only: they are
@@ -66,7 +66,8 @@ export const createProviders = (
 ): Providers => {
   const closers: (() => Promise<void>)[] = [];
   const runtime = (name: string): ProviderDeps => {
-    if (deps === undefined) throw new ProviderUnavailableError(name, 'runtime dependencies missing');
+    if (deps === undefined)
+      throw new ProviderUnavailableError(name, 'runtime dependencies missing');
     return deps;
   };
   const pick = <T>(name: string, mode: Mode, fake: () => T, real: () => T): T => {

@@ -18,8 +18,6 @@ export interface TeamRouterOptions {
   readonly writeLimiter: RequestHandler;
 }
 
-const validatedOf = <T>(req: Request): T => req.validated as T;
-
 /** Owner-only: list, add and change staff of the merchant account. */
 export const createTeamRouter = (options: TeamRouterOptions): Router => {
   const router = Router();
@@ -42,7 +40,7 @@ export const createTeamRouter = (options: TeamRouterOptions): Router => {
     asyncHandler(async (req: Request, res: Response) => {
       const owner = await options.members.findById(req.member?.id ?? '');
       if (owner === null) throw new UnauthorizedError();
-      const body = validatedOf<{ body: z.infer<typeof addMemberSchema> }>(req).body;
+      const body = (req.validated as { body: z.infer<typeof addMemberSchema> }).body;
       const member = await options.service.add({
         ...body,
         tenantId: tenantOf(req),
@@ -59,12 +57,16 @@ export const createTeamRouter = (options: TeamRouterOptions): Router => {
     requireOwner,
     validate({ params: memberIdParams, body: updateMemberSchema }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { params, body } = validatedOf<{
+      const { params, body } = req.validated as {
         params: z.infer<typeof memberIdParams>;
         body: z.infer<typeof updateMemberSchema>;
-      }>(req);
+      };
       sendSuccess(req, res, {
-        data: await options.service.update({ tenantId: tenantOf(req), memberId: params.id, ...body }),
+        data: await options.service.update({
+          tenantId: tenantOf(req),
+          memberId: params.id,
+          ...body,
+        }),
       });
     }),
   );

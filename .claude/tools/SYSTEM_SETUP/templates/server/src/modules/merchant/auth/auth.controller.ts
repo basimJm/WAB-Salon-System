@@ -5,7 +5,12 @@ import type {
   MerchantSession,
 } from '../../../domain/auth/merchantAuth.service';
 import { sendCreated, sendSuccess } from '../../../utils/response/successResponse';
-import type { checkPhoneSchema, loginSchema, refreshSchema, registerSchema } from './auth.validation';
+import type {
+  checkPhoneSchema,
+  loginSchema,
+  refreshSchema,
+  registerSchema,
+} from './auth.validation';
 
 const bodyOf = <S extends z.ZodType>(req: Request): z.infer<S> =>
   (req.validated as { body: z.infer<S> }).body;
@@ -35,11 +40,16 @@ export const createMerchantAuthController = (
     sendCreated(req, res, sessionData(session));
   },
   async login(req, res) {
-    const session = await service.login({ ...bodyOf<typeof loginSchema>(req), language: req.language });
+    const session = await service.login({
+      ...bodyOf<typeof loginSchema>(req),
+      language: req.language,
+    });
     sendSuccess(req, res, { data: sessionData(session) });
   },
   async refresh(req, res) {
-    sendSuccess(req, res, { data: sessionData(await service.refresh(bodyOf<typeof refreshSchema>(req))) });
+    sendSuccess(req, res, {
+      data: sessionData(await service.refresh(bodyOf<typeof refreshSchema>(req))),
+    });
   },
   async logout(req, res) {
     await service.logout(bodyOf<typeof refreshSchema>(req));

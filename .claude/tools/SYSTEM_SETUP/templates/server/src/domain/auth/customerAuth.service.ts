@@ -5,7 +5,12 @@ import type { OtpProvider } from '../../providers';
 import type { CustomersRepository } from '../../repositories/identity.repository';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import type { Entity } from '../../utils/database/plain';
-import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError } from '../../utils/errors';
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../../utils/errors';
 import type { CustomerRaw } from '../../models/customer.model';
 import type { OtpGate } from '../otp/otpGate.service';
 import type { SettingsService } from '../settings';
@@ -51,7 +56,11 @@ export interface CustomerAuthService {
   login(input: LoginInput): Promise<CustomerSession>;
   refresh(input: { refreshToken: string }): Promise<CustomerSession>;
   logout(input: { refreshToken: string }): Promise<void>;
-  changePhone(input: { customerId: string; phone: string; otpToken: string }): Promise<CustomerProfile>;
+  changePhone(input: {
+    customerId: string;
+    phone: string;
+    otpToken: string;
+  }): Promise<CustomerProfile>;
 }
 
 export interface CustomerAuthDeps {

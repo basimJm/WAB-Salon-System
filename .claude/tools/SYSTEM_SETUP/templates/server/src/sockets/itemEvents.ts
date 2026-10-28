@@ -35,7 +35,8 @@ export const createItemEvents = (deps: {
   };
   const toOwner = (item: AdminItemView, event: string): void => {
     const payload = { id: item.id, status: item.status };
-    if (item.owner.type === 'CUSTOMER') emit('customer', SOCKET_ROOMS.customer(item.owner.id), event, payload);
+    if (item.owner.type === 'CUSTOMER')
+      emit('customer', SOCKET_ROOMS.customer(item.owner.id), event, payload);
     else emit('merchant', SOCKET_ROOMS.tenant(item.owner.id), event, payload);
     emit('admin', SOCKET_ROOMS.admin, event, { ...payload, owner: item.owner });
   };
@@ -47,7 +48,9 @@ export const createItemEvents = (deps: {
       toOwner(item, ITEM_SOCKET_EVENTS.updated);
     },
     overviewTick: () => {
-      emit('admin', SOCKET_ROOMS.admin, ADMIN_SOCKET_EVENTS.overviewTick, { at: now().toISOString() });
+      emit('admin', SOCKET_ROOMS.admin, ADMIN_SOCKET_EVENTS.overviewTick, {
+        at: now().toISOString(),
+      });
     },
   };
 };

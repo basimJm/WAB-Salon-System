@@ -148,8 +148,18 @@ export class FakePaymentProvider implements PaymentProvider {
     }
     const sessionId = typeof parsed.sessionId === 'string' ? parsed.sessionId : '';
     const session = this.sessions.get(sessionId);
-    if (session === undefined) return Promise.resolve({ kind: 'IGNORED', sessionId, status: 'PENDING', gatewayCode: FAKE_GATEWAY_CODES.pending, gatewayMessage: 'unknown session' });
-    const status = parsed.status === 'SUCCEEDED' || parsed.status === 'FAILED' || parsed.status === 'CANCELLED' ? parsed.status : 'PENDING';
+    if (session === undefined)
+      return Promise.resolve({
+        kind: 'IGNORED',
+        sessionId,
+        status: 'PENDING',
+        gatewayCode: FAKE_GATEWAY_CODES.pending,
+        gatewayMessage: 'unknown session',
+      });
+    const status =
+      parsed.status === 'SUCCEEDED' || parsed.status === 'FAILED' || parsed.status === 'CANCELLED'
+        ? parsed.status
+        : 'PENDING';
     const replayed = session.status === status;
     session.status = status;
     return Promise.resolve({

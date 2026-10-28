@@ -48,7 +48,9 @@ export const exampleFromSchema = (schema: unknown, doc: Json, depth = 0): unknow
     }
   }
   const declared: unknown = schema['type'];
-  const type = Array.isArray(declared) ? (declared as unknown[]).find((t) => t !== 'null') : declared;
+  const type = Array.isArray(declared)
+    ? (declared as unknown[]).find((t) => t !== 'null')
+    : declared;
   switch (type) {
     case 'object': {
       const properties = isJson(schema['properties']) ? schema['properties'] : {};
@@ -86,12 +88,15 @@ interface PostmanParameter {
 
 const parametersOf = (operation: Json, location: string): PostmanParameter[] => {
   const list = Array.isArray(operation['parameters']) ? operation['parameters'] : [];
-  return list.filter(isJson).filter((p) => p['in'] === location).map((p) => ({
-    key: String(p['name']),
-    value: '',
-    ...(typeof p['description'] === 'string' ? { description: p['description'] } : {}),
-    ...(p['required'] === true ? {} : { disabled: true }),
-  }));
+  return list
+    .filter(isJson)
+    .filter((p) => p['in'] === location)
+    .map((p) => ({
+      key: String(p['name']),
+      value: '',
+      ...(typeof p['description'] === 'string' ? { description: p['description'] } : {}),
+      ...(p['required'] === true ? {} : { disabled: true }),
+    }));
 };
 
 const buildRequest = (
@@ -117,7 +122,12 @@ const buildRequest = (
     method: method.toUpperCase(),
     header: headers,
     ...(secured && tokenVariable !== ''
-      ? { auth: { type: 'bearer', bearer: [{ key: 'token', value: `{{${tokenVariable}}}`, type: 'string' }] } }
+      ? {
+          auth: {
+            type: 'bearer',
+            bearer: [{ key: 'token', value: `{{${tokenVariable}}}`, type: 'string' }],
+          },
+        }
       : {}),
     url: {
       raw: `${BASE_URL}${path.replace(/\{(\w+)\}/g, ':$1')}`,
@@ -154,7 +164,10 @@ export const buildPostmanCollection = (name: DocName, document: OpenApiDocument)
       const tags = Array.isArray(operation['tags']) ? operation['tags'] : [];
       const folder = String(tags[0] ?? 'General');
       const item = {
-        name: typeof operation['summary'] === 'string' ? operation['summary'] : `${method.toUpperCase()} ${path}`,
+        name:
+          typeof operation['summary'] === 'string'
+            ? operation['summary']
+            : `${method.toUpperCase()} ${path}`,
         request: buildRequest(name, doc, path, method, operation),
       };
       folders.set(folder, [...(folders.get(folder) ?? []), item]);
@@ -180,7 +193,11 @@ export const buildPostmanCollection = (name: DocName, document: OpenApiDocument)
 export const buildPostmanEnvironment = (): Json => ({
   name: POSTMAN_ENVIRONMENT_NAME,
   values: [
-    { key: POSTMAN_VARIABLES.baseUrl, value: `http://localhost:${String(DEFAULT_PORT)}`, enabled: true },
+    {
+      key: POSTMAN_VARIABLES.baseUrl,
+      value: `http://localhost:${String(DEFAULT_PORT)}`,
+      enabled: true,
+    },
     { key: POSTMAN_VARIABLES.language, value: POSTMAN_DEFAULT_LANGUAGE, enabled: true },
     ...Object.values(POSTMAN_VARIABLES.tokens)
       .filter((key) => key !== '')

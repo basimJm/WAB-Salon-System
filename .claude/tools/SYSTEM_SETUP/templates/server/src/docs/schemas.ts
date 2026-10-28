@@ -47,7 +47,10 @@ export const successResponseSchema = <T extends z.ZodType>(
 export const acceptLanguageHeader = z
   .enum(LANGUAGES)
   .optional()
-  .openapi({ param: { name: 'Accept-Language', in: 'header' }, description: 'Response language; default ar.' });
+  .openapi({
+    param: { name: 'Accept-Language', in: 'header' },
+    description: 'Response language; default ar.',
+  });
 
 export const jsonResponse = (description: string, schema: z.ZodType): ResponseConfig => ({
   description,

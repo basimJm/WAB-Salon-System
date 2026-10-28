@@ -11,7 +11,13 @@ import { MS_PER_SECOND } from '../../../constants/time';
 import { ExternalServiceError } from '../../../utils/errors';
 import type { Logger } from '../../../utils/logger';
 import { redisKey } from '../../../utils/redis/keys';
-import type { OtpCodeInput, OtpCodeResult, OtpCodeRules, OtpProvider, OtpSendInput } from '../types';
+import type {
+  OtpCodeInput,
+  OtpCodeResult,
+  OtpCodeRules,
+  OtpProvider,
+  OtpSendInput,
+} from '../types';
 import { OtpDeliveryError, type OtpChannel } from './channel';
 import { createProofs } from './proofs';
 import type { CodeStore } from './store';
@@ -46,7 +52,8 @@ const checkOptions = (options: CodeOtpOptions): void => {
   if (options.fixedCode !== undefined && !DIGITS.test(options.fixedCode))
     throw new RangeError('fixedCode must be digits');
   if (!options.isProduction) return;
-  if (options.channel.isFake === true) throw new RangeError('a fake channel is refused in production');
+  if (options.channel.isFake === true)
+    throw new RangeError('a fake channel is refused in production');
   if (options.store.scope === 'local')
     throw new RangeError('a process-local code store is refused in production');
   if (options.fixedCode !== undefined) throw new RangeError('fixedCode is refused in production');
@@ -71,7 +78,8 @@ export const createCodeOtp = (options: CodeOtpOptions): OtpProvider => {
       .update(`${purpose}\n${phone}\n${code}`)
       .digest();
   const newCode = (length: number): string => {
-    if (options.fixedCode !== undefined) return options.fixedCode.padStart(length, '0').slice(-length);
+    if (options.fixedCode !== undefined)
+      return options.fixedCode.padStart(length, '0').slice(-length);
     return String(draw(OTP_CODE_RADIX ** length)).padStart(length, '0');
   };
 
@@ -101,7 +109,10 @@ export const createCodeOtp = (options: CodeOtpOptions): OtpProvider => {
         logger?.error({ err: error, channel: channel.name }, 'otp channel failed');
         throw new ExternalServiceError({ cause: error, unavailable: true });
       }
-      logger?.info({ channel: channel.name, purpose: input.purpose, phone: input.phone }, 'otp code sent');
+      logger?.info(
+        { channel: channel.name, purpose: input.purpose, phone: input.phone },
+        'otp code sent',
+      );
       return { expiresInSeconds: rules.codeTtlSec };
     },
 
@@ -115,7 +126,10 @@ export const createCodeOtp = (options: CodeOtpOptions): OtpProvider => {
         return { outcome: 'INVALID_CODE' };
       // Only the caller that removes the code wins; a concurrent duplicate sees it gone.
       if (!(await store.delete(key))) return { outcome: 'EXPIRED' };
-      const issued = proofsFor(rules.proofTtlSec).issue({ phone: input.phone, purpose: input.purpose });
+      const issued = proofsFor(rules.proofTtlSec).issue({
+        phone: input.phone,
+        purpose: input.purpose,
+      });
       return { outcome: 'VERIFIED', ...issued };
     },
 

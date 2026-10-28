@@ -21,9 +21,9 @@ export const generateDocFiles = (): Record<string, string> => {
   const files: Record<string, string> = {};
   for (const name of DOC_NAMES) {
     files[`${DOCS_OUTPUT_DIR}/openapi.${name}.json`] = toFile(documents[name]);
-    files[`${POSTMAN_OUTPUT_DIR}/${POSTMAN_FILE_PREFIX}-${titleCase(name)}.postman_collection.json`] = toFile(
-      buildPostmanCollection(name, documents[name]),
-    );
+    files[
+      `${POSTMAN_OUTPUT_DIR}/${POSTMAN_FILE_PREFIX}-${titleCase(name)}.postman_collection.json`
+    ] = toFile(buildPostmanCollection(name, documents[name]));
   }
   files[`${POSTMAN_OUTPUT_DIR}/${POSTMAN_ENVIRONMENT_FILE}`] = toFile(buildPostmanEnvironment());
   return files;

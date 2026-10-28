@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { AUDIT_ACTION_MAX_LENGTH, AUDIT_ENTITY_ID_MAX_LENGTH, AUDIT_ENTITY_TYPE_MAX_LENGTH } from '../../../constants/audit';
+import {
+  AUDIT_ACTION_MAX_LENGTH,
+  AUDIT_ENTITY_ID_MAX_LENGTH,
+  AUDIT_ENTITY_TYPE_MAX_LENGTH,
+} from '../../../constants/audit';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import { ADMIN_PAGE_SIZE } from '../../../constants/pagination';
 import { paginationQuery } from '../../../utils/pagination';

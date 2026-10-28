@@ -12,7 +12,9 @@ import {
 import { z } from '../../../docs/zod';
 import { settingKeyParams, updateSettingSchema } from './settings.validation';
 
-const entry = z.object({ key: z.string(), value: z.unknown(), default: z.unknown() }).openapi('Setting');
+const entry = z
+  .object({ key: z.string(), value: z.unknown(), default: z.unknown() })
+  .openapi('Setting');
 
 export const registerAdminSettingsDocs = (registry: OpenAPIRegistry): void => {
   const base = `${API_PREFIXES.admin}${ADMIN_SETTINGS_ROUTES.base}`;
@@ -30,20 +32,27 @@ export const registerAdminSettingsDocs = (registry: OpenAPIRegistry): void => {
     tags: ['Settings'],
     summary: 'Every setting with its effective value and default',
     request: { headers },
-    responses: { [HTTP_STATUS.ok]: jsonResponse('Settings', successResponseSchema(z.array(entry))), ...failures },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse('Settings', successResponseSchema(z.array(entry))),
+      ...failures,
+    },
   });
   registry.registerPath({
     method: 'put',
     path: `${base}${ADMIN_SETTINGS_ROUTES.byKey.replace(':key', '{key}')}`,
     tags: ['Settings'],
-    summary: 'Change one setting (validated by its own rule; reason required; audited; applies to every instance at once)',
+    summary:
+      'Change one setting (validated by its own rule; reason required; audited; applies to every instance at once)',
     request: {
       headers,
       params: settingKeyParams,
       body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: updateSettingSchema } } },
     },
     responses: {
-      [HTTP_STATUS.ok]: jsonResponse('Saved', successResponseSchema(z.object({ key: z.string(), value: z.unknown() }))),
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Saved',
+        successResponseSchema(z.object({ key: z.string(), value: z.unknown() })),
+      ),
       ...failures,
     },
   });

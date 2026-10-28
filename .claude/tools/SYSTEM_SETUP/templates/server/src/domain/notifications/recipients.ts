@@ -1,5 +1,8 @@
 import type { NotificationRecipientType } from '../../constants/enums';
-import type { CustomersRepository, MembersRepository } from '../../repositories/identity.repository';
+import type {
+  CustomersRepository,
+  MembersRepository,
+} from '../../repositories/identity.repository';
 import type { Recipient, RecipientSource } from './notifications.service';
 
 /** Recipients come from the customers and members collections (language + push token). */

@@ -36,7 +36,7 @@ export interface ItemOwner {
 }
 
 export interface ItemInput {
-  readonly title: string;
+  readonly title?: string | undefined;
   readonly description?: string | undefined;
   readonly tags?: readonly string[] | undefined;
   /** A confirmed `ITEM_IMAGE` upload key of the same owner. */
@@ -58,8 +58,8 @@ export interface ItemsService {
     params: PaginationParams,
   ): Promise<{ items: ItemView[]; meta: PaginationMeta }>;
   get(owner: ItemOwner, id: string): Promise<ItemView>;
-  create(owner: ItemOwner, input: ItemInput): Promise<ItemView>;
-  update(owner: ItemOwner, id: string, input: Partial<ItemInput>): Promise<ItemView>;
+  create(owner: ItemOwner, input: ItemInput & { readonly title: string }): Promise<ItemView>;
+  update(owner: ItemOwner, id: string, input: ItemInput): Promise<ItemView>;
   /** Owners archive their own items (soft delete); nothing is ever hard-deleted. */
   archive(owner: ItemOwner, id: string): Promise<ItemView>;
   adminList(
@@ -130,7 +130,9 @@ export const createItemsService = (deps: ItemsDeps): ItemsService => {
 
   const recipientOf = (item: Entity<ItemRaw>): { type: 'CUSTOMER' | 'MEMBER'; id: string } =>
     // A merchant item belongs to the tenant, whose owner member has the tenant id as its own id.
-    item.ownerType === 'CUSTOMER' ? { type: 'CUSTOMER', id: item.ownerId } : { type: 'MEMBER', id: item.ownerId };
+    item.ownerType === 'CUSTOMER'
+      ? { type: 'CUSTOMER', id: item.ownerId }
+      : { type: 'MEMBER', id: item.ownerId };
 
   return {
     async list(owner, filter, params) {
@@ -165,7 +167,8 @@ export const createItemsService = (deps: ItemsDeps): ItemsService => {
 
     async update(owner, id, input) {
       const item = await owned(owner, id);
-      if (item.status === 'ARCHIVED') throw new BusinessRuleError({ code: ERROR_CODES.ITEM_ARCHIVED });
+      if (item.status === 'ARCHIVED')
+        throw new BusinessRuleError({ code: ERROR_CODES.ITEM_ARCHIVED });
       if (input.imageKey != null && input.imageKey !== item.imageKey)
         await checkImage(owner, input.imageKey, []);
       const updated = await items.updateById(id, {
@@ -201,7 +204,8 @@ export const createItemsService = (deps: ItemsDeps): ItemsService => {
     async adminArchive(id, context) {
       const item = await items.findById(id);
       if (item === null) throw notFound();
-      if (item.status === 'ARCHIVED') throw new BusinessRuleError({ code: ERROR_CODES.ITEM_ARCHIVED });
+      if (item.status === 'ARCHIVED')
+        throw new BusinessRuleError({ code: ERROR_CODES.ITEM_ARCHIVED });
       const updated = await items.updateById(id, {
         status: 'ARCHIVED',
         archivedReason: context.reason,
@@ -233,7 +237,8 @@ export const createItemsService = (deps: ItemsDeps): ItemsService => {
     async adminRestore(id, context) {
       const item = await items.findById(id);
       if (item === null) throw notFound();
-      if (item.status === 'ACTIVE') throw new BusinessRuleError({ code: ERROR_CODES.ITEM_ARCHIVED });
+      if (item.status === 'ACTIVE')
+        throw new BusinessRuleError({ code: ERROR_CODES.ITEM_ARCHIVED });
       const updated = await items.updateById(id, { status: 'ACTIVE' });
       if (updated === null) throw notFound();
       await audit.record({

@@ -14,5 +14,9 @@ export const addMemberSchema = z.object({
   permissions,
 });
 export const updateMemberSchema = z
-  .object({ name: personNameSchema.optional(), permissions: permissions.optional(), active: z.boolean().optional() })
+  .object({
+    name: personNameSchema.optional(),
+    permissions: permissions.optional(),
+    active: z.boolean().optional(),
+  })
   .refine((body) => Object.keys(body).length > 0, { message: 'nothing to update' });

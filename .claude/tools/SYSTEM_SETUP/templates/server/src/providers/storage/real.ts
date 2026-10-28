@@ -11,7 +11,8 @@ export interface RealStorageDeps {
  * store). Implement `StorageProvider` here and read its settings from `src/config`; until then
  * `STORAGE_PROVIDER=real` fails at startup (see src/providers/README.md).
  */
-export const createRealStorage = (_deps: RealStorageDeps): StorageProvider => {
+export const createRealStorage = (deps: RealStorageDeps): StorageProvider => {
+  deps.logger.error({ provider: 'storage' }, 'real adapter not integrated');
   throw new Error(
     'storage adapter not integrated: implement createRealStorage in src/providers/storage/real.ts',
   );

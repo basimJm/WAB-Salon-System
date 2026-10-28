@@ -86,7 +86,12 @@ export const registerCustomerAuthDocs = (registry: OpenAPIRegistry): void => {
     '`otpToken` = the single-use proof from `POST /auth/otp/verify` (purpose LOGIN) for this phone. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `ACCOUNT_BLOCKED` (403), `PHONE_NOT_REGISTERED` (404).',
     loginSchema,
     ok,
-    [HTTP_STATUS.unauthorized, HTTP_STATUS.forbidden, HTTP_STATUS.notFound, HTTP_STATUS.tooManyRequests],
+    [
+      HTTP_STATUS.unauthorized,
+      HTTP_STATUS.forbidden,
+      HTTP_STATUS.notFound,
+      HTTP_STATUS.tooManyRequests,
+    ],
   );
   route(
     CUSTOMER_AUTH_ROUTES.register,

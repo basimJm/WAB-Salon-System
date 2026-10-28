@@ -79,12 +79,13 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
     patch: { permissions?: Permission[]; active?: boolean; name?: string },
   ): Promise<Entity<MemberRaw> | null> {
     if (!isValidId(id) || !isValidId(tenantId)) return Promise.resolve(null);
-    const fields = Object.fromEntries(
-      Object.entries(patch).filter(([, value]) => value !== undefined),
-    );
+    const fields: Record<string, unknown> = {};
+    if (patch.permissions !== undefined) fields['permissions'] = patch.permissions;
+    if (patch.active !== undefined) fields['active'] = patch.active;
+    if (patch.name !== undefined) fields['name'] = patch.name;
     return this.model
       .findOneAndUpdate(
-        { _id: id, tenantId, role: { $ne: 'OWNER' } },
+        { _id: id, tenantId, role: 'STAFF' },
         { $set: fields },
         { new: true, runValidators: true },
       )

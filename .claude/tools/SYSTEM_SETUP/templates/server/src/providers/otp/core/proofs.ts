@@ -57,7 +57,8 @@ const decode = (part: string): unknown => {
  * the single-use flag, which lives as long as the proof could.
  */
 export const createProofs = (options: ProofOptions): Proofs => {
-  if (options.secret.length < OTP_SECRET_MIN_LENGTH) throw new RangeError('proof secret is too short');
+  if (options.secret.length < OTP_SECRET_MIN_LENGTH)
+    throw new RangeError('proof secret is too short');
   if (!Number.isInteger(options.ttlSec) || options.ttlSec <= 0)
     throw new RangeError('proof ttlSec must be a positive integer');
   const now = options.now ?? ((): Date => new Date());

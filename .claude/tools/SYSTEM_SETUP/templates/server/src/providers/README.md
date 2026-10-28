@@ -2,13 +2,13 @@
 
 Every external service sits behind one interface (`<name>/types.ts`) that services receive by injection. `*_PROVIDER=fake|real` (`PAYMENT_PROVIDER` also `disabled`) picks the implementation in `src/providers/index.ts`:
 
-| Provider | Port | Fake (dev/test) | Real (production) |
-|---|---|---|---|
-| `otp` | `OtpProvider` | `FakeOtpProvider`: the full code flow (HMAC codes with TTL, single use, signed `otpToken`) over a channel that records codes (`OTP_FIXED_CODE` for local QA) | `createRealOtp`: the same core over the channel you plug into `otp/real.ts` (`createRealOtpChannel`), e.g. the `__NPM_SCOPE__/otp` SDK |
-| `storage` | `StorageProvider` | `FakeStorageProvider` (in-memory presign / confirm / CDN URLs) | `createRealStorage` in `storage/real.ts`, e.g. the `__NPM_SCOPE__/storage` SDK (S3 + CDN) |
-| `notifier` | `Notifier` | `FakeNotifier` (records pushes and emails; idempotent) | `createRealNotifier` in `notifier/real.ts`, e.g. the `__NPM_SCOPE__/notifications` SDK (FCM + SMTP) |
-| `payments` | `PaymentProvider` | `FakePaymentProvider` (scenario by reference suffix `@fail`, `@cancel`, `@pending`) | `createRealPayments` in `payments/real.ts`, e.g. the `__NPM_SCOPE__/payments` SDK; `disabled` answers 503 |
-| `analytics` | `AnalyticsProvider` | `FakeAnalyticsProvider` (in memory) | `createMongoAnalytics` over the append-only `serverEvents` collection (replace with the `__NPM_SCOPE__/analytics` SDK when one exists) |
+| Provider    | Port                | Fake (dev/test)                                                                                                                                              | Real (production)                                                                                                                      |
+| ----------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `otp`       | `OtpProvider`       | `FakeOtpProvider`: the full code flow (HMAC codes with TTL, single use, signed `otpToken`) over a channel that records codes (`OTP_FIXED_CODE` for local QA) | `createRealOtp`: the same core over the channel you plug into `otp/real.ts` (`createRealOtpChannel`), e.g. the `__NPM_SCOPE__/otp` SDK |
+| `storage`   | `StorageProvider`   | `FakeStorageProvider` (in-memory presign / confirm / CDN URLs)                                                                                               | `createRealStorage` in `storage/real.ts`, e.g. the `__NPM_SCOPE__/storage` SDK (S3 + CDN)                                              |
+| `notifier`  | `Notifier`          | `FakeNotifier` (records pushes and emails; idempotent)                                                                                                       | `createRealNotifier` in `notifier/real.ts`, e.g. the `__NPM_SCOPE__/notifications` SDK (FCM + SMTP)                                    |
+| `payments`  | `PaymentProvider`   | `FakePaymentProvider` (scenario by reference suffix `@fail`, `@cancel`, `@pending`)                                                                          | `createRealPayments` in `payments/real.ts`, e.g. the `__NPM_SCOPE__/payments` SDK; `disabled` answers 503                              |
+| `analytics` | `AnalyticsProvider` | `FakeAnalyticsProvider` (in memory)                                                                                                                          | `createMongoAnalytics` over the append-only `serverEvents` collection (replace with the `__NPM_SCOPE__/analytics` SDK when one exists) |
 
 ## Plugging an SDK adapter
 

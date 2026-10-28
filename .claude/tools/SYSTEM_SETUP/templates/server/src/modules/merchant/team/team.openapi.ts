@@ -34,7 +34,10 @@ export const registerMerchantTeamDocs = (registry: OpenAPIRegistry): void => {
     summary: 'Team members (owner only: 403 `OWNER_REQUIRED`)',
     request: { headers },
     responses: {
-      [HTTP_STATUS.ok]: jsonResponse('Members', successResponseSchema(z.array(memberProfileSchema))),
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Members',
+        successResponseSchema(z.array(memberProfileSchema)),
+      ),
       ...failures,
     },
   });
@@ -43,8 +46,12 @@ export const registerMerchantTeamDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags,
     summary: 'Add a staff member with a permission grant (owner only)',
-    description: 'Unknown permission keys are 400; owner-only capabilities answer 400 with code `OWNER_REQUIRED` in the detail. A number already used answers 409 `PHONE_ALREADY_REGISTERED`.',
-    request: { headers, body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: addMemberSchema } } } },
+    description:
+      'Unknown permission keys are 400; owner-only capabilities answer 400 with code `OWNER_REQUIRED` in the detail. A number already used answers 409 `PHONE_ALREADY_REGISTERED`.',
+    request: {
+      headers,
+      body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: addMemberSchema } } },
+    },
     responses: { [HTTP_STATUS.created]: one, ...failures },
   });
   registry.registerPath({

@@ -52,10 +52,11 @@ export interface ApiServices {
 }
 
 /** A service that is not wired: every call answers 503 instead of crashing or faking an answer. */
-export const unavailable = <T extends object>(): T =>
-  new Proxy({} as T, {
-    get: () => () => Promise.reject(new ExternalServiceError({ unavailable: true })),
-  });
+const UNAVAILABLE_HANDLER: ProxyHandler<object> = {
+  get: () => () => Promise.reject(new ExternalServiceError({ unavailable: true })),
+};
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- the caller names the port it stands in for
+export const unavailable = <T extends object>(): T => new Proxy({}, UNAVAILABLE_HANDLER) as T;
 
 /** A guard that is not wired: the route answers 503 rather than opening up. */
 export const unavailableGuard: RequestHandler = (_req, _res, next) => {

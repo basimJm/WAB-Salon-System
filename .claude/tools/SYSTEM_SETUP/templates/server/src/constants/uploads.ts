@@ -72,5 +72,9 @@ export const BYTES_PER_MB = 1_048_576;
 export const UPLOAD_URL_TTL_SEC = 300;
 /** Per-IP budget of presign/confirm; its own counter. */
 export const UPLOAD_ROUTE_RATE_LIMIT = { windowMs: 60_000, max: 20 } as const;
-export const UPLOAD_ROUTES = { base: '/uploads', presign: '/presign', confirm: '/confirm' } as const;
+export const UPLOAD_ROUTES = {
+  base: '/uploads',
+  presign: '/presign',
+  confirm: '/confirm',
+} as const;
 export const UPLOAD_CONTENT_TYPE_MAX_LENGTH = 100;

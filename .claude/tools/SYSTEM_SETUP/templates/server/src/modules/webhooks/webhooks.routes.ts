@@ -15,7 +15,10 @@ export interface WebhooksRouterOptions {
  * Gateway callbacks. The provider authenticates the raw body (signature over the exact bytes) before
  * anything is trusted; an unverifiable call is 401 and changes nothing.
  */
-export const createWebhooksRouter = ({ payments, onPaymentEvent }: WebhooksRouterOptions): Router => {
+export const createWebhooksRouter = ({
+  payments,
+  onPaymentEvent,
+}: WebhooksRouterOptions): Router => {
   const router = Router();
   router.post(
     PAYMENT_WEBHOOK_ROUTE,

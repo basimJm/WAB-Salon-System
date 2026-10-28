@@ -7,6 +7,11 @@ export const updateProfileSchema = z
   .object({
     name: personNameSchema.optional(),
     email: emailSchema.nullable().optional(),
-    avatarKey: z.string().max(OBJECT_KEY_MAX_LENGTH).regex(OBJECT_KEY_PATTERN).nullable().optional(),
+    avatarKey: z
+      .string()
+      .max(OBJECT_KEY_MAX_LENGTH)
+      .regex(OBJECT_KEY_PATTERN)
+      .nullable()
+      .optional(),
   })
   .refine((body) => Object.keys(body).length > 0, { message: 'nothing to update' });

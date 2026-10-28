@@ -87,7 +87,12 @@ export const registerMerchantAuthDocs = (registry: OpenAPIRegistry): void => {
     'Staff are added by the owner first. Errors: `OTP_INVALID`, `OTP_EXPIRED` (401), `OTP_BLOCKED` (429), `MEMBER_INACTIVE` (403), `PHONE_NOT_REGISTERED` (404).',
     loginSchema,
     ok,
-    [HTTP_STATUS.unauthorized, HTTP_STATUS.forbidden, HTTP_STATUS.notFound, HTTP_STATUS.tooManyRequests],
+    [
+      HTTP_STATUS.unauthorized,
+      HTTP_STATUS.forbidden,
+      HTTP_STATUS.notFound,
+      HTTP_STATUS.tooManyRequests,
+    ],
   );
   route(
     MERCHANT_AUTH_ROUTES.refresh,

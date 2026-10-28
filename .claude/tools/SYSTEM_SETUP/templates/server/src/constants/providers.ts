@@ -61,6 +61,8 @@ export const PUSH_KINDS = ['VISIBLE', 'DATA_ONLY'] as const;
 export type PushKind = (typeof PUSH_KINDS)[number];
 export const PUSH_PRIORITIES = ['NORMAL', 'HIGH'] as const;
 export type PushPriority = (typeof PUSH_PRIORITIES)[number];
+export const PUSH_INTERRUPTION_LEVELS = ['TIME_SENSITIVE'] as const;
+export type PushInterruptionLevel = (typeof PUSH_INTERRUPTION_LEVELS)[number];
 export const PUSH_TOKEN_RESULTS = ['SENT', 'INVALID_TOKEN', 'FAILED'] as const;
 export type PushTokenResult = (typeof PUSH_TOKEN_RESULTS)[number];
 /** FCM accepts at most 500 tokens in one multicast call. */

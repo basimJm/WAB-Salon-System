@@ -12,8 +12,7 @@ import type {
 
 type Handler = (req: Request, res: Response) => Promise<void>;
 type Body<S extends z.ZodType> = z.infer<S>;
-const validatedOf = <T>(req: Request): T => req.validated as T;
-const idOf = (req: Request): string => validatedOf<{ params: { id: string } }>(req).params.id;
+const idOf = (req: Request): string => (req.validated as { params: { id: string } }).params.id;
 
 /** The owner routes (customer app, merchant app): the owner comes from the request's identity. */
 export const createOwnerItemsController = (
@@ -21,7 +20,8 @@ export const createOwnerItemsController = (
   ownerOf: (req: Request) => ItemOwner,
 ): Record<'list' | 'get' | 'create' | 'update' | 'archive', Handler> => ({
   async list(req, res) {
-    const { page, pageSize, ...filter } = validatedOf<{ query: Body<typeof itemListQuery> }>(req).query;
+    const { page, pageSize, ...filter } = (req.validated as { query: Body<typeof itemListQuery> })
+      .query;
     const result = await service.list(ownerOf(req), filter, { page, pageSize });
     sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);
   },
@@ -29,11 +29,11 @@ export const createOwnerItemsController = (
     sendSuccess(req, res, { data: await service.get(ownerOf(req), idOf(req)) });
   },
   async create(req, res) {
-    const body = validatedOf<{ body: Body<typeof createItemSchema> }>(req).body;
+    const body = (req.validated as { body: Body<typeof createItemSchema> }).body;
     sendCreated(req, res, await service.create(ownerOf(req), body));
   },
   async update(req, res) {
-    const body = validatedOf<{ body: Body<typeof updateItemSchema> }>(req).body;
+    const body = (req.validated as { body: Body<typeof updateItemSchema> }).body;
     sendSuccess(req, res, { data: await service.update(ownerOf(req), idOf(req), body) });
   },
   async archive(req, res) {
@@ -47,14 +47,14 @@ export const createAdminItemsController = (
 ): Record<'list' | 'get' | 'archive' | 'restore', Handler> => {
   const contextOf = (req: Request): AdminContext => ({
     adminId: req.auth?.subjectId ?? '',
-    reason: validatedOf<{ body: Body<typeof adminReasonSchema> }>(req).body.reason,
+    reason: (req.validated as { body: Body<typeof adminReasonSchema> }).body.reason,
     ip: req.ip ?? '',
     userAgent: req.get('user-agent') ?? '',
   });
   return {
     async list(req, res) {
-      const { page, pageSize, ...filter } = validatedOf<{ query: Body<typeof adminItemListQuery> }>(
-        req,
+      const { page, pageSize, ...filter } = (
+        req.validated as { query: Body<typeof adminItemListQuery> }
       ).query;
       const result = await service.adminList(filter, { page, pageSize });
       sendPaginated(req, res, result.items, { page, pageSize }, result.meta.total);

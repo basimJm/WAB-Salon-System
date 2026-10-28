@@ -16,7 +16,8 @@ export interface ClosableNotifier extends Notifier {
  * any vendor). Implement `ClosableNotifier` here; until then `NOTIFIER_PROVIDER=real` fails at
  * startup (see src/providers/README.md).
  */
-export const createRealNotifier = (_deps: RealNotifierDeps): ClosableNotifier => {
+export const createRealNotifier = (deps: RealNotifierDeps): ClosableNotifier => {
+  deps.logger.error({ provider: 'notifier' }, 'real adapter not integrated');
   throw new Error(
     'notifier adapter not integrated: implement createRealNotifier in src/providers/notifier/real.ts',
   );

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { PHONE_CHECK_PURPOSES } from '../../../constants/customerAuth';
-import { BUSINESS_NAME_MAX_LENGTH, BUSINESS_NAME_MIN_LENGTH } from '../../../constants/merchantAuth';
+import {
+  BUSINESS_NAME_MAX_LENGTH,
+  BUSINESS_NAME_MIN_LENGTH,
+} from '../../../constants/merchantAuth';
 import {
   otpTokenSchema as otpToken,
   personNameSchema,

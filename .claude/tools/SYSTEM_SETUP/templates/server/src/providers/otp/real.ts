@@ -19,7 +19,8 @@ export interface RealOtpDeps {
  * vendor client) into `createRealOtpChannel`; until then `OTP_PROVIDER=real` fails at startup with
  * a clear message instead of silently sending nothing.
  */
-export const createRealOtpChannel = (_deps: RealOtpDeps): OtpChannel => {
+export const createRealOtpChannel = (deps: RealOtpDeps): OtpChannel => {
+  deps.logger.error({ provider: 'otp' }, 'real adapter not integrated');
   throw new Error(
     'OTP channel not integrated: implement createRealOtpChannel in src/providers/otp/real.ts (see src/providers/README.md)',
   );

@@ -7,12 +7,12 @@ import { BaseRepository, type Page } from './base.repository';
 import type { Entity } from '../utils/database/plain';
 
 export interface ItemFilter {
-  readonly ownerType?: ItemOwnerType;
-  readonly ownerId?: string;
-  readonly status?: ItemStatus;
-  readonly tag?: string;
+  readonly ownerType?: ItemOwnerType | undefined;
+  readonly ownerId?: string | undefined;
+  readonly status?: ItemStatus | undefined;
+  readonly tag?: string | undefined;
   /** Case-insensitive title search. */
-  readonly q?: string;
+  readonly q?: string | undefined;
 }
 
 const escapeRegex = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

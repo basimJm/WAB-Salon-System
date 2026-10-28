@@ -10,10 +10,7 @@ export const effectivePermissions = (member: {
   role: MemberRole;
   permissions: readonly Permission[];
 }): readonly Permission[] =>
-  member.role === 'OWNER'
-    ? PERMISSIONS
-    : // A member stored without a grant has none (older rows may lack the field).
-      ((member.permissions as readonly Permission[] | undefined) ?? []);
+  member.role === 'OWNER' ? PERMISSIONS : member.permissions;
 
 export const hasAllPermissions = (
   member: { role: MemberRole; permissions: readonly Permission[] },

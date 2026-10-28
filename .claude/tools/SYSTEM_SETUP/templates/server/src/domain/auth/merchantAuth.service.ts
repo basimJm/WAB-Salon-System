@@ -10,7 +10,12 @@ import type { OtpProvider } from '../../providers';
 import type { MembersRepository } from '../../repositories/identity.repository';
 import { isDuplicateKeyError } from '../../utils/database/errors';
 import type { Entity } from '../../utils/database/plain';
-import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError } from '../../utils/errors';
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from '../../utils/errors';
 import type { OtpGate } from '../otp/otpGate.service';
 import type { SettingsService } from '../settings';
 import { createPhoneVerifier } from './phoneVerifier';

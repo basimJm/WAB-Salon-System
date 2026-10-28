@@ -40,7 +40,11 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
   mount(
     router,
     MERCHANT_ME_ROUTES.base,
-    createMerchantMeRouter({ members, guard, limiter: createBrowseRouteLimiter(services, 'merchant') }),
+    createMerchantMeRouter({
+      members,
+      guard,
+      limiter: createBrowseRouteLimiter(services, 'merchant'),
+    }),
   );
   mount(
     router,

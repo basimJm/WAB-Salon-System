@@ -63,7 +63,11 @@ const scopeOf = (type: NotificationRecipientType): 'customer' | 'merchant' =>
 export const createNotificationService = (deps: NotificationServiceDeps): NotificationService => {
   const { notifications, recipients, notifier, access, logger } = deps;
 
-  const text = (event: NotificationEvent, part: 'title' | 'body', params?: MessageParams) =>
+  const text = (
+    event: NotificationEvent,
+    part: 'title' | 'body',
+    params?: MessageParams,
+  ): Record<Language, string> =>
     Object.fromEntries(
       LANGUAGES.map((language) => [
         language,
@@ -71,10 +75,7 @@ export const createNotificationService = (deps: NotificationServiceDeps): Notifi
       ]),
     ) as Record<Language, string>;
 
-  const push = async (
-    recipient: Recipient,
-    stored: Entity<NotificationRaw>,
-  ): Promise<void> => {
+  const push = async (recipient: Recipient, stored: Entity<NotificationRaw>): Promise<void> => {
     if (recipient.pushToken === undefined) {
       await notifications.recordPush(stored.id, false, PUSH_RESULTS.noToken);
       return;

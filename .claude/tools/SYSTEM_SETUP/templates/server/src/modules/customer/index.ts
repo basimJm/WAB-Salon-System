@@ -36,7 +36,8 @@ export const createCustomerRouter = (services: ApiServices = {}): Router => {
     router,
     CUSTOMER_PROFILE_ROUTES.base,
     createCustomerProfileRouter({
-      customers: services.customers ?? unavailable<Pick<CustomersRepository, 'findById' | 'patch'>>(),
+      customers:
+        services.customers ?? unavailable<Pick<CustomersRepository, 'findById' | 'patch'>>(),
       uploads: services.uploads ?? unavailable<UploadVerifier>(),
       authenticate,
       limiter: createBrowseRouteLimiter(services, 'customer'),

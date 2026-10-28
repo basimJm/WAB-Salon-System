@@ -12,7 +12,11 @@ import { buildOpenApiDocuments } from './index';
  */
 const main = (): void => {
   const [name, note] = process.argv.slice(2);
-  if (!(DOC_NAMES as readonly string[]).includes(name ?? '') || note === undefined || note.trim() === '') {
+  if (
+    !(DOC_NAMES as readonly string[]).includes(name ?? '') ||
+    note === undefined ||
+    note.trim() === ''
+  ) {
     process.stderr.write(`usage: contract:bump <${DOC_NAMES.join('|')}> "<client impact>"\n`);
     process.exit(1);
   }

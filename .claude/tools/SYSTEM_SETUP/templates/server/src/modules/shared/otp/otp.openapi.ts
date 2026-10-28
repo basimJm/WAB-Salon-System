@@ -14,7 +14,9 @@ import { CUSTOMER_OTP_SCHEMAS, MERCHANT_OTP_SCHEMAS, type OtpSchemas } from './o
 
 const decisionSchema = successResponseSchema(
   z.object({
-    allowed: z.boolean().describe('A new code was sent. `false` = blocked or resend countdown running.'),
+    allowed: z
+      .boolean()
+      .describe('A new code was sent. `false` = blocked or resend countdown running.'),
     otpLength: z.number().int().describe('Number of code boxes; never hardcode it in the app.'),
     resendAfterSeconds: z.number().int().describe('Resend countdown in seconds.'),
     expiresInSeconds: z

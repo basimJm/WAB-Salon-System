@@ -28,11 +28,36 @@ export const createCustomerAuthRouter = ({
   const router = Router();
   const controller = createCustomerAuthController(service);
   const routes = CUSTOMER_AUTH_ROUTES;
-  router.post(routes.checkPhone, limiter, validate({ body: checkPhoneSchema }), asyncHandler(controller.checkPhone));
-  router.post(routes.login, limiter, validate({ body: loginSchema }), asyncHandler(controller.login));
-  router.post(routes.register, limiter, validate({ body: registerSchema }), asyncHandler(controller.register));
-  router.post(routes.refresh, limiter, validate({ body: refreshSchema }), asyncHandler(controller.refresh));
-  router.post(routes.logout, limiter, validate({ body: refreshSchema }), asyncHandler(controller.logout));
+  router.post(
+    routes.checkPhone,
+    limiter,
+    validate({ body: checkPhoneSchema }),
+    asyncHandler(controller.checkPhone),
+  );
+  router.post(
+    routes.login,
+    limiter,
+    validate({ body: loginSchema }),
+    asyncHandler(controller.login),
+  );
+  router.post(
+    routes.register,
+    limiter,
+    validate({ body: registerSchema }),
+    asyncHandler(controller.register),
+  );
+  router.post(
+    routes.refresh,
+    limiter,
+    validate({ body: refreshSchema }),
+    asyncHandler(controller.refresh),
+  );
+  router.post(
+    routes.logout,
+    limiter,
+    validate({ body: refreshSchema }),
+    asyncHandler(controller.logout),
+  );
   router.post(
     routes.changePhone,
     limiter,
