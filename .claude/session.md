@@ -295,3 +295,13 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog status and vendored skill docs only.
+
+### T-145 — Skill-driven performance pass merged; masters synced (2026-10-28)
+- Branch: `chore/sync-masters-into-main-14`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] CUS-097 (#550) and MER-079 (#551) merged; statuses DONE; board regenerated
+  - [ ] masters → `main` → masters; all 0 behind `main`
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog status only, no product code written.
