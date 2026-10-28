@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.designsystem.components.format
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import com.fab.wab.merchant.core.common.DateTimeText
 import com.fab.wab.merchant.core.common.TimeFormat
 import com.fab.wab.merchant.designsystem.resources.Res
@@ -19,7 +20,8 @@ private const val ZERO = '0'
 fun dateTimeText(instant: Instant): DateTimeText {
     val am = stringResource(Res.string.time_am)
     val pm = stringResource(Res.string.time_pm)
-    return TimeFormat.instantText(instant.toString(), am, pm) ?: DateTimeText(date = instant.toString(), time = "")
+    // Remembered: list cards and calendar blocks recompose on the one-minute clock tick with the same instants.
+    return remember(instant, am, pm) { TimeFormat.instantText(instant, am, pm) }
 }
 
 /** "25 JOD" / "25 د.أ" from the contract's decimal text ("25.000" → "25", "12.500" → "12.5"). */

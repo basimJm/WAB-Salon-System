@@ -22,8 +22,13 @@ class KotlinMultiplatformLibraryPlugin : Plugin<Project> {
                 configureKotlinMultiplatform(this, frameworkName)
             }
 
+            // Every Compose module gets the shared stability configuration, also when it adds the plugin by alias.
+            pluginManager.withPlugin(COMPOSE_COMPILER_PLUGIN) { configureComposeStability() }
+
             // Android-specific config (namespace, compileSdk, minSdk) is configured
             // per-module in build.gradle.kts via: kotlin { android { ... } }
         }
     }
 }
+
+private const val COMPOSE_COMPILER_PLUGIN = "org.jetbrains.kotlin.plugin.compose"
