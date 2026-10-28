@@ -29,7 +29,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 class BookingFlowDependencies(
@@ -40,7 +39,7 @@ class BookingFlowDependencies(
     val deleteDraft: DeleteBookingDraftUseCase,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
-    val today: () -> LocalDate = { BusinessTime.nowInstant().toLocalDateTime(TimeZone.of(BusinessTime.ZONE_ID)).date },
+    val today: () -> LocalDate = { BusinessTime.nowInstant().toLocalDateTime(BusinessTime.zone).date },
 )
 
 /**

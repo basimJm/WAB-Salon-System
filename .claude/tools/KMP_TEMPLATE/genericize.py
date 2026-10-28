@@ -25,6 +25,7 @@ REMOVALS = (
     f"core/domain/{MAIN}/core/domain/session/Gender.kt",
     f"core/domain/{MAIN}/core/domain/session/LaunchDestination.kt",
     f"core/domain/{TEST}/core/domain/locations",
+    f"core/domain/{TEST}/core/domain/salon",
     f"core/domain/{TEST}/core/domain/config",
     f"core/domain/{TEST}/core/domain/session",
     f"core/data/{MAIN}/core/data/catalog",
@@ -57,6 +58,7 @@ ANDROID_ENV = f"androidApp/src/main/kotlin/{PKG}/app/AppEnvironmentModule.kt"
 # (file, [(old, new), ...]); anchors must exist.
 TRANSFORMS: Dict[str, List[Tuple[str, str]]] = {
     ANDROID_APP_PLUGIN: [(
+        '    manifestPlaceholders["MERCHANT_APP_ID"] = property("${prefix}_MERCHANT_APP_ID").orEmpty()\n'
         '    // Merchant app hand-off (CUS-056): optional until the merchant app and its store listing exist.\n'
         '    buildConfigField("String", "MERCHANT_REGISTER_URL", quoted(property("${prefix}_MERCHANT_REGISTER_URL").orEmpty()))\n'
         '    buildConfigField("String", "MERCHANT_STORE_URL", quoted(property("${prefix}_MERCHANT_STORE_URL").orEmpty()))\n'
@@ -80,8 +82,11 @@ TRANSFORMS: Dict[str, List[Tuple[str, str]]] = {
         ("\t<key>MERCHANT_REGISTER_URL</key>\n\t<string>$(MERCHANT_REGISTER_URL)</string>\n"
          "\t<key>MERCHANT_STORE_URL</key>\n\t<string>$(MERCHANT_STORE_URL)</string>\n"
          "\t<key>MERCHANT_APP_SCHEME</key>\n\t<string>$(MERCHANT_APP_SCHEME)</string>\n"
-         "\t<key>LSApplicationQueriesSchemes</key>\n\t<array>\n\t\t<string>$(MERCHANT_APP_SCHEME)</string>\n\t</array>\n", ""),
-        ("We need your location to show salons near you.", "We use your location to show what is near you."),
+         "\t<key>LSApplicationQueriesSchemes</key>\n\t<array>\n\t\t<string>$(MERCHANT_APP_SCHEME)</string>\n",
+         # CUS-094: the WhatsApp / Google Maps schemes stay (core/ui external actions are generic).
+         "\t<key>LSApplicationQueriesSchemes</key>\n\t<array>\n"),
+        ("WAB uses your location to show salons near you.", "We use your location to show what is near you."),
+        ("WAB uses the camera to take your profile photo.", "We use the camera to take your profile photo."),
     ],
     f"core/common/{TEST}/core/common/AppEnvironmentTest.kt": [
         ("\n    @Test\n    fun merchantLinksAreConfiguredOnlyWithBothUrls() {\n"
@@ -134,6 +139,10 @@ TRANSFORMS: Dict[str, List[Tuple[str, str]]] = {
         ('        assertEquals(\n            "b2",\n            RealtimeEvent(RealtimeEvents.BOOKING_UPDATED, buildJsonObject '
          '{ put("bookingId", JsonPrimitive("b2")) }).entityId(),\n        )\n', ""),
         ('"all bookings: 1 duplicate dropped"', '"all entities: 1 duplicate dropped"'),
+        ('"$paymentStatus","hasBride":false,', '"$paymentStatus",'),
+    ],
+    f"core/realtime/{TEST}/core/realtime/SocketIoProtocolTest.kt": [
+        ('"PAY_ON_ARRIVAL","hasBride":false,', '"PAY_ON_ARRIVAL",'),
     ],
     f"core/design-system/src/commonMain/composeResources/values/strings.xml": [
         ("Enable location services to see salons near you", "Enable location services to see what is near you"),
@@ -142,17 +151,18 @@ TRANSFORMS: Dict[str, List[Tuple[str, str]]] = {
         ("فعّل خدمات الموقع لعرض الصالونات القريبة منك", "فعّل خدمات الموقع لعرض ما هو قريب منك"),
     ],
     "iosApp/iosApp/en.lproj/InfoPlist.strings": [
-        ("We need your location to show salons near you.", "We use your location to show what is near you."),
-        ("We need the camera to take photos for your reviews.", "We use the camera to take photos in the app."),
+        ("WAB uses your location to show salons near you.", "We use your location to show what is near you."),
+        ("WAB uses the camera to take your profile photo.", "We use the camera to take your profile photo."),
     ],
     "iosApp/iosApp/ar.lproj/InfoPlist.strings": [
-        ("نحتاج إلى موقعك لعرض الصالونات القريبة منك.", "نستخدم موقعك لعرض ما هو قريب منك."),
-        ("نحتاج إلى الكاميرا لالتقاط صور لتقييماتك.", "نستخدم الكاميرا لالتقاط الصور داخل التطبيق."),
+        ("يستخدم تطبيق WAB موقعك لعرض الصالونات القريبة منك.", "نستخدم موقعك لعرض ما هو قريب منك."),
+        ("يستخدم تطبيق WAB الكاميرا لالتقاط صورة ملفك الشخصي.", "نستخدم الكاميرا لالتقاط صورة ملفك الشخصي."),
     ],
     "androidApp/src/main/AndroidManifest.xml": [
         ("<!-- PRD §4.4 App Links: https://<web host>/salon/{salonId}; the host comes from <ENV>_WEB_BASE_URL. -->",
          "<!-- App Links: https://<web host>/...; the host comes from <ENV>_WEB_BASE_URL (DeepLinks parses the path). -->"),
         ('android:pathPrefix="/salon/" />', 'android:pathPrefix="/" />'),
+        ('        <package android:name="${MERCHANT_APP_ID}" />\n', ""),
     ],
     f"core/design-system/{MAIN}/designsystem/components/shimmer/AppShimmerTemplates.kt": [
         ("/** How a salon card is laid out: full width in lists, fixed compact width in horizontal home sections. */",

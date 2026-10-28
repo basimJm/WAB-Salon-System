@@ -13,7 +13,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -29,14 +29,17 @@ import com.fab.wab.customer.designsystem.theme.GlassStyle
 import com.fab.wab.customer.designsystem.theme.GlassTokens
 
 /** Specular sheen: a white light falling on the upper part of the glass, fading out toward the middle. */
-internal fun Modifier.glassSheen(t: GlassTokens, alpha: Float = t.sheenAlpha): Modifier = drawBehind {
-    val sheen = Brush.verticalGradient(
-        colors = listOf(t.highlight.copy(alpha = alpha), Color.Transparent),
-        startY = 0f,
-        endY = size.height * t.sheenFraction,
-    )
-    drawRect(sheen)
+internal fun Modifier.glassSheen(t: GlassTokens, alpha: Float = t.sheenAlpha): Modifier = drawWithCache {
+    // CUS-097: the brush is built once per size, not on every draw (press, ripple and shimmer frames redraw).
+    val sheen = sheenBrush(t, alpha, size.height)
+    onDrawBehind { drawRect(sheen) }
 }
+
+private fun sheenBrush(t: GlassTokens, alpha: Float, height: Float): Brush = Brush.verticalGradient(
+    colors = listOf(t.highlight.copy(alpha = alpha), Color.Transparent),
+    startY = 0f,
+    endY = height * t.sheenFraction,
+)
 
 /** Refractive rim: the edge catches light at the top-start and bottom-end corners and stays faint on the sides. */
 internal fun Modifier.glassRim(t: GlassTokens, shape: Shape): Modifier {
@@ -66,17 +69,15 @@ fun Modifier.glassBackground(
 ): Modifier {
     val body = Brush.verticalGradient(listOf(t.fillTop(style), t.fillBottom(style)))
     val sheenAlpha = t.sheen(style)
-    val glass = drawBehind {
-        val outline = shape.createOutline(size, layoutDirection, this)
-        clipPath(Path().apply { addOutline(outline) }) {
-            drawRect(body)
-            drawRect(
-                Brush.verticalGradient(
-                    colors = listOf(t.highlight.copy(alpha = sheenAlpha), Color.Transparent),
-                    startY = 0f,
-                    endY = size.height * t.sheenFraction,
-                ),
-            )
+    // CUS-097: outline, clip path and sheen are cached per size and layout direction instead of rebuilt per draw.
+    val glass = drawWithCache {
+        val clip = Path().apply { addOutline(shape.createOutline(size, layoutDirection, this@drawWithCache)) }
+        val sheen = sheenBrush(t, sheenAlpha, size.height)
+        onDrawBehind {
+            clipPath(clip) {
+                drawRect(body)
+                drawRect(sheen)
+            }
         }
     }.glassRim(t, shape)
     // No elevation shadow: under a see-through body it shows through as a dark inner rectangle.
@@ -108,27 +109,17 @@ fun Modifier.glassClickable(press: GlassPress, enabled: Boolean = true, role: Ro
     clickable(interactionSource = press.interaction, indication = null, enabled = enabled, role = role, onClick = onClick)
 
 /** Screen backdrop: the theme background with two soft brand lights, so translucent glass reads as glass. */
-fun Modifier.glassBackdrop(background: Color, t: GlassTokens): Modifier = drawBehind {
-    drawRect(background)
+fun Modifier.glassBackdrop(background: Color, t: GlassTokens): Modifier = drawWithCache {
     val radius = size.maxDimension * AMBIENT_RADIUS
-    drawCircle(
-        Brush.radialGradient(
-            listOf(t.ambientStart.copy(alpha = t.ambientAlpha), Color.Transparent),
-            center = Offset(size.width * AMBIENT_FAR, size.height * AMBIENT_NEAR),
-            radius = radius,
-        ),
-        radius = radius,
-        center = Offset(size.width * AMBIENT_FAR, size.height * AMBIENT_NEAR),
-    )
-    drawCircle(
-        Brush.radialGradient(
-            listOf(t.ambientEnd.copy(alpha = t.ambientAlpha), Color.Transparent),
-            center = Offset(size.width * AMBIENT_NEAR, size.height * AMBIENT_MIDDLE),
-            radius = radius,
-        ),
-        radius = radius,
-        center = Offset(size.width * AMBIENT_NEAR, size.height * AMBIENT_MIDDLE),
-    )
+    val startCenter = Offset(size.width * AMBIENT_FAR, size.height * AMBIENT_NEAR)
+    val endCenter = Offset(size.width * AMBIENT_NEAR, size.height * AMBIENT_MIDDLE)
+    val startLight = Brush.radialGradient(listOf(t.ambientStart.copy(alpha = t.ambientAlpha), Color.Transparent), startCenter, radius)
+    val endLight = Brush.radialGradient(listOf(t.ambientEnd.copy(alpha = t.ambientAlpha), Color.Transparent), endCenter, radius)
+    onDrawBehind {
+        drawRect(background)
+        drawCircle(startLight, radius = radius, center = startCenter)
+        drawCircle(endLight, radius = radius, center = endCenter)
+    }
 }
 
 private const val AMBIENT_RADIUS = 0.6f

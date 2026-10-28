@@ -28,7 +28,8 @@ EXCLUDED_NAMES = {
     "node_modules", ".hotswan", "local.properties", "google-services.json", "GoogleService-Info.plist", "Local.xcconfig",
 }
 # Only at the project root: WAB documents, design exports, session files and the monorepo's GitHub folder.
-EXCLUDED_ROOT_NAMES = {"design", "docs", ".claude", ".github", "AGENTS.md"}
+# `baselineprofile`: the customer app's Baseline Profile journey (WAB screens); the generated app builds without it.
+EXCLUDED_ROOT_NAMES = {"design", "docs", ".claude", ".github", "AGENTS.md", "baselineprofile"}
 EXCLUDED_SUFFIXES = (".log", ".iml")
 BINARY_SUFFIXES = {
     ".png", ".jpg", ".jpeg", ".webp", ".gif", ".ico", ".jar", ".ttf", ".otf", ".zip", ".keystore", ".jks",
@@ -36,6 +37,8 @@ BINARY_SUFFIXES = {
 }
 # composeApp files that only exist for the WAB features (launch gate, onboarding, tabs, analytics catalog, ...).
 SHELL_REMOVALS = (
+    # The customer app's generated Baseline + Startup Profiles list WAB classes; a new app generates its own.
+    "androidApp/src/main/generated/baselineProfiles",
     "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/analytics/ActionAnalytics.kt",
     "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/analytics/AnalyticsCatalog.kt",
     "composeApp/src/commonMain/kotlin/com/fab/wab/customer/app/analytics/AuthDiscoveryActionEvents.kt",
@@ -175,6 +178,7 @@ def strip_features(target: Path) -> None:
     lines = settings.read_text(encoding="utf-8").splitlines(keepends=True)
     kept = [line for line in lines
             if not re.match(r'\s*":feature:([a-z-]+):', line) or re.match(rf'\s*":feature:({"|".join(KEEP_FEATURES)}):', line)]
+    kept = [line for line in kept if '":baselineprofile"' not in line]  # the module is not copied (EXCLUDED_ROOT_NAMES)
     settings.write_text("".join(kept), encoding="utf-8")
     plugin = next(target.glob("build-logic/convention/src/main/kotlin/**/ComposeAppPlugin.kt"))
     text = plugin.read_text(encoding="utf-8")
