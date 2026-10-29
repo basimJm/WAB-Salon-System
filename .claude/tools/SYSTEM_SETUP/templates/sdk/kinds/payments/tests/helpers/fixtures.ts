@@ -7,7 +7,9 @@ export const SECRET = 'webhook-secret-of-at-least-16';
 export const API_KEY = 'mock-api-key';
 export const instant = { sleep: () => Promise.resolve(), random: () => 0.5 };
 
-export const sessionRequest = (overrides: Partial<CreateSessionRequest> = {}): CreateSessionRequest => ({
+export const sessionRequest = (
+  overrides: Partial<CreateSessionRequest> = {},
+): CreateSessionRequest => ({
   orderId: 'order-1',
   amount: 12_500,
   currency: 'JOD',
@@ -30,7 +32,10 @@ export const fetchVia =
       headers: init.headers,
       body: init.body ?? '',
     });
-    return Promise.resolve({ status: answer.status, text: () => Promise.resolve(JSON.stringify(answer.body)) });
+    return Promise.resolve({
+      status: answer.status,
+      text: () => Promise.resolve(JSON.stringify(answer.body)),
+    });
   };
 
 /** Deterministic ids: `sess_1`, `ref_2`, ... */

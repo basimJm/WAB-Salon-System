@@ -12,7 +12,11 @@ const fieldsOf = (options: PaymentsOptions): string[] => {
   return [];
 };
 
-const http = { baseUrl: 'http://localhost:4242/', apiKey: 'k', checkoutUrl: 'http://localhost:4242/pay/' };
+const http = {
+  baseUrl: 'http://localhost:4242/',
+  apiKey: 'k',
+  checkoutUrl: 'http://localhost:4242/pay/',
+};
 
 describe('resolveConfig', () => {
   it('applies defaults and trims URLs', () => {
@@ -39,15 +43,37 @@ describe('resolveConfig', () => {
       retry: { maxAttempts: 1 },
       fetch: () => Promise.reject(new Error('x')),
     });
-    expect(withHttp.http).toEqual({ baseUrl: 'http://localhost:4242', apiKey: 'k', checkoutUrl: 'http://localhost:4242/pay' });
-    expect(withHttp).toMatchObject({ currencies: ['JOD'], sessionTtlSec: 60, webhookToleranceSec: 10, timeoutMs: 5 });
-    expect(resolveConfig({ environment: 'dev', provider: 'http', webhookSecret: 's', http: { baseUrl: 'http://h', apiKey: 'k' } }).http?.checkoutUrl).toBeUndefined();
+    expect(withHttp.http).toEqual({
+      baseUrl: 'http://localhost:4242',
+      apiKey: 'k',
+      checkoutUrl: 'http://localhost:4242/pay',
+    });
+    expect(withHttp).toMatchObject({
+      currencies: ['JOD'],
+      sessionTtlSec: 60,
+      webhookToleranceSec: 10,
+      timeoutMs: 5,
+    });
+    expect(
+      resolveConfig({
+        environment: 'dev',
+        provider: 'http',
+        webhookSecret: 's',
+        http: { baseUrl: 'http://h', apiKey: 'k' },
+      }).http?.checkoutUrl,
+    ).toBeUndefined();
   });
 
   it('names invalid fields only', () => {
-    expect(fieldsOf({ environment: 'dev', provider: 'http', webhookSecret: 's' })).toEqual(['http']);
-    expect(fieldsOf({ environment: 'dev', provider: 'fake', webhookSecret: 's', currencies: ['jod'] })).toEqual(['currencies.0']);
-    expect(fieldsOf({ environment: 'dev', provider: 'fake', webhookSecret: '' })).toEqual(['webhookSecret']);
+    expect(fieldsOf({ environment: 'dev', provider: 'http', webhookSecret: 's' })).toEqual([
+      'http',
+    ]);
+    expect(
+      fieldsOf({ environment: 'dev', provider: 'fake', webhookSecret: 's', currencies: ['jod'] }),
+    ).toEqual(['currencies.0']);
+    expect(fieldsOf({ environment: 'dev', provider: 'fake', webhookSecret: '' })).toEqual([
+      'webhookSecret',
+    ]);
   });
 
   it('is strict in production', () => {
@@ -55,7 +81,11 @@ describe('resolveConfig', () => {
       environment: 'prod',
       provider: 'http',
       webhookSecret: SECRET,
-      http: { baseUrl: 'https://gw.example.test', apiKey: 'k', checkoutUrl: 'https://pay.example.test' },
+      http: {
+        baseUrl: 'https://gw.example.test',
+        apiKey: 'k',
+        checkoutUrl: 'https://pay.example.test',
+      },
     };
     expect(fieldsOf(prod)).toEqual([]);
     expect(fieldsOf({ ...prod, provider: 'fake' })).toEqual(['provider']);
