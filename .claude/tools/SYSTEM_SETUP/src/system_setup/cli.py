@@ -211,7 +211,7 @@ def apply_sdk_kinds(spec: Spec, manifest: Optional[Manifest]) -> None:
 
 
 def generate(spec: Spec, templates: Path, run_post: bool = False, git: bool = True,
-             tool: Optional[Path] = None, knowledge: Optional[Path] = None) -> Report:
+             tool: Optional[Path] = None, knowledge: Optional[Path] = None, prompt: Optional[Path] = None) -> Report:
     tool = tool or tool_root()
     check_target(spec.target, tool)
     manifests = load_templates(templates, needed_kinds(spec))
@@ -239,11 +239,11 @@ def generate(spec: Spec, templates: Path, run_post: bool = False, git: bool = Tr
         write_registry(spec.target, registry)
     report.created = ensure_project_files(spec.target, registry)
     report.created.append(write_business_input(spec.target, spec.business, spec.system_name, spec.today.isoformat()))
-    prompt = write_agent_prompt(spec.target, tool / PROMPT_FILE, prompt_placeholders(
+    prompt_rel = write_agent_prompt(spec.target, prompt or tool_root() / PROMPT_FILE, prompt_placeholders(
         spec.system_name, spec.business, projects_table(registry), ", ".join(f"`{m}`" for m in spec.masters()),
         f"github.com/{spec.owner_github}/{spec.repo_name or spec.slug}", spec.today.isoformat()))
-    if prompt:
-        report.created.append(prompt)
+    if prompt_rel:
+        report.created.append(prompt_rel)
     report.knowledge = copy_knowledge(spec.target, knowledge if knowledge is not None else tool / "knowledge")
     if run_post:
         for result in report.results:
