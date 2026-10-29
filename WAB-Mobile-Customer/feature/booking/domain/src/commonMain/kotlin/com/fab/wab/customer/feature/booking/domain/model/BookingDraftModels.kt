@@ -65,6 +65,10 @@ fun servicesOfferedTo(services: List<SalonService>, isBride: Boolean): List<Salo
     if (isBride) services else services.filterNot { it.brideOnly }
 
 /** A person who stops being a bride keeps only the services still offered to them. */
+/** §5.19: the person's gender; a man is never a bride, so the bride flag and bride-only picks are dropped. */
+fun DraftPerson.withGender(gender: Gender, salonServices: List<SalonService>): DraftPerson =
+    copy(gender = gender).let { if (gender != Gender.FEMALE && it.isBride) it.withBride(false, salonServices) else it }
+
 fun DraftPerson.withBride(isBride: Boolean, services: List<SalonService>): DraftPerson {
     val offered = servicesOfferedTo(services, isBride).mapTo(HashSet()) { it.id }
     return copy(isBride = isBride, serviceIds = serviceIds.filter { it in offered })

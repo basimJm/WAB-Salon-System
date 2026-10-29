@@ -38,7 +38,10 @@ import com.fab.wab.customer.feature.salons.presentation.resources.salons_empty_b
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title
 import org.jetbrains.compose.resources.stringResource
 
-/** S04 (design `on.salons`): top bar, search + filter button, All / Salons / Clinics tabs (§5.19), active chips, paged salon rows with design states. */
+/**
+ * S04 (design `on.salons`): top bar, search + filter button, All / Salons / Clinics tabs (§5.19), active chips, paged
+ * salon rows with design states.
+ */
 @Composable
 fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(SalonsAnalytics.SCREEN)

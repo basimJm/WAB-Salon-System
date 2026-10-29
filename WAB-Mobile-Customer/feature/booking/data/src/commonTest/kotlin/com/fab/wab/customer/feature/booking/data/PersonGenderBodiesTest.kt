@@ -19,7 +19,8 @@ class PersonGenderBodiesTest {
     fun draftSendsEachPersonsGender() {
         val body = assertNotNull(draftBodyOf("salon", PaymentMethod.PAY_ON_ARRIVAL, listOf(woman, man)))
         assertEquals(listOf<String?>("FEMALE", "MALE"), body.persons.map { it.gender })
-        assertNull(assertNotNull(draftBodyOf("salon", PaymentMethod.PAY_ON_ARRIVAL, listOf(woman.copy(gender = null)))).persons.single().gender)
+        val unknown = assertNotNull(draftBodyOf("salon", PaymentMethod.PAY_ON_ARRIVAL, listOf(woman.copy(gender = null))))
+        assertNull(unknown.persons.single().gender)
     }
 
     @Test

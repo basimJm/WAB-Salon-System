@@ -26,5 +26,7 @@ val salonsPresentationModule = module {
     viewModel { (entry: AllSalonsEntry) -> AllSalonsViewModel(entry, deps = get()) }
     factory { FilterSheetDependencies(loadServices = get(), loadPriceBounds = get()) }
     viewModel { (initial: SalonFilters, gender: Gender) -> FilterSheetViewModel(initial, gender, deps = get()) }
-    viewModel { (gender: Gender, type: BusinessType) -> AllServicesViewModel(gender, loadServices = get(), analytics = get(), businessType = type) }
+    viewModel { (gender: Gender, type: BusinessType) ->
+        AllServicesViewModel(gender, loadServices = get(), analytics = get(), businessType = type)
+    }
 }

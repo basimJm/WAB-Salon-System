@@ -56,7 +56,8 @@ import kotlin.test.assertTrue
 fun service(id: String, price: String, minutes: Int) = SalonService(id, "c$id", id, null, null, price, minutes, emptyList())
 
 fun salon(gender: Gender) = SalonDetails(
-    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.fromCode(gender.code), coverUrl = null, profileImageUrl = null, description = null, locationText = null,
+    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.fromCode(gender.code), coverUrl = null,
+    profileImageUrl = null, description = null, locationText = null,
     location = null, phone = null, whatsapp = null, rating = RatingSummary(4f, 1), isOpenNow = true, todayHours = null, closedReason = null,
     weeklySchedule = emptyList(), upcomingClosures = emptyList(),
     staff = listOf(StaffPreview("m1", "Omar", null, StaffStatus.ON_DUTY), StaffPreview("m2", "Ali", null, StaffStatus.ON_DUTY)),

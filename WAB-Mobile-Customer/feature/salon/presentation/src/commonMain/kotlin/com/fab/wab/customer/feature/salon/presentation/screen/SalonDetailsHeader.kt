@@ -45,7 +45,10 @@ import com.fab.wab.customer.feature.salon.presentation.resources.salon_cover
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_rating_count
 import org.jetbrains.compose.resources.stringResource
 
-/** Cover (180, radius 22) with the 96 px logo overlapping by 50 px, then name, type · audience (§5.19), status + rating and the location link. */
+/**
+ * Cover (180, radius 22) with the 96 px logo overlapping by 50 px, then name, type · audience (§5.19), status + rating
+ * and the location link.
+ */
 @Composable
 internal fun SalonHeader(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing

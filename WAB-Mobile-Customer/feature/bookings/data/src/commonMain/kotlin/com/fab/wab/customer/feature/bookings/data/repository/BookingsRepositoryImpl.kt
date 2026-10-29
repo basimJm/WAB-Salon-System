@@ -25,7 +25,8 @@ class BookingsRepositoryImpl(private val api: BookingsApi) : BookingsRepository 
         pageSize: Int,
         businessType: BusinessType?,
     ): AppResult<List<BookingSummary>> =
-        safeApiCall { api.list(tab.code, query, page, pageSize, businessType?.code) }.mapSuccess { response -> response.data.map { it.toDomain() } }
+        safeApiCall { api.list(tab.code, query, page, pageSize, businessType?.code) }
+            .mapSuccess { response -> response.data.map { it.toDomain() } }
 
     override suspend fun details(bookingId: String): AppResult<BookingDetails> =
         safeApiCall { api.details(bookingId) }.mapSuccess { it.data.toDomain() }

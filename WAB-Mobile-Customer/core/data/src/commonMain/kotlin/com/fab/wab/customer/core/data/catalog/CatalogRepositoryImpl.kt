@@ -11,7 +11,8 @@ import com.fab.wab.customer.core.network.safeApiCall
 
 class CatalogRepositoryImpl(private val api: CatalogApi) : CatalogRepository {
     override suspend fun services(gender: Gender, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> =
-        safeApiCall { api.services(gender.code, businessType?.code, page, pageSize) }.mapSuccess { response -> response.data.map { it.toDomain() } }
+        safeApiCall { api.services(gender.code, businessType?.code, page, pageSize) }
+            .mapSuccess { response -> response.data.map { it.toDomain() } }
 }
 
 fun GetCatalogServicesDataItem.toDomain(): CatalogService =

@@ -40,7 +40,9 @@ class AllServicesViewModelTest {
     private val effects = mutableListOf<SideEffect>()
 
     private fun TestScope.viewModel(type: BusinessType = BusinessType.SALON): AllServicesViewModel {
-        val vm = AllServicesViewModel(Gender.MALE, LoadFilterServicesUseCase(catalog), NoOpAnalyticsTracker, { "error" }, backgroundScope, type)
+        val vm = AllServicesViewModel(
+            Gender.MALE, LoadFilterServicesUseCase(catalog), NoOpAnalyticsTracker, { "error" }, backgroundScope, type,
+        )
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm

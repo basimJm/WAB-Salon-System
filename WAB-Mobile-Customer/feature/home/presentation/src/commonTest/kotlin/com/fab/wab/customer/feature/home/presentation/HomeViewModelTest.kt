@@ -277,9 +277,9 @@ class HomeViewModelTest {
     fun clinicSectionsOpenTheSameScreensFilteredToClinics() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
         vm.onEvent(UiAction.OnSeeAll(SalonSection.Recommended, BusinessType.CLINIC))
-        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, filter = SalonListFilter.RECOMMENDED, businessType = BusinessType.CLINIC), effects.last())
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, null, null, SalonListFilter.RECOMMENDED, BusinessType.CLINIC), effects.last())
         vm.onEvent(UiAction.OnSeeAll(SalonSection.Nearest))
-        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, filter = SalonListFilter.NEAREST, businessType = BusinessType.SALON), effects.last())
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, null, null, SalonListFilter.NEAREST, BusinessType.SALON), effects.last())
         vm.onEvent(UiAction.OnServicesSeeMore(BusinessType.CLINIC))
         assertEquals(SideEffect.OpenAllServices(Gender.FEMALE, BusinessType.CLINIC), effects.last())
         vm.onEvent(UiAction.OnServiceClick("cv1", BusinessType.CLINIC))

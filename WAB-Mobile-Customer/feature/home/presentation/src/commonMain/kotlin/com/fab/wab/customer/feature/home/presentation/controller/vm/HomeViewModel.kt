@@ -113,7 +113,8 @@ class HomeViewModel(
                 val name = uiState.value.servicesOf(event.businessType).items.firstOrNull { it.id == event.serviceId }?.name
                 openSalons(serviceId = event.serviceId, serviceName = name, businessType = event.businessType)
             }
-            is UiAction.OnServicesSeeMore -> uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it, event.businessType)) }
+            is UiAction.OnServicesSeeMore ->
+                uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it, event.businessType)) }
             is UiAction.OnSalonClick -> {
                 track(HomeAnalytics.ACTION_SALON_CLICK, HomeAnalytics.PARAM_ID to event.salonId)
                 emitSideEffect(SideEffect.OpenSalon(event.salonId, event.branchId))

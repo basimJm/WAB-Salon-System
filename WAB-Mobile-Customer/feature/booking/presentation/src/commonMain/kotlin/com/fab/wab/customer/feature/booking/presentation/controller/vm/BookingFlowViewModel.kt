@@ -1,6 +1,5 @@
 package com.fab.wab.customer.feature.booking.presentation.controller.vm
 
-import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.analytics.AnalyticsAction
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.analyticsParams
@@ -17,6 +16,7 @@ import com.fab.wab.customer.feature.booking.domain.model.StaffChoice
 import com.fab.wab.customer.feature.booking.domain.model.hasStaffOverlap
 import com.fab.wab.customer.feature.booking.domain.model.selectionTotalsOf
 import com.fab.wab.customer.feature.booking.domain.model.withBride
+import com.fab.wab.customer.feature.booking.domain.model.withGender
 import com.fab.wab.customer.feature.booking.domain.usecase.CreateBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.DeleteBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
@@ -77,7 +77,12 @@ class BookingFlowViewModel(
             is UiAction.OnBrideChange -> if (uiState.value.showsBride) {
                 updatePerson { withBride(event.isBride, uiState.value.salon?.services.orEmpty()) }
             }
-            is UiAction.OnGenderChange -> changeGender(event.gender)
+            // BOTH salons and clinics only (§5.19): each person's gender.
+            is UiAction.OnGenderChange -> if (uiState.value.asksGender) {
+                track(BookingAnalytics.ACTION_GENDER, BookingAnalytics.PARAM_VALUE to event.gender.code.lowercase())
+                updatePerson { withGender(event.gender, uiState.value.salon?.services.orEmpty()) }
+                updateState { copy(genderError = false) }
+            }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
             else -> return false
         }
@@ -132,15 +137,6 @@ class BookingFlowViewModel(
                 AppResult.Loading -> Unit
             }
         }
-    }
-
-    /** BOTH salons and clinics (§5.19): each person's gender; a man is never a bride, so bride picks are dropped. */
-    private fun changeGender(gender: Gender) {
-        if (!uiState.value.asksGender) return
-        track(BookingAnalytics.ACTION_GENDER, BookingAnalytics.PARAM_VALUE to gender.code.lowercase())
-        val services = uiState.value.salon?.services.orEmpty()
-        updatePerson { copy(gender = gender).let { if (gender != Gender.FEMALE && it.isBride) it.withBride(false, services) else it } }
-        updateState { copy(genderError = false) }
     }
 
     private fun selectBranch(branchId: String) {
@@ -236,7 +232,9 @@ class BookingFlowViewModel(
     private fun addCompanion() {
         if (!uiState.value.canAddCompanion) return
         val companion = DraftPerson(gender = uiState.value.lockedGender)
-        updateState { copy(persons = persons + companion, genderError = false, currentPerson = persons.size, availability = null, selectedDate = null) }
+        updateState {
+            copy(persons = persons + companion, genderError = false, currentPerson = persons.size, availability = null, selectedDate = null)
+        }
         go(BookingStep.PERSON)
     }
 

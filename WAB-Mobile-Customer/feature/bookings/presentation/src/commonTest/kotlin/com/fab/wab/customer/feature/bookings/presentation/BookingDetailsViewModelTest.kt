@@ -65,7 +65,8 @@ private fun detailsBooking(status: BookingStatus) = BookingDetails(
 )
 
 private val SALON = SalonDetails(
-    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.FEMALE, coverUrl = null, profileImageUrl = "img", description = null, locationText = null,
+    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.FEMALE, coverUrl = null, profileImageUrl = "img",
+    description = null, locationText = null,
     location = null, phone = "+962791234567", whatsapp = null, rating = RatingSummary(4f, 1), isOpenNow = true, todayHours = null,
     closedReason = null, weeklySchedule = emptyList(), upcomingClosures = emptyList(), staff = emptyList(), services = emptyList(),
     gallery = emptyList(), isFavorite = false, reviews = ReviewsPreview(RatingSummary(4f, 1), emptyList()),

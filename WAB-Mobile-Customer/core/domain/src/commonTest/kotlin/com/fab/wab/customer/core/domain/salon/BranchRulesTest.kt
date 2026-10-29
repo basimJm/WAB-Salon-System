@@ -79,7 +79,8 @@ class BranchRulesTest {
 
 private object SalonDetailsFixture {
     fun details(services: List<SalonService>, staff: List<StaffPreview>) = SalonDetails(
-        id = "s", name = "Salon", businessType = BusinessType.SALON, audience = null, coverUrl = null, profileImageUrl = null, description = null, locationText = null,
+        id = "s", name = "Salon", businessType = BusinessType.SALON, audience = null, coverUrl = null, profileImageUrl = null,
+        description = null, locationText = null,
         location = null, phone = null, whatsapp = null, rating = RatingSummary(0f, 0), isOpenNow = true, todayHours = null,
         closedReason = null, weeklySchedule = emptyList(), upcomingClosures = emptyList(), staff = staff, services = services,
         gallery = emptyList(), isFavorite = false, reviews = ReviewsPreview(RatingSummary(0f, 0), emptyList()),
