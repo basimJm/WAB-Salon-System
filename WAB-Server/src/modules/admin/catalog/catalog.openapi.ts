@@ -2,6 +2,7 @@ import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { ADMIN_CATALOG_ROUTES } from '../../../constants/catalog';
 import { API_PREFIXES } from '../../../constants/server';
 import { z } from '../../../docs/zod';
+import { businessKindShape } from '../../../docs/schemas';
 import { registerCrudDocs } from '../crud/crud.openapi';
 import { catalogAdminQuery, createCatalogSchema, updateCatalogSchema } from './catalog.validation';
 
@@ -17,7 +18,7 @@ export const registerAdminCatalogDocs = (registry: OpenAPIRegistry): void => {
       name: localized,
       description: localized,
       imageKey: z.string(),
-      gender: z.enum(['MALE', 'FEMALE']),
+      ...businessKindShape,
       active: z.boolean(),
       sortOrder: z.number(),
     }),

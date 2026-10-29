@@ -10,23 +10,23 @@ export const CONTRACT_VERSIONS: Readonly<
   Record<DocName, { readonly version: string; readonly sha256: string; readonly note: string }>
 > = {
   common: {
-    version: '1.1.0',
-    sha256: '7f3f181e90340aeb41ef1ababd6a3407d56eb639f4108c02b1a88b9b66a18d5e',
-    note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only. Clients: none',
+    version: '1.2.0',
+    sha256: 'f69a4075d02f7f10f6b00ef1ead65a665c2547e739b959307667d7a763667e17',
+    note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.6.0',
-    sha256: '72384a511ae44eccbd9c6d4eb0a589315ce48ffcf856d467e3a32b009de82eda',
-    note: 'SRV-172: optional branchId query on salon details (that branch\'s staff/services/place; 404 BRANCH_NOT_FOUND); staff sheet = member branch services. Additive; customer app needs no change (it filters by branchId client-side), apiSync at the next customer task.',
+    version: '1.7.0',
+    sha256: '6683cf0fb54f31202ed491059856e611483bc2662bf1743e7fc0f5acc2a925ec',
+    note: 'SRV-174 BREAKING: salon gender -> businessType + audience on salon details/catalog; catalog query gender optional + businessType; bride at clinic/men\'s salon = 422 BRIDE_NOT_ALLOWED. Client: CUS-098',
   },
   merchant: {
-    version: '1.6.0',
-    sha256: '6c69d083bfdf698c9ce611460ec428e514ece5bacee98c420e42e30513e2d359',
-    note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final (was the stored at-salon part). No merchant row needed: decoders tolerate new fields; ./gradlew apiSync at the next merchant task',
+    version: '1.7.0',
+    sha256: '8330b4d0d02d3402bcf7f2c8294eb627733c6e9da5b310a71dc23b469485ee94',
+    note: 'SRV-174 BREAKING: application salon {businessType, audience}; profile/catalog gender -> businessType + audience; BUSINESS_TYPE_MISMATCH / BRIDE_NOT_ALLOWED on services. Client: MER-080',
   },
   admin: {
-    version: '1.8.0',
-    sha256: '182e94e9ba7796693505c5617f02fab203ce66ba7d7a92ac0b60be2a33930c9b',
-    note: 'SRV-171 (additive): GET /admin/v1/salons/{id}/branches takes page/pageSize (default 25) and answers meta {page, pageSize, total}; booking q also matches partial references. Admin panel already tolerates both; npm run api:sync at the next admin task',
+    version: '1.9.0',
+    sha256: '30e74ceb21378da1a6029d46a8b5b1b7c8bb71078264897713b754af1ba2ffba',
+    note: 'SRV-174 BREAKING: salons/applications/catalog/placements/search gender -> businessType + audience (filters too); PATCH /salons/{id}/gender -> /salons/{id}/audience; placements reorder by businessType; SALONS export businessType/audience. Client: ADM-109',
   },
 };

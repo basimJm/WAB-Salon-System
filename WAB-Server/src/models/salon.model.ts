@@ -18,7 +18,7 @@ import {
   SCHEDULE_DAY_ORDER,
   type SalonState,
 } from '../constants/salon';
-import { GENDERS, type Gender } from '../constants/enums';
+import { AUDIENCES, BUSINESS_TYPES, type Audience, type BusinessType } from '../constants/enums';
 import { E164_PATTERN } from '../constants/providers';
 import { DAYS_OF_WEEK, HH_MM_PATTERN, type DayOfWeek } from '../constants/time';
 
@@ -60,7 +60,10 @@ export interface PayoutDetails {
 
 export interface SalonRaw {
   name: string;
-  gender: Gender;
+  /** SALON or CLINIC, chosen in the application; never changes (§5.19). */
+  businessType: BusinessType;
+  /** Who the business serves; a CLINIC is always BOTH. */
+  audience: Audience;
   state: SalonState;
   description?: string;
   coverKey?: string;
@@ -151,7 +154,8 @@ const salonSchema = new Schema<SalonRaw>(
       minlength: SALON_NAME_MIN_LENGTH,
       maxlength: SALON_NAME_MAX_LENGTH,
     },
-    gender: { type: String, enum: GENDERS, required: true },
+    businessType: { type: String, enum: BUSINESS_TYPES, required: true },
+    audience: { type: String, enum: AUDIENCES, required: true },
     state: { type: String, enum: SALON_STATES, required: true },
     description: { type: String, maxlength: SALON_DESCRIPTION_MAX_LENGTH },
     coverKey: { type: String },
@@ -219,7 +223,7 @@ const salonSchema = new Schema<SalonRaw>(
   { timestamps: true, collection: SALONS_COLLECTION },
 );
 salonSchema.index({ location: '2dsphere' });
-salonSchema.index({ state: 1, gender: 1 });
+salonSchema.index({ state: 1, businessType: 1, audience: 1 });
 salonSchema.index({ cityId: 1, areaId: 1 });
 
 export const SalonModel = model<SalonRaw>('Salon', salonSchema);

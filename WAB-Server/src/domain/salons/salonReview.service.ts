@@ -33,7 +33,8 @@ export interface ApplicationNotifier {
 export interface ApplicationRow {
   readonly id: string;
   readonly name: string;
-  readonly gender: SalonRaw['gender'];
+  readonly businessType: SalonRaw['businessType'];
+  readonly audience: SalonRaw['audience'];
   readonly state: SalonState;
   readonly cityId: string | null;
   readonly owner: { id: string; firstName: string; lastName: string; phone: string } | null;
@@ -83,7 +84,8 @@ export const createSalonReviewService = (deps: SalonReviewDeps): SalonReviewServ
   const row = (salon: Entity<SalonRaw>, owner: Owner | null): ApplicationRow => ({
     id: salon.id,
     name: salon.name,
-    gender: salon.gender,
+    businessType: salon.businessType,
+    audience: salon.audience,
     state: salon.state,
     cityId: salon.cityId ?? null,
     owner,

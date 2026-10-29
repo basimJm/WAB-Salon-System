@@ -162,7 +162,8 @@ describe('team and hours per branch', () => {
     salons.docs.push({
       _id: salonId,
       name: 'Hifa',
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       state: 'LIVE',
       weeklySchedule: week('10:00'),
       mainBranchId: mainBranch,

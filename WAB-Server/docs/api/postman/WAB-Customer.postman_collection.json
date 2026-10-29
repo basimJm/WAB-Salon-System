@@ -672,7 +672,7 @@
       "name": "Catalog",
       "item": [
         {
-          "name": "Active catalog services of one gender (paginated, localized)",
+          "name": "Active catalog services, optionally of one business type and the audiences a gender sees (own + BOTH) (paginated, localized)",
           "request": {
             "method": "GET",
             "header": [
@@ -704,8 +704,14 @@
                   "disabled": true
                 },
                 {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
                   "key": "gender",
-                  "value": ""
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []

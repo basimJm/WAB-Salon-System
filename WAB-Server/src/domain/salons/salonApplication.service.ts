@@ -1,5 +1,6 @@
 import { ERROR_CODES } from '../../constants/errorCodes';
-import type { Gender, Language } from '../../constants/enums';
+import type { Audience, BusinessType, Language } from '../../constants/enums';
+import { AUDIENCE_ALL, audienceFor } from '../businessTypes/rules';
 import type { SalonState } from '../../constants/salon';
 import type { OtpProvider } from '../../providers';
 import type {
@@ -35,7 +36,10 @@ import type { UploadVerifier } from '../uploads/uploads.service';
 
 export interface SalonDraft {
   readonly name: string;
-  readonly gender: Gender;
+  /** SALON or CLINIC; never changes afterwards (§5.19). */
+  readonly businessType: BusinessType;
+  /** Required for a SALON; a CLINIC is always BOTH (whatever is sent). */
+  readonly audience?: Audience | undefined;
   readonly description?: string | undefined;
   readonly cityId?: string | undefined;
   readonly areaId?: string | undefined;
@@ -55,7 +59,8 @@ export interface ApplyInput {
 export interface ResubmitInput {
   readonly memberId: string;
   readonly name?: string | undefined;
-  readonly gender?: Gender | undefined;
+  /** A SALON may correct its audience while the application is rejected; a CLINIC stays BOTH. */
+  readonly audience?: Audience | undefined;
   readonly description?: string | undefined;
   readonly documentKeys?: readonly string[] | undefined;
 }
@@ -165,7 +170,8 @@ export const createSalonApplicationService = (
       const at = now();
       const salon = await salons.create({
         name: input.salon.name,
-        gender: input.salon.gender,
+        businessType: input.salon.businessType,
+        audience: audienceFor(input.salon.businessType, input.salon.audience ?? AUDIENCE_ALL),
         state: 'APPLICATION_PENDING',
         ...(input.salon.description === undefined ? {} : { description: input.salon.description }),
         ...(input.salon.cityId === undefined ? {} : { cityId: toObjectId(input.salon.cityId) }),
@@ -225,7 +231,9 @@ export const createSalonApplicationService = (
       }
       const updated = await salons.updateById(salonId, {
         ...(changes.name === undefined ? {} : { name: changes.name, searchText: changes.name }),
-        ...(changes.gender === undefined ? {} : { gender: changes.gender }),
+        ...(changes.audience === undefined
+          ? {}
+          : { audience: audienceFor(salon.businessType, changes.audience) }),
         ...(changes.description === undefined ? {} : { description: changes.description }),
         state: 'APPLICATION_PENDING',
         application: {

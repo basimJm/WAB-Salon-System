@@ -116,8 +116,20 @@ beforeEach(() => {
   recomputes.length = 0;
   conflict.list = [];
   salonsM.docs.push(
-    { _id: womenSalon, name: 'Glow', gender: 'FEMALE', weeklySchedule: week(['FRI']) },
-    { _id: menSalon, name: 'Barber', gender: 'MALE', weeklySchedule: week() },
+    {
+      _id: womenSalon,
+      name: 'Glow',
+      businessType: 'SALON',
+      audience: 'FEMALE',
+      weeklySchedule: week(['FRI']),
+    },
+    {
+      _id: menSalon,
+      name: 'Barber',
+      businessType: 'SALON',
+      audience: 'MALE',
+      weeklySchedule: week(),
+    },
   );
 });
 

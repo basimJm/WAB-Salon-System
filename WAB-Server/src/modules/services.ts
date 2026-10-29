@@ -380,7 +380,7 @@ export const unavailableAdminSalons: AdminSalonsService = {
   members: unavailable,
   list: unavailable,
   detail: unavailable,
-  changeGender: unavailable,
+  changeAudience: unavailable,
 };
 
 export const unavailableSalonDetails: SalonDetailsService = {

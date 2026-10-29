@@ -228,7 +228,8 @@ beforeEach(async () => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     weeklySchedule: week,
@@ -324,7 +325,8 @@ describe('POST /customer/v1/bookings', () => {
     const stored = m.bookings.docs[0];
     expect(stored).toMatchObject({
       status: 'PENDING',
-      salonGender: 'FEMALE',
+      businessType: 'SALON',
+      salonAudience: 'FEMALE',
       hasBride: false,
       paymentMethod: 'PAY_ON_ARRIVAL',
       refundStatus: 'NONE',

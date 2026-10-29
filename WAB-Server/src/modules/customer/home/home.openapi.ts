@@ -9,6 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { businessKindShape } from '../../../docs/schemas';
 import { homeQuerySchema } from './home.validation';
 
 const card = z.object({
@@ -68,7 +69,7 @@ export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
                 name: z.string(),
                 description: z.string(),
                 imageUrl: z.string(),
-                gender: z.enum(['MALE', 'FEMALE']),
+                ...businessKindShape,
               }),
             ),
             recommended: section(card),

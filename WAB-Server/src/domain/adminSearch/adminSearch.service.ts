@@ -1,6 +1,12 @@
 import type { AdminSearchType } from '../../constants/adminSearch';
 import { ADMIN_SEARCH_TYPES } from '../../constants/adminSearch';
-import type { BookingStatus, CustomerStatus, Gender, MemberRole } from '../../constants/enums';
+import type {
+  Audience,
+  BookingStatus,
+  BusinessType,
+  CustomerStatus,
+  MemberRole,
+} from '../../constants/enums';
 import type { SalonState } from '../../constants/salon';
 import type { BookingsRepository } from '../../repositories/bookings.repository';
 import type {
@@ -21,7 +27,8 @@ export interface SearchCustomer {
 export interface SearchSalon {
   readonly id: string;
   readonly name: string;
-  readonly gender: Gender;
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly state: SalonState;
 }
 export interface SearchBooking {
@@ -159,7 +166,8 @@ export const createAdminSearchService = (deps: AdminSearchDeps): AdminSearchServ
                 items: salons.items.map((s) => ({
                   id: s.id,
                   name: s.name,
-                  gender: s.gender,
+                  businessType: s.businessType,
+                  audience: s.audience,
                   state: s.state,
                 })),
               },

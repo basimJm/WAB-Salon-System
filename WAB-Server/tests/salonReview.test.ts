@@ -79,7 +79,8 @@ const addSalon = (
   salons.docs.push({
     _id,
     name,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'APPLICATION_PENDING',
     description: 'nice',
     application: {

@@ -171,6 +171,8 @@ import type { ReadinessCheck } from './utils/health';
 import { REDIS_KEY_PREFIX } from './constants/redis';
 import { ALL_MODELS } from './models';
 import { ensureIndexes } from './utils/database/indexes';
+import { migrateBusinessTypes } from './domain/businessTypes/migration';
+import { createMongoBusinessTypeMigrationStore } from './domain/businessTypes/migrationStore';
 import { seedDemoOnStart } from './seeds/demoOnStart';
 import { RedisRateLimitStore } from './utils/redis/rateLimitStore';
 import { connectRedis, createRedisReadinessCheck, disconnectRedis } from './utils/redis/client';
@@ -1204,6 +1206,8 @@ const main = async (): Promise<void> => {
   let redis: Redis | undefined;
   try {
     await ensureIndexes(ALL_MODELS, logger);
+    // Rows from before business types get SALON + their gender as audience (§5.19); idempotent.
+    await migrateBusinessTypes({ store: createMongoBusinessTypeMigrationStore(), logger });
     redis = await connectRedis(config, logger);
     const connected = redis;
     const relay: SocketRelay = {};

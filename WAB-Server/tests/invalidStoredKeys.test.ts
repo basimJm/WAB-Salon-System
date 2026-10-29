@@ -111,7 +111,8 @@ describe('public lists with an invalid stored key', () => {
       name: { ar: id, en: id },
       description: { ar: id, en: id },
       imageKey,
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
     });
     const meta = { page: 1, pageSize: 2, total: 2 };
     const service = createCatalogService({

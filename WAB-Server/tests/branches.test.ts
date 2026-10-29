@@ -92,7 +92,8 @@ describe('branch fields on existing collections', () => {
   it('salons count their branches (0 until the first one exists)', () => {
     const salon = new SalonModel({
       name: 'Lamar',
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       state: 'LIVE',
       application: { submittedAt: new Date() },
       searchText: 'Lamar',

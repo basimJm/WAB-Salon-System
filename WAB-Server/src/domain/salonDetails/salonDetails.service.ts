@@ -71,7 +71,8 @@ export interface StaffDetails extends StaffSummary {
 export interface SalonDetails {
   readonly id: string;
   readonly name: string;
-  readonly gender: SalonRaw['gender'];
+  readonly businessType: SalonRaw['businessType'];
+  readonly audience: SalonRaw['audience'];
   readonly coverUrl: string | null;
   readonly profileImageUrl: string | null;
   readonly description: string | null;
@@ -271,7 +272,8 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
       return {
         id: salon.id,
         name: salon.name,
-        gender: salon.gender,
+        businessType: salon.businessType,
+        audience: salon.audience,
         coverUrl: url(salon.coverKey),
         profileImageUrl: url(salon.profileKey),
         description: salon.description ?? null,

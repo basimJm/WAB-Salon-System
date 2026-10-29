@@ -11,7 +11,8 @@ import {
   type Point,
 } from './branchPlaces';
 import type { QueryFilter } from 'mongoose';
-import type { Gender } from '../../constants/enums';
+import type { BusinessType, Gender } from '../../constants/enums';
+import { visibleAudiences } from '../businessTypes/rules';
 import {
   DISTANCE_DECIMALS,
   EARTH_RADIUS_KM,
@@ -75,7 +76,8 @@ export interface SearchQuery {
 
 /** Which salons are currently recommended for an audience (placements arrive with SRV-066). */
 export interface RecommendedLookup {
-  salonIds(gender: Gender, at: Date): Promise<string[]>;
+  /** Active placements of one business type a customer of this gender may see, in order (§5.13). */
+  salonIds(input: { businessType: BusinessType; gender: Gender }, at: Date): Promise<string[]>;
 }
 export const noRecommendations: RecommendedLookup = { salonIds: () => Promise.resolve([]) };
 
@@ -262,7 +264,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     });
   };
 
-  /** Visible salons of an audience by id (LIVE, complete, that gender). */
+  /** Salons a customer of this gender may see, by id (LIVE, complete, audience fits, §5.19). */
   const visibleSalons = async (
     ids: readonly string[],
     gender: Gender,
@@ -274,7 +276,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
             _id: { $in: [...ids] },
             state: 'LIVE',
             'completeness.isComplete': true,
-            gender,
+            audience: { $in: visibleAudiences(gender) },
           });
     return new Map(found.map((salon) => [salon.id, salon]));
   };
@@ -308,7 +310,10 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       }
       let placementOrder: string[] | undefined;
       if (query.general === 'RECOMMENDED') {
-        const ids = await recommended.salonIds(query.gender, now());
+        const ids = await recommended.salonIds(
+          { businessType: 'SALON', gender: query.gender },
+          now(),
+        );
         placementOrder = ids;
         allowed = allowed === undefined ? ids : allowed.filter((id) => ids.includes(id));
       }
@@ -339,7 +344,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       const filter: QueryFilter<SalonRaw> = {
         state: 'LIVE',
         'completeness.isComplete': true,
-        gender: query.gender,
+        audience: { $in: visibleAudiences(query.gender) },
         ...(allowed === undefined ? {} : { _id: { $in: allowed } }),
         ...(query.minRating === undefined ? {} : { 'rating.avg': { $gte: query.minRating } }),
         ...(query.q === undefined || query.q === ''
@@ -468,7 +473,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
         _id: { $in: [...sums.keys()] },
         state: 'LIVE',
         'completeness.isComplete': true,
-        gender,
+        audience: { $in: visibleAudiences(gender) },
       });
       const values = live.map((s) => sums.get(s.id) ?? 0);
       return values.length === 0 ? null : { min: Math.min(...values), max: Math.max(...values) };

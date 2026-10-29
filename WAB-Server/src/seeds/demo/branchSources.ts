@@ -28,7 +28,8 @@ export const loadDemoBranchSources = async (): Promise<Map<string, DemoBranchSou
     }).lean();
     sources.set(key, {
       salonId,
-      gender: salon.gender,
+      // Extra branches only go to the original single-gender demo salons.
+      gender: salon.audience === 'MALE' ? 'MALE' : 'FEMALE',
       services: services.map((service) => ({
         catalogServiceId: service.catalogServiceId,
         price: service.price,

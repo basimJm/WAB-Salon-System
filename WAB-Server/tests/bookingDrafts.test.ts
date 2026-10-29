@@ -174,7 +174,8 @@ beforeEach(async () => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     weeklySchedule: week,
@@ -284,7 +285,7 @@ describe('creating a draft', () => {
   });
 
   const menOnly = (): void => {
-    for (const doc of m.salons.docs) doc['gender'] = 'MALE';
+    for (const doc of m.salons.docs) doc['audience'] = 'MALE';
   };
   const noSetup = (): void => undefined;
   it.each<[string, () => object[], string, () => void]>([
@@ -294,7 +295,7 @@ describe('creating a draft', () => {
       'TOO_MANY_COMPANIONS',
       noSetup,
     ],
-    ['a bride at a men’s salon', () => [person({ isBride: true })], 'GENDER_MISMATCH', menOnly],
+    ['a bride at a men’s salon', () => [person({ isBride: true })], 'BRIDE_NOT_ALLOWED', menOnly],
     [
       'an unknown service',
       () => [person({ serviceIds: [id().toHexString()] })],

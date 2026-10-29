@@ -104,7 +104,8 @@ const addSalon = (over: Record<string, unknown> = {}): void => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     rating: { avg: 4.5, count: 8 },

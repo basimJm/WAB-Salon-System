@@ -87,7 +87,8 @@ const addSalon = (name: string, over: Record<string, unknown> = {}): string => {
     _id,
     name,
     searchText: `${name} Amman`,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     rating: { avg: 4, count: 10 },
@@ -124,14 +125,18 @@ beforeEach(() => {
 });
 
 describe('GET /customer/v1/salons', () => {
-  it('shows only LIVE, complete salons of the requested gender; the gender is required', async () => {
+  it('shows only LIVE, complete businesses the gender may see (own + BOTH + clinics, §5.19); the gender is required', async () => {
     addSalon('Visible');
-    addSalon('Men', { gender: 'MALE' });
+    addSalon('Men', { audience: 'MALE' });
     addSalon('Pending', { state: 'APPLICATION_PENDING' });
     addSalon('Offline', { state: 'OFFLINE' });
     addSalon('Incomplete', { completeness: { missing: ['COVER'], isComplete: false } });
     expect(await names('gender=FEMALE')).toEqual(['Visible']);
     expect(await names('gender=MALE')).toEqual(['Men']);
+    addSalon('Unisex', { audience: 'BOTH', rating: { avg: 3, count: 1 } });
+    addSalon('Clinic', { businessType: 'CLINIC', audience: 'BOTH', rating: { avg: 2, count: 1 } });
+    expect(await names('gender=FEMALE')).toEqual(['Visible', 'Unisex', 'Clinic']);
+    expect(await names('gender=MALE')).toEqual(['Men', 'Unisex', 'Clinic']);
     expect((await request(app).get('/customer/v1/salons')).status).toBe(400);
     expect((await request(app).get('/customer/v1/salons?gender=BOTH')).status).toBe(400);
   });

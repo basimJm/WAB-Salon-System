@@ -556,7 +556,7 @@
       "name": "Catalog",
       "item": [
         {
-          "name": "Active catalog services of one gender (paginated, localized)",
+          "name": "Active catalog services, optionally of one business type and the audiences a gender sees (own + BOTH) (paginated, localized)",
           "request": {
             "method": "GET",
             "header": [
@@ -588,8 +588,14 @@
                   "disabled": true
                 },
                 {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
                   "key": "gender",
-                  "value": ""
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -632,7 +638,7 @@
             "description": "Public. The phone is proven by an `otpToken` (purpose REGISTER, from `POST /auth/otp/verify`). The salon waits for admin approval; license documents are private storage keys.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"salon\": {\n    \"name\": \"string\",\n    \"gender\": \"MALE\",\n    \"description\": \"string\",\n    \"cityId\": \"string\",\n    \"areaId\": \"string\"\n  },\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"salon\": {\n    \"name\": \"string\",\n    \"businessType\": \"SALON\",\n    \"audience\": \"MALE\",\n    \"description\": \"string\",\n    \"cityId\": \"string\",\n    \"areaId\": \"string\"\n  },\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -718,7 +724,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"gender\": \"MALE\",\n  \"description\": \"string\",\n  \"documentKeys\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"name\": \"string\",\n  \"audience\": \"MALE\",\n  \"description\": \"string\",\n  \"documentKeys\": [\n    \"string\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2141,7 +2147,7 @@
           }
         },
         {
-          "name": "Offer a catalog service (same gender as the salon; bride-only only in women’s salons; once per salon)",
+          "name": "Offer a catalog service (same business type as the salon and a fitting audience, else 400 BUSINESS_TYPE_MISMATCH; bride-only only in women’s and BOTH salons, else BRIDE_NOT_ALLOWED; once per salon)",
           "request": {
             "method": "POST",
             "header": [
@@ -2303,7 +2309,7 @@
           }
         },
         {
-          "name": "Offer a catalog service (same gender as the salon; bride-only only in women’s salons; once per salon)",
+          "name": "Offer a catalog service (same business type as the salon and a fitting audience, else 400 BUSINESS_TYPE_MISMATCH; bride-only only in women’s and BOTH salons, else BRIDE_NOT_ALLOWED; once per salon)",
           "request": {
             "method": "POST",
             "header": [

@@ -29,6 +29,7 @@ import {
   type UnavailableReason,
 } from './availability';
 import type { HoldsStore } from './holds';
+import { brideAllowed } from '../businessTypes/rules';
 
 /** Where existing PENDING/APPROVED bookings come from; the booking module supplies it (SRV-071). */
 export interface BookingBusyLookup {
@@ -252,7 +253,8 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       const salon = await visibleSalon(salonId);
       if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
       const branch = await branchOf(salonId, branchId);
-      if (person.isBride && salon.gender !== 'FEMALE') throw invalid('body.person.isBride');
+      if (person.isBride && !brideAllowed(salon))
+        throw rule('BRIDE_NOT_ALLOWED', 'body.person.isBride');
 
       const wanted = [...new Set(person.serviceIds)];
       if (wanted.length !== person.serviceIds.length) throw invalid('body.person.serviceIds');
@@ -326,8 +328,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       const planned: PlannedPerson[] = [];
       for (const [index, input] of persons.entries()) {
         const at = (key: string): string => `persons.${String(index)}.${key}`;
-        if (input.isBride && salon.gender !== 'FEMALE')
-          throw rule('GENDER_MISMATCH', at('isBride'));
+        if (input.isBride && !brideAllowed(salon)) throw rule('BRIDE_NOT_ALLOWED', at('isBride'));
         const wanted = [...new Set(input.serviceIds)];
         const chosen =
           wanted.length === 0 || wanted.length !== input.serviceIds.length

@@ -17,6 +17,7 @@ import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import { catalogFits } from '../businessTypes/rules';
 
 export interface CatalogRequestView {
   readonly id: string;
@@ -64,7 +65,7 @@ export interface CatalogRequestsService {
   }): Promise<{ items: CatalogRequestView[]; meta: PaginationMeta }>;
   /**
    * Approve by creating a catalog service (`name` + `description`), or by mapping the request to
-   * an existing active catalog service of the salon's gender (`catalogServiceId`, SRV-125).
+   * an existing active catalog service that fits the salon's type and audience (`catalogServiceId`, SRV-125).
    */
   approve(
     input: {
@@ -226,8 +227,8 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
         if (existing?.active !== true) {
           throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
         }
-        if (existing.gender !== salon.gender) {
-          throw new BusinessRuleError({ code: ERROR_CODES.GENDER_MISMATCH });
+        if (!catalogFits(existing, salon)) {
+          throw new BusinessRuleError({ code: ERROR_CODES.BUSINESS_TYPE_MISMATCH });
         }
       }
       const finalImage =
@@ -260,7 +261,9 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
             name: input.name,
             description: input.description,
             imageKey: finalImage,
-            gender: salon.gender,
+            // The new catalog entry belongs to the requesting business's type and audience (§3.2).
+            businessType: salon.businessType,
+            audience: salon.audience,
             active: true,
             sortOrder: input.sortOrder,
           });

@@ -9,6 +9,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { businessKindShape } from '../../../docs/schemas';
 import { salonParamsSchema, salonQuerySchema, staffParamsSchema } from './salonDetails.validation';
 
 const rating = z.object({ avg: z.number(), count: z.number() });
@@ -59,7 +60,7 @@ const branchSummary = z.object({
 const details = z.object({
   id: z.string(),
   name: z.string(),
-  gender: z.enum(['MALE', 'FEMALE']),
+  ...businessKindShape,
   coverUrl: z.string().nullable(),
   profileImageUrl: z.string().nullable(),
   description: z.string().nullable(),

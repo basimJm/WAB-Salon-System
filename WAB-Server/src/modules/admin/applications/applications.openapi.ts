@@ -10,6 +10,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { businessKindShape } from '../../../docs/schemas';
 import { applicationParams, applicationsQuery, decisionBody } from './applications.validation';
 
 const owner = z.object({
@@ -21,7 +22,7 @@ const owner = z.object({
 const row = z.object({
   id: z.string(),
   name: z.string(),
-  gender: z.enum(['MALE', 'FEMALE']),
+  ...businessKindShape,
   state: z.enum(SALON_STATES),
   cityId: z.string().nullable(),
   owner: owner.nullable(),

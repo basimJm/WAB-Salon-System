@@ -5,12 +5,14 @@ import {
   BOOKING_PAYMENT_STATUSES,
   BOOKING_REFUND_STATUSES,
   BOOKING_STATUSES,
-  GENDERS,
+  AUDIENCES,
+  BUSINESS_TYPES,
   type ActorType,
   type BookingPaymentStatus,
   type BookingRefundStatus,
   type BookingStatus,
-  type Gender,
+  type Audience,
+  type BusinessType,
 } from '../constants/enums';
 import { PAYMENT_OPTIONS } from '../constants/salon';
 import type { LocalizedName } from '../constants/referenceData';
@@ -60,7 +62,9 @@ export interface BookingRaw {
   branchId?: Types.ObjectId;
   /** The branch as the customer saw it when booking. */
   branchSnapshot?: BranchSnapshot;
-  salonGender: Gender;
+  /** Snapshots of the business at booking time (§3.5, §5.19). */
+  businessType: BusinessType;
+  salonAudience: Audience;
   persons: BookingPersonRaw[];
   /** Earliest person start / latest person end. */
   appointmentStart: Date;
@@ -133,7 +137,8 @@ const bookingSchema = new Schema<BookingRaw>(
         { _id: false },
       ),
     },
-    salonGender: { type: String, enum: GENDERS, required: true },
+    businessType: { type: String, enum: BUSINESS_TYPES, required: true },
+    salonAudience: { type: String, enum: AUDIENCES, required: true },
     persons: { type: [bookingPersonSchema], required: true },
     appointmentStart: { type: Date, required: true },
     appointmentEnd: { type: Date, required: true },
