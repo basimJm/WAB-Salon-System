@@ -319,3 +319,15 @@
 - Tests: `python3 -m unittest discover -s .claude/tools/SYSTEM_SETUP/tests` (61 OK); KMP CI policy tests in the snapshot (93 OK)
 - Loops: 1/1 — regenerated the sample system after the alignment and re-ran server verify + admin gate; leak scan for template identities and WAB words
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — six parts built by separate agents on separate branches, merged without conflicts. DEVIATIONS: the KMP snapshot keeps its own `BUSINESS_DOMAIN.md` §11 (21 codes, diverging from the server's 23; its error-code policy reads the local file first — follow-up); not run on the generated system: KMP Gradle gate (proven on the snapshot re-instantiation only) and the SDK verifies (proven per kind by the SDK agent); `cli.py`/`prompts.py` exceed 300 lines.
+
+### T-147 — SYSTEM_SETUP: business-domain questions + agent prompt (owner request 2026-10-29)
+- Project: repo root (`.claude/tools/SYSTEM_SETUP`)
+- Branch: `feat/system-setup-business`
+- Status: IN REVIEW (PR into `customer`)
+- Acceptance criteria:
+  - [x] The tool asks the business domain (summary, language/RTL, currency + minor unit, time zones, actors, rules, entities/states, jobs, integrations, open decisions) interactively, by `--business file.md|json` or flags; defaults = TBD flagged as open
+  - [x] Answers rendered into the generated `CLAUDE.md` (§1/§3/§4/§6), `BUSINESS_DOMAIN.md` (actors, states, rules, jobs, settings defaults, integrations, open points), `docs/BUSINESS_INPUT.md`
+  - [x] `PROMPT.md` in the tool + filled `docs/AGENT_PROMPT.md` in every generated repo (linked from its README): how an agent finishes the domain with the owner, writes PRD/BRD/backlogs per project, assigns cross-project `Needs`, then works task by task under the generated rules
+- Tests: `python3 -m unittest discover -s .claude/tools/SYSTEM_SETUP/tests` (72 OK); proof run with a business file: no token left, answers present
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tool only; `rtl` stored as `on`/`off` text.
