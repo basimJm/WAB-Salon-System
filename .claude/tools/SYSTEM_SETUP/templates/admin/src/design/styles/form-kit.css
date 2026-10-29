@@ -93,11 +93,6 @@
   justify-content: space-between;
 }
 
-.app-banner-preview {
-  inline-size: 100%;
-  block-size: auto;
-  border-radius: var(--radius-md);
-}
 
 .app-kpi-grid {
   display: grid;

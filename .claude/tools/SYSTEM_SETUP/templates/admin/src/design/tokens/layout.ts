@@ -85,7 +85,7 @@ export const SIZES = {
   spinner: '1.5rem',
   touchTarget: '2.75rem',
   cardMin: '15rem',
-  /** Design card grid (banners): card min width and artwork height. */
+  /** Design card grid (card grids): card min width and artwork height. */
   gridCard: '16.25rem',
   gridCardMedia: '8.125rem',
   authCard: '25rem',

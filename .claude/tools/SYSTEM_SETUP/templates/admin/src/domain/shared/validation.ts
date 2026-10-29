@@ -39,7 +39,7 @@ export const localDateString = () =>
 
 type ObjectSchema = z.ZodType<Record<string, unknown>, Record<string, unknown>>;
 
-/** Refinement: `end` must be strictly after `start` (banner, recommended and subscription periods, Admin PRD §3). */
+/** Refinement: `end` must be strictly after `start` (schedules and validity periods, PRD §3). */
 export function endAfterStart<S extends ObjectSchema>(
   schema: S,
   startKey: keyof z.output<S> & string,

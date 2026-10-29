@@ -113,7 +113,7 @@
 .app-cell2__code { color: var(--c-muted); font-family: var(--font-numeric); font-size: var(--fs-xs); direction: ltr; }
 .app-cell-clip { display: inline-block; max-width: var(--size-card-min); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 
-/* Design `Blocks` "cards" body (banners): auto-fill grid of 260 px cards with a 130 px artwork area. */
+/* Design `Blocks` "cards" body (card grids): auto-fill grid of 260 px cards with a 130 px artwork area. */
 .app-cardgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--size-grid-card)), 1fr)); gap: var(--space-3); margin: 0; padding: var(--space-4); list-style: none; }
 .app-cardgrid__cell { display: flex; min-width: 0; }
 .app-gridcard { display: flex; flex: 1; flex-direction: column; min-width: 0; overflow: hidden; border: var(--size-hairline) solid var(--c-line); border-radius: var(--radius-popup); background: var(--c-card); }
