@@ -29,6 +29,7 @@ import com.fab.wab.merchant.core.firebase.FakeCrashReporter
 import com.fab.wab.merchant.core.realtime.FakeRealtimeClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -170,6 +171,23 @@ class MainViewModelTest {
         val state = vm.state.first { it.gate != null }
         assertEquals(LaunchGate.Ready, state.gate)
         assertEquals(false, state.loading)
+    }
+
+    @Test
+    fun splashWaitsForTheLogoAnimationEvenWhenConfigIsReady() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.state.collect {} }
+        assertTrue(vm.state.first { it.gate == LaunchGate.Ready }.showSplash)
+        vm.onEvent(UiAction.OnLogoAnimationFinished)
+        assertFalse(vm.state.first { it.logoShown }.showSplash)
+    }
+
+    @Test
+    fun logoAnimationAloneDoesNotLeaveTheSplashBeforeConfig() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(FakeAppConfigRepository(AppResult.Error(AppError.NetworkError("offline"))))
+        backgroundScope.launch { vm.state.collect {} }
+        vm.onEvent(UiAction.OnLogoAnimationFinished)
+        assertTrue(vm.state.first { it.logoShown && it.error != null }.showSplash)
     }
 
     @Test
