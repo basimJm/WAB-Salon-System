@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.bookings.domain.repository
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingSummary
@@ -16,7 +17,14 @@ object BookingsDefaults {
 
 /** `GET /bookings?tab&q&page&pageSize` (registered customers). */
 interface BookingsRepository {
-    suspend fun list(tab: BookingTab, query: String, page: Int, pageSize: Int): AppResult<List<BookingSummary>>
+    /** `businessType` null = salons and clinics (bookings filter All / Salons / Clinics, §5.19). */
+    suspend fun list(
+        tab: BookingTab,
+        query: String,
+        page: Int,
+        pageSize: Int,
+        businessType: BusinessType? = null,
+    ): AppResult<List<BookingSummary>>
 
     /** `GET /bookings/{id}`. */
     suspend fun details(bookingId: String): AppResult<BookingDetails>

@@ -26,7 +26,10 @@ export function branchesRoutes(store: BranchStore): readonly MockRoute[] {
   const salonOf = (p: Record<string, string>) => p['id'] ?? '';
   return [
     mockRoute(
-      defineEndpoint(O.getSalonsByIdBranches, { data: dto.getSalonsByIdBranchesDataSchema }),
+      defineEndpoint(O.getSalonsByIdBranches, {
+        data: dto.getSalonsByIdBranchesDataSchema,
+        query: dto.getSalonsByIdBranchesQuerySchema,
+      }),
       ({ params }) => {
         const items = store.list(salonOf(params));
         return {

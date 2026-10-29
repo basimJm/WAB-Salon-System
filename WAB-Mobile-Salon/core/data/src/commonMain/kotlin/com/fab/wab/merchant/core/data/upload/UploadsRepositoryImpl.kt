@@ -20,8 +20,9 @@ import kotlinx.serialization.json.JsonPrimitive
 class UploadsRepositoryImpl(private val api: UploadsApi) : UploadsRepository {
     override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> {
         val bytes = size.toInt()
-        return if (purpose == UploadPurpose.LICENSE_DOCUMENT) {
-            safeApiCall { api.presignLicense(PostUploadsLicensePresignBody(contentType, bytes)) }.mapSuccess { it.data.toDomain() }
+        return if (purpose.isLicense) {
+            val body = PostUploadsLicensePresignBody(contentType, bytes, purpose.name)
+            safeApiCall { api.presignLicense(body) }.mapSuccess { it.data.toDomain() }
         } else {
             safeApiCall { api.presign(PostUploadsPresignBody(purpose.name, contentType, bytes)) }.mapSuccess { it.data.toDomain() }
         }
@@ -44,7 +45,7 @@ class UploadsRepositoryImpl(private val api: UploadsApi) : UploadsRepository {
     }
 
     override suspend fun confirm(purpose: UploadPurpose, key: String): AppResult<ConfirmedUpload> =
-        if (purpose == UploadPurpose.LICENSE_DOCUMENT) {
+        if (purpose.isLicense) {
             safeApiCall { api.confirmLicense(key) }.mapSuccess { ConfirmedUpload(it.data.key, it.data.url) }
         } else {
             safeApiCall { api.confirm(key) }.mapSuccess { ConfirmedUpload(it.data.key, it.data.url) }

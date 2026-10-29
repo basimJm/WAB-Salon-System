@@ -68,7 +68,7 @@ describe('SalonsPage insight filters', () => {
 
   it('shows the recommended flag, bookings of 30 days and the deletion request', async () => {
     open();
-    await waitFor(() => expect(bodyRows()).toBe(3));
+    await waitFor(() => expect(bodyRows()).toBe(4));
     expect(screen.getByRole('columnheader', { name: 'Bookings (30 days)' })).toBeInTheDocument();
     expect(screen.getAllByText('Recommended').length).toBeGreaterThan(1);
     expect(screen.getByText('Deletion requested', { selector: 'span' })).toBeInTheDocument();
@@ -77,9 +77,9 @@ describe('SalonsPage insight filters', () => {
   it('filters by subscription, by recommended and by deletion request', async () => {
     const user = userEvent.setup();
     open();
-    await waitFor(() => expect(bodyRows()).toBe(3));
+    await waitFor(() => expect(bodyRows()).toBe(4));
     await user.selectOptions(screen.getByLabelText('Subscription'), 'ACTIVE');
-    await waitFor(() => expect(bodyRows()).toBe(1));
+    await waitFor(() => expect(bodyRows()).toBe(2));
     await user.selectOptions(screen.getByLabelText('Subscription'), '');
     await user.selectOptions(screen.getByLabelText('Recommended'), 'true');
     await waitFor(() => expect(bodyRows()).toBe(1));

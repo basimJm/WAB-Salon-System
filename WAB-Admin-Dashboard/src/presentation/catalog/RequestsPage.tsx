@@ -19,9 +19,15 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useLanguage } from '../hooks/useLanguage';
 import { useResourcePanel } from '../hooks/useResourcePanel';
+import {
+  BUSINESS_TYPE_FILTER_KEY,
+  businessTypeFilterOf,
+  businessTypeParam,
+} from '../shared/businessFilter';
+import { BusinessTypeFilter } from '../shared/BusinessTypeFilter';
 import { ApproveDrawer } from './ApproveDrawer';
 
-const OPTIONS = { filterKeys: ['status'] };
+const OPTIONS = { filterKeys: ['status', BUSINESS_TYPE_FILTER_KEY] };
 const DEFAULT_STATUS: RequestStatus = 'PENDING';
 const TONES = { PENDING: 'amber', APPROVED: 'green', REJECTED: 'rose' } as const;
 
@@ -30,13 +36,19 @@ function useApprove(state: ReturnType<typeof useListController>['state'], status
   const repo = repositories.catalog.requests;
   return useResourcePanel<CatalogRequest, ApproveInput>(state, {
     queryName: 'getCatalogRequests',
-    load: (s) => repo.list({ page: s.page, pageSize: s.pageSize, status }),
+    load: (s) =>
+      repo.list({
+        page: s.page,
+        pageSize: s.pageSize,
+        status,
+        ...businessTypeParam(businessTypeFilterOf(s)),
+      }),
     save: (editing, v, reason) =>
       editing ? repo.approve(editing.id, v, reason) : Promise.reject(new Error('no request')),
   });
 }
 
-/** Admin PRD A23 · Salon suggestions for new catalog services: approve (creates or maps to a service) or reject with a note. */
+/** Admin PRD A23 · Salon and clinic suggestions for new catalog services (type filter, §5.19): approve (creates or maps to a service) or reject with a note. */
 export default function RequestsPage() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -84,15 +96,21 @@ export default function RequestsPage() {
           active: [],
           onClearAll: list.clearFilters,
           controls: (
-            <Select
-              label={t('locations.status')}
-              value={status}
-              options={REQUEST_STATUSES.map((s) => ({
-                value: s,
-                label: t(`catalog.requestStatus.${s}`),
-              }))}
-              onChange={(e) => list.setFilter('status', [e.target.value])}
-            />
+            <>
+              <BusinessTypeFilter
+                value={businessTypeFilterOf(state)}
+                onChange={(type) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, type ? [type] : [])}
+              />
+              <Select
+                label={t('locations.status')}
+                value={status}
+                options={REQUEST_STATUSES.map((s) => ({
+                  value: s,
+                  label: t(`catalog.requestStatus.${s}`),
+                }))}
+                onChange={(e) => list.setFilter('status', [e.target.value])}
+              />
+            </>
           ),
         }}
         table={{

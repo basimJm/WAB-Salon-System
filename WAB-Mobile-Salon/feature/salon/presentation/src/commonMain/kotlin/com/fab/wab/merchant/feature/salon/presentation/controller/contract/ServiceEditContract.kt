@@ -17,7 +17,7 @@ sealed interface ServiceEditContract {
         val isNew: Boolean = false,
         val title: String = "",
         val imageUrl: String = "",
-        val womenSalon: Boolean = false,
+        val brideAllowed: Boolean = false,
         val original: ServiceDraft = ServiceDraft(),
         val draft: ServiceDraft = ServiceDraft(),
         val currentMedia: List<String> = emptyList(),

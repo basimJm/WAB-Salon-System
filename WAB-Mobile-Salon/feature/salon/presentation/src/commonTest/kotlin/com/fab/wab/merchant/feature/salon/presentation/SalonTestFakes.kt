@@ -10,7 +10,8 @@ import com.fab.wab.merchant.core.domain.model.PlacePrediction
 import com.fab.wab.merchant.core.domain.provider.DeviceLocationProvider
 import com.fab.wab.merchant.core.domain.repository.PlacesRepository
 import com.fab.wab.merchant.core.domain.salon.CompletenessItem
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SalonState
@@ -26,8 +27,13 @@ import com.fab.wab.merchant.feature.salon.domain.SalonProfileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal fun salon(missing: Set<CompletenessItem> = emptySet()) = SalonProfile(
-    id = "s1", name = "Lina", gender = SalonGenderType.FEMALE, state = SalonState.APPROVED_INCOMPLETE, description = "Old",
+internal fun salon(
+    missing: Set<CompletenessItem> = emptySet(),
+    type: BusinessType = BusinessType.SALON,
+    audience: Audience = Audience.FEMALE,
+) = SalonProfile(
+    id = "s1", name = "Lina", businessType = type, audience = audience,
+    state = SalonState.APPROVED_INCOMPLETE, description = "Old",
     coverUrl = "https://cdn/cover.jpg", profileUrl = null, coverKey = "salons/s1/cover.jpg", location = LocationData(31.9, 35.9),
     locationText = "Abdoun", cityId = "c1", areaId = "a1", phone = "+962791234567", whatsapp = null, missing = missing,
     ratingAverage = 4.8, ratingCount = 12,
@@ -49,6 +55,13 @@ internal class FakeProfiles(var result: AppResult<SalonProfile> = AppResult.Succ
     override suspend fun update(changes: ProfileChanges): AppResult<SalonProfile> {
         sent += changes
         return result
+    }
+
+    var widenResult: AppResult<SalonProfile> = AppResult.Success(salon())
+    var widened = 0
+    override suspend fun widenAudience(): AppResult<SalonProfile> {
+        widened++
+        return widenResult
     }
 }
 

@@ -3,6 +3,9 @@ package com.fab.wab.merchant.feature.salon.presentation
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
+import com.fab.wab.merchant.core.domain.ErrorCode
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.location.ReverseGeocoder
 import com.fab.wab.merchant.core.domain.model.LocationData
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
@@ -31,6 +34,7 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfil
 import com.fab.wab.merchant.feature.salon.presentation.controller.vm.SalonProfileViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -41,6 +45,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+
+private const val CONFLICT = 409
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SalonProfileViewModelTest {
@@ -53,7 +59,7 @@ class SalonProfileViewModelTest {
     private val permissions = FakePermissions()
     private val device = FakeDeviceLocation()
 
-    private fun TestScope.viewModel() = SalonProfileViewModel(
+    private fun TestScope.viewModel(owner: Boolean = false) = SalonProfileViewModel(
         SalonProfileDependencies(
             salon = salon,
             profiles = profiles,
@@ -66,12 +72,65 @@ class SalonProfileViewModelTest {
             ),
             analytics = NoOpAnalyticsTracker,
             errorText = { "failed" },
+            isOwner = flowOf(owner),
         ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
     private fun TestScope.effectsOf(viewModel: SalonProfileViewModel) =
         mutableListOf<SideEffect>().also { list -> backgroundScope.launch { viewModel.sideEffect.collect { list += it } } }
+
+    /** BUSINESS_DOMAIN §5.19: the owner widens a women's salon to both after confirming. */
+    @Test
+    fun theOwnerWidensAWomenSalonToBothAfterConfirming() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(owner = true)
+        val effects = effectsOf(viewModel)
+        assertTrue(viewModel.state.first { !it.loading }.canWidenAudience)
+        viewModel.onEvent(UiAction.OnWidenAudience)
+        assertTrue(viewModel.state.first().widenDialog)
+        viewModel.onEvent(UiAction.OnDismissWiden)
+        assertFalse(viewModel.state.first().widenDialog)
+        assertEquals(0, profiles.widened)
+        profiles.widenResult = AppResult.Success(salon(audience = Audience.BOTH))
+        viewModel.onEvent(UiAction.OnWidenAudience)
+        viewModel.onEvent(UiAction.OnConfirmWiden)
+        val after = viewModel.state.first()
+        assertEquals(1, profiles.widened)
+        assertEquals(Audience.BOTH, after.salon?.audience)
+        assertFalse(after.canWidenAudience, "a BOTH salon cannot widen again")
+        assertEquals(SideEffect.AudienceWidened, effects.last())
+    }
+
+    @Test
+    fun wideningIsHiddenForMembersClinicsAndBothSalons() = runTest(UnconfinedTestDispatcher()) {
+        val member = viewModel(owner = false)
+        assertFalse(member.state.first { !it.loading }.canWidenAudience)
+        member.onEvent(UiAction.OnWidenAudience)
+        assertFalse(member.state.first().widenDialog)
+        salon.state.value = salon(type = BusinessType.CLINIC, audience = Audience.BOTH)
+        assertFalse(viewModel(owner = true).state.first { !it.loading }.canWidenAudience)
+        salon.state.value = salon(audience = Audience.BOTH)
+        assertFalse(viewModel(owner = true).state.first { !it.loading }.canWidenAudience)
+        salon.state.value = salon(audience = Audience.MALE)
+        assertTrue(viewModel(owner = true).state.first { !it.loading }.canWidenAudience)
+    }
+
+    @Test
+    fun aRefusedWideningShowsTheErrorAndReloadsTheSalon() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(owner = true)
+        val effects = effectsOf(viewModel)
+        viewModel.state.first { !it.loading }
+        profiles.widenResult = AppResult.Error(AppError.ServerError(ErrorCode.AUDIENCE_CHANGE_NOT_ALLOWED, CONFLICT, null))
+        salon.result = AppResult.Success(salon(audience = Audience.BOTH))
+        val refreshes = salon.refreshes
+        viewModel.onEvent(UiAction.OnWidenAudience)
+        viewModel.onEvent(UiAction.OnConfirmWiden)
+        assertEquals(SideEffect.ShowError("failed"), effects.last())
+        assertEquals(refreshes + 1, salon.refreshes)
+        val after = viewModel.state.first()
+        assertFalse(after.widening)
+        assertEquals(Audience.BOTH, after.salon?.audience)
+    }
 
     @Test
     fun loadsTheSalonIntoTheFormWithCitiesAndAreas() = runTest(UnconfinedTestDispatcher()) {

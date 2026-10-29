@@ -1,7 +1,7 @@
 import type { LocalizedName } from '@/domain/locations/locations';
 import type { AppKind } from '@/domain/appconfig/appConfig';
 import type { Page, PageQuery } from '@/domain/shared/page';
-import type { SalonGender } from '@/domain/salons/salons';
+import type { PersonGender } from '@/domain/shared/businessType';
 
 export const CAMPAIGN_STATUSES = ['SCHEDULED', 'SENDING', 'SENT', 'CANCELLED'] as const;
 export const AUDIENCE_KINDS = [
@@ -18,7 +18,7 @@ export type AudienceKind = (typeof AUDIENCE_KINDS)[number];
 
 export interface Audience {
   kind: AudienceKind;
-  gender?: SalonGender;
+  gender?: PersonGender;
   cityIds?: string[];
   salonId?: string;
   customerIds?: string[];

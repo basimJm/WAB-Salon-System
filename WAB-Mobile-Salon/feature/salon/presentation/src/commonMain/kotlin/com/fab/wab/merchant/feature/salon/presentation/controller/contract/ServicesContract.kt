@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.feature.salon.presentation.controller.contract
 
 import com.fab.wab.merchant.core.domain.branch.BranchScope
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
 import com.fab.wab.merchant.feature.salon.domain.CatalogService
 import com.fab.wab.merchant.feature.salon.domain.SalonService
 import com.fab.wab.merchant.feature.salon.domain.matching
@@ -44,7 +45,8 @@ sealed interface CatalogPickerContract {
     data class UiState(
         val loading: Boolean = true,
         val error: String? = null,
-        val womenSalon: Boolean = false,
+        /** The business type + audience whose catalog is shown (BUSINESS_DOMAIN §5.19). */
+        val kind: BusinessKind? = null,
         val items: List<CatalogService> = emptyList(),
         val added: Map<String, String> = emptyMap(),
         val query: String = "",

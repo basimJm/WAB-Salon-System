@@ -18,6 +18,8 @@
       "id": "08c23382575950264c482f48",
       "name": "Gentlemen's Corner"
     },
+    "businessType": "SALON",
+    "salonAudience": "FEMALE",
     "branch": {
       "id": "6adf513d4bd7099438793e86",
       "name": "Dabouq",
@@ -64,7 +66,8 @@
             "price": "4.800",
             "durationMinutes": 15
           }
-        ]
+        ],
+        "gender": null
       },
       {
         "name": "Yousef +1",
@@ -84,7 +87,8 @@
             "price": "19.200",
             "durationMinutes": 45
           }
-        ]
+        ],
+        "gender": null
       }
     ],
     "money": {

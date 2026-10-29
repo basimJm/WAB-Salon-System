@@ -26,6 +26,7 @@ import { Timeline } from '../components/templates/Timeline';
 import { useLanguage } from '../hooks/useLanguage';
 import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
 import { useLazyStrings } from '../hooks/useLazyStrings';
+import { BusinessBadges } from '../shared/BusinessBadges';
 
 type Person = BookingDetails['persons'][number];
 
@@ -44,7 +45,14 @@ function Facts({ b }: { b: BookingDetails }) {
     {
       key: 'name',
       header: t('bookings.person'),
-      render: (p) => (p.isBride ? `${p.name} · ${t('bookings.bride')}` : p.name),
+      render: (p) =>
+        [
+          p.name,
+          p.gender ? t(`catalog.genders.${p.gender}`) : '',
+          p.isBride ? t('bookings.bride') : '',
+        ]
+          .filter(Boolean)
+          .join(' · '),
     },
     {
       key: 'services',
@@ -79,6 +87,11 @@ function Facts({ b }: { b: BookingDetails }) {
             value: b.salon ? (
               <RouterLink to={`${ROUTES.salons}/${b.salon.id}`}>{b.salon.name}</RouterLink>
             ) : null,
+          },
+          {
+            key: 'type',
+            label: t('business.type'),
+            value: <BusinessBadges businessType={b.businessType} audience={b.salonAudience} />,
           },
           {
             key: 'when',

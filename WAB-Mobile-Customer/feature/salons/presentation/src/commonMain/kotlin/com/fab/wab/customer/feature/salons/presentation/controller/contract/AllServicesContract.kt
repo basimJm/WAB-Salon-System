@@ -1,6 +1,7 @@
 package com.fab.wab.customer.feature.salons.presentation.controller.contract
 
 import com.fab.wab.customer.core.domain.catalog.CatalogService
+import com.fab.wab.customer.core.domain.salon.BusinessType
 
 sealed interface AllServicesContract {
 
@@ -24,7 +25,7 @@ sealed interface AllServicesContract {
 
     sealed interface SideEffect {
         /** → S04 pre-filtered by that service (PRD S06). */
-        data class OpenSalons(val serviceId: String, val serviceName: String) : SideEffect
+        data class OpenSalons(val serviceId: String, val serviceName: String, val businessType: BusinessType) : SideEffect
         data class ShowError(val message: String) : SideEffect
     }
 }

@@ -7,6 +7,7 @@ import com.fab.wab.customer.core.domain.auth.AuthTokens
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.provider.DeviceLocationProvider
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonQuery
 import com.fab.wab.customer.core.domain.salon.SalonSearchRepository
@@ -148,6 +149,29 @@ class AllSalonsViewModelTest {
     fun withoutAnEntryGenderTheSessionGenderIsUsed() = runTest(UnconfinedTestDispatcher()) {
         viewModel()
         assertEquals(Gender.FEMALE, search.queries.single().gender)
+    }
+
+    @Test
+    fun clinicEntryFiltersToClinicsAndTheTabsSwitchTheTypeWithAReload() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(AllSalonsEntry(filter = SalonListFilter.RECOMMENDED, businessType = BusinessType.CLINIC))
+        assertEquals(BusinessType.CLINIC, vm.state.value.businessType)
+        assertEquals(BusinessType.CLINIC, search.queries.single().businessType)
+        vm.onEvent(UiAction.OnBusinessTypeSelect(null))
+        assertEquals(null, search.queries.last().businessType, "All lists salons and clinics")
+        assertEquals(GeneralFilter.RECOMMENDED, search.queries.last().filters.general, "other filters stay")
+        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
+        assertEquals(BusinessType.SALON, search.queries.last().businessType)
+        val count = search.queries.size
+        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
+        assertEquals(count, search.queries.size, "the selected tab does not reload")
+        vm.onEvent(UiAction.OnLoadMore)
+        assertEquals(BusinessType.SALON, search.queries.last().businessType, "paging keeps the type")
+    }
+
+    @Test
+    fun searchWithoutATypeListsEveryBusiness() = runTest(UnconfinedTestDispatcher()) {
+        viewModel()
+        assertEquals(null, search.queries.single().businessType)
     }
 
     @Test

@@ -17,7 +17,9 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from contract_fixtures import envelope_json, load_captured, render_captured_ids, render_decoders  # noqa: E402
+from contract_fixtures import (  # noqa: E402
+    CLINIC_SECTIONS, ROTATING_ENUM_FIELDS, as_clinic, envelope_json, load_captured, render_captured_ids, render_decoders,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SPEC = PROJECT_ROOT.parent / "WAB-Server" / "docs" / "api" / "openapi.customer.json"
@@ -115,6 +117,10 @@ class Renderer:
         for schema_name, schema in self.spec.get("components", {}).get("schemas", {}).items():
             if schema.get("type") == "object" and schema.get("properties"):
                 self.render_class(schema_name, schema, "Components")
+            elif schema.get("type") == "string" and schema.get("enum"):
+                # Shared string enums (BusinessType, Audience): a typealias keeps the wire value a String.
+                values = ", ".join(map(str, schema["enum"]))
+                self.classes.setdefault("Components", []).append(f"/** One of: {values}. */\ntypealias {schema_name} = String")
         for path, methods in self.spec.get("paths", {}).items():
             for method, op in methods.items():
                 if method not in METHODS:
@@ -177,7 +183,10 @@ def sample_value(schema: dict | None, field: str, components: dict, depth: int =
     if isinstance(kind, list):
         kind = next((k for k in kind if k != "null"), "null")
     if "enum" in schema:
-        return schema["enum"][0]
+        # Audiences rotate per list item so the mock shows Men / Women / Both cards (BUSINESS_DOMAIN §5.19).
+        return schema["enum"][index % len(schema["enum"])] if field.lower() in ROTATING_ENUM_FIELDS else schema["enum"][0]
+    if kind == "object" and field.lower() in CLINIC_SECTIONS:
+        return as_clinic(sample_value(schema, "", components, depth, index))
     if kind == "object":
         return {prop: sample_value(sub, prop, components, depth + 1, index) for prop, sub in schema.get("properties", {}).items()} if schema.get("properties") else {}
     if kind == "array":

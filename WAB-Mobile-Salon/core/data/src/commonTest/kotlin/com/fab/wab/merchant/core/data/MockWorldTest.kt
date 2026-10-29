@@ -10,6 +10,9 @@ import com.fab.wab.merchant.core.data.mock.createMockEngine
 import com.fab.wab.merchant.core.data.mock.fixtureKeyOf
 import com.fab.wab.merchant.core.data.mock.patchFixture
 import com.fab.wab.merchant.core.data.mock.patchPendingBooking
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -20,6 +23,8 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 
 private const val SALON = """{"success":true,"data":{"state":"LIVE","booking":{"state":"PENDING"}}}"""
+private const val KINDS = """{"data":{"businessType":"SALON","audience":"FEMALE","name":"FEMALE",""" +
+    """"items":[{"businessType":"SALON","salonAudience":"FEMALE","persons":[{"gender":"FEMALE"}]}]}}"""
 private const val LOGIN = """{"success":true,"data":{"member":{"role":"OWNER","permissions":["DASHBOARD_VIEW"]}}}"""
 
 /** MER-007: every contract operation answers in mock mode; salon states and permission sets are switchable. */
@@ -48,6 +53,18 @@ class MockWorldTest {
         assertTrue(patched.contains("\"permissions\":[\"BOOKINGS_OPERATE\",\"BOOKINGS_VIEW_OWN\"]"))
         assertEquals(LOGIN, patchFixture(LOGIN, null, null))
         assertEquals("not json", patchFixture("not json", MockSalonState.LIVE, null))
+    }
+
+    /** BUSINESS_DOMAIN §5.19: the DEV switcher turns the captured women's salon into any type + audience. */
+    @Test
+    fun businessKindOverrideChangesTypesAndAudiencesOnly() {
+        val patched = patchFixture(KINDS, null, null, BusinessKind(BusinessType.CLINIC, Audience.BOTH))
+        assertEquals(2, Regex("\"businessType\":\"CLINIC\"").findAll(patched).count())
+        assertTrue(patched.contains("\"audience\":\"BOTH\"") && patched.contains("\"salonAudience\":\"BOTH\""))
+        assertTrue(patched.contains("\"gender\":\"FEMALE\"") && patched.contains("\"name\":\"FEMALE\""), "other fields stay")
+        MockScenarios.setBusinessKind(BusinessKind(BusinessType.SALON, Audience.MALE))
+        MockScenarios.widenAudience()
+        assertEquals(BusinessKind(BusinessType.SALON, Audience.BOTH), MockScenarios.businessKind.value)
     }
 
     @Test

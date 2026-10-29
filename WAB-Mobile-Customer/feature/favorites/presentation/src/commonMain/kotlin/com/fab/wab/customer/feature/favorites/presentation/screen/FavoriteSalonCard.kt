@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.fab.wab.customer.core.domain.salon.SalonSummary
+import com.fab.wab.customer.designsystem.components.domain.businessText
 import com.fab.wab.customer.designsystem.components.domain.ratingValueText
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.image.AppImage
@@ -58,6 +59,7 @@ internal fun FavoriteSalonCard(salon: SalonSummary, onClick: () -> Unit, onRemov
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(FavoritesDesign.cardColumnGap)) {
             NameLine(salon.name, onRemove)
             RatingLine(salon.rating, salon.reviewsCount)
+            MetaText(businessText(salon.businessType, salon.audience))
             MetaText(salon.placeText())
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)

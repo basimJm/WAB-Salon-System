@@ -1,10 +1,10 @@
 package com.fab.wab.customer.feature.booking.presentation.controller.contract
 
+import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.salon.BranchRules
 import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.SalonService
-import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
 import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
@@ -37,6 +37,7 @@ sealed interface BookingFlowContract {
         val persons: List<DraftPerson> = listOf(DraftPerson()),
         val currentPerson: Int = 0,
         val nameError: Boolean = false,
+        val genderError: Boolean = false,
         val calendar: List<CalendarDay> = emptyList(),
         val visibleMonth: Int = 0,
         val selectedDate: LocalDate? = null,
@@ -64,8 +65,13 @@ sealed interface BookingFlowContract {
         val canAddCompanion: Boolean get() = companionsCount < BookingFlowDefaults.MAX_COMPANIONS
         val isCompanionFlow: Boolean get() = currentPerson > 0
         val person: DraftPerson get() = persons[currentPerson]
-        val isWomenSalon: Boolean get() = salon?.gender == Gender.FEMALE
-        val canContinuePerson: Boolean get() = person.name.isNotBlank()
+        /** §5.19: a men's or women's salon fixes every person's gender; a BOTH salon or a clinic asks it per person. */
+        val lockedGender: Gender? get() = salon?.lockedGender
+        val asksGender: Boolean get() = salon != null && lockedGender == null
+        val personGender: Gender? get() = lockedGender ?: person.gender
+        /** Bride only at a women's or BOTH salon (never a clinic) and only for a woman (§5.19). */
+        val showsBride: Boolean get() = salon?.allowsBride == true && personGender == Gender.FEMALE
+        val canContinuePerson: Boolean get() = person.name.isNotBlank() && personGender != null
         val canContinueServices: Boolean get() = person.serviceIds.isNotEmpty()
         val totals: SelectionTotals get() = selectionTotalsOf(salon?.services.orEmpty(), person.serviceIds)
         /** Step 1 list of the current person: bride-only services only for a bride (PRD S16, SRV-170). */
@@ -77,6 +83,7 @@ sealed interface BookingFlowContract {
         data class OnBranchSelect(val branchId: String) : UiAction
         data class OnNameChange(val value: String) : UiAction
         data class OnBrideChange(val isBride: Boolean) : UiAction
+        data class OnGenderChange(val gender: Gender) : UiAction
         data class OnServiceToggle(val serviceId: String) : UiAction
         data class OnMonthChange(val delta: Int) : UiAction
         data class OnDateSelect(val date: LocalDate) : UiAction

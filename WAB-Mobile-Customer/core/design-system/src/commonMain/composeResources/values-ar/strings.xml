@@ -70,6 +70,9 @@
     <string name="error_code_salon_not_bookable">هذا الصالون لا يقبل الحجوزات حالياً.</string>
     <string name="error_code_salon_closed">الصالون مغلق في ذلك الوقت.</string>
     <string name="error_code_gender_mismatch">هذا الصالون لا يخدم الجنس المحدد.</string>
+    <string name="error_code_business_type_mismatch">هذه الخدمة غير متوفرة لدى هذا النوع من الأعمال.</string>
+    <string name="error_code_audience_change_not_allowed">لا يمكن تغيير الفئة التي يخدمها هذا العمل بهذه الطريقة.</string>
+    <string name="error_code_bride_not_allowed">حجوزات العروس متاحة فقط في الصالونات النسائية والصالونات التي تخدم الرجال والنساء.</string>
     <string name="error_code_too_many_companions">يمكنك إضافة 5 مرافقين كحد أقصى.</string>
     <string name="error_code_service_unavailable">إحدى الخدمات المحددة لم تعد متاحة.</string>
     <string name="error_code_bride_only_service">هذه الخدمة متاحة للعرائس فقط.</string>
@@ -125,4 +128,13 @@
     <string name="photo_camera_denied">اسمح بالوصول إلى الكاميرا لالتقاط صورة</string>
     <string name="dialog_camera_denied_title">الوصول إلى الكاميرا متوقف. فعّله من إعدادات الجهاز</string>
     <string name="dialog_notifications_denied_title">الإشعارات متوقفة. فعّلها من إعدادات الجهاز</string>
+    <string name="business_type_all">الكل</string>
+    <string name="business_type_salons">الصالونات</string>
+    <string name="business_type_clinics">العيادات</string>
+    <string name="business_salon">صالون</string>
+    <string name="business_clinic">عيادة تجميل</string>
+    <string name="audience_men">رجال</string>
+    <string name="audience_women">نساء</string>
+    <string name="audience_both">رجال ونساء</string>
+    <string name="business_label">%1$s · %2$s</string>
 </resources>

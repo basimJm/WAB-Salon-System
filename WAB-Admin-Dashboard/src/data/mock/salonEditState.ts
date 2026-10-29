@@ -17,7 +17,7 @@ function salonState(id: string) {
     profile: {
       id,
       name: salon?.name ?? 'Salon',
-      gender: salon?.gender ?? ('FEMALE' as const),
+      gender: 'FEMALE' as const, // contract 1.12.0 still lists it (server gap), the client ignores it
       state: salon?.state ?? 'LIVE',
       description: 'Hair, nails and bridal packages' as string | null,
       coverUrl: null as string | null,

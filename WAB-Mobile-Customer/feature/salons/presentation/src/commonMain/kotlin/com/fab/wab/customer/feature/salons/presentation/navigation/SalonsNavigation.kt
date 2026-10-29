@@ -20,6 +20,7 @@ import com.fab.wab.customer.core.navigation.route.SalonListFilter
 import com.fab.wab.customer.core.navigation.route.Screen
 import com.fab.wab.customer.core.notification.composable.rememberNotificationManager
 import com.fab.wab.customer.core.notification.model.NotificationStyle
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsContract.SideEffect
@@ -50,24 +51,26 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
                 serviceId = route.serviceId,
                 serviceName = route.serviceName,
                 filter = SalonListFilter.fromCode(route.filter),
+                businessType = BusinessType.fromCodeOrNull(route.businessType),
             )
             AllSalonsDestination(entry)
         }
         navGraphBuilder.composable<Screen.AllServices> { entry ->
-            val gender = Gender.fromCode(entry.toRoute<Screen.AllServices>().gender) ?: Gender.entries.first()
-            AllServicesDestination(gender)
+            val route = entry.toRoute<Screen.AllServices>()
+            val gender = Gender.fromCode(route.gender) ?: Gender.entries.first()
+            AllServicesDestination(gender, BusinessType.fromCodeOrNull(route.businessType) ?: BusinessType.SALON)
         }
     }
 
     @Composable
-    private fun AllServicesDestination(gender: Gender) {
-        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(gender) }
+    private fun AllServicesDestination(gender: Gender, businessType: BusinessType) {
+        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(gender, businessType) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is AllServicesContract.SideEffect.OpenSalons ->
-                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName))
+                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType.code))
                 is AllServicesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

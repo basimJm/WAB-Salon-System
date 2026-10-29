@@ -4,7 +4,8 @@
   "data": {
     "id": "79ea2a78d15934408a10b09f",
     "name": "Rose Bridal Studio",
-    "gender": "FEMALE",
+    "businessType": "SALON",
+    "audience": "FEMALE",
     "coverUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/cover.jpg",
     "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
     "description": "Bridal and occasion specialists in Sweifieh: bridal makeup, hair styling and henna for the whole party.",

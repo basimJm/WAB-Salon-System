@@ -1,6 +1,7 @@
 package com.fab.wab.customer.feature.salons.data
 
 import com.fab.wab.customer.core.domain.model.LocationData
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.PriceRange
 import com.fab.wab.customer.core.domain.salon.SalonFilters
@@ -39,6 +40,7 @@ class SalonSearchApiTest {
     fun combinesTextFiltersAndLocationInOneQuery() = runTest {
         val query = SalonQuery(
             gender = Gender.FEMALE,
+            businessType = BusinessType.CLINIC,
             text = "glow",
             filters = SalonFilters(
                 services = listOf(ServiceRef("s1", "Hair"), ServiceRef("s2", "Nails")),
@@ -52,6 +54,7 @@ class SalonSearchApiTest {
         SalonSearchApi(client).search(query)
         val p = requested!!.parameters
         assertEquals("FEMALE", p["gender"])
+        assertEquals("CLINIC", p["businessType"])
         assertEquals("glow", p["q"])
         assertEquals(listOf("s1", "s2"), p.getAll("serviceIds"))
         assertEquals("10", p["minPrice"])
@@ -69,5 +72,6 @@ class SalonSearchApiTest {
         assertEquals("RECOMMENDED", p["general"])
         assertNull(p["q"])
         assertNull(p["sort"])
+        assertNull(p["businessType"], "no type = salons and clinics")
     }
 }

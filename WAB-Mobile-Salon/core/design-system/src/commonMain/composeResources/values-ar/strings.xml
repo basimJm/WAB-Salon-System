@@ -66,6 +66,9 @@
     <string name="error_code_last_branch">لا يمكن إغلاق آخر فرع مفتوح للصالون.</string>
     <string name="error_code_branch_scope_denied">يمكنك إدارة فرعك فقط.</string>
     <string name="error_code_gender_mismatch">هذا الصالون لا يخدم الجنس المحدد.</string>
+    <string name="error_code_business_type_mismatch">هذه الخدمة غير متاحة لنوع نشاطك.</string>
+    <string name="error_code_audience_change_not_allowed">لا يمكن تغيير الفئة التي يخدمها نشاطك بهذه الطريقة.</string>
+    <string name="error_code_bride_not_allowed">خدمات العروس متاحة فقط للصالونات التي تخدم النساء.</string>
     <string name="error_code_too_many_companions">يمكنك إضافة 5 مرافقين كحد أقصى.</string>
     <string name="error_code_service_unavailable">إحدى الخدمات المحددة لم تعد متاحة.</string>
     <string name="error_code_bride_only_service">هذه الخدمة متاحة للعرائس فقط.</string>

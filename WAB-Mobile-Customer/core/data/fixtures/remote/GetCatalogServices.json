@@ -5,72 +5,82 @@
     {
       "id": "6adf0d5d1399cd74c64483d8",
       "name": "Haircut",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Cut and shape to your taste",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/haircut.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483d9",
       "name": "Blow dry",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Wash and blow-dry styling",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/blow-dry.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483da",
       "name": "Hair coloring",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Full color or highlights",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/hair-color.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483db",
       "name": "Keratin treatment",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Smoothing treatment for the hair",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/keratin.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483dc",
       "name": "Manicure",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Nail care and polish",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/manicure.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483dd",
       "name": "Pedicure",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Foot and toenail care",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/pedicure.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483de",
       "name": "Makeup",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Makeup for occasions",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/makeup.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483df",
       "name": "Bridal makeup",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Complete bridal makeup",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/bridal-makeup.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483e0",
       "name": "Facial",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Deep cleansing and hydration",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/facial.jpg"
     },
     {
       "id": "6adf0d5d1399cd74c64483e1",
       "name": "Waxing",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "description": "Hair removal with wax",
-      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg",
-      "gender": "FEMALE"
+      "imageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/catalog/waxing.jpg"
     }
   ],
   "meta": {

@@ -4,8 +4,9 @@ import com.fab.wab.merchant.core.data.contract.generated.GetSalonData
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.mapSuccess
 import com.fab.wab.merchant.core.domain.model.LocationData
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.salon.CompletenessItem
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SalonState
@@ -30,11 +31,12 @@ class SalonRepositoryImpl(private val api: SalonApi, private val sessionStore: S
     }
 }
 
-/** Unknown states read as pending review, unknown completeness keys are ignored. */
+/** Unknown states read as pending review, unknown completeness keys are ignored; an unknown type/audience reads as a unisex salon. */
 fun GetSalonData.toDomain() = SalonProfile(
     id = id,
     name = name,
-    gender = if (gender == SalonGenderType.FEMALE.name) SalonGenderType.FEMALE else SalonGenderType.MALE,
+    businessType = BusinessType.fromCode(businessType) ?: BusinessType.SALON,
+    audience = Audience.fromCode(audience) ?: Audience.BOTH,
     state = SalonState.fromCode(state) ?: SalonState.APPLICATION_PENDING,
     description = description?.takeIf { it.isNotBlank() },
     coverUrl = coverUrl,
