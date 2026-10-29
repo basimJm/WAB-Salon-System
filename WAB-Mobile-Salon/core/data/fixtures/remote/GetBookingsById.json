@@ -66,7 +66,8 @@
             "price": "24.000",
             "durationMinutes": 45
           }
-        ]
+        ],
+        "gender": "FEMALE"
       },
       {
         "name": "Salma +1",
@@ -86,7 +87,8 @@
             "price": "30.000",
             "durationMinutes": 60
           }
-        ]
+        ],
+        "gender": "FEMALE"
       },
       {
         "name": "Salma +2",
@@ -106,7 +108,8 @@
             "price": "9.600",
             "durationMinutes": 30
           }
-        ]
+        ],
+        "gender": "FEMALE"
       }
     ],
     "money": {
@@ -151,6 +154,8 @@
     ],
     "cancellation": null,
     "createdAt": "2026-10-25T21:30:00.000Z",
-    "actions": []
+    "actions": [],
+    "businessType": "SALON",
+    "salonAudience": "FEMALE"
   }
 }

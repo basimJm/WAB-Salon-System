@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.badge.AppStatusBadge
@@ -115,7 +115,7 @@ private fun SalonRow(salon: SalonProfile) {
                 text = salon.name,
                 style = AppTheme.typography.titleMedium.copy(fontSize = HubDesign.salonNameSize, fontWeight = FontWeight.Bold),
             )
-            val type = if (salon.gender == SalonGenderType.FEMALE) Res.string.hub_women else Res.string.hub_men
+            val type = if (salon.audience == Audience.FEMALE) Res.string.hub_women else Res.string.hub_men
             AppText(text = stringResource(type), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         }
         AppSalonStateChip(salon.state, salonStateLabel(salon.state))

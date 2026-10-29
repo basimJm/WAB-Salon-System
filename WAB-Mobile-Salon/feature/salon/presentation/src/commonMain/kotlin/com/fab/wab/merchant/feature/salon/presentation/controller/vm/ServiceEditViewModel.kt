@@ -7,7 +7,7 @@ import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.branch.BranchScope
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.currentKind
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.upload.LocalFile
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
@@ -116,7 +116,7 @@ class ServiceEditViewModel(
     private fun load() {
         scope.launch {
             updateState { copy(loading = true, error = null) }
-            val women = (deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data)?.gender == SalonGenderType.FEMALE
+            val women = deps.salon.currentKind()?.brideAllowed == true
             val id = serviceId
             if (id != null) {
                 val service = deps.services.cachedService(id)

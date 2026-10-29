@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.feature.application.presentation.di
 
+import com.fab.wab.merchant.core.domain.salon.SalonRepository
+import com.fab.wab.merchant.core.domain.salon.currentKind
 import com.fab.wab.merchant.feature.application.presentation.controller.contract.RegistrationMode
 import com.fab.wab.merchant.feature.application.presentation.controller.vm.ApplicationStatusViewModel
 import com.fab.wab.merchant.feature.application.presentation.controller.vm.RegistrationDependencies
@@ -10,6 +12,7 @@ import org.koin.dsl.module
 
 val applicationPresentationModule = module {
     factory {
+        val salon = get<SalonRepository>()
         RegistrationDependencies(
             submit = get(),
             resubmit = get(),
@@ -18,6 +21,7 @@ val applicationPresentationModule = module {
             uploadFile = get(),
             pending = get(),
             analytics = get(),
+            salonKind = { salon.currentKind() },
         )
     }
     viewModel { (mode: RegistrationMode) -> RegistrationViewModel(mode, deps = get()) }

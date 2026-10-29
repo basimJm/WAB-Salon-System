@@ -20,7 +20,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.card.AppCard
@@ -210,7 +210,7 @@ private fun CityArea(state: UiState, onAction: (UiAction) -> Unit) {
 
 @Composable
 private fun SalonType(state: UiState) {
-    val female = state.salon?.gender == SalonGenderType.FEMALE
+    val female = state.salon?.audience == Audience.FEMALE
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
             AppText(text = stringResource(Res.string.profile_type), style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)

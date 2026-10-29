@@ -3,7 +3,7 @@ package com.fab.wab.merchant.feature.salon.presentation.controller.vm
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.branch.BranchScope
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
@@ -20,7 +20,10 @@ import kotlinx.coroutines.launch
 
 private const val FIRST_PAGE = 1
 
-/** PRD M16 "Add from catalog": the salon's gender only, paged, already-added services marked (tap → edit). */
+/**
+ * PRD M16 "Add from catalog": only the business type's catalog that fits its audience (§5.19), paged,
+ * already-added services marked (tap → edit).
+ */
 class CatalogPickerViewModel(
     private val services: ServicesRepository,
     private val salon: SalonRepository,
@@ -31,7 +34,7 @@ class CatalogPickerViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var page = FIRST_PAGE
-    private var gender: SalonGenderType? = null
+    private var kind: BusinessKind? = null
 
     override fun onStart() {
         load()
@@ -53,8 +56,8 @@ class CatalogPickerViewModel(
     private fun load() {
         scope.launch {
             updateState { copy(loading = true, error = null) }
-            val type = gender ?: salonGender() ?: return@launch
-            gender = type
+            val type = kind ?: salonKind() ?: return@launch
+            kind = type
             (services.services(branchScope.first().edited) as? AppResult.Success)?.let { mine ->
                 updateState { copy(added = mine.data.associate { it.catalogId to it.id }) }
             }
@@ -63,7 +66,7 @@ class CatalogPickerViewModel(
                 is AppResult.Success -> updateState {
                     copy(
                         loading = false,
-                        womenSalon = type == SalonGenderType.FEMALE,
+                        womenSalon = type.brideAllowed,
                         items = result.data,
                         hasMore = result.data.size >= ServiceLimits.PAGE_SIZE,
                     )
@@ -74,10 +77,10 @@ class CatalogPickerViewModel(
         }
     }
 
-    private suspend fun salonGender(): SalonGenderType? {
-        salon.current.value?.let { return it.gender }
+    private suspend fun salonKind(): BusinessKind? {
+        salon.current.value?.let { return it.kind }
         return when (val result = salon.refresh()) {
-            is AppResult.Success -> result.data.gender
+            is AppResult.Success -> result.data.kind
             is AppResult.Error -> {
                 fail(result.appError)
                 null
@@ -93,7 +96,7 @@ class CatalogPickerViewModel(
 
     private fun loadMore() {
         val state = uiState.value
-        val type = gender ?: return
+        val type = kind ?: return
         if (!state.hasMore || state.loadingMore || state.loading) return
         scope.launch {
             updateState { copy(loadingMore = true) }

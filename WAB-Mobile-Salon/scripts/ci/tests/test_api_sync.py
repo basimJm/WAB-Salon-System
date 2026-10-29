@@ -25,6 +25,7 @@ SPEC = {
                         "gender": {"type": "string", "enum": ["MALE", "FEMALE"]},
                         "staff": {"type": "array", "items": {"type": "object", "required": ["name"], "properties": {"name": {"type": "string"}}}},
                         "object": {"type": "boolean"},
+                        "audience": {"$ref": "#/components/schemas/Audience"},
                     }},
                 }}}}}},
             },
@@ -34,7 +35,7 @@ SPEC = {
                     "responses": {"200": {"content": {"application/json": {"schema": {"type": "object", "properties": {"data": {"type": "null"}}}}}}}},
         },
     },
-    "components": {"schemas": {"CustomerProfile": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "email": {"type": ["string", "null"]}}}}},
+    "components": {"schemas": {"Audience": {"type": "string", "enum": ["MALE", "FEMALE", "BOTH"]}, "CustomerProfile": {"type": "object", "required": ["id"], "properties": {"id": {"type": "string"}, "email": {"type": ["string", "null"]}}}}},
 }
 
 
@@ -66,6 +67,11 @@ class ApiSyncTest(unittest.TestCase):
         self.assertIn('@SerialName("object")\n    val `object`: Boolean? = null,', kotlin)
         self.assertIn("data class CustomerProfile(", self.files["Components.kt"])
         self.assertIn("val email: String? = null,", self.files["Components.kt"])
+
+    def test_scalar_component_refs_inline_their_type_and_enum(self) -> None:
+        kotlin = self.files["SalonDetailsDtos.kt"]
+        self.assertIn("/** One of: MALE, FEMALE, BOTH. */\n    val audience: String? = null,", kotlin)
+        self.assertNotIn("class Audience", self.files["Components.kt"])
 
     def test_operations_registry_lists_every_operation(self) -> None:
         ops = self.files["Operations.kt"]

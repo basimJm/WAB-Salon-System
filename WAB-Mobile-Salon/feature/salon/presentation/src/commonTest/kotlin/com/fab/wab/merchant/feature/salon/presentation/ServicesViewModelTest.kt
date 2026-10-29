@@ -6,7 +6,9 @@ import com.fab.wab.merchant.core.domain.branch.Branch
 import com.fab.wab.merchant.core.domain.branch.BranchName
 import com.fab.wab.merchant.core.domain.branch.BranchScope
 import com.fab.wab.merchant.core.domain.branch.BranchStatus
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.session.MemberScope
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
 import com.fab.wab.merchant.core.ui.media.FakeFilePicker
@@ -91,11 +93,11 @@ class ServicesViewModelTest {
     }
 
     @Test
-    fun catalogUsesTheSalonGenderPagesAndMarksAdded() = runTest(UnconfinedTestDispatcher()) {
+    fun catalogUsesTheBusinessKindPagesAndMarksAdded() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = picker()
         val effects = effects(viewModel.sideEffect)
         val state = viewModel.state.first { !it.loading }
-        assertEquals(listOf(SalonGenderType.FEMALE), services.catalogGenders)
+        assertEquals(listOf(BusinessKind(BusinessType.SALON, Audience.FEMALE)), services.catalogKinds)
         assertTrue(state.womenSalon && state.hasMore)
         assertEquals("s1", state.added["c1"])
         viewModel.onEvent(CatalogPickerContract.UiAction.OnLoadMore)

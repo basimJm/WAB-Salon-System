@@ -24,14 +24,12 @@ enum class CompletenessItem {
     }
 }
 
-/** Salon gender of the contract (`MALE` / `FEMALE`), fixed after approval. */
-enum class SalonGenderType { MALE, FEMALE }
-
 /** `GET /salon`: the salon as its members manage it (PRD M12, M13; state for the launch router). */
 data class SalonProfile(
     val id: String,
     val name: String,
-    val gender: SalonGenderType,
+    val businessType: BusinessType,
+    val audience: Audience,
     val state: SalonState,
     val description: String?,
     val coverUrl: String?,
@@ -49,6 +47,7 @@ data class SalonProfile(
     val ratingCount: Int,
 ) {
     val isComplete: Boolean get() = missing.isEmpty()
+    val kind: BusinessKind get() = BusinessKind(businessType, audience)
 }
 
 /** One shared source for the current salon: refreshed at launch, by Home / hub pull-to-refresh and after edits. */
@@ -58,3 +57,6 @@ interface SalonRepository {
     /** Loads `GET /salon`, caches it and stores the salon state in the session. */
     suspend fun refresh(): AppResult<SalonProfile>
 }
+
+/** The cached salon's type + audience, else one `GET /salon`; null when it cannot be read. */
+suspend fun SalonRepository.currentKind(): BusinessKind? = current.value?.kind ?: (refresh() as? AppResult.Success)?.data?.kind

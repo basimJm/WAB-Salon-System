@@ -3,7 +3,8 @@ package com.fab.wab.merchant.feature.team.presentation
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SalonState
@@ -74,7 +75,7 @@ private class FakeStaff : StaffRepository {
 private class FakeSalon : SalonRepository {
     override val current: StateFlow<SalonProfile?> = MutableStateFlow(
         SalonProfile(
-            "s", "Lina", SalonGenderType.FEMALE, SalonState.LIVE, null, null, null,
+            "s", "Lina", BusinessType.SALON, Audience.FEMALE, SalonState.LIVE, null, null, null,
             location = null, locationText = null, cityId = null, areaId = null, phone = null, whatsapp = null,
             missing = emptySet(), ratingAverage = 0.0, ratingCount = 0,
         ),

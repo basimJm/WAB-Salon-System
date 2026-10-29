@@ -7,7 +7,6 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
 import com.fab.wab.merchant.core.domain.booking.AffectedReasons
 import com.fab.wab.merchant.core.domain.booking.conflictBookingIds
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
@@ -150,7 +149,7 @@ class StaffProfileViewModel(
                 is AppResult.Success -> {
                     val draft = result.data.toDraft()
                     val salon = deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data
-                    val women = salon?.gender == SalonGenderType.FEMALE
+                    val women = salon?.kind?.brideAllowed == true
                     updateState {
                         copy(
                             loading = false,

@@ -9,6 +9,22 @@
 
 ## Current task
 
+### MER-080 — Register as salon or clinic (contract 1.9.0)
+- Branch: `feat/mer-080-business-type-register`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-29; BUSINESS_DOMAIN §5.19, §2, §3.3, §12.10; INTEGRATION §5a; operations `POST /salon/applications`, `POST /salon/application/resubmit`, `POST /uploads/license/presign` purpose `MEDICAL_LICENSE`, `GET /catalog/services?businessType=&gender=`):
+  - [x] `apiSync` to merchant contract 1.9.0 (`api_sync --check` ok); generator fixed: a `$ref` to a scalar enum component (`BusinessType`, `Audience`) is inlined as `String` with its enum doc (it emitted undefined Kotlin types); captured remote fixtures migrated per §5.19 Migration (salon/catalog `gender` → `businessType` SALON + `audience`; bookings `businessType` + `salonAudience` + person `gender`) → `contract_gaps` 0
+  - [x] core: `BusinessType`, `Audience`, `BusinessKind` (brideAllowed, canWidenAudience, catalogGender, clinic = BOTH), `SalonProfile.businessType/audience/kind`, `SalonRepository.currentKind()`; `UploadPurpose.MEDICAL_LICENSE` through the public license routes (`purpose` sent)
+  - [x] M04 first step Salon / Clinic; Salon → audience Men / Women / Both; Clinic → no audience question (unisex note) + required medical license (1–5 files, camera / photo / files picker of MER-076, own list, retry/remove); name label Salon/Clinic name; review card with type, audience and medical license; type warning
+  - [x] Resubmission: type read from `GET /salon` and locked; salon audience editable; clinic medical license optional (kept on file unless replaced, server rule)
+  - [x] Error codes `BUSINESS_TYPE_MISMATCH`, `AUDIENCE_CHANGE_NOT_ALLOWED`, `BRIDE_NOT_ALLOWED` (ErrorCode + AR/EN + ErrorHandling)
+  - [x] Contract compile fallout: catalog by `businessType` (+ `gender` for MALE/FEMALE salons), bride flags from `brideAllowed` (UI follow-up in MER-081)
+  - [x] AR + EN strings; mock: generated fixtures serve 1.9.0 (captured salon = FEMALE SALON)
+- Tests: `BusinessKindTest` (5), `SalonMapperTest` (+1), `RegistrationRulesTest` (+3), `ApplicationMappersTest` (+1), `RegistrationViewModelTest` (+2: clinic medical license, locked resubmission type), `ServicesMappersTest`, `test_api_sync.py` (+1, 11 OK); `policy_checks.py all` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: PRD M04 is still the single-screen form (no PRD section for clinics yet): "first step" = the first card of the form, "review step" = a review card above Submit. DEVIATION: captured fixtures were migrated by script, not re-captured (needs the local stack with SRV-174…178).
+
 ### MER-079 — Measured performance pass with the Android skills + deferred device checks of MER-076…078
 - Branch: `perf/mer-079-measured-performance`
 - Status: IN PROGRESS
@@ -24,38 +40,6 @@
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: tab routes by serial name (release bottom bar), package-wide keep rules removed with a policy guard, tone off the main thread, stability config reaches every Compose module, calendar `drawWithCache`, geocoder/location bounded with fallbacks; temporary local manifests removed, none committed.
 - Notes: results — main-thread binder time −54 %, recomposition −19 %, request-sheet long frames 6.3 → 4.8, APK −6.9 %, R8 scores 83 % → 98.5 %; cold start and whole-journey jank unchanged within the noise of a shared host.
 
-### MER-076 — Device integrations: call, WhatsApp, permissions, camera/gallery upload, location, maps (Android + iOS)
-- Branch: `fix/mer-076-device-integrations`
-- Status: IN PROGRESS
-- Acceptance criteria (owner report 2026-10-27; PRD M08/M09 call/WhatsApp, M13/M14 uploads + location, M04 license upload, M17 staff photos; operations `POST /uploads/presign`, `POST /uploads/{id}/confirm`):
-  - [x] iOS hand-offs: every `UIApplication.openURL(_:)` (calls, WhatsApp, maps, mail, links, Settings shortcut, store link) was the one-argument API, a no-op since iOS 18 → `IosUiKit.open` (`open(_:options:completionHandler:)`, answers success); `whatsapp://` when installed (`LSApplicationQueriesSchemes`) else `wa.me`; share sheet from the top-most controller with an iPad popover anchor
-  - [x] Android hand-offs: no handler (tablet without dialer, no WhatsApp/browser/maps) answered silently → `start()` reports false; one installed WhatsApp flavour (`com.whatsapp` / `.w4b`) opened directly; `<queries>` for dial/geo/https/mailto/IMAGE_CAPTURE/WhatsApp packages; store link no longer crashes without a browser
-  - [x] Phones normalized before dialling (`ExternalLinks.dialable`: bidi isolates from `ltrIsolate`, spaces, Arabic-Indic digits); failed call copies the number + banner, failed WhatsApp/mail/link/maps explain (`ExternalHandoff`, AR + EN); Contact WAB WhatsApp prefilled (More, Subscription, offline banner, contact page)
-  - [x] Camera was never offered on any upload (only the library) → source sheet (Take a photo / Photo library / Files for license documents) on every merchant upload: license documents, salon cover/profile, gallery, staff/member photo, my account photo, service media, catalog request image (`MediaPickHandler` + `AppMediaPicker`); camera row disabled with its reason when no camera (iOS simulator)
-  - [x] Android camera: `TakePicture` into a FileProvider cache file (full resolution), CAMERA permission removed (declared-but-ungranted CAMERA makes ACTION_IMAGE_CAPTURE throw); EXIF orientation applied before crop/compress; picker requests survive activity recreation (rotation / camera app); missing picker/camera app no longer crashes
-  - [x] iOS pickers: delegates were local (UIKit holds them weakly) → kept strongly while the picker is up (picker could never call back); presented from the top-most controller; camera checks AVCaptureDevice authorization first (refused → "Open settings" dialog instead of a black viewfinder)
-  - [x] Location: iOS read the cached `CLLocationManager().location` (nil) → one-shot `requestLocation()` with a held delegate; Android had no timeout/SecurityException handling → `getCurrentLocation` + last-known fallback; 15 s timeout; denied / blocked / services off / not found shown on the map with Try again / Open settings (was silent or a jump to Settings); "Open in Maps" on the salon profile location
-  - [x] Android 13+ notification permission was never requested → after sign-in an explanation then the system dialog, then (request answerers, once per install) the overlay explanation (`AlertsPermissionPrompt`)
-  - [x] iOS usage strings rewritten for the merchant app in Info.plist + AR/EN `InfoPlist.strings`
-  - [ ] Device proof on emulator + simulator — NOT DONE (owner time limit; see Notes)
-- Tests: `MediaPickHandlerTest` (7), `ExternalHandoffTest` (4), `MapPickerLocateTest` (3), `AlertsPermissionViewModelTest` (3), `ExternalLinksTest` (+2), `GalleryViewModelTest` (+1), `SalonProfileViewModelTest` (+1, 1 changed), picking tests of Services/Catalog/MyAccount/Team/Registration updated to the source sheet; `./gradlew testAndroidHostTest` 188 suites / 627 tests / 0 failures, no `w:`; `run_detekt.sh` ok; `policy_checks.py all` ok; `:androidApp:assembleDevDebug` ok; `:composeApp:linkDebugFrameworkIosSimulatorArm64` ok. NOT run: `iosApp-Dev` xcodebuild simulator build, iOS K/N tests
-- Loops: 1/1 — batch verification (rules §3.13) on `chore/merchant-integration-perf`: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green; merged release manifest checked (POST_NOTIFICATIONS kept, no CAMERA). DEFERRED: device proof of every hand-off (emulator/simulator were taken by other agents; call + camera need a real iPhone)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together (manifest, AppDelegate push handling, R8/stability config); deviations listed in Loops/Notes.
-- Notes: Stopped at the owner's 25-minute limit (2026-10-27). NOT done: emulator/simulator proof of each feature (the free AVD was already in use by another session), iOS `iosApp-Dev` simulator build, Personal-Team (`iosApp-Personal.entitlements`) launch check — AppDelegate only fails `registerForRemoteNotifications` there (no crash path found in code, not run). Removed dead code: `ImagePicker` port + platform pickers, `PlatformUrlLauncher`. `android.media.ExifInterface` (framework) used, no new library; design-system commonTest gained `kotlinx-coroutines-test` (already in the catalog). Staff have no call action in PRD/design, so none was added. "Open in Maps" has no web fallback (a host literal would need build config).
-### MER-077 — Performance: R8, Compose, startup (Android + shared)
-- Branch: `perf/mer-077-android-performance`
-- Status: IN PROGRESS
-- Acceptance criteria (owner 2026-10-27 "the app lags"; CLAUDE.md §6; skills r8-analyzer, jetpack-compose-performance, anr-audit-and-fix):
-  - [x] R8: release already minified + `shrinkResources` with `proguard-android-optimize.txt` (AGP default = full mode), debug unminified and debuggable — verified in `AndroidAppPlugin`, unchanged
-  - [x] Compose stability: shared `config/compose-stability.conf` (read-only collections, kotlinx.datetime, immutable domain models of core + home/bookings/team/finance/notifications, all `val`, checked) wired into every Compose module by `configureComposeStability()` (build-logic)
-  - [x] Calendar: day/week column layout, time window and hour labels remembered on their inputs; the 1-minute clock tick (`nowMs`) and sheet flags no longer rebuild the layout; `rangeText` lambda remembered so `CalendarTexts` stays equal
-  - [x] Coil: one process-wide loader (`SingletonImageLoader`, application context) shared by the shell and the booking-request overlay (one memory + disk cache instead of two)
-  - [x] Startup/ANR: `AppSettings` + `PushTokenProvider` resolved inside the IO coroutine of `AndroidApp.onCreate` (DataStore + Firebase Messaging creation off the main thread)
-  - [ ] Gates: host tests, detekt, `assembleDevRelease` + `assembleDevDebug`, iOS framework link — NOT RUN (see Notes)
-- Tests: `CalendarLayoutTest.equalInputsGiveEqualLayout` (new: equal inputs give an equal layout/window, the property the remember keys rely on); `policy_checks.py all` ok; Gradle not run
-- Loops: 1/1 — batch verification (rules §3.13): gates above green incl. devRelease/prodRelease with the Compose stability config. DEFERRED: before/after measurements, narrowing R8 keep rules, app baseline profile
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together (manifest, AppDelegate push handling, R8/stability config); deviations listed in Loops/Notes.
-- Notes: DEVIATIONS — Gradle runs only from the terminal panel (no Java in the sandbox) and the panel hook refused a new tab (6 tabs open by other agents; their tabs were not reused), so no Gradle task, no detekt, no device measurement ran. Not done (time box 25 min): narrowing the broad keep rules (`io.ktor.**`, whole `core.data/network/domain` packages) needs a release run on a device to prove nothing breaks; ProfileInstaller already arrives transitively through androidx.activity (library baseline profiles apply), no app baseline profile (needs a Macrobenchmark module); bookings list / Home / team / finance lists already use `key` + `contentType`.
 ### MER-078 — Performance: iOS release build + Compose iOS settings
 - Branch: `perf/mer-078-ios-performance`
 - Status: IN PROGRESS

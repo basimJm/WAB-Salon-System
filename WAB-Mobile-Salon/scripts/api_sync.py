@@ -68,6 +68,9 @@ class Renderer:
         if not schema:
             return "JsonElement"
         if "$ref" in schema:
+            target = self.component(schema)
+            if target is not None and not (target.get("type") == "object" and target.get("properties")):
+                return self.kotlin_type(target, name, file_key)  # scalar component (enum): inline its type
             return schema["$ref"].rsplit("/", 1)[-1]
         if any(k in schema for k in ("oneOf", "anyOf", "allOf")):
             return "JsonElement"
@@ -85,6 +88,17 @@ class Renderer:
             return f"List<{self.kotlin_type(schema.get('items'), name + 'Item', file_key)}>"
         return {"string": "String", "integer": "Int", "number": "Double", "boolean": "Boolean"}.get(kind, "JsonElement")
 
+    def component(self, schema: dict) -> dict | None:
+        """The component a `$ref` points to (None when it is missing)."""
+        return self.spec.get("components", {}).get("schemas", {}).get(schema["$ref"].rsplit("/", 1)[-1])
+
+    def enum_of(self, schema: dict | None) -> list | None:
+        if not isinstance(schema, dict):
+            return None
+        if "$ref" in schema:
+            schema = self.component(schema) or {}
+        return schema.get("enum")
+
     @staticmethod
     def nullable(schema: dict | None, required: bool) -> bool:
         if not schema:
@@ -99,7 +113,8 @@ class Renderer:
             kotlin = self.kotlin_type(sub, name + pascal(prop), file_key)
             optional = self.nullable(sub, prop in required)
             field = f"`{prop}`" if prop in KOTLIN_KEYWORDS or not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", prop) else prop
-            doc = f"    /** One of: {', '.join(map(str, sub['enum']))}. */\n" if isinstance(sub, dict) and sub.get("enum") else ""
+            enum = self.enum_of(sub)
+            doc = f"    /** One of: {', '.join(map(str, enum))}. */\n" if enum else ""
             serial = f'    @SerialName("{prop}")\n' if field != prop else ""
             lines.append(f"{doc}{serial}    val {field}: {kotlin}{'? = null' if optional else ''},")
         lines.append(")")

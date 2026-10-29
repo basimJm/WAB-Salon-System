@@ -1,14 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="reg_title">سجّل صالونك</string>
+    <string name="reg_title">سجّل صالونك أو عيادتك</string>
     <string name="reg_subtitle">أرسل طلبك وسنراجعه خلال 1–2 يوم عمل.</string>
     <string name="reg_resubmit_title">تعديل وإعادة الإرسال</string>
     <string name="reg_salon_name">اسم الصالون</string>
     <string name="reg_salon_name_hint">مثال: بيلا هاوس</string>
-    <string name="reg_type">نوع الصالون</string>
+    <string name="reg_business_type">ماذا تريد أن تسجّل؟</string>
+    <string name="reg_salon">صالون</string>
+    <string name="reg_clinic">عيادة تجميل</string>
+    <string name="reg_type_locked">لا يمكن تغيير نوع النشاط.</string>
+    <string name="reg_clinic_name">اسم العيادة</string>
+    <string name="reg_clinic_name_hint">مثال: عيادة جلو</string>
+    <string name="reg_audience">من يخدم الصالون؟</string>
+    <string name="reg_both">الجنسين</string>
+    <string name="reg_clinic_unisex">العيادات تخدم الرجال والنساء.</string>
+    <string name="reg_audience_men">رجال</string>
+    <string name="reg_audience_women">نساء</string>
+    <string name="reg_audience_both">رجال ونساء</string>
+    <string name="reg_medical">الترخيص الطبي</string>
+    <string name="reg_medical_hint">ارفع من 1 إلى 5 ملفات للترخيص الطبي للعيادة (صورة أو PDF، حتى 10 ميغابايت للملف).</string>
+    <string name="reg_medical_hint_resubmit">أضف ملفات جديدة فقط إذا أردت استبدال الترخيص الطبي المرفوع سابقاً (صورة أو PDF، حتى 10 ميغابايت للملف).</string>
+    <string name="reg_medical_error">ارفع الترخيص الطبي للعيادة</string>
+    <string name="reg_review">راجع اختياراتك</string>
+    <string name="reg_review_type">النوع:</string>
+    <string name="reg_review_audience">يخدم:</string>
+    <string name="reg_review_medical">الترخيص الطبي:</string>
+    <string name="reg_review_uploaded">مرفوع</string>
+    <string name="reg_review_missing">لم يُحدَّد بعد</string>
     <string name="reg_men">رجالي</string>
     <string name="reg_women">نسائي</string>
-    <string name="reg_type_warning">لا يمكن تغيير نوع الصالون لاحقاً</string>
+    <string name="reg_type_warning">لا يمكن تغيير نوع النشاط لاحقاً، ويمكن للصالون الرجالي أو النسائي لاحقاً أن يختار خدمة الجنسين.</string>
     <string name="reg_first_name">الاسم الأول للمالك</string>
     <string name="reg_last_name">الاسم الأخير</string>
     <string name="reg_city">المدينة</string>
@@ -16,7 +37,7 @@
     <string name="reg_select">اختر</string>
     <string name="reg_area_hint">اختر المدينة أولاً</string>
     <string name="reg_documents">وثائق الترخيص</string>
-    <string name="reg_documents_hint">ارفع من 1 إلى 5 ملفات تثبت وجود الصالون وترخيصه (صورة أو PDF، حتى 10 ميغابايت للملف).</string>
+    <string name="reg_documents_hint">ارفع من 1 إلى 5 ملفات تثبت وجود نشاطك وترخيصه (صورة أو PDF، حتى 10 ميغابايت للملف).</string>
     <string name="reg_agree">أوافق على</string>
     <string name="reg_terms_link">شروط وأحكام WAB للصالونات</string>
     <string name="reg_terms_error">يجب الموافقة على الشروط والأحكام</string>

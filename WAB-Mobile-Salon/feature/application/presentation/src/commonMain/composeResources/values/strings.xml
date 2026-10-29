@@ -1,14 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="reg_title">Register your salon</string>
+    <string name="reg_title">Register your salon or clinic</string>
     <string name="reg_subtitle">Submit your application — we’ll review it in 1–2 business days.</string>
     <string name="reg_resubmit_title">Edit &amp; resubmit</string>
     <string name="reg_salon_name">Salon name</string>
     <string name="reg_salon_name_hint">e.g. Bella House</string>
-    <string name="reg_type">Salon type</string>
+    <string name="reg_business_type">What are you registering?</string>
+    <string name="reg_salon">Salon</string>
+    <string name="reg_clinic">Beauty clinic</string>
+    <string name="reg_type_locked">The business type cannot be changed.</string>
+    <string name="reg_clinic_name">Clinic name</string>
+    <string name="reg_clinic_name_hint">e.g. Glow Clinic</string>
+    <string name="reg_audience">Who does the salon serve?</string>
+    <string name="reg_both">Both</string>
+    <string name="reg_clinic_unisex">Clinics serve both men and women.</string>
+    <string name="reg_audience_men">Men</string>
+    <string name="reg_audience_women">Women</string>
+    <string name="reg_audience_both">Men and women</string>
+    <string name="reg_medical">Medical license</string>
+    <string name="reg_medical_hint">Upload 1–5 files of the clinic’s medical license (image or PDF, max 10 MB each).</string>
+    <string name="reg_medical_hint_resubmit">Add new files only to replace the medical license on file (image or PDF, max 10 MB each).</string>
+    <string name="reg_medical_error">Upload the clinic’s medical license</string>
+    <string name="reg_review">Review your choices</string>
+    <string name="reg_review_type">Type:</string>
+    <string name="reg_review_audience">Serves:</string>
+    <string name="reg_review_medical">Medical license:</string>
+    <string name="reg_review_uploaded">Uploaded</string>
+    <string name="reg_review_missing">Not chosen yet</string>
     <string name="reg_men">Men</string>
     <string name="reg_women">Women</string>
-    <string name="reg_type_warning">Salon type cannot be changed later</string>
+    <string name="reg_type_warning">The business type cannot be changed later. A men’s or women’s salon can later choose to serve both.</string>
     <string name="reg_first_name">Owner first name</string>
     <string name="reg_last_name">Last name</string>
     <string name="reg_city">City</string>
@@ -16,7 +37,7 @@
     <string name="reg_select">Select</string>
     <string name="reg_area_hint">Select a city first</string>
     <string name="reg_documents">License documents</string>
-    <string name="reg_documents_hint">Upload 1–5 files proving your salon exists and is licensed (image or PDF, max 10 MB each).</string>
+    <string name="reg_documents_hint">Upload 1–5 files proving your business exists and is licensed (image or PDF, max 10 MB each).</string>
     <string name="reg_agree">I agree to the</string>
     <string name="reg_terms_link">WAB Salon Terms &amp; Conditions</string>
     <string name="reg_terms_error">You must accept the terms</string>

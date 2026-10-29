@@ -34,7 +34,7 @@ class BookingMappersTest {
     private val item = GetBookingsDataItem(
         id = "b1", referenceNumber = "WAB-1", status = "PENDING", paymentMethod = "DEPOSIT", paymentStatus = "DEPOSIT_PAID",
         hasBride = true, appointmentStart = START, appointmentEnd = END, respondBy = "2026-10-22T14:00:00Z", requestedAt = START,
-        personsCount = 2.0,
+        personsCount = 2.0, businessType = "SALON", salonAudience = "FEMALE",
         total = "45.000", customer = GetBookingsDataItemCustomer("c1", "Sara", "+962791234567"),
         staff = listOf(GetBookingsDataItemStaffItem("s1", "Rana Odeh", "Rana", PHOTO)),
     )
@@ -42,12 +42,13 @@ class BookingMappersTest {
     private val detailsData = GetBookingsByIdData(
         id = "b1", referenceNumber = "WAB-1", status = "APPROVED", paymentMethod = "PAY_ON_ARRIVAL", paymentStatus = "PAY_ON_ARRIVAL",
         hasBride = false, appointmentStart = START, appointmentEnd = END, respondBy = END, requestedAt = START, personsCount = 1.0,
-        total = "25.000",
+        businessType = "SALON", salonAudience = "FEMALE", total = "25.000",
         customer = GetBookingsByIdDataCustomer("c1", "Noor", "+962790000000"), staff = emptyList(), refundStatus = "NONE",
         persons = listOf(
             GetBookingsByIdDataPersonsItem(
                 "Noor",
                 false,
+                "FEMALE",
                 START,
                 END,
                 "25.000",
