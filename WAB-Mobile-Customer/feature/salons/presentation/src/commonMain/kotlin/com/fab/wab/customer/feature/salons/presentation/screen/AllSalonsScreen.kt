@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,6 +13,7 @@ import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.designsystem.components.chip.ActiveFilterChip
 import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeTabs
 import com.fab.wab.customer.designsystem.components.dialog.GlobalDialogKind
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
@@ -37,7 +39,10 @@ import com.fab.wab.customer.feature.salons.presentation.resources.salons_empty_b
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title
 import org.jetbrains.compose.resources.stringResource
 
-/** S04 (design `on.salons`): top bar, search + filter button, active chips, paged salon rows with design states. */
+/**
+ * S04 (design `on.salons`): top bar, search + filter button, All / Salons / Clinics tabs (§5.19), active chips, paged
+ * salon rows with design states.
+ */
 @Composable
 fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(SalonsAnalytics.SCREEN)
@@ -53,6 +58,11 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
                 onValueChange = { onAction(UiAction.OnTextChange(it)) },
                 chipCount = chips.size,
                 onFilterClick = { onAction(UiAction.OnFilterClick) },
+            )
+            BusinessTypeTabs(
+                selected = state.businessType,
+                onSelect = { onAction(UiAction.OnBusinessTypeSelect(it)) },
+                modifier = Modifier.fillMaxWidth().padding(start = spacing.space20, end = spacing.space20, bottom = spacing.space12),
             )
             SalonsActiveChips(chips = chips, onRemove = { chip -> onAction(UiAction.OnChipRemove(chip.toFilterId())) })
             AppPullToRefresh(

@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.core.domain.dev
 
 import com.fab.wab.merchant.core.domain.permission.PermissionsSync
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SalonState
 
@@ -15,6 +16,9 @@ interface MockControls {
     val enabled: Boolean
     fun setSalonState(state: SalonState)
     fun setMember(preset: MockMemberPreset)
+
+    /** Salon or clinic and its audience (BUSINESS_DOMAIN §5.19); mock builds only. */
+    fun setBusinessKind(kind: BusinessKind) = Unit
 
     /** The booking-request triggers mark their booking PENDING so the request sheet / overlay can show it. */
     fun markBookingPending(bookingId: String)
@@ -38,6 +42,12 @@ class SwitchMockWorldUseCase(
     suspend fun salonState(state: SalonState) {
         if (!controls.enabled) return
         controls.setSalonState(state)
+        salon.refresh()
+    }
+
+    suspend fun businessKind(kind: BusinessKind) {
+        if (!controls.enabled) return
+        controls.setBusinessKind(kind)
         salon.refresh()
     }
 

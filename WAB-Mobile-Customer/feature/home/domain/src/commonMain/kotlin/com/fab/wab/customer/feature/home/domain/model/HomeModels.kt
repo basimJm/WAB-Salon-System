@@ -29,11 +29,17 @@ data class HomeService(val id: String, val name: String, val description: String
 /** A horizontal Home section; `hasMore` is the server's "> 10" decision behind "See more / See all". */
 data class HomeSection<T>(val items: List<T>, val hasMore: Boolean)
 
-/** One `GET /home` answer (PRD S03: one request, one shimmer). `nearest` is null when no coordinates were sent. */
+/**
+ * One `GET /home` answer (PRD S03: one request, one shimmer), sections per business type (BUSINESS_DOMAIN §5.19, in the
+ * Home order). The nearest sections are null when no coordinates were sent.
+ */
 data class HomeContent(
     val unreadCount: Int,
     val banners: List<HomeBanner>,
-    val services: HomeSection<HomeService>,
-    val recommended: HomeSection<SalonSummary>,
-    val nearest: HomeSection<SalonSummary>?,
+    val salonServices: HomeSection<HomeService>,
+    val clinicServices: HomeSection<HomeService>,
+    val recommendedSalons: HomeSection<SalonSummary>,
+    val recommendedClinics: HomeSection<SalonSummary>,
+    val nearestSalons: HomeSection<SalonSummary>?,
+    val nearestClinics: HomeSection<SalonSummary>?,
 )

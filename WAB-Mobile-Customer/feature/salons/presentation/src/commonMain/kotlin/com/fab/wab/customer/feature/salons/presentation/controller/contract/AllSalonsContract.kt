@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.salons.presentation.controller.contract
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.SalonSummary
@@ -12,6 +13,8 @@ data class AllSalonsEntry(
     val serviceId: String? = null,
     val serviceName: String? = null,
     val filter: SalonListFilter? = null,
+    /** Salons or clinics only (Home sections); null lists both (BUSINESS_DOMAIN §5.19). */
+    val businessType: BusinessType? = null,
 )
 
 /** One active-filter chip (PRD S04 item 3); the id tells the view model which filter to drop. */
@@ -28,6 +31,7 @@ sealed interface AllSalonsContract {
 
     data class UiState(
         val gender: Gender? = null,
+        val businessType: BusinessType? = null,
         val text: String = "",
         val filters: SalonFilters = SalonFilters(),
         val loading: Boolean = true,
@@ -47,6 +51,8 @@ sealed interface AllSalonsContract {
     sealed interface UiAction {
         data class OnTextChange(val value: String) : UiAction
         data object OnFilterClick : UiAction
+        /** All / Salons / Clinics (null = all). */
+        data class OnBusinessTypeSelect(val businessType: BusinessType?) : UiAction
         data class OnChipRemove(val chip: FilterChipId) : UiAction
         data class OnSalonClick(val salonId: String) : UiAction
         data class OnFavoriteClick(val salonId: String) : UiAction

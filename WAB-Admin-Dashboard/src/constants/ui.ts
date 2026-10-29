@@ -56,3 +56,5 @@ export const EXPORT_POLL_TIMEOUT_MS = 120_000;
 export const SEARCH_GROUP_SIZE = 5;
 /** Latest NEW alerts shown in the top-bar bell dropdown (design `WAB Admin Topbar`). */
 export const BELL_LATEST_ALERTS = 5;
+/** Bookings of a refused audience change listed by reference (the rest are counted), §5.12 conflict list. */
+export const AUDIENCE_CONFLICTS_SHOWN = 10;

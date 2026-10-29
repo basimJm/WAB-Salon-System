@@ -2,12 +2,15 @@ package com.fab.wab.merchant.feature.application.data
 
 import com.fab.wab.merchant.core.data.contract.generated.GetSalonApplicationData
 import com.fab.wab.merchant.core.data.contract.generated.MemberProfile as MemberDto
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.feature.application.data.repository.toApplyBody
 import com.fab.wab.merchant.feature.application.data.repository.toDomain
+import com.fab.wab.merchant.feature.application.data.repository.toResubmitBody
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationForm
-import com.fab.wab.merchant.feature.application.domain.model.SalonGender
 import com.fab.wab.merchant.feature.auth.domain.model.InstallationInfo
 import com.fab.wab.merchant.feature.auth.domain.model.PhoneNumber
 import kotlin.test.Test
@@ -17,13 +20,30 @@ import kotlin.test.assertNull
 class ApplicationMappersTest {
     @Test
     fun applyBodyCarriesTheSalonOwnerDocumentsAndInstallation() {
-        val form = RegistrationForm("Gents", SalonGender.MEN, "Omar", "Ali", "c1", "a1", listOf("l/1.pdf", "l/2.jpg"))
+        val kind = BusinessKind(BusinessType.SALON, Audience.MALE)
+        val form = RegistrationForm("Gents", kind, "Omar", "Ali", "c1", "a1", listOf("l/1.pdf", "l/2.jpg"))
         val body = form.toApplyBody(PhoneNumber("JO", "791234567"), "proof", InstallationInfo("inst-123456", "ANDROID", "1.0"))
-        assertEquals("MALE", body.salon.gender)
+        assertEquals("SALON", body.salon.businessType)
+        assertEquals("MALE", body.salon.audience)
+        assertNull(body.medicalLicenseKeys)
         assertEquals("c1", body.salon.cityId)
         assertEquals(listOf("l/1.pdf", "l/2.jpg"), body.documentKeys)
         assertEquals("inst-123456", body.installation.installationId)
         assertEquals("JO", body.phone.countryCode)
+    }
+
+    @Test
+    fun aClinicSendsItsTypeAndMedicalLicenseButNoAudience() {
+        val clinic = RegistrationForm(
+            "Glow", BusinessKind(BusinessType.CLINIC, Audience.BOTH), "Rana", "Odeh", "c1", "a1", listOf("l/1.pdf"),
+            medicalLicenseKeys = listOf("m/1.pdf"),
+        )
+        val body = clinic.toApplyBody(PhoneNumber("JO", "791234567"), "proof", InstallationInfo("inst-123456", "ANDROID", "1.0"))
+        assertEquals("CLINIC", body.salon.businessType)
+        assertNull(body.salon.audience)
+        assertEquals(listOf("m/1.pdf"), body.medicalLicenseKeys)
+        assertNull(clinic.copy(medicalLicenseKeys = emptyList()).toResubmitBody().medicalLicenseKeys, "keeps the license on file")
+        assertEquals("FEMALE", clinic.copy(kind = BusinessKind(BusinessType.SALON, Audience.FEMALE)).toResubmitBody().audience)
     }
 
     @Test

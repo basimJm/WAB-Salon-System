@@ -18,6 +18,11 @@
     <string name="mock_title">بيانات تجريبية (للتطوير)</string>
     <string name="mock_salon">حالة الصالون</string>
     <string name="mock_member">العضو المسجّل</string>
+    <string name="mock_business">نوع النشاط</string>
+    <string name="mock_kind_women">صالون نسائي</string>
+    <string name="mock_kind_men">صالون رجالي</string>
+    <string name="mock_kind_both">صالون للجنسين</string>
+    <string name="mock_kind_clinic">عيادة تجميل</string>
     <string name="mock_owner">المالك</string>
     <string name="mock_manager">مدير</string>
     <string name="mock_employee">موظف</string>

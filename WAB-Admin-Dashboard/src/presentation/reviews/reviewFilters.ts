@@ -6,6 +6,7 @@ import {
   type ReviewTarget,
 } from '@/domain/reviews/reviews';
 import type { ListState } from '@/domain/shared/listState';
+import { businessTypeFilterOf, businessTypeParam } from '../shared/businessFilter';
 
 export const RATINGS = [1, 2, 3, 4, 5];
 const DEFAULT_STATUS: ReviewStatus = 'PENDING';
@@ -34,6 +35,7 @@ export function reviewFilters(state: ListState): {
       ...(rating ? { rating } : {}),
       ...(salon ? { salonId: salon } : {}),
       ...(salon && branch ? { branchId: branch } : {}),
+      ...businessTypeParam(businessTypeFilterOf(state)),
     },
   };
 }

@@ -9,16 +9,18 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
 class CatalogApi(private val client: HttpClient) {
-    suspend fun services(gender: String, page: Int, pageSize: Int): BaseResponse<List<GetCatalogServicesDataItem>> =
+    suspend fun services(gender: String, businessType: String?, page: Int, pageSize: Int): BaseResponse<List<GetCatalogServicesDataItem>> =
         client.get(CustomerOperations.getCatalogServices.path) {
             parameter(QUERY_PAGE, page)
             parameter(QUERY_PAGE_SIZE, pageSize)
             parameter(QUERY_GENDER, gender)
+            businessType?.let { parameter(QUERY_BUSINESS_TYPE, it) }
         }.body()
 
     private companion object {
         const val QUERY_PAGE = "page"
         const val QUERY_PAGE_SIZE = "pageSize"
         const val QUERY_GENDER = "gender"
+        const val QUERY_BUSINESS_TYPE = "businessType"
     }
 }

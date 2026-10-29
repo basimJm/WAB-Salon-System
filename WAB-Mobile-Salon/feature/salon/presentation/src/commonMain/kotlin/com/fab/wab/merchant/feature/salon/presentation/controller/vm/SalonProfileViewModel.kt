@@ -38,6 +38,10 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Salon
 import com.fab.wab.merchant.designsystem.components.map.MapPickerController
 import com.fab.wab.merchant.designsystem.components.map.MapPickerHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class SalonProfileDependencies(
@@ -50,9 +54,14 @@ class SalonProfileDependencies(
     val map: MapPickerController,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** The signed-in member is the owner (audience widening). */
+    val isOwner: Flow<Boolean> = flowOf(false),
 )
 
-/** PRD M13: edit the salon profile, upload cover / profile images (cropped), pin the location, guard unsaved changes. */
+/**
+ * PRD M13: edit the salon profile, upload cover / profile images (cropped), pin the location, guard unsaved changes;
+ * the owner may widen a MALE / FEMALE salon to both (BUSINESS_DOMAIN §5.19).
+ */
 class SalonProfileViewModel(
     private val deps: SalonProfileDependencies,
     testScope: CoroutineScope? = null,
@@ -60,13 +69,19 @@ class SalonProfileViewModel(
 
     private val mapHandler = MapPickerHandler(deps.map, scope, ::readMap, ::writeMap)
     private val media = MediaPickHandler(deps.filePicker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
+    private val audience = AudienceWidening(deps, scope, { uiState.value }, { change -> updateState(change) }, ::emitSideEffect)
+    private var ownerWatched = false
 
     override fun onStart() {
+        if (!ownerWatched) {
+            ownerWatched = true
+            deps.isOwner.onEach { owner -> updateState { copy(isOwner = owner) } }.launchIn(scope)
+        }
         load()
     }
 
     override fun handle(event: UiAction) {
-        handleForm(event) || handleMedia(event) || handleExit(event)
+        handleForm(event) || handleMedia(event) || handleExit(event) || audience.handle(event)
     }
 
     private fun handleForm(event: UiAction): Boolean {

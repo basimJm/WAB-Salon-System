@@ -55,12 +55,14 @@ fun RegistrationForm.toApplyBody(phone: PhoneNumber, otpToken: String, installat
     lastName = lastName,
     salon = PostSalonApplicationsBodySalon(
         name = salonName,
-        gender = gender.code,
+        businessType = kind.type.name,
+        audience = salonAudience,
         description = description,
         cityId = cityId,
         areaId = areaId,
     ),
     documentKeys = documentKeys,
+    medicalLicenseKeys = medicalLicenseKeys.takeIf { kind.isClinic },
     installation = PostSalonApplicationsBodyInstallation(
         installationId = installation.installationId,
         platform = installation.platform,
@@ -71,8 +73,17 @@ fun RegistrationForm.toApplyBody(phone: PhoneNumber, otpToken: String, installat
     ),
 )
 
-fun RegistrationForm.toResubmitBody() =
-    PostSalonApplicationResubmitBody(name = salonName, gender = gender.code, description = description, documentKeys = documentKeys)
+/** A clinic's audience is not sent (the server keeps it BOTH, §5.19); a salon sends the one it chose. */
+private val RegistrationForm.salonAudience: String? get() = kind.audience.name.takeUnless { kind.isClinic }
+
+/** A resubmission keeps the medical license on file unless the clinic added new files. */
+fun RegistrationForm.toResubmitBody() = PostSalonApplicationResubmitBody(
+    name = salonName,
+    audience = salonAudience,
+    description = description,
+    documentKeys = documentKeys,
+    medicalLicenseKeys = medicalLicenseKeys.takeIf { kind.isClinic && it.isNotEmpty() },
+)
 
 fun PostSalonApplicationsData.toDomain() = ApplicationSession(
     tokens = AuthTokens(accessToken = accessToken, refreshToken = refreshToken),

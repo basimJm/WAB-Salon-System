@@ -28,7 +28,7 @@ sealed interface StaffProfileContract {
         val loading: Boolean = true,
         val error: String? = null,
         val memberName: String = "",
-        val womenSalon: Boolean = false,
+        val brideAllowed: Boolean = false,
         val profile: StaffProfile? = null,
         val original: StaffDraft = StaffDraft(),
         val draft: StaffDraft = StaffDraft(),

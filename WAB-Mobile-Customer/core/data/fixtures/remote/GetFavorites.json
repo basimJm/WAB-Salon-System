@@ -5,6 +5,8 @@
     {
       "id": "79ea2a78d15934408a10b09f",
       "name": "Rose Bridal Studio",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
       "rating": 4.2,
       "reviewsCount": 23,

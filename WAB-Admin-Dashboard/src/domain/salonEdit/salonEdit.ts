@@ -14,7 +14,6 @@ export interface GeoPoint {
 export interface SalonProfile {
   readonly id: string;
   readonly name: string;
-  readonly gender: 'MALE' | 'FEMALE';
   readonly state: string;
   readonly description: string | null;
   readonly coverUrl: string | null;

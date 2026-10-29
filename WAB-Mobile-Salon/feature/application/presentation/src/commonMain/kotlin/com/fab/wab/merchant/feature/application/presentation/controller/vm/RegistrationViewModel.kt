@@ -8,19 +8,16 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
 import com.fab.wab.merchant.core.domain.locations.LocationDefaults
 import com.fab.wab.merchant.core.domain.locations.LocationsRepository
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.upload.UploadFileUseCase
-import com.fab.wab.merchant.core.domain.upload.UploadLimits
 import com.fab.wab.merchant.core.domain.upload.UploadPurpose
-import com.fab.wab.merchant.core.domain.upload.UploadSlot
-import com.fab.wab.merchant.core.domain.upload.acceptUploads
-import com.fab.wab.merchant.core.domain.upload.remainingSlots
+import com.fab.wab.merchant.core.domain.upload.UploadRejection
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.core.ui.media.FilePicker
-import com.fab.wab.merchant.core.ui.media.PickedFile
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
 import com.fab.wab.merchant.designsystem.components.upload.DOCUMENT_SOURCES
 import com.fab.wab.merchant.designsystem.components.upload.MediaPickHandler
-import com.fab.wab.merchant.designsystem.components.upload.UploadStatus
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationInput
 import com.fab.wab.merchant.feature.application.domain.model.registrationErrors
 import com.fab.wab.merchant.feature.application.domain.model.toForm
@@ -46,9 +43,11 @@ class RegistrationDependencies(
     val pending: PendingOtpVerification,
     val analytics: AnalyticsTracker,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    /** The rejected salon's own type + audience (resubmission; `GET /salon`), null when it cannot be read. */
+    val salonKind: suspend () -> BusinessKind? = { null },
 )
 
-/** PRD M04 salon registration (and the resubmission of a rejected application, PRD M05). */
+/** PRD M04 registration of a salon or a clinic (BUSINESS_DOMAIN §5.19) and the resubmission of a rejected one (PRD M05). */
 class RegistrationViewModel(
     mode: RegistrationMode,
     private val deps: RegistrationDependencies,
@@ -56,42 +55,48 @@ class RegistrationViewModel(
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(mode = mode), testScope) {
 
     private val proof: OtpVerified? = if (mode == RegistrationMode.NEW) deps.pending.consume() else null
-    private var uploads: List<DocumentUpload> = emptyList()
-    private var nextFileId = 0
     private val media = MediaPickHandler(deps.filePicker, scope, { uiState.value.media }) { updateState { copy(media = it) } }
+    private val documents = tray(UploadPurpose.LICENSE_DOCUMENT) { list ->
+        edit { copy(documentKeys = list.confirmedKeys, documentsUploading = list.anyUploading) }
+    }
+    private val medical = tray(UploadPurpose.MEDICAL_LICENSE) { list ->
+        edit { copy(medicalLicenseKeys = list.confirmedKeys, medicalUploading = list.anyUploading) }
+    }
+    private var started = false
+
+    private fun tray(purpose: UploadPurpose, onChange: (List<DocumentUpload>) -> Unit) = LicenseTray(
+        purpose = purpose,
+        scope = scope,
+        uploadFile = deps.uploadFile,
+        onUploaded = { deps.analytics.trackAction(AnalyticsAction(ApplicationAnalytics.ACTION_DOCUMENT_UPLOAD)) },
+        onChange = onChange,
+    )
 
     override fun onStart() {
         if (uiState.value.mode == RegistrationMode.NEW && proof == null) {
             emitSideEffect(SideEffect.NavigateToLogin)
             return
         }
-        if (uiState.value.mode == RegistrationMode.NEW) loadCities()
+        if (!started) {
+            started = true
+            if (uiState.value.mode == RegistrationMode.NEW) loadCities() else loadSalonKind()
+        }
         revalidate()
     }
 
     override fun handle(event: UiAction) {
-        handleForm(event) || handleDocuments(event)
+        handleForm(event) || handleDocuments(event) || handleMedical(event)
     }
 
     private fun handleForm(event: UiAction): Boolean {
         when (event) {
+            is UiAction.OnBusinessTypeSelect -> selectType(event.type)
+            is UiAction.OnAudienceSelect -> edit { copy(audience = event.audience) }
             is UiAction.OnSalonNameChange -> edit { copy(salonName = event.value) }
-            is UiAction.OnGenderSelect -> edit { copy(gender = event.gender) }
             is UiAction.OnFirstNameChange -> edit { copy(firstName = event.value) }
             is UiAction.OnLastNameChange -> edit { copy(lastName = event.value) }
             is UiAction.OnCitySelect -> selectCity(event.index)
             is UiAction.OnAreaSelect -> uiState.value.areas.getOrNull(event.index)?.let { area -> edit { copy(areaId = area.id) } }
-            else -> return false
-        }
-        return true
-    }
-
-    private fun handleDocuments(event: UiAction): Boolean {
-        when (event) {
-            UiAction.OnAddDocuments -> addDocuments()
-            is UiAction.OnMedia -> media.handle(event.action)
-            is UiAction.OnRemoveDocument -> setUploads(uploads.filterNot { it.file.id == event.id })
-            is UiAction.OnRetryDocument -> uploads.firstOrNull { it.file.id == event.id }?.let { startUpload(it) }
             UiAction.OnTermsToggle -> edit { copy(termsAccepted = !termsAccepted) }
             UiAction.OnTermsClick -> emitSideEffect(SideEffect.OpenContent(ApplicationSlugs.SALON_TERMS))
             UiAction.OnSubmit -> submit()
@@ -100,24 +105,59 @@ class RegistrationViewModel(
         return true
     }
 
+    private fun handleDocuments(event: UiAction): Boolean {
+        when (event) {
+            UiAction.OnAddDocuments -> pick(documents) { copy(documentRejection = it) }
+            is UiAction.OnMedia -> media.handle(event.action)
+            is UiAction.OnRemoveDocument -> documents.remove(event.id)
+            is UiAction.OnRetryDocument -> documents.retry(event.id)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleMedical(event: UiAction): Boolean {
+        when (event) {
+            UiAction.OnAddMedicalLicense -> pick(medical) { copy(medicalRejection = it) }
+            is UiAction.OnRemoveMedicalLicense -> medical.remove(event.id)
+            is UiAction.OnRetryMedicalLicense -> medical.retry(event.id)
+            else -> return false
+        }
+        return true
+    }
+
+    /** A clinic serves everyone (no audience question, §5.19); the type of a resubmission is fixed. */
+    private fun selectType(type: BusinessType) {
+        if (uiState.value.typeLocked) return
+        edit { copy(businessType = type, audience = if (type == BusinessType.CLINIC) null else audience) }
+    }
+
     private fun edit(change: RegistrationInput.() -> RegistrationInput) {
         updateState { copy(input = input.change()) }
         revalidate()
     }
 
     private fun revalidate() = updateState {
-        copy(errors = registrationErrors(input, resubmission = isResubmission), documents = uploads)
-    }
-
-    private fun setUploads(next: List<DocumentUpload>) {
-        uploads = next
-        edit { copy(documentKeys = next.confirmedKeys, documentsUploading = next.anyUploading) }
+        copy(
+            errors = registrationErrors(input, resubmission = isResubmission),
+            documents = this@RegistrationViewModel.documents.items,
+            medicalDocuments = medical.items,
+        )
     }
 
     private fun loadCities() {
         val country = proof?.phone?.countryCode ?: LocationDefaults.DEFAULT_COUNTRY_CODE
         scope.launch {
             (deps.locations.cities(country) as? AppResult.Success)?.let { cities -> updateState { copy(cities = cities.data) } }
+        }
+    }
+
+    /** A resubmission keeps the salon's type; a salon may still correct its audience while rejected. */
+    private fun loadSalonKind() {
+        scope.launch {
+            val kind = deps.salonKind() ?: return@launch
+            updateState { copy(typeLocked = true) }
+            edit { copy(businessType = kind.type, audience = kind.audience.takeUnless { kind.isClinic }) }
         }
     }
 
@@ -130,27 +170,12 @@ class RegistrationViewModel(
         }
     }
 
-    private fun addDocuments() {
-        val remaining = remainingSlots(uploads.size, UploadLimits.DOCUMENT_MAX_FILES)
-        media.open(DOCUMENT_SOURCES, maxCount = remaining) { files -> acceptDocuments(files, remaining) }
-    }
-
-    private fun acceptDocuments(files: List<PickedFile>, remaining: Int) {
-        val picked = files.map { it.toLocalFile(id = (nextFileId++).toString()) }
-        val (accepted, refused) = acceptUploads(picked, UploadSlot.DOCUMENTS, remaining)
-        updateState { copy(documentRejection = refused.firstOrNull()) }
-        accepted.forEach { startUpload(DocumentUpload(it, UploadStatus.Uploading(0f))) }
-    }
-
-    private fun startUpload(upload: DocumentUpload) {
-        val id = upload.file.id
-        setUploads(uploads.filterNot { it.file.id == id } + upload.copy(status = UploadStatus.Uploading(0f)))
-        scope.launch {
-            deps.uploadFile(
-                upload.file,
-                UploadPurpose.LICENSE_DOCUMENT,
-            ).collect { progress -> setUploads(uploads.withProgress(id, progress)) }
-            deps.analytics.trackAction(AnalyticsAction(ApplicationAnalytics.ACTION_DOCUMENT_UPLOAD))
+    /** Camera / photo library / files (MER-076 picker) into [target]; [showRejection] stores the first refused file. */
+    private fun pick(target: LicenseTray, showRejection: UiState.(UploadRejection?) -> UiState) {
+        val remaining = target.remaining
+        media.open(DOCUMENT_SOURCES, maxCount = remaining) { files ->
+            val refused = target.accept(files, remaining)
+            updateState { showRejection(refused) }
         }
     }
 

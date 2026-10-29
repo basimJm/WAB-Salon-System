@@ -37,6 +37,9 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   id: `64h${String(n).padStart(21, '0')}`,
   referenceNumber: `WAB-00000${String(n)}`,
   status,
+  // Every mock booking is at Noor Salon (a women's salon): the snapshots of §5.19.
+  businessType: 'SALON' as 'SALON' | 'CLINIC',
+  salonAudience: 'FEMALE' as 'FEMALE' | 'MALE' | 'BOTH',
   paymentMethod: payment === 'PAY_ON_ARRIVAL' ? 'PAY_ON_ARRIVAL' : 'DEPOSIT',
   paymentStatus: payment,
   hasBride: bride,
@@ -84,6 +87,7 @@ export function bookingsRoutes(): readonly MockRoute[] {
             (query.get('brideOnly') !== 'true' || r.hasBride) &&
             (!query.get('paymentStatus') || r.paymentStatus === query.get('paymentStatus')) &&
             (!query.get('branchId') || r.branch?.id === query.get('branchId')) &&
+            (!query.get('businessType') || r.businessType === query.get('businessType')) &&
             `${r.referenceNumber} ${r.customer.name} ${r.salon.name}`.toLowerCase().includes(q),
         );
         return {
@@ -107,6 +111,7 @@ export function bookingsRoutes(): readonly MockRoute[] {
               {
                 name: 'Dana',
                 isBride: r.hasBride,
+                gender: 'FEMALE' as const,
                 start: r.appointmentStart,
                 end: r.appointmentEnd,
                 subtotal: r.total,

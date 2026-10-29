@@ -28,6 +28,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -38,26 +39,33 @@ import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeCo
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SalonSection
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.resources.Res
+import com.fab.wab.customer.feature.home.presentation.resources.home_clinic_services
 import com.fab.wab.customer.feature.home.presentation.resources.home_enable_location
 import com.fab.wab.customer.feature.home.presentation.resources.home_nearest
+import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_clinics
+import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_clinics_empty
 import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_empty
 import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_location_off
 import com.fab.wab.customer.feature.home.presentation.resources.home_recommended
+import com.fab.wab.customer.feature.home.presentation.resources.home_recommended_clinics
+import com.fab.wab.customer.feature.home.presentation.resources.home_salon_services
 import com.fab.wab.customer.feature.home.presentation.resources.home_see_all
 import com.fab.wab.customer.feature.home.presentation.resources.home_see_more
-import com.fab.wab.customer.feature.home.presentation.resources.home_services
 import org.jetbrains.compose.resources.stringResource
 
-/** Design S03 services row: 136 dp tiles with a 96 dp image, 13.5 sp name and a two-line 11.5 sp description. */
+/**
+ * Design S03 services row: 136 dp tiles with a 96 dp image, 13.5 sp name and a two-line 11.5 sp description; one row of
+ * salon services and one of clinic services (BUSINESS_DOMAIN §5.19), hidden when empty.
+ */
 @Composable
-internal fun ServicesSection(section: HomeSection<HomeService>, onAction: (UiAction) -> Unit) {
+internal fun ServicesSection(section: HomeSection<HomeService>, type: BusinessType, onAction: (UiAction) -> Unit) {
     if (section.items.isEmpty()) return
     Column(Modifier.fillMaxWidth()) {
         SectionTitle(
-            title = stringResource(Res.string.home_services),
-            topMargin = DiscoveryDesign.SECTION_TOP_FIRST,
+            title = stringResource(if (type == BusinessType.CLINIC) Res.string.home_clinic_services else Res.string.home_salon_services),
+            topMargin = if (type == BusinessType.CLINIC) DiscoveryDesign.SECTION_TOP else DiscoveryDesign.SECTION_TOP_FIRST,
             actionText = if (section.hasMore) stringResource(Res.string.home_see_more) else null,
-            onAction = { onAction(UiAction.OnServicesSeeMore) },
+            onAction = { onAction(UiAction.OnServicesSeeMore(type)) },
         )
         LazyRow(
             contentPadding = PaddingValues(
@@ -68,7 +76,7 @@ internal fun ServicesSection(section: HomeSection<HomeService>, onAction: (UiAct
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
         ) {
             items(section.items, key = { it.id }, contentType = { SERVICE_TYPE }) { service ->
-                ServiceTile(service, onClick = { onAction(UiAction.OnServiceClick(service.id)) })
+                ServiceTile(service, onClick = { onAction(UiAction.OnServiceClick(service.id, type)) })
             }
         }
     }
@@ -101,32 +109,40 @@ private fun ServiceTile(service: HomeService, onClick: () -> Unit) {
 }
 
 @Composable
-internal fun RecommendedSection(section: HomeSection<SalonSummary>, onAction: (UiAction) -> Unit) {
+internal fun RecommendedSection(section: HomeSection<SalonSummary>, type: BusinessType, onAction: (UiAction) -> Unit) {
     if (section.items.isEmpty()) return
     Column(Modifier.fillMaxWidth()) {
         SectionTitle(
-            title = stringResource(Res.string.home_recommended),
+            title = stringResource(if (type == BusinessType.CLINIC) Res.string.home_recommended_clinics else Res.string.home_recommended),
             topMargin = DiscoveryDesign.SECTION_TOP,
             actionText = if (section.hasMore) stringResource(Res.string.home_see_all) else null,
-            onAction = { onAction(UiAction.OnSeeAll(SalonSection.Recommended)) },
+            onAction = { onAction(UiAction.OnSeeAll(SalonSection.Recommended, type)) },
         )
         SalonRow(section.items, onAction, showDistance = false)
     }
 }
 
-/** PRD S03 item 7 / design `nearOn | nearOff | nearEmpty`; available to guests. */
+/**
+ * PRD S03 item 7 / design `nearOn | nearOff | nearEmpty`; available to guests. Nearest clinics follow nearest salons and
+ * never repeat the location prompt: without location only the salons section asks for it.
+ */
 @Composable
-internal fun NearestSection(nearest: NearestUi, onAction: (UiAction) -> Unit) {
+internal fun NearestSection(nearest: NearestUi, type: BusinessType, onAction: (UiAction) -> Unit) {
+    val clinics = type == BusinessType.CLINIC
+    if (clinics && nearest == NearestUi.LocationOff) return
     val spacing = AppTheme.spacing
     SectionTitle(
-        title = stringResource(Res.string.home_nearest),
+        title = stringResource(if (clinics) Res.string.home_nearest_clinics else Res.string.home_nearest),
         topMargin = DiscoveryDesign.SECTION_TOP,
         actionText = if ((nearest as? NearestUi.Salons)?.hasMore == true) stringResource(Res.string.home_see_all) else null,
-        onAction = { onAction(UiAction.OnSeeAll(SalonSection.Nearest)) },
+        onAction = { onAction(UiAction.OnSeeAll(SalonSection.Nearest, type)) },
     )
     when (nearest) {
         is NearestUi.Salons -> SalonRow(nearest.items, onAction, showDistance = true)
-        NearestUi.Empty -> NearestEmpty(Modifier.padding(horizontal = spacing.space20))
+        NearestUi.Empty -> NearestEmpty(
+            stringResource(if (clinics) Res.string.home_nearest_clinics_empty else Res.string.home_nearest_empty),
+            Modifier.padding(horizontal = spacing.space20),
+        )
         NearestUi.LocationOff -> NearestLocationOff(
             onEnable = { onAction(UiAction.OnEnableLocationClick) },
             Modifier.padding(horizontal = spacing.space20),
@@ -216,9 +232,9 @@ private fun NearestLocationOff(onEnable: () -> Unit, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun NearestEmpty(modifier: Modifier = Modifier) {
+private fun NearestEmpty(text: String, modifier: Modifier = Modifier) {
     AppText(
-        text = stringResource(Res.string.home_nearest_empty),
+        text = text,
         style = discoveryBody(DiscoveryDesign.TEXT_13_5, lineHeight = DiscoveryDesign.LINE_HEIGHT_1_6),
         color = AppTheme.colors.muted,
         textAlign = TextAlign.Center,

@@ -5,6 +5,9 @@
     <string name="hub_missing">Missing</string>
     <string name="hub_women">Women’s salon</string>
     <string name="hub_men">Men’s salon</string>
+    <string name="hub_both">Salon for men and women</string>
+    <string name="hub_clinic">Beauty clinic · men and women</string>
+    <string name="hub_title_clinic">Manage clinic</string>
     <string name="tile_profile">Profile &amp; images</string>
     <string name="tile_profile_sub">Name, description, location, contact</string>
     <string name="tile_gallery">Gallery</string>
@@ -31,6 +34,7 @@
     <string name="profile_cover_hint">Cover image 16:9</string>
     <string name="profile_logo_hint">Logo</string>
     <string name="profile_name">Salon name</string>
+    <string name="profile_name_clinic">Clinic name</string>
     <string name="profile_description">Description</string>
     <string name="profile_count">%1$d / %2$d</string>
     <string name="profile_location">Location on map</string>
@@ -42,8 +46,15 @@
     <string name="profile_phone">Phone number</string>
     <string name="profile_whatsapp">WhatsApp (optional)</string>
     <string name="profile_phone_hint">+962 7X XXX XXXX</string>
-    <string name="profile_type">Salon type</string>
-    <string name="profile_locked">Cannot be changed</string>
+    <string name="profile_type">Business type</string>
+    <string name="profile_locked">The type cannot be changed. The owner can choose to serve both men and women.</string>
+    <string name="profile_clinic_note">Clinics serve men and women. The type cannot be changed.</string>
+    <string name="profile_widen">Serve both men and women</string>
+    <string name="profile_widen_title">Serve both men and women?</string>
+    <string name="profile_widen_body">Customers of both genders will see your salon and can book right away. Only WAB can change this back.</string>
+    <string name="profile_widen_confirm">Serve both</string>
+    <string name="profile_widen_cancel">Not now</string>
+    <string name="profile_widen_done">Your salon now serves men and women</string>
     <string name="profile_preview">Preview as customer</string>
     <string name="profile_save">Save changes</string>
     <string name="profile_saved">Changes saved</string>
@@ -141,6 +152,8 @@
     <string name="catalog_search">Search the catalog</string>
     <string name="catalog_note_women">Women’s salon catalog</string>
     <string name="catalog_note_men">Men’s salon catalog</string>
+    <string name="catalog_note_both">Salon catalog for men and women</string>
+    <string name="catalog_note_clinic">Beauty clinic catalog</string>
     <string name="catalog_added">Added</string>
     <string name="catalog_cant_find">Can’t find your service?</string>
     <string name="catalog_request">Request it to be added</string>

@@ -12,14 +12,21 @@ import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useLanguage } from '../hooks/useLanguage';
+import {
+  BUSINESS_TYPE_FILTER_KEY,
+  businessTypeFilterOf,
+  businessTypeParam,
+} from '../shared/businessFilter';
+import { BusinessBadges } from '../shared/BusinessBadges';
+import { BusinessTypeFilter } from '../shared/BusinessTypeFilter';
 
-const OPTIONS = { filterKeys: ['state'] };
+const OPTIONS = { filterKeys: ['state', BUSINESS_TYPE_FILTER_KEY] };
 const DEFAULT_STATE: SalonState = 'APPLICATION_PENDING';
 const QUEUE_STATES = SALON_STATES.filter(
   (s) => s === 'APPLICATION_PENDING' || s === 'APPLICATION_REJECTED',
 );
 
-/** Admin PRD A14 · Salon applications queue, oldest first, with how many times each was resubmitted. */
+/** Admin PRD A14 · Salon and clinic applications queue (§5.19 type filter), oldest first, with how many times each was resubmitted. */
 export default function ApplicationsPage() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -28,10 +35,16 @@ export default function ApplicationsPage() {
   const list = useListController(OPTIONS);
   const { state } = list;
   const status = QUEUE_STATES.find((s) => s === state.filters['state']?.[0]) ?? DEFAULT_STATE;
+  const businessType = businessTypeFilterOf(state);
   const query = useQuery({
     queryKey: ['getSalonsApplications', state, status],
     queryFn: () =>
-      repositories.applications.list({ page: state.page, pageSize: state.pageSize, state: status }),
+      repositories.applications.list({
+        page: state.page,
+        pageSize: state.pageSize,
+        state: status,
+        ...businessTypeParam(businessType),
+      }),
   });
   const data = query.data;
   const title = t('nav.sub.applications');
@@ -42,7 +55,11 @@ export default function ApplicationsPage() {
       header: t('salons.owner'),
       render: (r) => (r.owner ? `${r.owner.firstName} ${r.owner.lastName}` : '—'),
     },
-    { key: 'gender', header: t('salons.gender'), render: (r) => t(`catalog.genders.${r.gender}`) },
+    {
+      key: 'type',
+      header: t('business.type'),
+      render: (r) => <BusinessBadges businessType={r.businessType} audience={r.audience} />,
+    },
     {
       key: 'submitted',
       header: t('applications.submitted'),
@@ -69,12 +86,18 @@ export default function ApplicationsPage() {
         active: [],
         onClearAll: list.clearFilters,
         controls: (
-          <Select
-            label={t('salons.state')}
-            value={status}
-            options={QUEUE_STATES.map((s) => ({ value: s, label: t(`status.salon.${s}`) }))}
-            onChange={(e) => list.setFilter('state', [e.target.value])}
-          />
+          <>
+            <BusinessTypeFilter
+              value={businessType}
+              onChange={(type) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, type ? [type] : [])}
+            />
+            <Select
+              label={t('salons.state')}
+              value={status}
+              options={QUEUE_STATES.map((s) => ({ value: s, label: t(`status.salon.${s}`) }))}
+              onChange={(e) => list.setFilter('state', [e.target.value])}
+            />
+          </>
         ),
       }}
       table={{

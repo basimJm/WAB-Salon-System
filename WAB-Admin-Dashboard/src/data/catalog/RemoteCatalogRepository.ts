@@ -5,11 +5,12 @@ import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type {
   ApproveInput,
-  CatalogGender,
   CatalogRepository,
   CatalogRequest,
+  CatalogServiceQuery,
   RequestStatus,
 } from '@/domain/catalog/catalog';
+import type { BusinessType } from '@/domain/shared/businessType';
 import type { Page, PageQuery } from '@/domain/shared/page';
 
 const listRequests = defineEndpoint(OPERATIONS.getCatalogRequests, {
@@ -31,9 +32,16 @@ export class RemoteCatalogRepository implements CatalogRepository {
 
   constructor(api: ApiClient) {
     this.requests = {
-      list: (q: PageQuery & { status?: RequestStatus }): Promise<Page<CatalogRequest>> =>
+      list: (
+        q: PageQuery & { status?: RequestStatus; businessType?: BusinessType },
+      ): Promise<Page<CatalogRequest>> =>
         api.executePage(listRequests, {
-          query: defined({ page: q.page, pageSize: q.pageSize, status: q.status }),
+          query: defined({
+            page: q.page,
+            pageSize: q.pageSize,
+            status: q.status,
+            businessType: q.businessType,
+          }),
         }),
       approve: async (id: string, input: ApproveInput, reason: string) =>
         (await api.execute(approveRequest, { params: { id }, body: { ...input, reason } })).data,
@@ -56,8 +64,13 @@ export class RemoteCatalogRepository implements CatalogRepository {
           body: dto.patchCatalogServicesByIdBodySchema,
         }),
       },
-      (q: PageQuery & { gender?: CatalogGender }) =>
-        defined({ page: q.page, pageSize: q.pageSize, gender: q.gender }),
+      (q: PageQuery & CatalogServiceQuery) =>
+        defined({
+          page: q.page,
+          pageSize: q.pageSize,
+          businessType: q.businessType,
+          audience: q.audience,
+        }),
     );
   }
 }

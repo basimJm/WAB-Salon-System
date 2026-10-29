@@ -23,6 +23,9 @@ import com.fab.wab.customer.designsystem.resources.error_code_member_inactive
 import com.fab.wab.customer.designsystem.resources.error_code_salon_not_found
 import com.fab.wab.customer.designsystem.resources.error_code_salon_not_bookable
 import com.fab.wab.customer.designsystem.resources.error_code_salon_closed
+import com.fab.wab.customer.designsystem.resources.error_code_audience_change_not_allowed
+import com.fab.wab.customer.designsystem.resources.error_code_bride_not_allowed
+import com.fab.wab.customer.designsystem.resources.error_code_business_type_mismatch
 import com.fab.wab.customer.designsystem.resources.error_code_gender_mismatch
 import com.fab.wab.customer.designsystem.resources.error_code_too_many_companions
 import com.fab.wab.customer.designsystem.resources.error_code_service_unavailable
@@ -84,6 +87,9 @@ internal val ERROR_CODE_STRINGS: Map<ErrorCode, StringResource> = mapOf(
     ErrorCode.SALON_NOT_BOOKABLE to Res.string.error_code_salon_not_bookable,
     ErrorCode.SALON_CLOSED to Res.string.error_code_salon_closed,
     ErrorCode.GENDER_MISMATCH to Res.string.error_code_gender_mismatch,
+    ErrorCode.BUSINESS_TYPE_MISMATCH to Res.string.error_code_business_type_mismatch,
+    ErrorCode.AUDIENCE_CHANGE_NOT_ALLOWED to Res.string.error_code_audience_change_not_allowed,
+    ErrorCode.BRIDE_NOT_ALLOWED to Res.string.error_code_bride_not_allowed,
     ErrorCode.TOO_MANY_COMPANIONS to Res.string.error_code_too_many_companions,
     ErrorCode.SERVICE_UNAVAILABLE to Res.string.error_code_service_unavailable,
     ErrorCode.BRIDE_ONLY_SERVICE to Res.string.error_code_bride_only_service,

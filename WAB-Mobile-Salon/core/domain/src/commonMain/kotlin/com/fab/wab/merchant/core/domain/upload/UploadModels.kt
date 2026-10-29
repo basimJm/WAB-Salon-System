@@ -16,6 +16,13 @@ enum class UploadPurpose {
 
     /** Public flow before the salon exists: `POST /uploads/license/presign` + `/confirm` (private file). */
     LICENSE_DOCUMENT,
+
+    /** A clinic's medical license (BUSINESS_DOMAIN §5.19): the same public license flow with this purpose. */
+    MEDICAL_LICENSE,
+    ;
+
+    /** Uploaded through the public license routes (the applicant has no salon session yet). */
+    val isLicense: Boolean get() = this == LICENSE_DOCUMENT || this == MEDICAL_LICENSE
 }
 
 /** What a picker returned; limits differ per kind (PRD §12). */

@@ -1,7 +1,7 @@
 package com.fab.wab.merchant.feature.salon.domain
 
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
 import kotlinx.coroutines.flow.Flow
 
 /** A salon service (`GET /salon/services`); [price] is the JOD decimal string from the server (tax inclusive). */
@@ -18,8 +18,8 @@ data class SalonService(
     val active: Boolean,
 )
 
-/** An admin catalog entry for one gender (`GET /catalog/services?gender=`). */
-data class CatalogService(val id: String, val name: String, val description: String, val imageUrl: String, val gender: SalonGenderType)
+/** An admin catalog entry of one business type and audience (`GET /catalog/services?businessType=&gender=`, §5.19). */
+data class CatalogService(val id: String, val name: String, val description: String, val imageUrl: String, val kind: BusinessKind)
 
 /** The editable part of a service (PRD M16 form); [mediaKeys] null = media unchanged. */
 data class ServiceDraft(
@@ -109,7 +109,8 @@ interface ServicesRepository {
     /** [branchId] null = salon-level (the member's own branch / the main branch); else that branch (MER-064, owner). */
     suspend fun services(branchId: String? = null): AppResult<List<SalonService>>
 
-    suspend fun catalog(gender: SalonGenderType, page: Int): AppResult<List<CatalogService>>
+    /** Only the catalog of the business's own type that fits its audience (BUSINESS_DOMAIN §5.19). */
+    suspend fun catalog(kind: BusinessKind, page: Int): AppResult<List<CatalogService>>
 
     fun cachedService(id: String): SalonService?
 
