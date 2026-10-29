@@ -9,6 +9,21 @@
 
 ## Current task
 
+### CUS-101 — Search + filter by business type; clinic details/booking regression
+- Branch: `fix/cus-101-clinics-search-filter`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-30: "i cannot find clinics and search look ugly and filtering should be when open filter select salon or clinic then categories filter changes based on filter business type and booking and details for the clinic not work"; BUSINESS_DOMAIN §5.19; operations `GET /salons`, `GET /catalog/services?businessType`, `GET /salons/{id}`, booking drafts):
+  - [x] S04: the All/Salons/Clinics tabs are gone; title follows the type ("Salons & clinics" / "Salons" / "Beauty clinics"); hint "Search salons and clinics"; the type is a removable chip like every other filter (removing it keeps the other filters)
+  - [x] S05: "Show" All/Salons/Clinics is the first section; choosing a type reloads the service categories from that type's catalog and drops picks of the other type; Reset clears the type; Apply returns it in `SalonFilters.businessType`
+  - [x] Home clinic entries (See all / See more) still open S04 filtered to clinics (entry type → filter)
+  - [x] Clinic details + booking: the 500 was the server (SRV-179, invalid demo staff photo keys); with the fixed server a clinic opens and a full booking reaches the reference (WAB-C5EC9K, local stack)
+  - [x] Booking texts that named "the salon" (any-staff hint, rules title/approval, pay on arrival, success, verify label) are neutral for salons and clinics (AR + EN)
+  - [x] Tests: `FilterSheetViewModelTest` (+2: type first + categories follow + picks dropped + applied; reset clears the type), `AllSalonsViewModelTest` (type from the entry, applied via the sheet, chip removal keeps other filters, paging keeps the type)
+- Tests: policy_checks all ok; `:feature:salons:presentation`, `:feature:home:presentation`, `:core:domain`, `:composeApp` host tests + `assembleDevDebug` green. Device (own Pixel_8_Pro AVD, emulator-5554, dev debug against the local stack, AR): search → filter → Clinics (only clinic services) → Apply (title "عيادات التجميل", chip, 2 clinics) → Glow Aesthetic Clinic details → sign in (demo customer, fake OTP) → person (gender) → services → 31 Oct 11:00 → Ahmad → companions → summary (pay on arrival) → OTP → success WAB-C5EC9K
+- Loops: 0/1
+- Review: PENDING
+- Notes: found on the way (not app code): hosted dev demo images answer 403 (the `demo/` objects were never uploaded to the dev bucket; owner runs the image seed with storage credentials); after sign-in from a salon page the app lands on Home, not back on the salon page. DEVICE SETUP (local only, never committed): `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000`, untracked `androidApp/src/devDebug/AndroidManifest.xml` (cleartext).
+
 ### CUS-100 — Animated brand logo on the launch/config screen
 - Branch: `feat/cus-100-animated-logo`
 - Status: IN PROGRESS

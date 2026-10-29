@@ -23,6 +23,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
+import com.fab.wab.customer.designsystem.components.domain.businessTypeTabLabel
+import com.fab.wab.customer.designsystem.components.domain.businessTypeTabOrder
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
@@ -38,6 +40,7 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.Rati
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.toFloatRange
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.generalFilterOptions
 import com.fab.wab.customer.feature.salons.presentation.resources.Res
+import com.fab.wab.customer.feature.salons.presentation.resources.filter_business_type
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_general
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_price
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_rating
@@ -51,6 +54,24 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 
 /** Design `fReady` services block: 15 sp bold title, wrapped 38 dp chips, shimmer chips while paging, "See more". */
+/** First choice of S05 (owner 2026-10-30): All / Salons / Clinics; the service categories below follow it. */
+@Composable
+internal fun FilterBusinessTypeSection(state: UiState, onAction: (UiAction) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        SectionTitle(stringResource(Res.string.filter_business_type))
+        ChipFlow {
+            businessTypeTabOrder.forEach { type ->
+                FilterChoiceChip(
+                    label = stringResource(businessTypeTabLabel(type)),
+                    selected = state.businessType == type,
+                    onClick = { onAction(UiAction.OnBusinessTypeSelect(type)) },
+                )
+            }
+        }
+        SectionDivider()
+    }
+}
+
 @Composable
 internal fun FilterServicesSection(state: UiState, onAction: (UiAction) -> Unit) {
     Column(Modifier.fillMaxWidth()) {

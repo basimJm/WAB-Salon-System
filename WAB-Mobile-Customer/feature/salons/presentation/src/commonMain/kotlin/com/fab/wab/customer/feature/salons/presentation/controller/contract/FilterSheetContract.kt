@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.salons.presentation.controller.contract
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.PriceRange
 import com.fab.wab.customer.core.domain.salon.SalonFilters
@@ -9,6 +10,8 @@ import kotlin.math.roundToInt
 sealed interface FilterSheetContract {
 
     data class UiState(
+        /** Chosen first (owner 2026-10-30): the service categories below are the catalog of this type; null = both. */
+        val businessType: BusinessType? = null,
         val services: List<ServiceRef> = emptyList(),
         val servicesPage: Int = 0,
         val servicesHasMore: Boolean = false,
@@ -21,7 +24,8 @@ sealed interface FilterSheetContract {
         val general: GeneralFilter? = null,
         val minRating: Int? = null,
     ) {
-        val canReset: Boolean get() = selectedServices.isNotEmpty() || general != null || minRating != null
+        val canReset: Boolean
+            get() = selectedServices.isNotEmpty() || general != null || minRating != null || businessType != null
         /** PRD S05 item 2: the price section exists only with a selected service and server bounds. */
         val showPrice: Boolean get() = selectedServices.isNotEmpty() && priceBounds != null
 
@@ -30,10 +34,12 @@ sealed interface FilterSheetContract {
             priceRange = if (showPrice) priceSelection?.toPriceRange(priceBounds) else null,
             general = general,
             minRating = minRating,
+            businessType = businessType,
         )
     }
 
     sealed interface UiAction {
+        data class OnBusinessTypeSelect(val businessType: BusinessType?) : UiAction
         data class OnServiceToggle(val service: ServiceRef) : UiAction
         data object OnSeeMoreServices : UiAction
         data object OnRetryServices : UiAction

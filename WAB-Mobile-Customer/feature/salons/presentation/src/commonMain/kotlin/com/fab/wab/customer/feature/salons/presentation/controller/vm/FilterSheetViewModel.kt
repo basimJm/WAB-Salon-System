@@ -3,6 +3,7 @@ package com.fab.wab.customer.feature.salons.presentation.controller.vm
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.catalog.CatalogDefaults
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.ServiceRef
@@ -25,7 +26,10 @@ class FilterSheetDependencies(
     val errorText: suspend (AppError) -> String = ::appErrorText,
 )
 
-/** S05: starts from the active filters, services paged by 10, price bounds follow the selected services. */
+/**
+ * S05: starts from the active filters; the business type is chosen first and the service categories are that type's
+ * catalog (owner 2026-10-30), paged by 10; price bounds follow the selected services.
+ */
 class FilterSheetViewModel(
     initial: SalonFilters,
     private val gender: Gender,
@@ -33,6 +37,7 @@ class FilterSheetViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(
     initialState = UiState(
+        businessType = initial.businessType,
         selectedServices = initial.services,
         priceBounds = initial.priceRange,
         priceSelection = initial.priceRange?.toFloatRange(),
@@ -44,6 +49,7 @@ class FilterSheetViewModel(
 
     private var started = false
     private var priceJob: Job? = null
+    private var servicesJob: Job? = null
 
     override fun onStart() {
         if (started) return
@@ -54,6 +60,7 @@ class FilterSheetViewModel(
 
     override fun handle(event: UiAction) {
         when (event) {
+            is UiAction.OnBusinessTypeSelect -> selectBusinessType(event.businessType)
             is UiAction.OnServiceToggle -> toggleService(event.service)
             UiAction.OnSeeMoreServices -> if (uiState.value.servicesHasMore) loadServices(uiState.value.servicesPage + 1)
             UiAction.OnRetryServices -> loadServices(uiState.value.servicesPage + 1)
@@ -77,15 +84,39 @@ class FilterSheetViewModel(
         refreshPriceBounds()
     }
 
-    private fun reset() {
+    /** Another type has another catalog: its services replace the list and earlier picks (of the old type) are dropped. */
+    private fun selectBusinessType(type: BusinessType?) {
+        if (type == uiState.value.businessType) return
         priceJob?.cancel()
-        updateState { copy(selectedServices = emptyList(), priceBounds = null, priceSelection = null, general = null, minRating = null) }
+        updateState {
+            copy(businessType = type, services = emptyList(), selectedServices = emptyList(), priceBounds = null, priceSelection = null)
+        }
+        loadServices(page = CatalogDefaults.FIRST_PAGE)
+    }
+
+    private fun reset() {
+        val typeChanged = uiState.value.businessType != null
+        priceJob?.cancel()
+        updateState {
+            copy(
+                businessType = null,
+                selectedServices = emptyList(),
+                priceBounds = null,
+                priceSelection = null,
+                general = null,
+                minRating = null,
+                services = if (typeChanged) emptyList() else services,
+            )
+        }
+        if (typeChanged) loadServices(page = CatalogDefaults.FIRST_PAGE)
     }
 
     private fun loadServices(page: Int) {
-        scope.launch {
+        servicesJob?.cancel()
+        val type = uiState.value.businessType
+        servicesJob = scope.launch {
             updateState { copy(servicesLoading = true, servicesError = null) }
-            when (val result = deps.loadServices(gender, page)) {
+            when (val result = deps.loadServices(gender, page, type)) {
                 is AppResult.Success -> updateState {
                     val known = services.map { it.id }.toSet()
                     val fresh = result.data.filterNot { it.id in known }.map { ServiceRef(it.id, it.name) }
