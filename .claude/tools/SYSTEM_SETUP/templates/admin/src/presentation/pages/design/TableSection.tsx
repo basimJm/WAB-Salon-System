@@ -94,7 +94,7 @@ export function TableSection() {
         selection={{
           selected,
           onChange: setSelected,
-          rowLabel: (r) => `${k('salon')} ${r.name}`,
+          rowLabel: (r) => `${k('item')} ${r.name}`,
         }}
         rowActions={(r) => (
           <Button variant="ghost" size="sm">

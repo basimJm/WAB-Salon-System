@@ -22,7 +22,7 @@ export interface ListController {
   setPageSize: (size: number) => void;
   setSort: (sort: ListSort | null) => void;
   setFilter: (key: string, values: readonly string[]) => void;
-  /** Several filters in one URL change (e.g. salon + branch), so one does not undo the other. */
+  /** Several filters in one URL change (e.g. status + owner), so one does not undo the other. */
   setFilters: (changes: Readonly<Record<string, readonly string[]>>) => void;
   clearFilters: () => void;
 }

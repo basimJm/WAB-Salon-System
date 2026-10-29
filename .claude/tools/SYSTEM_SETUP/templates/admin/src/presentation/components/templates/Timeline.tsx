@@ -6,7 +6,7 @@ import { cx } from '../../utils/cx';
 export interface TimelineEntry {
   id: string;
   title: string;
-  /** Who did it ("Customer", "Salon: Layla", "System", an admin name). */
+  /** Who did it ("Customer", "Vendor: Layla", "System", an admin name). */
   actor?: string;
   /** ISO instant (UTC). */
   at: string;

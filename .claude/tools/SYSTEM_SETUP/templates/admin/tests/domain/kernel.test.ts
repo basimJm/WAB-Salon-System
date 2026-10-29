@@ -30,7 +30,7 @@ import {
 
 describe('ids', () => {
   it('accepts non-empty strings and rejects blank ones', () => {
-    expect(toId<'Salon'>('abc')).toBe('abc');
+    expect(toId<'Item'>('abc')).toBe('abc');
     expect(() => toId('  ')).toThrow(RangeError);
   });
 });

@@ -24,6 +24,6 @@ export interface SelectionCore {
 }
 
 export interface TableSelection<Row> extends SelectionCore {
-  /** Accessible name of a row's checkbox (e.g. the salon name). */
+  /** Accessible name of a row's checkbox (e.g. the row name). */
   rowLabel: (row: Row) => string;
 }

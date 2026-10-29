@@ -73,10 +73,10 @@ describe('feature slices', () => {
         'src/domain/items/rules.ts':
           "import { x } from './item'; import { x as y } from '../shared/money'; export const z = x + y;",
         'src/data/mock/fixtures.ts': ok,
-        'src/data/salons/repo.ts':
-          "import { x } from '../../domain/salons/salon'; import { x as m } from '../mock/fixtures'; export const r = x + m;",
+        'src/data/items/repo.ts':
+          "import { x } from '../../domain/items/item'; import { x as m } from '../mock/fixtures'; export const r = x + m;",
         'src/presentation/components/Button.ts': ok,
-        'src/presentation/salons/Page.ts':
+        'src/presentation/items/Page.ts':
           "import { x } from '../components/Button'; export const p = x;",
       }),
     ).toBe(0);
@@ -85,19 +85,19 @@ describe('feature slices', () => {
   it.each([
     [
       'domain',
-      'src/domain/salons/a.ts',
+      'src/domain/items/a.ts',
       "import { x } from '../bookings/b'; export const a = x;",
       'src/domain/bookings/b.ts',
     ],
     [
       'data',
-      'src/data/salons/a.ts',
+      'src/data/items/a.ts',
       "import { x } from '../bookings/b'; export const a = x;",
       'src/data/bookings/b.ts',
     ],
     [
       'presentation',
-      'src/presentation/salons/a.ts',
+      'src/presentation/items/a.ts',
       "import { x } from '../bookings/b'; export const a = x;",
       'src/presentation/bookings/b.ts',
     ],
