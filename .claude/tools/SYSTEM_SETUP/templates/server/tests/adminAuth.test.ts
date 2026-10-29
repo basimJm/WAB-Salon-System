@@ -1,7 +1,8 @@
 import { Types } from 'mongoose';
 import request from 'supertest';
 import { createApp } from '../src/app';
-import { unavailableAdminLogin } from '../src/modules/services';
+import { unavailable } from '../src/modules/services';
+import type { AdminLoginService } from '../src/domain/auth/adminLogin.service';
 import { SETTING_DEFAULTS } from '../src/constants/settings';
 import { createAdminAuthService } from '../src/domain/auth/adminAuth.service';
 import { createRefreshTokenService } from '../src/domain/auth/refreshTokens.service';
@@ -275,7 +276,7 @@ describe('admin auth: HTTP', () => {
     const rig = await setup();
     const app = createApp({
       logger,
-      services: { adminAuth: { service: rig.service, login: unavailableAdminLogin } },
+      services: { adminAuth: { service: rig.service, login: unavailable<AdminLoginService>() } },
     });
     const session = await rig.service.openSession({ adminId: rig.adminId, ip: IP });
     const refreshed = await request(app)
@@ -295,7 +296,7 @@ describe('admin auth: HTTP', () => {
     const res = await request(
       createApp({
         logger,
-        services: { adminAuth: { service: rig.service, login: unavailableAdminLogin } },
+        services: { adminAuth: { service: rig.service, login: unavailable<AdminLoginService>() } },
       }),
     )
       .post('/admin/v1/auth/refresh')

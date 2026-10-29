@@ -1,4 +1,4 @@
-import { ERROR_CODES as SDK_ERRORS, OtpError, RedisCodeStore } from '@wab/otp';
+import { OtpDeliveryError, RedisCodeStore } from '../src/providers/otp';
 import type { Redis } from 'ioredis';
 import request from 'supertest';
 import { createApp } from '../src/app';
@@ -12,7 +12,7 @@ import { connectRedis, disconnectRedis } from '../src/utils/redis/client';
 import { redisKey } from '../src/utils/redis/keys';
 import { startTestRedis, type TestRedis } from './helpers/redis';
 
-/** SRV-153: WhatsApp OTP request + verify (BUSINESS_DOMAIN §3.1a steps 2, 3 and 5). */
+/** Phone OTP request + verify (docs/BUSINESS_DOMAIN.md §3.1a steps 2, 3 and 5). */
 interface Body {
   success: boolean;
   message: string;
@@ -84,7 +84,7 @@ beforeEach(async () => {
 });
 
 describe('POST /auth/otp/request', () => {
-  it('sends a code on WhatsApp in the request language and answers the decision', async () => {
+  it('sends a code in the request language and answers the decision', async () => {
     const app = makeApp();
     const res = await post(app, 'request', { phone: PHONE, purpose: 'LOGIN' }, { language: 'en' });
     expect(res.status).toBe(200);
@@ -136,11 +136,11 @@ describe('POST /auth/otp/request', () => {
     const app = makeApp();
     const res = await request(app)
       .post('/merchant/v1/auth/otp/request')
-      .send({ phone: PHONE, purpose: 'BANK_DETAILS' });
+      .send({ phone: PHONE, purpose: 'REGISTER' });
     expect(bodyOf(res).data).toMatchObject({ otpLength: 4, expiresInSeconds: 120 });
     expect(provider.channel.sent[0]).toMatchObject({ language: 'ar', ttlSec: 120 });
     expect(sentCode()).toMatch(/^\d{4}$/);
-    expect(await redis.pttl(CODE_KEY('BANK_DETAILS'))).toBeLessThanOrEqual(120_000);
+    expect(await redis.pttl(CODE_KEY('REGISTER'))).toBeLessThanOrEqual(120_000);
   });
 
   it('sends nothing during the resend countdown (allowed false, expiresInSeconds 0)', async () => {
@@ -165,13 +165,13 @@ describe('POST /auth/otp/request', () => {
   });
 
   it.each([
-    ['ar', 'تعذّر إرسال رمز التحقق عبر واتساب'],
-    ['en', 'We could not send the code on WhatsApp'],
+    ['ar', 'تعذر إرسال الرمز'],
+    ['en', 'We could not deliver the code'],
   ])(
-    'answers 422 OTP_DELIVERY_FAILED (%s) when WhatsApp refuses the number; the request still counts',
+    'answers 422 OTP_DELIVERY_FAILED (%s) when the channel refuses the number; the request still counts',
     async (language, text) => {
       const app = makeApp();
-      provider.channel.failWith = new OtpError(SDK_ERRORS.DELIVERY_FAILED, 'not on WhatsApp');
+      provider.channel.failWith = new OtpDeliveryError('not reachable');
       const res = await post(app, 'request', { phone: PHONE, purpose: 'LOGIN' }, { language });
       expect(res.status).toBe(422);
       expect(bodyOf(res).error.code).toBe('OTP_DELIVERY_FAILED');
@@ -181,29 +181,23 @@ describe('POST /auth/otp/request', () => {
     },
   );
 
-  it.each([
-    SDK_ERRORS.VENDOR_ERROR,
-    SDK_ERRORS.TIMEOUT,
-    SDK_ERRORS.NETWORK_ERROR,
-    SDK_ERRORS.RATE_LIMITED,
-    SDK_ERRORS.AUTH_FAILED,
-    SDK_ERRORS.CONFIG_INVALID,
-    SDK_ERRORS.UNKNOWN,
-  ])('answers 503 without vendor text when the provider fails with %s', async (code) => {
-    const app = makeApp();
-    provider.channel.failWith = new OtpError(code, 'provider says no', { retryable: true });
-    const res = await post(app, 'request', { phone: PHONE, purpose: 'LOGIN' });
-    expect(res.status).toBe(503);
-    expect(bodyOf(res).error.code).toBe('INTERNAL');
-    expect(JSON.stringify(bodyOf(res))).not.toContain('provider says no');
-  });
+  it.each(['ETIMEDOUT', 'vendor 500', 'auth failed'])(
+    'answers 503 without vendor text when the channel fails (%s)',
+    async (reason) => {
+      const app = makeApp();
+      provider.channel.failWith = Object.assign(new Error('provider says no'), { reason });
+      const res = await post(app, 'request', { phone: PHONE, purpose: 'LOGIN' });
+      expect(res.status).toBe(503);
+      expect(bodyOf(res).error.code).toBe('INTERNAL');
+      expect(JSON.stringify(bodyOf(res))).not.toContain('provider says no');
+    },
+  );
 
   it.each([
-    ['customer', 'BANK_DETAILS', 400],
-    ['customer', 'BOOKING_CONFIRMATION', 200],
-    ['merchant', 'BOOKING_CONFIRMATION', 400],
-    ['merchant', 'BANK_DETAILS', 200],
+    ['customer', 'CHANGE_PHONE', 200],
+    ['merchant', 'CHANGE_PHONE', 400],
     ['merchant', 'REGISTER', 200],
+    ['customer', 'BANK_DETAILS', 400],
   ])('%s purpose %s answers %i', async (namespace, purpose, status) => {
     const res = await post(makeApp(), 'request', { phone: PHONE, purpose }, { namespace });
     expect(res.status).toBe(status);
@@ -353,11 +347,14 @@ describe('POST /auth/otp/verify', () => {
     expect(await redis.get(redisKey(OTP_KEY_PREFIX.wrong, PHONE))).toBeNull();
   });
 
-  it('a merchant BANK_DETAILS code works only on the merchant namespace purpose', async () => {
+  it('a merchant REGISTER code verifies for that purpose only', async () => {
     const app = makeApp();
-    const token = await tokenFor(app, 'BANK_DETAILS', 'merchant');
+    const token = await tokenFor(app, 'REGISTER', 'merchant');
     await expect(
-      provider.verify({ proof: token, expectedPhone: PHONE, purpose: 'BANK_DETAILS' }),
+      provider.verify({ proof: token, expectedPhone: PHONE, purpose: 'LOGIN' }),
+    ).resolves.toEqual({ outcome: 'PURPOSE_MISMATCH' });
+    await expect(
+      provider.verify({ proof: token, expectedPhone: PHONE, purpose: 'REGISTER' }),
     ).resolves.toMatchObject({ outcome: 'VERIFIED' });
   });
 
@@ -367,7 +364,7 @@ describe('POST /auth/otp/verify', () => {
     [{ phone: PHONE, purpose: 'LOGIN', code: '123' }, 'body.code'],
     [{ phone: PHONE, purpose: 'LOGIN', code: '12345678901' }, 'body.code'],
     [{ phone: PHONE, purpose: 'LOGIN', code: 123456 }, 'body.code'],
-    [{ phone: PHONE, purpose: 'BANK_DETAILS', code: '123456' }, 'body.purpose'],
+    [{ phone: PHONE, purpose: 'BOOKING', code: '123456' }, 'body.purpose'],
     [{ phone: '0791234567', purpose: 'LOGIN', code: '123456' }, 'body.phone'],
   ])('validates %j', async (body, field) => {
     const res = await post(makeApp(), 'verify', body);

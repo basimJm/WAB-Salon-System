@@ -101,7 +101,9 @@ describe('errorHandler (integration)', () => {
       message: MESSAGES.en['errors.ITEM_ARCHIVED'],
       error: {
         code: 'ITEM_ARCHIVED',
-        details: [{ field: 'item', code: 'ARCHIVED', message: MESSAGES.en['errors.ITEM_ARCHIVED'] }],
+        details: [
+          { field: 'item', code: 'ARCHIVED', message: MESSAGES.en['errors.ITEM_ARCHIVED'] },
+        ],
         traceId: res.headers['x-request-id'],
       },
     });

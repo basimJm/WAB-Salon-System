@@ -1,12 +1,7 @@
 import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ALL_MODELS } from '../src/models';
-import { RETIRED_INDEXES } from '../src/constants/database';
-import {
-  CUSTOMER_TEXT_INDEX_NAME,
-  CUSTOMER_TEXT_LANGUAGE_OVERRIDE,
-} from '../src/constants/identity';
-import { CustomerModel } from '../src/models/customer.model';
+import {} from '../src/constants/identity';
 import { SettingModel } from '../src/models/setting.model';
 import { ensureIndexes, type IndexedModel } from '../src/utils/database/indexes';
 import type { Logger } from '../src/utils/logger';
@@ -96,18 +91,6 @@ describe('text indexes', () => {
         ]);
       }
     }
-  });
-
-  it('the customer search index has its own name, so the old one can be retired', () => {
-    const text = CustomerModel.schema
-      .indexes()
-      .find(([fields]) => Object.values(fields).includes('text'));
-    expect(text?.[1]).toMatchObject({
-      name: CUSTOMER_TEXT_INDEX_NAME,
-      default_language: 'none',
-      language_override: CUSTOMER_TEXT_LANGUAGE_OVERRIDE,
-    });
-    expect(RETIRED_INDEXES['Customer']).toContain('firstName_text_lastName_text_phone.e164_text');
   });
 });
 

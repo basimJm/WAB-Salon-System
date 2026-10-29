@@ -121,12 +121,9 @@ describe('audit log model', () => {
     ]);
   });
 
-  it.each(['item_archive', 'Item', '1ACTION', 'A__B', ''])(
-    'rejects action %j',
-    async (action) => {
-      expect(await failingFields(model, { ...entry, action })).toContain('action');
-    },
-  );
+  it.each(['item_archive', 'Item', '1ACTION', 'A__B', ''])('rejects action %j', async (action) => {
+    expect(await failingFields(model, { ...entry, action })).toContain('action');
+  });
 
   it('indexes by admin, by entity and by action, newest first', () => {
     expect(AuditLogModel.schema.indexes().map(([keys]) => keys)).toEqual([
