@@ -4,6 +4,7 @@
 > **Who uses it:** WAB-Server (schemas, services, rules), the generated OpenAPI contract (`INTEGRATION.md` §3), and all clients for shared enums/rules.
 > **Sources:** consolidated from the Customer, Merchant and Admin PRDs and BRDs, the Backend BRD, the package BRDs and `CLAUDE.md`. If this file conflicts with a PRD on **screen behavior**, the PRD wins. If it conflicts on **data/rules**, raise it and fix both.
 > **Branches (owner decisions 2026-10-25):** a salon (the brand) has one or more **branches**; location, contacts, hours, closures, services/prices and staff belong to a branch; name, gender, logo/cover/gallery, description, policy, subscription, payouts, rating and Recommended placement stay salon-wide. See §3.3a, §5.2, §5.16–§5.18 and decision log §12.
+> **Business types (owner decisions 2026-10-29):** a business is a **SALON** or a **CLINIC** (beauty clinic: botox, filler, laser…). Salons serve men, women or **both** (`audience`); clinics are always for everyone (`audience = BOTH`). Clinics work exactly like salons (branches, staff, services, booking flow, subscription, placements) but have their own catalog categories, home sections and a required medical license. See §3.3, §5.4, §5.17, §5.19 and decision log §12.10.
 > **Conventions:** MongoDB + Mongoose; `_id` ObjectId; timestamps `createdAt`/`updatedAt` (UTC) on every collection; money stored as **integer fils** (1 JOD = 1000 fils) to avoid float errors and exposed in the API as a decimal string with 3 decimals; localized admin-managed text as `{ ar, en }`; files stored as **storage keys** (never full URLs); soft-delete via status fields, not physical deletes, unless stated.
 
 ---
@@ -25,7 +26,9 @@ A phone number belongs to at most one customer and, separately, at most one memb
 ## 2. Enums (shared by server, contracts and clients)
 
 ```
-Gender                 = MALE | FEMALE                       // also salon audience: MALE=men's salon, FEMALE=women's salon
+Gender                 = MALE | FEMALE                       // a person (customer, booking person)
+BusinessType           = SALON | CLINIC                      // what the business is (immutable after the application)
+Audience               = MALE | FEMALE | BOTH                // who a business serves; CLINIC is always BOTH
 Language               = ar | en
 AppKind                = CUSTOMER | MERCHANT
 Platform               = ANDROID | IOS | WEB
@@ -53,7 +56,7 @@ SubscriptionStatus     = TRIAL | ACTIVE | EXPIRED
 PayoutStatus           = PENDING | TRANSFERRED
 CatalogRequestStatus   = PENDING | APPROVED | REJECTED
 UploadPurpose          = CUSTOMER_AVATAR | MEMBER_PHOTO | SALON_COVER | SALON_PROFILE | GALLERY_IMAGE | GALLERY_VIDEO
-                       | SERVICE_MEDIA | LICENSE_DOCUMENT | CATALOG_IMAGE | BANNER_IMAGE | EXPORT
+                       | SERVICE_MEDIA | LICENSE_DOCUMENT | MEDICAL_LICENSE | CATALOG_IMAGE | BANNER_IMAGE | EXPORT
 BannerAction           = NONE | SALON | EXTERNAL_URL
 FullPaymentRefundRule  = FULL | MINUS_DEPOSIT
 NoShowDepositRule      = KEEP | REFUND
@@ -141,9 +144,11 @@ admin:otp:{adminId}     hashed code, TTL 300
 
 **catalogServices**
 ```
-name{ar,en}  description{ar,en}  imageKey  gender: Gender  active: Boolean  sortOrder: Number
+name{ar,en}  description{ar,en}  imageKey  businessType: BusinessType  audience: Audience  active: Boolean  sortOrder: Number
+// a catalog service (category) belongs to one business type; a SALON service has audience MALE|FEMALE|BOTH, a CLINIC service is BOTH;
+// a business can only use catalog services of its own businessType whose audience fits its own audience (BOTH fits all)
 ```
-Index: `{gender, active, sortOrder}`; text on names.
+Index: `{businessType, audience, active, sortOrder}`; text on names.
 
 **catalogRequests** `{ salonId, requestedByMemberId, name, description, imageKey?, status: CatalogRequestStatus, adminNote?, catalogServiceId? (set on approve) }`.
 
@@ -151,7 +156,10 @@ Index: `{gender, active, sortOrder}`; text on names.
 
 **salons**
 ```
-name: String (1–80)   gender: Gender (immutable after approval except by admin)
+name: String (1–80)
+businessType: BusinessType (chosen in the application; immutable)
+audience: Audience (SALON: MALE | FEMALE | BOTH chosen in the application; CLINIC: always BOTH)
+// `gender` (MALE|FEMALE) is migrated to `audience` with businessType = SALON (§5.19); audience changes: §5.19
 state: SalonState
 description?: String (≤1000)
 coverKey?: String   profileKey?: String
@@ -178,7 +186,7 @@ noShowDeposit: NoShowDepositRule
 noShowFullPayment: NoShowFullPaymentRule
 notes?: String
 ```
-Indexes: `{state, gender}`; Atlas Search index on `searchText` (ar + en analyzers). (Geo and city/area indexes are on `branches`.)
+Indexes: `{state, businessType, audience}`; Atlas Search index on `searchText` (ar + en analyzers). (Geo and city/area indexes are on `branches`.)
 
 **branches** (§5.16)
 ```
@@ -204,7 +212,7 @@ Indexes: `location` 2dsphere; `{salonId, status}`; `{cityId, areaId}`; partial u
 ```
 salonId → salons   branchId → branches   catalogServiceId → catalogServices
 price: Int (fils, >0)   durationMinutes: Int (≥5, multiple of 5)
-brideOnly: Boolean (only allowed when salon.gender = FEMALE)
+brideOnly: Boolean (only allowed when businessType = SALON and audience ∈ {FEMALE, BOTH})
 extraDescription?: String   mediaKeys: String[]
 active: Boolean
 ```
@@ -227,7 +235,7 @@ providesServices: Boolean
 staff?: {                    // required when providesServices
   bio?: String   yearsOfExperience?: Int
   serviceIds: → salonServices[]   // services of the member's own branch only
-  brideQualified: Boolean (FEMALE salons only)
+  brideQualified: Boolean (SALON with audience FEMALE or BOTH only)
   workingDays: [ { day: DayOfWeek, start?: "HH:mm", end?: "HH:mm" } ]   // subset of the branch's open days; custom hours within branch hours
   rating: { avg, count }     customersCount: Int   // distinct customers with COMPLETED bookings served
 }
@@ -251,7 +259,7 @@ TTL index on `expiresAt`.
 **bookings**
 ```
 referenceNumber: String (unique, human-friendly, e.g. "WAB-" + 6–8 base32 chars)
-customerId → customers   salonId → salons   salonGender: Gender
+customerId → customers   salonId → salons   businessType: BusinessType   salonAudience: Audience   // snapshots (replace salonGender)
 branchId → branches   branchSnapshot: { name: {ar,en}, locationText, phone }   // copied at creation
 persons: [ BookingPerson ]  (1 main + ≤ settings.booking.maxCompanions)
 appointmentStart: Date (min person start)   appointmentEnd: Date (max person end)
@@ -314,7 +322,7 @@ currentPeriodEnd?: Date
 payments: [ { amount: Int, paidAt, periodFrom, periodTo, method, reference, note?, recordedBy → admins } ]
 ```
 
-**recommendedPlacements** `{ salonId, gender, startAt, endAt, order, amountPaid: Int, note? }` — active when `startAt ≤ now < endAt`.
+**recommendedPlacements** `{ salonId, businessType, audience, startAt, endAt, order, amountPaid: Int, note? }` (businessType/audience copied from the salon) — active when `startAt ≤ now < endAt`.
 
 ### 3.6 Social & content
 
@@ -457,7 +465,7 @@ Before saving a branch's weekly hours or closures, leaves, staff deactivation, *
 - Daily job: TRIAL past end with no period → EXPIRED; ACTIVE past `currentPeriodEnd` → EXPIRED; alert admin at T−7 days and on expiry. Admin decides OFFLINE (not automatic).
 - Recording a payment sets ACTIVE and `currentPeriodEnd` = max(existing, periodTo).
 - One subscription per **salon** covers all its branches (trial starts at salon approval).
-- Recommended placements are bought per **salon** (not per branch); Recommended section = active placements for the gender, ordered by `order`, salons must be customer-visible; booking from it starts at branch choice.
+- Recommended placements are bought per **salon/clinic** (not per branch); the Recommended salons section = active SALON placements whose audience fits the customer's gender (§5.19), the Recommended clinics section = active CLINIC placements; each ordered by `order`, businesses must be customer-visible; booking from it starts at branch choice.
 
 ### 5.14 Payouts (manual, Phase 1)
 One bank account and one payout per **salon** (all branches); ledger, transactions and refunds carry `branchId` so the owner and admin can filter by branch. Net due = Σ ledger since last payout. Admin creates payout (period, computed gross/fees/refunds/net), records transfer → ledger `PAYOUT −net`, status TRANSFERRED, notify owner + FINANCE_VIEW members.
@@ -476,6 +484,17 @@ Customer: `DELETION_PENDING`, tokens revoked, `deletionScheduledAt` = +30 days; 
 - **Nearest**: one entry per **bookable branch** inside `discovery.nearbyRadiusKm`, sorted by distance; a salon with several branches shows **"Salon name - Branch name"** (e.g. "Hifa Salon - Mecca Street"); a single-branch salon shows the salon name only.
 - **Salon details**: salon-wide header (name, rating, gallery, description, policy); a branch selector/list with each branch's address, map, phone, hours and open/closed state; staff and services are shown **per branch**; reviews are salon-wide, each labelled with its branch.
 - Favorites, banners (action SALON) and deep links point at the salon; a deep link may carry `branchId` to preselect a branch.
+
+### 5.19 Business types and audience (owner decisions 2026-10-29)
+- **Visibility:** a customer of gender G sees SALONs whose audience is G or BOTH, and every CLINIC. Lists, search, nearest, Recommended, favorites and deep links follow this rule; a guest without a gender sees what the onboarding gender selects (unchanged).
+- **Booking persons:** for a SALON with audience MALE or FEMALE every person must match it (`GENDER_MISMATCH`, unchanged); for a SALON with audience BOTH and for every CLINIC the customer and up to `booking.maxCompanions` companions may be any gender in one booking.
+- **Bride:** bride bookings, `brideOnly` services and `brideQualified` staff exist only for SALONs with audience FEMALE or BOTH; never for clinics (`BRIDE_NOT_ALLOWED`).
+- **Catalog:** catalog services carry `businessType` + `audience`; admin manages them per business type; a business offers (and requests) only services of its own type that fit its audience (`BUSINESS_TYPE_MISMATCH`). Search by service and the home services sections are per type.
+- **Application:** the merchant chooses SALON or CLINIC. SALON → audience MALE, FEMALE or BOTH; CLINIC → audience BOTH (not asked) and a **medical license** document (`UploadPurpose MEDICAL_LICENSE`) is required besides the trade license; admin sees both before approval.
+- **Audience change after approval:** the OWNER can widen a SALON MALE→BOTH or FEMALE→BOTH instantly (audit + admin notification `salon.audience_widened`); narrowing BOTH→MALE/FEMALE only by admin with a reason (conflicting future bookings/services follow §5.12); a CLINIC's audience never changes; businessType never changes (`AUDIENCE_CHANGE_NOT_ALLOWED`).
+- **Customer home:** sections in order — banners, services (salon services, then clinic services), Recommended salons, **Recommended clinics**, nearest salons, **nearest clinics**; "See more" of the clinic sections opens the same list screens filtered to CLINIC. Bookings list filter: all / salons / clinics.
+- **Admin:** every business list, application queue, booking list, review list, placement list, catalog, banner, campaign, report and export can be filtered by businessType; catalog categories are managed per business type.
+- **Migration:** existing salons get `businessType = SALON`, `audience = gender`; catalog services `businessType = SALON`, `audience = gender`; bookings `businessType = SALON`, `salonAudience = salonGender`; placements copy from their salon. API: `gender` on salon/catalog payloads is replaced by `businessType` + `audience` (contracts bumped; clients re-sync).
 
 ### 5.18 Booking with branches
 - **Step 1 = choose branch** when the salon has more than one bookable branch (skipped and auto-selected when it has exactly one). Every later step (services, staff, slots) uses that branch only; a draft and its booking keep `branchId` + `branchSnapshot`.
@@ -535,6 +554,7 @@ Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON
 | booking.cancelled_by_customer | ✔ confirmation | ✔ (VIEW_ALL + assigned) | — |
 | booking.reminder_1h / reminder_15m | ✔ | ✔ assigned staff (1h) | — |
 | booking.pending_30m | ✔ | ✔ (RESPOND) | — |
+| salon.audience_widened (owner widened to BOTH, §5.19) | — | ✔ owner (confirmation) | ✔ |
 | booking.completed (rate) / no_show | ✔ | — | — |
 | booking.reassigned | ✔ | ✔ old/new staff | — |
 | refund.pending / refunded | ✔ | in-app (FINANCE_VIEW) | refund failed/delayed |
@@ -602,7 +622,7 @@ alerts.api5xxRatePct = 2 (window 10 min)    alerts.crashesPerHour = 10
 ```
 VALIDATION_ERROR  UNAUTHORIZED  FORBIDDEN  PERMISSION_DENIED  NOT_FOUND  CONFLICT  RATE_LIMITED  INTERNAL
 OTP_BLOCKED  OTP_INVALID  OTP_EXPIRED  OTP_DELIVERY_FAILED  PHONE_NOT_REGISTERED  PHONE_ALREADY_REGISTERED  ACCOUNT_BLOCKED  MEMBER_INACTIVE  CURRENT_PASSWORD_INVALID  EMAIL_ALREADY_USED
-SALON_NOT_FOUND  SALON_NOT_BOOKABLE  SALON_CLOSED  GENDER_MISMATCH  TOO_MANY_COMPANIONS
+SALON_NOT_FOUND  SALON_NOT_BOOKABLE  SALON_CLOSED  GENDER_MISMATCH  TOO_MANY_COMPANIONS  BUSINESS_TYPE_MISMATCH  AUDIENCE_CHANGE_NOT_ALLOWED  BRIDE_NOT_ALLOWED
 BRANCH_NOT_FOUND  BRANCH_NOT_BOOKABLE  BRANCH_REQUIRED  BRANCH_LIMIT_REACHED  BRANCH_HAS_UPCOMING_BOOKINGS  LAST_BRANCH  BRANCH_SCOPE_DENIED
 SERVICE_UNAVAILABLE  BRIDE_ONLY_SERVICE  STAFF_NOT_ELIGIBLE  SLOT_UNAVAILABLE  SLOT_TAKEN  DATE_OUT_OF_RANGE
 PAYMENT_FAILED  PAYMENT_NOT_VERIFIED  PAYMENT_OPTION_NOT_ALLOWED  DRAFT_EXPIRED
@@ -622,3 +642,4 @@ MAINTENANCE  UPDATE_REQUIRED
 6. Reference number format `WAB-XXXXXX` (base32, no ambiguous chars).
 7. Branches (owner decisions 2026-10-25): per branch = location & contacts, hours & closures, services & prices, staff (one branch per member); salon-wide = name, gender, logo/cover/gallery, description, policy, subscription (3 free months per salon), payouts (one bank account), rating, Recommended placement. No admin approval for new branches (live when complete). Managers: one or more per branch, branch data only, no finance/subscription/policy; team members and permissions stay owner-only. Search card = nearest branch; nearest list = one entry per branch, "Salon - Branch". Closing a branch is blocked while it has upcoming bookings; branch or whole salon can go offline; existing salons migrate to one main branch; reviews show their branch; branch limit = setting `salon.maxBranches`.
 8. Phone OTP (owner decisions 2026-10-26): server-generated codes delivered over WhatsApp by ARQAM OTP (AR + EN authentication templates; the direct Meta Cloud API channel, its delivery webhook and status polling were dropped) (§3.1a); Firebase Phone Auth removed from the server and both apps (Firebase stays for push, analytics, crash reporting). Users without WhatsApp cannot receive a code (no SMS fallback).
+10. Business types (owner decisions 2026-10-29): SALON or CLINIC (immutable); salons serve MALE, FEMALE or BOTH, clinics always BOTH; BOTH salons and clinics are visible to everyone and take mixed-gender bookings; owner may widen a salon to BOTH, narrowing only by admin; clinics need a medical license; bride only for FEMALE/BOTH salons; catalog per business type; home adds Recommended clinics + nearest clinics; bookings filter salon/clinic; admin filters everything by business type (§5.19).

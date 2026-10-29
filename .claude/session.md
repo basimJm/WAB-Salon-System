@@ -331,3 +331,15 @@
 - Tests: `python3 -m unittest discover -s .claude/tools/SYSTEM_SETUP/tests` (72 OK); proof run with a business file: no token left, answers present
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — tool only; `rtl` stored as `on`/`off` text.
+
+### T-148 — Business types: salons + beauty clinics in the domain, integration map and every backlog (owner request 2026-10-29)
+- Project: repo root (`BUSINESS_DOMAIN.md`, `INTEGRATION.md`, the four backlogs)
+- Branch: `docs/clinics-domain`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Owner asked 4 open rules (mixed-gender bookings, audience change, clinic documents, bride); answers in BUSINESS_DOMAIN §12.10
+  - [x] BUSINESS_DOMAIN: `BusinessType`, `Audience`, salon/catalog/booking/placement fields, `MEDICAL_LICENSE` upload, §5.13 Recommended per type, new §5.19 (visibility, persons, bride, catalog, application, audience change, home order, admin filters, migration), notification `salon.audience_widened`, 3 error codes
+  - [x] INTEGRATION §5a edges; tasks SRV-174…178, ADM-109/110, CUS-098/099, MER-080/081 with cross-project `Needs`; `tasks.py check` OK (known CUS-047 note), board regenerated
+- Tests: `python3 scripts/tasks.py check`
+- Loops: 1/1 — re-read the user stories (home sections order, see-more, services section, unisex clinics, same booking flow, bookings filter, register salon/clinic, gender choice, clinic = branches/staff, widen to both, admin per type) against §5.19 and the task rows
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs and backlog only. DEVIATION: PRDs (customer/merchant/admin) not edited; tasks point at BUSINESS_DOMAIN §5.19.
