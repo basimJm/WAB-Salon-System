@@ -364,7 +364,7 @@ describe('POST /auth/otp/verify', () => {
     [{ phone: PHONE, purpose: 'LOGIN', code: '123' }, 'body.code'],
     [{ phone: PHONE, purpose: 'LOGIN', code: '12345678901' }, 'body.code'],
     [{ phone: PHONE, purpose: 'LOGIN', code: 123456 }, 'body.code'],
-    [{ phone: PHONE, purpose: 'BOOKING', code: '123456' }, 'body.purpose'],
+    [{ phone: PHONE, purpose: 'UNKNOWN_PURPOSE', code: '123456' }, 'body.purpose'],
     [{ phone: '0791234567', purpose: 'LOGIN', code: '123456' }, 'body.phone'],
   ])('validates %j', async (body, field) => {
     const res = await post(makeApp(), 'verify', body);
