@@ -10,6 +10,24 @@
 
 ## Current task
 
+### ADM-110 — Catalog per business type + salon audience dialog (widen/narrow, conflict list)
+
+- Branch: `feat/adm-110-catalog-types`
+- Status: IN PROGRESS
+- Acceptance criteria (BUSINESS_DOMAIN §5.19, §5.12, §5.13; INTEGRATION §5a; SRV-178; operations getCatalogServices, postCatalogServices, patchCatalogServicesById, postCatalogRequestsByIdApprove, getRecommended, putRecommendedReorder, patchSalonsByIdAudience):
+  - [x] Catalog managed per type: Salons / Clinics switch (salons first), salon services filtered by audience (All / Women / Men / Men & women), clinic services have no audience filter; type + audience badges per row
+  - [x] Create: type + audience fields (`BusinessKindFields`), CLINIC fixed to BOTH (disabled + hint), defaults from the current type/audience filter; edit: type and audience read-only (the server's patch takes neither)
+  - [x] Approve a request by mapping: only active services that fit the salon (`catalogFits`, same rule as the server)
+  - [x] Placements per type (Recommended salons / Recommended clinics), reorder per type, salon picker of the same type (built in ADM-109, kept)
+  - [x] Salon audience drawer (`AudienceDrawer`) replaces the old gender change: SALON only (no button for a clinic), current audience shown, only other audiences offered, widening vs narrowing explained, mandatory reason; 409 SCHEDULE_CONFLICT → conflict list (booking links with reference + time, first 10, then a count); other errors inline; strings are a lazy locale area (`salonAudience`)
+  - [x] Mock: narrowing with open bookings → 409 with booking ids, clinic → 422 AUDIENCE_CHANGE_NOT_ALLOWED, same audience → 422
+- Tests: new tests/salon-audience.test.tsx (6), tests/catalog.test.tsx (catalogKindOf + per-type page + create defaults); `vitest run` 121 files / 1404 tests green; `sh scripts/gate.sh` GATE OK (dev-release entry back under 80 KB after the lazy `salonAudience` area)
+- Loops: 0/1
+- Review: PENDING
+- Notes: placements have no audience filter (the order is per type; a filtered reorder would send a partial list)
+
+## Last blocks
+
 ### ADM-109 — Business types: contract 1.12.0 re-sync + type filters + badges + medical license
 
 - Branch: `feat/adm-109-business-types`
@@ -27,8 +45,6 @@
 - Review: PENDING
 - Notes: DEVIATIONS: browser check deferred to after ADM-110 (lead instruction: one check for both); reports/banners/campaigns/transactions have no `businessType` parameter in contract 1.12.0, so no type filter there (server gap); `getSalonsByIdProfile` still declares `gender` while the server sends `businessType` + `audience`: read with `.omit({ gender })` (server gap, reported); the catalog page and the salon audience dialog get their full per-type behaviour in ADM-110; contract re-sync also fixed the 3 `contract.test` failures noted in ADM-108 (branches list now sends page/pageSize).
 
-## Last blocks
-
 ### ADM-108 — Cloudflare Pages deploy
 
 - Branch: `feat/adm-108-cloudflare`
@@ -37,19 +53,3 @@
 - Tests: tests/hosting.test.ts (+1, 16 total) green; full suite 1374 pass; builds dev-release + prod-release and the Cloudflare `_headers` generation checked. DEVIATION: 3 tests in tests/contract.test.ts fail on `origin/admin` itself (the committed contract is behind the server spec; a resync changes the branches query and breaks 77 test files): not touched here, needs its own contract re-sync task.
 - Loops: 1/1 (user decision)
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — config and docs only. DEVIATION: no e2e; the deploy itself needs the owner's Cloudflare login.
-
-### ADM-107 — Adopt admin contract 1.7.0 (SRV-170) + end-to-end pass on the local real stack
-
-- Branch: `feat/adm-107-contract-1-7`
-- Status: IN REVIEW
-- Acceptance criteria (SRV-170 admin contract 1.7.0; PRD A15 list/details; BUSINESS_DOMAIN §5.5 money views; design 06 "Staff" fact; operations getBookings, getBookingsById; owner request 2026-10-26 "e2e every feature until it works, collect blocks"):
-  - [x] `npm run api:sync` → contract 1.7.0 (dto: staff `{id, name, firstName, photoUrl}` on rows/persons, `rejection` on list rows, `money.paidAtSalon`)
-  - [x] Domain `BookingStaff`/`BookingReason`; `rejection` on `BookingSummary`; `money.remaining` documented as still owed (0 once final) + `paidAtSalon`; `uniqueStaff()` rule
-  - [x] Bookings list: rejected rows show the reason (code worded AR/EN, free text) under the status (design list has no staff column, so none added)
-  - [x] Booking details: Staff fact (photo or initials, each member once), per-person staff with photo, rejection/cancellation reason + time, "Still to pay at the salon" + "Paid at the salon"
-  - [x] Mock follows the server semantics (REJECTED row with reason, remaining 0 when final, paidAtSalon on COMPLETED)
-  - [x] e2e on the local real stack (`docs/E2E_RESULTS.md`): sign-in + OTP, 2-day session, 276-visit sweep (42 routes + details × AR/EN × light/dark × 1440/768/375), actions per module; admin defects fixed (F1–F5), server defects S1–S6 listed, blocks listed
-- Tests: new tests/booking-contract-1-7.test.tsx (12), tests/branches-repository.test.ts (3), tests/drawer-height.test.ts (2), primitives Avatar fallback; bookings/branchFilters counts (4 mock rows), design-gaps lazy strings; `vitest run` 119 files / 1376 tests green; `sh scripts/gate.sh` GATE OK (dev-release entry back under 80 KB after the lazy bookings area)
-- Browser check: real Chrome (Playwright) against dev-release → 127.0.0.1:4000 on :4174: final sweep 276 visits, 0 bad (no overflow, no error state, no sign-out), only console item = seeded staff photo 404 (S4); bookings list/details AR light 1440 + 375 screenshots compared with design 06 (Staff fact, money lines); actions in EN 1440 (status change, cancel as salon, reassign, refund, salon offline/online, branches, customer block/unblock, review approve/reject, catalog create with upload, settings save/revert, bell mark read, exports, audit)
-- Loops: 1/1 — re-checked every criterion against the diff, the unit tests and the real server; the loop found the entry budget overflow (bookings strings made lazy), the reason-label test using the global i18n, and the e2e defects F1–F5 (all fixed with tests)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — contract-driven types, pure rules in domain, presentation helpers small; lazy locale bundles per area (no page pulls another area's strings); no server code changed. DEVIATIONS: list rows show no staff column (not in PRD A15 list / design 06 list); `RemoteBranchesRepository.list` ignores the contract's `meta` (server omits it, S3); salon application approve/reject, refund success, CSV export and reassign save could not be completed on this stack (no pending application / server S1, S2 / no eligible staff); staff/admins-and-roles has no PRD page or endpoint; WebKit not run; no Playwright e2e spec added (user decision 2026-10-14: no e2e runs); not pushed (lead instruction).

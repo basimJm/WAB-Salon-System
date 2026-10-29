@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import type { CatalogService, CatalogServiceInput } from '@/domain/catalog/catalog';
-import { audienceFor, type BusinessKind } from '@/domain/shared/businessType';
+import { catalogKindOf, CATALOG_FILTER_KEYS } from './catalogKind';
 import { Badge } from '../components/core/Badge';
 import { Button } from '../components/core/Button';
 import type { Column } from '../components/data/tableTypes';
@@ -9,16 +9,16 @@ import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
 import { useLanguage } from '../hooks/useLanguage';
 import { useResourcePanel } from '../hooks/useResourcePanel';
-import { BUSINESS_TYPE_FILTER_KEY, businessTypeFilterOf } from '../shared/businessFilter';
 import { BusinessBadges } from '../shared/BusinessBadges';
-import { BusinessTypeFilter } from '../shared/BusinessTypeFilter';
 import { CatalogDrawer } from './CatalogDrawer';
+import { CatalogKindFilters } from './CatalogKindFilters';
 
-const OPTIONS = { filterKeys: [BUSINESS_TYPE_FILTER_KEY] };
-/** A new service starts as a women's salon service unless the list shows clinics. */
-const NEW_KIND: BusinessKind = { businessType: 'SALON', audience: 'FEMALE' };
+const OPTIONS = { filterKeys: CATALOG_FILTER_KEYS };
 
-/** Admin PRD A23 · Catalog services per business type + audience (§5.19). Never deleted: deactivate. */
+/**
+ * Admin PRD A23 · Catalog services managed per business type (§5.19): salon services serve women, men or both,
+ * clinic services always serve everyone. Never deleted: deactivate.
+ */
 export default function CatalogPage() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -26,13 +26,10 @@ export default function CatalogPage() {
   const repo = repositories.catalog.services;
   const list = useListController(OPTIONS);
   const { state } = list;
-  const businessType = businessTypeFilterOf(state);
-  const newKind: BusinessKind = businessType
-    ? { businessType, audience: audienceFor(businessType, NEW_KIND.audience) }
-    : NEW_KIND;
+  const kind = catalogKindOf(state);
   const resource = useResourcePanel<CatalogService, CatalogServiceInput>(state, {
     queryName: 'getCatalogServices',
-    load: (s) => repo.list({ page: s.page, pageSize: s.pageSize, businessType }),
+    load: (s) => repo.list({ page: s.page, pageSize: s.pageSize, ...kind.query }),
     save: (editing, v, reason) => {
       if (!editing) return repo.create(v, reason);
       const { name, description, imageKey, active, sortOrder } = v;
@@ -67,10 +64,7 @@ export default function CatalogPage() {
         subtitle={t('catalog.subtitle')}
         actions={
           <>
-            <BusinessTypeFilter
-              value={businessType}
-              onChange={(type) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, type ? [type] : [])}
-            />
+            <CatalogKindFilters kind={kind} onChange={list.setFilters} />
             <Button onClick={resource.openCreate}>{t('catalog.add')}</Button>
           </>
         }
@@ -105,7 +99,7 @@ export default function CatalogPage() {
         <CatalogDrawer
           key={resource.panel.editing?.id ?? 'new'}
           item={resource.panel.editing}
-          kind={newKind}
+          kind={kind.forNew}
           saving={resource.saving}
           error={resource.saveError}
           onSubmit={(v, reason) => resource.submit(v, reason)}

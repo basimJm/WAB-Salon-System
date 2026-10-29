@@ -36,8 +36,6 @@
     "onlineTitle": "Put {{name}} online",
     "offlineText": "The salon disappears from the apps and its owner is told why. Write the reason.",
     "onlineText": "The salon becomes visible again (if its profile is complete) and its owner is told.",
-    "audienceWarning": "Widening to men & women keeps every service. Narrowing switches off the services that no longer fit; it is refused while future bookings exist.",
-    "audienceSame": "Choose a different audience",
     "payout": "Payout details",
     "payoutAudit": "Reading the full IBAN is recorded in the audit log. Nothing is cached.",
     "showPayout": "Show bank details",

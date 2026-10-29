@@ -5,15 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
 import type { SalonDetails } from '@/domain/salons/salons';
-import { AUDIENCES, canChangeAudience, type Audience } from '@/domain/shared/businessType';
+import { canChangeAudience } from '@/domain/shared/businessType';
 import { Button } from '../components/core/Button';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
-import { reasonError, ResourceDrawer, Select } from '../components/overlay/ResourceDrawer';
 import { useToast } from '../components/overlay/Toast';
+import { AudienceDrawer } from './AudienceDrawer';
 
 type Open = 'offline' | 'online' | 'audience' | null;
 
-/** Header actions of a salon: offline/online (owner is notified) and change of audience (services switch off). */
+/** Header actions of a salon: offline/online (owner is notified) and, for a SALON, the audience change (§5.19). */
 export function SalonActions({ salon }: { salon: SalonDetails }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -21,30 +21,20 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
   const queryClient = useQueryClient();
   const { repositories } = useContainer();
   const [open, setOpen] = useState<Open>(null);
-  const [audience, setAudience] = useState<Audience>(salon.audience);
-  const [reason, setReason] = useState('');
-  const [reasonBad, setReasonBad] = useState(false);
   const act = useMutation({
-    mutationFn: async ({ kind, why }: { kind: Exclude<Open, null>; why: string }) => {
+    mutationFn: async ({ kind, why }: { kind: 'offline' | 'online'; why: string }) => {
       const repo = repositories.salons;
       if (kind === 'offline') await repo.setOffline(salon.id, why);
-      else if (kind === 'online') await repo.setOnline(salon.id, why);
-      else await repo.changeAudience(salon.id, audience, why);
+      else await repo.setOnline(salon.id, why);
     },
     onSuccess: async () => {
       setOpen(null);
-      setReason('');
       toast.show(t('salons.actionDone'), 'success');
       await queryClient.invalidateQueries({ queryKey: ['getSalonsById'] });
       await queryClient.invalidateQueries({ queryKey: ['getSalons'] });
     },
   });
   const close = () => setOpen(null);
-  const saveAudience = () => {
-    const bad = reasonError(reason) !== undefined || audience === salon.audience;
-    setReasonBad(bad);
-    if (!bad) act.mutate({ kind: 'audience', why: reason.trim() });
-  };
   return (
     <>
       <Button
@@ -64,16 +54,7 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
         </Button>
       ) : null}
       {canChangeAudience(salon.businessType) ? (
-        <Button
-          variant="secondary"
-          onClick={() => {
-            act.reset();
-            setAudience(salon.audience);
-            setReason('');
-            setReasonBad(false);
-            setOpen('audience');
-          }}
-        >
+        <Button variant="secondary" onClick={() => setOpen('audience')}>
           {t('salons.changeAudience')}
         </Button>
       ) : null}
@@ -89,33 +70,7 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
         onConfirm={(why) => open && open !== 'audience' && act.mutate({ kind: open, why })}
         onClose={close}
       />
-      {open === 'audience' ? (
-        <ResourceDrawer
-          title={t('salons.changeAudience')}
-          reason={reason}
-          reasonErr={reasonBad && reasonError(reason) ? 'appConfig.error.reason' : undefined}
-          onReason={setReason}
-          saving={act.isPending}
-          error={act.error}
-          onSubmit={saveAudience}
-          onClose={close}
-        >
-          <p className="wab-field__hint" role="note">
-            {t('salons.audienceWarning')}
-          </p>
-          <Select
-            label={t('business.audience')}
-            value={audience}
-            options={AUDIENCES.map((a) => ({ value: a, label: t(`status.audience.${a}`) }))}
-            onChange={(e) => setAudience(AUDIENCES.find((a) => a === e.target.value) ?? audience)}
-          />
-          {reasonBad && audience === salon.audience ? (
-            <p className="wab-field__error" role="alert">
-              {t('salons.audienceSame')}
-            </p>
-          ) : null}
-        </ResourceDrawer>
-      ) : null}
+      {open === 'audience' ? <AudienceDrawer salon={salon} onClose={close} /> : null}
     </>
   );
 }

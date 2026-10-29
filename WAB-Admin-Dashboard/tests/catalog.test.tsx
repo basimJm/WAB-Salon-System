@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { validateCatalogForm } from '@/domain/catalog/catalog';
+import { parseListState } from '@/domain/shared/listState';
+import { CATALOG_FILTER_KEYS, catalogKindOf } from '@/presentation/catalog/catalogKind';
 import CatalogPage from '@/presentation/catalog/CatalogPage';
 import { renderWithApp } from './helpers/render';
 
@@ -23,6 +25,21 @@ describe('validateCatalogForm', () => {
   });
 });
 
+describe('catalogKindOf', () => {
+  const kindOf = (search: string) =>
+    catalogKindOf(parseListState(new URLSearchParams(search), { filterKeys: CATALOG_FILTER_KEYS }));
+
+  it('defaults to salons, keeps a salon audience, drops it for clinics and unknown values', () => {
+    expect(kindOf('').query).toEqual({ businessType: 'SALON' });
+    expect(kindOf('').forNew).toEqual({ businessType: 'SALON', audience: 'FEMALE' });
+    expect(kindOf('audience=MALE').query).toEqual({ businessType: 'SALON', audience: 'MALE' });
+    expect(kindOf('audience=MALE').forNew.audience).toBe('MALE');
+    expect(kindOf('type=CLINIC&audience=MALE').query).toEqual({ businessType: 'CLINIC' });
+    expect(kindOf('type=CLINIC').forNew).toEqual({ businessType: 'CLINIC', audience: 'BOTH' });
+    expect(kindOf('type=SPA&audience=X').query).toEqual({ businessType: 'SALON' });
+  });
+});
+
 describe('CatalogPage', () => {
   const open = () =>
     renderWithApp(
@@ -31,14 +48,38 @@ describe('CatalogPage', () => {
       </MemoryRouter>,
     );
 
-  it('shows every business type with its badges, and the server filters clinics (§5.19)', async () => {
+  it('is managed per type: salons first with an audience filter, clinics on their own (§5.19)', async () => {
     open();
     expect(await screen.findByText('Haircut')).toBeInTheDocument();
-    expect(screen.getByText('Botox')).toBeInTheDocument();
-    expect(screen.getAllByText('Clinic').length).toBeGreaterThan(0);
-    await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
+    expect(screen.getByText('Shave')).toBeInTheDocument();
+    expect(screen.queryByText('Botox')).toBeNull();
+    await userEvent.selectOptions(screen.getByLabelText('Audience'), 'MALE');
     await waitFor(() => expect(screen.queryByText('Haircut')).toBeNull());
-    expect(screen.getByText('Botox')).toBeInTheDocument();
+    expect(screen.getByText('Shave')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
+    expect(await screen.findByText('Botox')).toBeInTheDocument();
+    expect(screen.queryByText('Shave')).toBeNull();
+    // Clinic services all serve everyone: no audience filter there.
+    expect(screen.queryByLabelText('Audience')).toBeNull();
+  });
+
+  it('a new clinic service is fixed to everyone; a new salon service follows the audience filter', async () => {
+    open();
+    await userEvent.selectOptions(await screen.findByLabelText('Audience'), 'BOTH');
+    await userEvent.click(screen.getByRole('button', { name: 'Add a service' }));
+    let dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByLabelText('Business type')).toHaveValue('SALON');
+    expect(within(dialog).getByLabelText('Audience')).toHaveValue('BOTH');
+    expect(within(dialog).getByLabelText('Audience')).toBeEnabled();
+    await userEvent.selectOptions(within(dialog).getByLabelText('Business type'), 'CLINIC');
+    expect(within(dialog).getByLabelText('Audience')).toBeDisabled();
+    expect(within(dialog).getByRole('note')).toHaveTextContent('Clinics serve everyone');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Add a service' }));
+    dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByLabelText('Business type')).toHaveValue('CLINIC');
+    expect(within(dialog).getByLabelText('Audience')).toHaveValue('BOTH');
   });
 
   it('warns before deactivating, and saves with a reason', async () => {

@@ -4,6 +4,14 @@ import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
 import { MockBusinessError, type MockRoute } from './mockTransport';
 import { createBranchStore, type BranchStore } from './branchStore';
+import { MOCK_BOOKINGS } from './bookingsRoutes';
+
+const OPEN_BOOKINGS = new Set(['PENDING', 'APPROVED']);
+/** Future bookings that block narrowing a salon's audience (§5.19 → §5.12), as the server lists them. */
+const openBookingIds = (salonId: string) =>
+  MOCK_BOOKINGS.filter((b) => b.salon.id === salonId && OPEN_BOOKINGS.has(b.status)).map(
+    (b) => b.id,
+  );
 
 const AMMAN = '64a000000000000000000001';
 const IRBID = '64a000000000000000000002';
@@ -142,6 +150,8 @@ export function salonsRoutes(store: BranchStore = createBranchStore()): readonly
           throw new MockBusinessError(422, 'AUDIENCE_CHANGE_NOT_ALLOWED');
         }
         if (salon.audience === audience) throw new MockBusinessError(422, 'INVALID_TRANSITION');
+        const blocking = audience === 'BOTH' ? [] : openBookingIds(salon.id);
+        if (blocking.length > 0) throw new MockBusinessError(409, 'SCHEDULE_CONFLICT', blocking);
         changes.set(salon.id, { ...changes.get(salon.id), audience });
         return { data: details(find(params['id']), store) };
       },
