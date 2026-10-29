@@ -23,10 +23,11 @@ const NOW = new Date('2026-10-12T08:00:00Z');
 const salonsM = createFakeModel();
 const servicesM = createFakeModel();
 const closuresM = createFakeModel();
-const recommended: { ids: string[] } & RecommendedLookup = {
+const recommended: { ids: string[]; clinicIds: string[] } & RecommendedLookup = {
   ids: [],
-  salonIds() {
-    return Promise.resolve(this.ids);
+  clinicIds: [],
+  salonIds({ businessType }) {
+    return Promise.resolve(businessType === 'CLINIC' ? this.clinicIds : this.ids);
   },
 };
 const saved: { ids: Set<string>; asked: string[] } = { ids: new Set(), asked: [] };
@@ -120,6 +121,7 @@ const c2 = new Types.ObjectId().toHexString();
 beforeEach(() => {
   for (const f of [salonsM, servicesM, closuresM]) f.docs.length = 0;
   recommended.ids = [];
+  recommended.clinicIds = [];
   saved.ids = new Set();
   saved.asked = [];
 });
@@ -237,6 +239,33 @@ describe('GET /customer/v1/salons', () => {
     expect(
       (await request(app).get('/customer/v1/salons?gender=FEMALE&general=NEAREST')).status,
     ).toBe(400);
+  });
+
+  it('filters by business type and recommends per type, salons first (§5.19, §5.13)', async () => {
+    const salon = addSalon('Salon', { rating: { avg: 5, count: 9 } });
+    const unisex = addSalon('Unisex', { audience: 'BOTH', rating: { avg: 4, count: 9 } });
+    const clinic = addSalon('Clinic', { businessType: 'CLINIC', audience: 'BOTH' });
+    addSalon('Men', { audience: 'MALE' });
+    expect(await names('gender=FEMALE&businessType=CLINIC')).toEqual(['Clinic']);
+    expect(await names('gender=FEMALE&businessType=SALON')).toEqual(['Salon', 'Unisex']);
+    expect((await names('gender=MALE&businessType=SALON')).sort()).toEqual(['Men', 'Unisex']);
+    expect(
+      (await request(app).get('/customer/v1/salons?gender=FEMALE&businessType=SPA')).status,
+    ).toBe(400);
+    recommended.ids = [unisex, salon];
+    recommended.clinicIds = [clinic];
+    expect(await names('gender=FEMALE&general=RECOMMENDED&businessType=CLINIC')).toEqual([
+      'Clinic',
+    ]);
+    expect(await names('gender=FEMALE&general=RECOMMENDED&businessType=SALON')).toEqual([
+      'Unisex',
+      'Salon',
+    ]);
+    expect(await names('gender=FEMALE&general=RECOMMENDED')).toEqual(['Unisex', 'Salon', 'Clinic']);
+    const cards = bodyOf(
+      await request(app).get('/customer/v1/salons?gender=FEMALE&businessType=CLINIC'),
+    ).data as unknown as Record<string, unknown>[];
+    expect(cards[0]).toMatchObject({ businessType: 'CLINIC', audience: 'BOTH' });
   });
 
   it('lists recommended salons in the order the admin set, not by rating', async () => {

@@ -827,7 +827,7 @@
       "name": "Salon search",
       "item": [
         {
-          "name": "Search LIVE salons of one gender: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended",
+          "name": "Search LIVE salons and clinics the gender may see (§5.19: own audience, BOTH, every clinic), optionally of one businessType: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended (salons first, then clinics, each in the admin order)",
           "request": {
             "method": "GET",
             "header": [
@@ -860,6 +860,11 @@
                 {
                   "key": "gender",
                   "value": ""
+                },
+                {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
                 },
                 {
                   "key": "q",
@@ -939,6 +944,11 @@
                   "value": ""
                 },
                 {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
                   "key": "serviceIds",
                   "value": ""
                 }
@@ -976,6 +986,11 @@
               "query": [
                 {
                   "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "gender",
                   "value": "",
                   "disabled": true
                 }
@@ -1034,7 +1049,7 @@
       "name": "Home",
       "item": [
         {
-          "name": "Home (S03): banners, services, recommended and nearest salons in one request",
+          "name": "Home (S03, §5.19): banners, salon + clinic services, Recommended salons + clinics, nearest salons + clinics in one request",
           "request": {
             "method": "GET",
             "header": [
@@ -1071,7 +1086,7 @@
               ],
               "variable": []
             },
-            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all."
+            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. Only businesses the gender may see (own audience, BOTH, every clinic). `nearestSalons`/`nearestClinics` are null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all."
           }
         }
       ]

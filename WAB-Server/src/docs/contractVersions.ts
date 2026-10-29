@@ -15,9 +15,9 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.7.0',
-    sha256: '6683cf0fb54f31202ed491059856e611483bc2662bf1743e7fc0f5acc2a925ec',
-    note: 'SRV-174 BREAKING: salon gender -> businessType + audience on salon details/catalog; catalog query gender optional + businessType; bride at clinic/men\'s salon = 422 BRIDE_NOT_ALLOWED. Client: CUS-098',
+    version: '1.8.0',
+    sha256: 'da97b25ac02a3e89ede41ef683c8fb1a71ebe4bd370552f0bad755ff5df75a64',
+    note: 'SRV-175: businessType filter on search/filters (+ recommended per type, salons first), businessType + audience on every card, home salonServices/clinicServices/recommendedSalons/recommendedClinics/nearestSalons/nearestClinics (old keys kept as salon aliases), salon details ?gender= for guests (404 when hidden); favorites follow the audience rule. Client: CUS-098',
   },
   merchant: {
     version: '1.7.0',

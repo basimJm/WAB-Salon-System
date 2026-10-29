@@ -10,6 +10,26 @@
 
 ## Current task
 
+### SRV-175 — Customer discovery by business type (owner 2026-10-29)
+
+- Branch: `feat/srv-175-discovery-types`
+- Branched: from `feat/srv-174-business-types` (batched flow, rules §3.13)
+- Status: IN PROGRESS (committed, not pushed; no PR — the lead ships it)
+- Acceptance criteria (BUSINESS_DOMAIN §5.19 visibility + home, §5.17 discovery, §5.13 Recommended per type, §2; operations `GET /customer/v1/salons`, `/salons/filters`, `/salons/{salonId}`, `/home`, `/favorites`, `/catalog/services`):
+  - [x] Visibility (audience ∈ {gender, BOTH}; clinics always BOTH, so every clinic) on search, lists, nearest, Recommended, favorites (add refused 404, list drops hidden) and salon details (signed-in customer's gender, else guest `?gender=`; hidden → 404 `SALON_NOT_FOUND`; no gender → unchanged)
+  - [x] `businessType` filter on search, price bounds and nearest; every card carries `businessType` + `audience`
+  - [x] Recommended per type: `general=RECOMMENDED&businessType=…` = active placements of that type the gender may see, admin order; without a type salons first, then clinics
+  - [x] Home: `salonServices`, `clinicServices`, `recommendedSalons`, `recommendedClinics`, `nearestSalons`, `nearestClinics` (nearest null without a position); old `services`/`recommended`/`nearest` kept as salon aliases (deprecated, app versions before CUS-098)
+  - [x] Catalog list per type (`businessType` query, SRV-174) used by the home services sections
+  - [x] Contract customer 1.8.0 (CUS-098)
+- Tests: `tests/search.test.ts` (+1: type filter, recommended per type and order, cards carry type), `tests/home.test.ts` (+1: six sections per type, aliases, guest without position; existing call expectations per type), `tests/favorites.test.ts` (+1: men's salon refused/dropped for a woman, BOTH + clinic kept), `tests/salonDetails.test.ts` (+1: guest gender 404/200, clinic visible to men, bad gender 400); affected suites green (Terminal panel)
+- API docs: customer regenerated, `contract:bump customer` 1.7.0 → 1.8.0
+- Loops: 0/1
+- Review: PENDING
+- Notes: `nearest` list "See more" = the search endpoint with `sort=NEAREST&businessType=CLINIC` (no separate nearest endpoint exists). Guest salon details only filter when the app sends `?gender=` (deep links from a guest without onboarding stay unfiltered).
+
+## Last blocks
+
 ### SRV-174 — Business types model + migration + seed + error codes + contracts (owner 2026-10-29)
 
 - Branch: `feat/srv-174-business-types`
@@ -28,8 +48,6 @@
 - Loops: 0/1
 - Review: PENDING
 - Notes: DEVIATION — the model rename breaks every reader at compile time, so this branch already carries the parts of SRV-177 (application type/audience, catalog fit, bride flags) and SRV-178 (admin audience change, admin filters, placements per type) that the compiler forced; SRV-175…178 add the rest. Booking persons have no gender field today: the mixed-gender rule lands in SRV-176. Tools run from a symlinked `node_modules` (not committed), `ensure-sdks` skipped.
-
-## Last blocks
 
 ### SRV-173 — One-command dev seed: data, branches, images, reports (owner 2026-10-27)
 
@@ -52,21 +70,3 @@
 - Loops: 1/1 — re-checked each criterion against the code, the tests and the real run; found and fixed: the base marker defect above, flags rewritten on every run (now compared)
 - Review: PASSED (SE ✔ (composition over the existing seed functions; storage port only; constants/env keys named), Mobile N/A (no contract change), Architect ✔ (no API change; dev-only guard reused; on-start never blocks the API), QA ✔ (every criterion has a test; real run idempotent))
 - Notes: DEVIATIONS: (1) the QA database keeps the duplicate demo server events the pre-fix runs (2 here, plus earlier `qa/stack.sh` starts) inserted — not deleted (insert-only seed; QA analytics noise only); (2) the first real run's counts scrolled out of the terminal (the second pre-fix run and both post-fix runs were read); (3) the reports step recomputes the 14 stored days each run (same values); (4) an `ADMIN_PASSWORD` under 12 characters fails the run loudly (same rule as `seed:admin`); (5) admin-made catalog services still feed demo salon services on an edited DB (pre-existing, unchanged); (6) tools run from a symlinked `node_modules` (not committed), `ensure-sdks` skipped.
-
-### SRV-172 — Server defects from the merchant/customer e2e passes
-
-- Branch: `feat/srv-172-e2e-defects-2`
-- Branched: from `origin/server`
-- Status: IN REVIEW (committed, not pushed; no PR — the lead ships it)
-- Acceptance criteria (merchant `WAB-Mobile-Salon/docs/E2E_RESULTS.md` server findings 1–3 (branch `feat/mer-075-contract-1-6`) + customer pass message; BUSINESS_DOMAIN §5.16–§5.18 branches, §8 notifications (updated), §3.5 `branchSnapshot`; Customer PRD S07; operations `GET /customer/v1/salons/{salonId}`, `GET /customer/v1/salons/{salonId}/staff/{memberId}`, `POST /customer/v1/salons/{salonId}/availability`, `GET /{customer,merchant}/v1/locations/countries`, `GET /merchant/v1/bookings`):
-  - [x] #2 salon details: optional `?branchId=` (bookable branch of the salon, else 404 `BRANCH_NOT_FOUND`; malformed 400) → `staff` and `services` of that branch only, place fields (location, phone, hours, closures) = that branch; `branches` still lists every bookable branch. Without `branchId`: unchanged — every bookable branch's staff/services tagged with `branchId` (the customer app loads once and filters by its branch selector, `BranchRules.ofBranch`; a main-only default would empty the other branches in the app)
-  - [x] Staff sheet: services restricted to the member's own branch (stale picks of another branch never shown); a member of a closed/incomplete branch is 404 like on the salon page. Slots (`availability`) were already branch-scoped (`branchOf` + `inBranch`): no leak; booking a foreign service is still refused there
-  - [x] #1 flags: `assets/flags/jo.svg` (drawn here from the flag geometry, no third-party file) written to every seeded country's `flagKey` through the storage port (public, `image/svg+xml`) by `npm run seed` (when real storage is configured; warns otherwise) and by `seed:demo-images`; missing shipped files are reported, never written. `Dockerfile.dockerignore` now lets `WAB-Server/assets` in (the Dockerfile already copied it, so the fonts/flags were missing from the build context)
-  - [x] #3 merchant `q`: SRV-171 partial-reference matching covers merchant (code without prefix, partial prefix, other salon's reference finds nothing) — test only
-  - [x] Customer pass (lead message): booking notifications name the place "Salon - Branch" on every branch of a multi-branch salon (main included) from `branchSnapshot` in the recipient's language; single-branch / pre-branch bookings show the salon name; one `salonTitle` helper shared with the nearest-list titles; demo seed follows the same rule (it named only extra branches, in English); BUSINESS_DOMAIN §8 records it. Existing locale templates already carry `{salon}` in AR + EN: no new keys
-- Tests: `tests/discoveryBranches.test.ts` (+4: selected branch staff/services/place, no-branch tagged list, 404 for closed/other-salon/unknown branch, staff sheet branch services + closed-branch 404), `tests/salonDetails.test.ts` (+1: 400 malformed, ignored without branch wiring), `tests/flagImages.test.ts` (new, 4: shipped SVG per seeded country, written via the real `@wab/storage` memory adapter, missing reported, file name only), `tests/docker.test.ts` (+1: every copied WAB-Server folder is in the build context), `tests/bookingQueries.test.ts` (+1 merchant partial references), `tests/notifications.test.ts` (+4: customer cancel at main/other branch AR+EN, salon cancel at main, single-branch + pre-branch), `tests/salonTitle.test.ts` (new, 2), `tests/demoBranchActivity.test.ts` (+1: seed notifications per branch incl. main, AR+EN, single-branch plain)
-- API docs: customer regenerated; `contract:bump customer` 1.5.0 → 1.6.0 (additive: `branchId` query + descriptions). Client impact: none required (CUS app filters client-side; `./gradlew apiSync` at the next customer task); merchant/admin unchanged
-- Gate (Terminal panel for jest): prettier --check ., eslint ., `tsc --noEmit`, `tsc -p tsconfig.build.json` + `node dist/docs/generate.js` (no diff after the bump), full jest 167 suites / 2944 tests green
-- Loops: 1/1 — re-read §5.16–§5.18 and §8 and Customer PRD S07 against the code and the regenerated customer contract; checked every `SalonDetailsService.get` caller (route only), the availability/draft paths for the same leak (branch-scoped already), every `{salon}` booking template (AR + EN) and both demo notification writers; found and fixed: the Docker build context excluded `WAB-Server/assets` (fonts and the new flags), the demo seed's English-only branch names in Arabic notifications
-- Review: PASSED (SE ✔ (branch filter in the service, no new queries per row; storage port only; one naming helper reused by search), Mobile ✔ (customer contract additive, app unaffected; AR + EN names from the snapshot), Architect ✔ (customer 1.6.0 bumped, no client row needed; flags go through the storage port, production `npm run seed` writes them too), QA ✔ (each defect has a test that fails without its fix; full suite green))
-- Notes: DEVIATIONS: (1) without `branchId` salon details keep every bookable branch (tagged) instead of switching to the main branch only — the customer app depends on it; a main-only default would be a breaking change; (2) the shared QA stack was not reseeded: its flag 404s and seeded notification texts stay until `npm run seed` / `seed:demo-images` (flags) is run there and new notifications are produced; (3) mid-reference matching (`512N` inside `WAB-46512N`) is not supported (anchored prefix, SRV-171 design); (4) tools run from a symlinked `node_modules` (not committed), `ensure-sdks` skipped.

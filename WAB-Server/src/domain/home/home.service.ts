@@ -1,4 +1,4 @@
-import type { Gender, Language } from '../../constants/enums';
+import type { BusinessType, Gender, Language } from '../../constants/enums';
 import { HOME_SECTION_SIZE } from '../../constants/home';
 import type { CustomersRepository } from '../../repositories/identity.repository';
 import type { BannersService, PublicBanner } from '../banners';
@@ -17,16 +17,29 @@ export interface HomeSection<T> {
   readonly hasMore: boolean;
 }
 
+type NearestSection = HomeSection<SalonCard & { title?: string }>;
+
 export interface Home {
   /** First name of the signed-in customer; `null` for guests (the app shows its nickname). */
   readonly firstName: string | null;
   /** Unread notifications; `null` for guests (no bell). */
   readonly unreadCount: number | null;
   readonly banners: PublicBanner[];
-  readonly services: HomeSection<PublicCatalogService>;
-  readonly recommended: HomeSection<SalonCard>;
+  /** Sections in order (§5.19): salon services, clinic services, Recommended salons, Recommended
+   * clinics, nearest salons, nearest clinics. Every business follows the visibility rule. */
+  readonly salonServices: HomeSection<PublicCatalogService>;
+  readonly clinicServices: HomeSection<PublicCatalogService>;
+  readonly recommendedSalons: HomeSection<SalonCard>;
+  readonly recommendedClinics: HomeSection<SalonCard>;
   /** `null` when the customer sent no position; one entry per bookable branch (§5.17). */
-  readonly nearest: HomeSection<SalonCard & { title?: string }> | null;
+  readonly nearestSalons: NearestSection | null;
+  readonly nearestClinics: NearestSection | null;
+  /** @deprecated same as `salonServices` (kept for app versions before CUS-098). */
+  readonly services: HomeSection<PublicCatalogService>;
+  /** @deprecated same as `recommendedSalons`. */
+  readonly recommended: HomeSection<SalonCard>;
+  /** @deprecated same as `nearestSalons`. */
+  readonly nearest: NearestSection | null;
 }
 
 export interface HomeService {
@@ -51,7 +64,7 @@ const section = <T>(items: T[], total: number): HomeSection<T> => ({
   hasMore: total > HOME_SECTION_SIZE,
 });
 
-/** One round trip with every home section for the selected gender (S03). */
+/** One round trip with every home section for the selected gender (S03, §5.19). */
 export const createHomeService = ({
   banners,
   catalog,
@@ -61,37 +74,82 @@ export const createHomeService = ({
 }: HomeDeps): HomeService => ({
   async get({ gender, language, customerId, position }) {
     const params = { page: 1, pageSize: HOME_SECTION_SIZE };
-    const [customer, unreadCount, live, services, recommended, nearest] = await Promise.all([
-      customerId === undefined ? Promise.resolve(null) : customers.findById(customerId),
-      customerId === undefined ? Promise.resolve(null) : unread.count(customerId),
-      banners.live(gender, language),
-      catalog.list({ gender, language, params }),
-      search.search({ query: { gender, general: 'RECOMMENDED' }, params, customerId, language }),
-      position === undefined
-        ? Promise.resolve(null)
-        : search.nearestBranches === undefined
-          ? search.search({
-              query: { gender, lat: position.lat, lng: position.lng, sort: 'NEAREST' },
+    const services = async (
+      businessType: BusinessType,
+    ): Promise<HomeSection<PublicCatalogService>> => {
+      const page = await catalog.list({ businessType, gender, language, params });
+      return section(page.items, page.meta.total);
+    };
+    const recommended = async (businessType: BusinessType): Promise<HomeSection<SalonCard>> => {
+      const page = await search.search({
+        query: { gender, businessType, general: 'RECOMMENDED' },
+        params,
+        customerId,
+        language,
+      });
+      return section(page.items, page.meta.total);
+    };
+    const nearest = async (businessType: BusinessType): Promise<NearestSection | null> => {
+      if (position === undefined) return null;
+      const page =
+        search.nearestBranches === undefined
+          ? await search.search({
+              query: {
+                gender,
+                businessType,
+                lat: position.lat,
+                lng: position.lng,
+                sort: 'NEAREST',
+              },
               params,
               customerId,
               language,
             })
-          : search.nearestBranches({
+          : await search.nearestBranches({
               gender,
+              businessType,
               lat: position.lat,
               lng: position.lng,
               params,
               customerId,
               language,
-            }),
+            });
+      return section(page.items, page.meta.total);
+    };
+    const [
+      customer,
+      unreadCount,
+      live,
+      salonServices,
+      clinicServices,
+      recommendedSalons,
+      recommendedClinics,
+      nearestSalons,
+      nearestClinics,
+    ] = await Promise.all([
+      customerId === undefined ? Promise.resolve(null) : customers.findById(customerId),
+      customerId === undefined ? Promise.resolve(null) : unread.count(customerId),
+      banners.live(gender, language),
+      services('SALON'),
+      services('CLINIC'),
+      recommended('SALON'),
+      recommended('CLINIC'),
+      nearest('SALON'),
+      nearest('CLINIC'),
     ]);
     return {
       firstName: customer?.firstName ?? null,
       unreadCount,
       banners: live,
-      services: section(services.items, services.meta.total),
-      recommended: section(recommended.items, recommended.meta.total),
-      nearest: nearest === null ? null : section(nearest.items, nearest.meta.total),
+      salonServices,
+      clinicServices,
+      recommendedSalons,
+      recommendedClinics,
+      nearestSalons,
+      nearestClinics,
+      services: salonServices,
+      recommended: recommendedSalons,
+      nearest: nearestSalons,
     };
   },
 });

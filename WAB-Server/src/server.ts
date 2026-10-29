@@ -977,6 +977,7 @@ const buildServices = (
       favorites: favoritesRepository,
       salons: new SalonsRepository(),
       search,
+      customers: new CustomersRepository(),
     }),
     reviews: reviewsService,
     inbox: inboxService,
@@ -1038,6 +1039,7 @@ const buildServices = (
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({
+      customers: new CustomersRepository(),
       events: serverEvents,
       branches: branchesRepository,
       favorites: favoritesRepository,

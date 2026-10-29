@@ -25,6 +25,9 @@ import { todaysHours } from '../salons/hours';
 import type { SettingsService } from '../settings';
 import type { ReviewView, ReviewsService } from '../reviews/reviews.service';
 import { noFavorites, type FavoriteLookup } from '../search/search.service';
+import { isVisibleTo } from '../businessTypes/rules';
+import type { Gender } from '../../constants/enums';
+import type { CustomersRepository } from '../../repositories/identity.repository';
 
 export interface StaffSummary {
   readonly id: string;
@@ -121,6 +124,11 @@ export interface SalonDetailsService {
     language: Language;
     customerId?: string | undefined;
     /**
+     * The viewer's gender for a guest (the onboarding choice). A signed-in customer's own gender
+     * wins. A business the viewer may not see (§5.19) is not found.
+     */
+    gender?: Gender | undefined;
+    /**
      * The branch the customer selected (§5.17/§5.18): staff, services and the place fields are
      * that branch's only; `BRANCH_NOT_FOUND` when it is not a bookable branch of the salon.
      * Omitted: every bookable branch's staff and services, each tagged with its `branchId`.
@@ -132,6 +140,8 @@ export interface SalonDetailsService {
 
 export interface SalonDetailsDeps {
   readonly salons: Pick<SalonsRepository, 'findById'>;
+  /** The signed-in customer's gender for the visibility rule (§5.19). */
+  readonly customers?: Pick<CustomersRepository, 'findById'>;
   readonly members: Pick<MembersRepository, 'findMany' | 'findOne'>;
   readonly salonServices: Pick<SalonServicesRepository, 'findMany'>;
   readonly catalog: Pick<CatalogServicesRepository, 'findMany'>;
@@ -224,8 +234,13 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
   };
 
   return {
-    async get({ salonId, language, customerId, branchId }) {
+    async get({ salonId, language, customerId, branchId, gender }) {
       const salon = await visible(salonId);
+      const customer = customerId === undefined ? null : await deps.customers?.findById(customerId);
+      const viewer = customer?.gender ?? gender;
+      if (viewer !== undefined && !isVisibleTo(salon, viewer)) {
+        throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      }
       // Profile views for merchant statistics (M21); tracking never fails the page.
       void deps.events?.track({
         name: SALON_VIEWED_EVENT,
