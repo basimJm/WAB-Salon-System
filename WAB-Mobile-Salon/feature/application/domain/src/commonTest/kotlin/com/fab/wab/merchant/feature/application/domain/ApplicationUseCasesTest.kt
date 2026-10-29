@@ -1,5 +1,8 @@
 package com.fab.wab.merchant.feature.application.domain
 
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
@@ -11,7 +14,6 @@ import com.fab.wab.merchant.core.domain.session.SessionState
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationForm
 import com.fab.wab.merchant.feature.application.domain.model.SalonApplication
-import com.fab.wab.merchant.feature.application.domain.model.SalonGender
 import com.fab.wab.merchant.feature.application.domain.repository.ApplicationRepository
 import com.fab.wab.merchant.feature.application.domain.repository.ApplicationSession
 import com.fab.wab.merchant.feature.application.domain.usecase.GetApplicationUseCase
@@ -31,7 +33,15 @@ import kotlin.test.assertNull
 internal val PENDING = SalonApplication("s1", SalonState.APPLICATION_PENDING, null, 0, null)
 internal val OWNER = MemberProfile("m1", "s1", "Lina", MemberRole.OWNER)
 internal val OWNER_KEYS = Permission.entries.map { it.name }.toSet()
-internal val FORM = RegistrationForm("Lina Beauty", SalonGender.WOMEN, "Lina", "Haddad", "c1", "a1", listOf("l/1.pdf"))
+internal val FORM = RegistrationForm(
+    "Lina Beauty",
+    BusinessKind(BusinessType.SALON, Audience.FEMALE),
+    "Lina",
+    "Haddad",
+    "c1",
+    "a1",
+    listOf("l/1.pdf"),
+)
 
 internal class FakeApplications : ApplicationRepository {
     var applyResult: AppResult<ApplicationSession> = AppResult.Success(ApplicationSession(AuthTokens("a", "r"), OWNER, OWNER_KEYS, PENDING))

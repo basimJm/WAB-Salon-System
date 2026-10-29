@@ -3,7 +3,8 @@ package com.fab.wab.merchant.feature.team.presentation
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SalonState
@@ -33,6 +34,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -71,10 +73,10 @@ private class FakeStaff : StaffRepository {
         )
 }
 
-private class FakeSalon : SalonRepository {
+private class FakeSalon(audience: Audience = Audience.FEMALE) : SalonRepository {
     override val current: StateFlow<SalonProfile?> = MutableStateFlow(
         SalonProfile(
-            "s", "Lina", SalonGenderType.FEMALE, SalonState.LIVE, null, null, null,
+            "s", "Lina", BusinessType.SALON, audience, SalonState.LIVE, null, null, null,
             location = null, locationText = null, cityId = null, areaId = null, phone = null, whatsapp = null,
             missing = emptySet(), ratingAverage = 0.0, ratingCount = 0,
         ),
@@ -88,9 +90,11 @@ class StaffProfileViewModelTest {
     private val staff = FakeStaff()
     private val affected = FakeAffected()
 
-    private fun TestScope.viewModel() = StaffProfileViewModel(
+    private fun TestScope.viewModel(audience: Audience = Audience.FEMALE) = StaffProfileViewModel(
         "m1",
-        StaffProfileDependencies(staff, FakeTeam(), FakeSalon(), affected, NoOpAnalyticsTracker, { TODAY }, { "Staff left" }, { "failed" }),
+        StaffProfileDependencies(
+            staff, FakeTeam(), FakeSalon(audience), affected, NoOpAnalyticsTracker, { TODAY }, { "Staff left" }, { "failed" },
+        ),
         testScope = backgroundScope,
     ).also { vm -> backgroundScope.launch { vm.state.collect { } } }
 
@@ -100,10 +104,19 @@ class StaffProfileViewModelTest {
     @Test
     fun loadsProfileOptionsAndLeaves() = runTest(UnconfinedTestDispatcher()) {
         val state = viewModel().state.first { !it.loading && it.leaves.isNotEmpty() }
-        assertTrue(state.womenSalon)
+        assertTrue(state.brideAllowed)
         assertEquals(listOf("s1", "s2"), state.services.map { it.id })
         assertEquals("4", state.draft.years)
         assertEquals(listOf("l1"), state.leaves.map { it.id })
+    }
+
+    /** BUSINESS_DOMAIN §5.19: bride-qualified staff only in salons serving women. */
+    @Test
+    fun aMenSalonHidesBrideQualified() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(Audience.MALE)
+        assertFalse(viewModel.state.first { !it.loading }.brideAllowed)
+        viewModel.onEvent(UiAction.OnBride(true))
+        assertFalse(viewModel.state.first().draft.brideQualified)
     }
 
     @Test

@@ -18,6 +18,11 @@
     <string name="mock_title">Mock data (development)</string>
     <string name="mock_salon">Salon state</string>
     <string name="mock_member">Signed-in member</string>
+    <string name="mock_business">Business type</string>
+    <string name="mock_kind_women">Women’s salon</string>
+    <string name="mock_kind_men">Men’s salon</string>
+    <string name="mock_kind_both">Salon for both</string>
+    <string name="mock_kind_clinic">Beauty clinic</string>
     <string name="mock_owner">Owner</string>
     <string name="mock_manager">Manager</string>
     <string name="mock_employee">Employee</string>

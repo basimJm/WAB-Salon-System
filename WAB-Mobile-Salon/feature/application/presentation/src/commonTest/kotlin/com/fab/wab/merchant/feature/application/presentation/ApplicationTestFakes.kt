@@ -61,8 +61,11 @@ internal class FakeLocations : LocationsRepository {
 }
 
 internal class FakeUploads(var fail: Boolean = false) : UploadsRepository {
-    override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> =
-        AppResult.Success(PresignedUpload("key-$size", "u", "PUT", emptyMap(), size))
+    val purposes = mutableListOf<UploadPurpose>()
+    override suspend fun presign(purpose: UploadPurpose, contentType: String, size: Long): AppResult<PresignedUpload> {
+        purposes += purpose
+        return AppResult.Success(PresignedUpload("key-$size", "u", "PUT", emptyMap(), size))
+    }
     override suspend fun upload(
         target: PresignedUpload,
         bytes: ByteArray,
