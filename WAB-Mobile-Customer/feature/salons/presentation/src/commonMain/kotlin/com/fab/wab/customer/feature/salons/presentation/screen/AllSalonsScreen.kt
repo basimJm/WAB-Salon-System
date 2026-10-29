@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -61,7 +62,7 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
             BusinessTypeTabs(
                 selected = state.businessType,
                 onSelect = { onAction(UiAction.OnBusinessTypeSelect(it)) },
-                modifier = Modifier.padding(start = spacing.space20, end = spacing.space20, bottom = spacing.space12),
+                modifier = Modifier.fillMaxWidth().padding(start = spacing.space20, end = spacing.space20, bottom = spacing.space12),
             )
             SalonsActiveChips(chips = chips, onRemove = { chip -> onAction(UiAction.OnChipRemove(chip.toFilterId())) })
             AppPullToRefresh(

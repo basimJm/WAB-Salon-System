@@ -124,4 +124,6 @@
     <string name="booking_gender_man">رجل</string>
     <string name="booking_gender_woman">امرأة</string>
     <string name="booking_gender_error">اختر جنس الشخص</string>
+    <string name="booking_who_companion_any">أدخل اسم المرافق وجنسه.</string>
+    <string name="booking_companions_subtitle_any">يمكنك إضافة حتى 5 مرافقين، رجالاً أو نساءً، ولكل مرافق خدماته وموعده.</string>
 </resources>

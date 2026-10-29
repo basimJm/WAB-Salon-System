@@ -122,4 +122,6 @@
     <string name="booking_gender_man">Man</string>
     <string name="booking_gender_woman">Woman</string>
     <string name="booking_gender_error">Choose the person’s gender</string>
+    <string name="booking_who_companion_any">Enter the companion’s name and gender.</string>
+    <string name="booking_companions_subtitle_any">Add up to 5 companions, men or women, each with their own services and time.</string>
 </resources>

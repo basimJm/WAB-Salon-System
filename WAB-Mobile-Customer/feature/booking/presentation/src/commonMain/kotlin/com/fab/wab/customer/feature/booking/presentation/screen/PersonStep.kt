@@ -42,6 +42,7 @@ import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_placeholder
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_person_title
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_who_companion
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_who_companion_any
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_who_main
 import org.jetbrains.compose.resources.stringResource
 
@@ -61,7 +62,13 @@ internal fun PersonStep(state: UiState, onAction: (UiAction) -> Unit) {
     ) {
         StepTitle(text = stringResource(Res.string.booking_step_person_title), modifier = Modifier.padding(bottom = spacing.space6))
         AppText(
-            text = stringResource(if (state.isCompanionFlow) Res.string.booking_who_companion else Res.string.booking_who_main),
+            text = stringResource(
+                when {
+                    !state.isCompanionFlow -> Res.string.booking_who_main
+                    state.asksGender -> Res.string.booking_who_companion_any
+                    else -> Res.string.booking_who_companion
+                },
+            ),
             modifier = Modifier.padding(bottom = spacing.space20),
             style = AppTheme.typography.bodyMedium,
             color = colors.muted,

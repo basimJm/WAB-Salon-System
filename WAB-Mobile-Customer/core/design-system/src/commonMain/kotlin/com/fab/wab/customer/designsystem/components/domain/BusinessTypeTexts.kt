@@ -1,5 +1,6 @@
 package com.fab.wab.customer.designsystem.components.domain
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.fab.wab.customer.core.domain.salon.Audience
@@ -52,10 +53,12 @@ fun businessText(type: BusinessType, audience: Audience?): String {
 /** The All / Salons / Clinics segmented filter of the salon list and the bookings list. */
 @Composable
 fun BusinessTypeTabs(selected: BusinessType?, onSelect: (BusinessType?) -> Unit, modifier: Modifier = Modifier) {
-    AppSegmentedTabs(
-        tabs = businessTypeTabOrder.map { stringResource(businessTypeTabLabel(it)) },
-        selectedIndex = businessTypeTabIndex(selected),
-        onSelect = { onSelect(businessTypeOfTab(it)) },
-        modifier = modifier,
-    )
+    // The caller's padding stays outside the glass track: `glassBackground` re-applies the modifier chain it extends.
+    Box(modifier) {
+        AppSegmentedTabs(
+            tabs = businessTypeTabOrder.map { stringResource(businessTypeTabLabel(it)) },
+            selectedIndex = businessTypeTabIndex(selected),
+            onSelect = { onSelect(businessTypeOfTab(it)) },
+        )
+    }
 }
