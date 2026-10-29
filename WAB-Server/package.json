@@ -19,6 +19,7 @@
     "seed:demo-images": "node dist/seeds/runDemoImages.js",
     "seed:dev": "node dist/seeds/runDev.js",
     "migrate:branches": "node dist/seeds/runMigrateBranches.js",
+    "migrate:business-types": "node dist/seeds/runMigrateBusinessTypes.js",
     "seed:admin": "node dist/seeds/runAdmin.js",
     "docs": "npm run build && node dist/docs/generate.js",
     "contract:bump": "npm run build && node dist/docs/contractBump.js",

@@ -7,6 +7,7 @@ import { ADMIN_PAGE_SIZE } from '../../../constants/pagination';
 import { STORAGE_KEY_MAX_LENGTH, STORAGE_KEY_PATTERN } from '../../../constants/salon';
 import { CATALOG_REQUEST_STATUSES } from '../../../constants/salonServices';
 import { paginationQuery } from '../../../utils/pagination';
+import { BUSINESS_TYPES } from '../../../constants/enums';
 
 const reason = z.string().trim().min(1).max(AUDIT_REASON_MAX_LENGTH);
 const localized = (max: number): z.ZodObject<{ ar: z.ZodString; en: z.ZodString }> => {
@@ -16,6 +17,7 @@ const localized = (max: number): z.ZodObject<{ ar: z.ZodString; en: z.ZodString 
 
 export const requestsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   status: z.enum(CATALOG_REQUEST_STATUSES).optional(),
+  businessType: z.enum(BUSINESS_TYPES).optional(),
 });
 export const requestParams = z.object({ id: z.string().regex(OBJECT_ID_PATTERN) });
 /** The salon wrote one language; the admin supplies both for the catalog entry. */

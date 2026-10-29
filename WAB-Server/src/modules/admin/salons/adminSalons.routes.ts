@@ -11,7 +11,7 @@ import { asyncHandler } from '../../../utils/async';
 import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
 import { toActor } from '../crud/actor';
 import { salonParams } from './salonState.validation';
-import { genderBody, membersQuery, salonsQuery } from './adminSalons.validation';
+import { audienceBody, membersQuery, salonsQuery } from './adminSalons.validation';
 
 const iso = (date: Date | null): string | null => (date === null ? null : date.toISOString());
 const rowData = (r: AdminSalonRow): Record<string, unknown> => ({
@@ -44,7 +44,7 @@ const detailData = (d: AdminSalonDetail): Record<string, unknown> => ({
 const part = <S extends z.ZodType>(req: Request, key: 'body' | 'params' | 'query'): z.infer<S> =>
   (req.validated as Record<string, z.infer<S>>)[key] as z.infer<S>;
 
-/** Admin salon list, overview and the gender change (offline/online live in the state router). */
+/** Admin salon list, overview and the audience change (offline/online live in the state router). */
 export const createAdminSalonsRouter = (
   service: AdminSalonsService,
   guard: RequestHandler,
@@ -79,14 +79,14 @@ export const createAdminSalonsRouter = (
     }),
   );
   router.patch(
-    routes.gender,
-    validate({ params: salonParams, body: genderBody }),
+    routes.audience,
+    validate({ params: salonParams, body: audienceBody }),
     asyncHandler(async (req: Request, res: Response) => {
       const { id } = part<typeof salonParams>(req, 'params');
-      const { gender, reason } = part<typeof genderBody>(req, 'body');
-      const result = await service.changeGender({
+      const { audience, reason } = part<typeof audienceBody>(req, 'body');
+      const result = await service.changeAudience({
         salonId: id,
-        gender,
+        audience,
         reason,
         actor: toActor(req),
       });

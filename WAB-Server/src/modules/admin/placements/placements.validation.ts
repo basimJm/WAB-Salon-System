@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { SORT_ORDER_MAX } from '../../../constants/adminCrud';
 import { AUDIT_REASON_MAX_LENGTH } from '../../../constants/audit';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
-import { GENDERS } from '../../../constants/enums';
+import { AUDIENCES, BUSINESS_TYPES } from '../../../constants/enums';
 import { ADMIN_PAGE_SIZE } from '../../../constants/pagination';
 import {
   PLACEMENT_NOTE_MAX_LENGTH,
@@ -22,12 +22,13 @@ const amount = z
 const note = z.string().trim().max(PLACEMENT_NOTE_MAX_LENGTH);
 
 export const placementsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
-  gender: z.enum(GENDERS).optional(),
+  businessType: z.enum(BUSINESS_TYPES).optional(),
+  audience: z.enum(AUDIENCES).optional(),
   status: z.enum(PLACEMENT_STATUSES).optional(),
   salonId: objectId.optional(),
 });
 export const placementParams = z.object({ id: objectId });
-/** The audience is the salon's gender; it is never sent. `amountPaid` is a JOD string. */
+/** Business type and audience are copied from the salon; never sent. `amountPaid` is a JOD string. */
 export const createPlacementBody = z.object({
   salonId: objectId,
   startAt: z.coerce.date(),
@@ -51,7 +52,7 @@ export const updatePlacementBody = z
   });
 export const endPlacementBody = z.object({ reason });
 export const reorderBody = z.object({
-  gender: z.enum(GENDERS),
+  businessType: z.enum(BUSINESS_TYPES),
   ids: z.array(objectId).min(1).max(PLACEMENT_REORDER_MAX),
   reason,
 });

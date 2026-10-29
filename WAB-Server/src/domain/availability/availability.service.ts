@@ -29,6 +29,11 @@ import {
   type UnavailableReason,
 } from './availability';
 import type { HoldsStore } from './holds';
+import { brideAllowed, impliedGender, personFits } from '../businessTypes/rules';
+import type { Gender } from '../../constants/enums';
+
+/** A bride is a woman: a bride person sent as MALE is a gender mismatch. */
+const MALE_GENDER: Gender = 'MALE';
 
 /** Where existing PENDING/APPROVED bookings come from; the booking module supplies it (SRV-071). */
 export interface BookingBusyLookup {
@@ -45,6 +50,8 @@ export interface AvailabilityRequest {
     /** Salon service ids (`services[].id` of the salon details). */
     readonly serviceIds: readonly string[];
     readonly isBride: boolean;
+    /** Optional (§5.19): must fit a single-gender salon. */
+    readonly gender?: Gender | undefined;
     readonly staffId?: string | undefined;
   };
   /** Times the other persons of the same draft already picked: treated as occupied. */
@@ -112,6 +119,8 @@ const toStaff = (m: Entity<MemberRaw>): AvailabilityStaff => ({
 export interface PlanPersonInput {
   readonly name: string;
   readonly isBride: boolean;
+  /** Optional (§5.19): defaults to a single-gender salon's audience; any gender at BOTH/CLINIC. */
+  readonly gender?: Gender | undefined;
   readonly serviceIds: readonly string[];
   /** Omitted = "any available staff". */
   readonly staffId?: string | undefined;
@@ -121,6 +130,8 @@ export interface PlanPersonInput {
 export interface PlannedPerson {
   readonly name: string;
   readonly isBride: boolean;
+  /** Resolved gender; `undefined` only when a BOTH business got none. */
+  readonly gender: Gender | undefined;
   readonly services: readonly Entity<SalonServiceRaw>[];
   readonly durationMinutes: number;
   readonly staffId: string;
@@ -252,7 +263,10 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       const salon = await visibleSalon(salonId);
       if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
       const branch = await branchOf(salonId, branchId);
-      if (person.isBride && salon.gender !== 'FEMALE') throw invalid('body.person.isBride');
+      if (person.isBride && !brideAllowed(salon))
+        throw rule('BRIDE_NOT_ALLOWED', 'body.person.isBride');
+      if (person.gender !== undefined && !personFits(salon, person.gender))
+        throw rule('GENDER_MISMATCH', 'body.person.gender');
 
       const wanted = [...new Set(person.serviceIds)];
       if (wanted.length !== person.serviceIds.length) throw invalid('body.person.serviceIds');
@@ -326,8 +340,13 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
       const planned: PlannedPerson[] = [];
       for (const [index, input] of persons.entries()) {
         const at = (key: string): string => `persons.${String(index)}.${key}`;
-        if (input.isBride && salon.gender !== 'FEMALE')
-          throw rule('GENDER_MISMATCH', at('isBride'));
+        if (input.isBride && !brideAllowed(salon)) throw rule('BRIDE_NOT_ALLOWED', at('isBride'));
+        // §5.19: a MALE/FEMALE salon takes only its own gender; BOTH salons and clinics any.
+        if (input.gender !== undefined && !personFits(salon, input.gender)) {
+          throw rule('GENDER_MISMATCH', at('gender'));
+        }
+        const gender = input.gender ?? impliedGender(salon);
+        if (input.isBride && gender === MALE_GENDER) throw rule('GENDER_MISMATCH', at('gender'));
         const wanted = [...new Set(input.serviceIds)];
         const chosen =
           wanted.length === 0 || wanted.length !== input.serviceIds.length
@@ -376,6 +395,7 @@ export const createAvailabilityService = (deps: AvailabilityDeps): AvailabilityS
         planned.push({
           name: input.name,
           isBride: input.isBride,
+          gender,
           services: chosen,
           durationMinutes,
           staffId,

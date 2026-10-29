@@ -116,8 +116,20 @@ beforeEach(() => {
   recomputes.length = 0;
   conflict.list = [];
   salonsM.docs.push(
-    { _id: womenSalon, name: 'Glow', gender: 'FEMALE', weeklySchedule: week(['FRI']) },
-    { _id: menSalon, name: 'Barber', gender: 'MALE', weeklySchedule: week() },
+    {
+      _id: womenSalon,
+      name: 'Glow',
+      businessType: 'SALON',
+      audience: 'FEMALE',
+      weeklySchedule: week(['FRI']),
+    },
+    {
+      _id: menSalon,
+      name: 'Barber',
+      businessType: 'SALON',
+      audience: 'MALE',
+      weeklySchedule: week(),
+    },
   );
 });
 
@@ -267,7 +279,15 @@ describe('staff profile', () => {
       (): object => ({ brideQualified: true }),
       'body.brideQualified',
     ],
+    [
+      'bride qualification in a clinic (§5.19)',
+      (): object => ({ brideQualified: true }),
+      'body.brideQualified',
+    ],
   ])('rejects %s and saves nothing', async (name, make, field) => {
+    if (name.includes('clinic')) {
+      Object.assign(salonsM.docs[0] ?? {}, { businessType: 'CLINIC', audience: 'BOTH' });
+    }
     const salon = name.includes('men’s') ? menSalon : womenSalon;
     const owner = addMember(salon, 'OWNER');
     const member = addMember(salon, 'EMPLOYEE');

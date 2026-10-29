@@ -93,7 +93,8 @@ const addSalon = (stateName: string, over: Record<string, unknown> = {}): void =
   salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: stateName,
     weeklySchedule: [{ day: 'SUN', isOff: false, open: '09:00', close: '18:00' }],
     policy: POLICY,
@@ -264,7 +265,8 @@ describe('PATCH /merchant/v1/salon/profile', () => {
     salons.docs.push({
       _id: other,
       name: 'Other',
-      gender: 'MALE',
+      businessType: 'SALON',
+      audience: 'MALE',
       state: 'LIVE',
       weeklySchedule: [],
       completeness: { missing: [], isComplete: false },

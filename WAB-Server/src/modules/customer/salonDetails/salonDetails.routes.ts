@@ -29,13 +29,16 @@ export const createSalonDetailsRouter = ({
     optionalAuth,
     validate({ params: salonParamsSchema, query: salonQuerySchema }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { query } = req.validated as { query: { branchId?: string } };
+      const { query } = req.validated as {
+        query: { branchId?: string; gender?: 'MALE' | 'FEMALE' };
+      };
       sendSuccess(req, res, {
         data: await service.get({
           salonId: params(req)['salonId'] ?? '',
           language: req.language,
           customerId: req.auth?.subjectId,
           branchId: query.branchId,
+          gender: query.gender,
         }),
       });
     }),

@@ -113,7 +113,8 @@ beforeEach(() => {
   moves.length = 0;
   m.salons.docs.push({
     _id: salonId,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     weeklySchedule: week,

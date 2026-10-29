@@ -8,6 +8,7 @@ import {
   jsonResponse,
   paginationMetaSchema,
   successResponseSchema,
+  businessKindShape,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
 import { filtersQuerySchema, searchQuerySchema } from './search.validation';
@@ -15,6 +16,7 @@ import { filtersQuerySchema, searchQuerySchema } from './search.validation';
 const card = z.object({
   id: z.string(),
   name: z.string(),
+  ...businessKindShape,
   profileImageUrl: z.string().nullable(),
   rating: z.number(),
   reviewsCount: z.number(),
@@ -47,7 +49,7 @@ export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags: ['Salon search'],
     summary:
-      'Search LIVE salons of one gender: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended',
+      'Search LIVE salons and clinics the gender may see (§5.19: own audience, BOTH, every clinic), optionally of one businessType: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended (salons first, then clinics, each in the admin order)',
     description:
       'Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating.',
     security: [],

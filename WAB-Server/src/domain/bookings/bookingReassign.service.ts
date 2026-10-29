@@ -100,6 +100,7 @@ export const createBookingReassignService = (deps: {
         {
           name: person.name,
           isBride: person.isBride,
+          gender: person.gender,
           serviceIds: person.services.map((s) => s.salonServiceId),
           staffId,
           start: person.start,

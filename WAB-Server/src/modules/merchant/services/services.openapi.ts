@@ -88,7 +88,7 @@ export const registerMerchantServicesDocs = (
     path: base,
     tags,
     summary:
-      'Offer a catalog service (same gender as the salon; bride-only only in women’s salons; once per salon)',
+      'Offer a catalog service (same business type as the salon and a fitting audience, else 400 BUSINESS_TYPE_MISMATCH; bride-only only in women’s and BOTH salons, else BRIDE_NOT_ALLOWED; once per salon)',
     request: withScope({ headers, body: body(addServiceSchema) }),
     responses: {
       [HTTP_STATUS.created]: jsonResponse('Added', successResponseSchema(view)),

@@ -40,7 +40,8 @@ const setup = (): {
   salons.docs.push({
     _id: salonId,
     name: 'Lamar',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     location: { type: 'Point', coordinates: [35.88, 31.95] },
     locationText: 'Abdoun',

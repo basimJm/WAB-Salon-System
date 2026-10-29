@@ -10,6 +10,7 @@ import {
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
 import { createDraftBody, draftParams, verifyOtpBody } from './drafts.validation';
+import { GENDERS } from '../../../constants/enums';
 
 const draft = z.object({
   id: z.string(),
@@ -25,6 +26,7 @@ const draft = z.object({
       name: z.string(),
       isMain: z.boolean(),
       isBride: z.boolean(),
+      gender: z.enum(GENDERS).nullable(),
       services: z.array(
         z.object({
           salonServiceId: z.string(),

@@ -21,6 +21,8 @@ import type { Logger } from '../../utils/logger';
 import type { PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
+import type { BusinessType } from '../../constants/enums';
+import { salonIdFilter } from '../businessTypes/salonFilter';
 
 export interface AdminReviewRow {
   readonly id: string;
@@ -52,6 +54,8 @@ export interface AdminReviewsService {
     status?: ReviewStatus | undefined;
     target?: ReviewTarget | undefined;
     salonId?: string | undefined;
+    /** Reviews of salons or of clinics only (§5.19). */
+    businessType?: BusinessType | undefined;
     staffId?: string | undefined;
     branchId?: string | undefined;
     rating?: number | undefined;
@@ -218,14 +222,24 @@ export const createAdminReviewsService = (deps: AdminReviewsDeps): AdminReviewsS
         );
 
   return {
-    async list({ status, target, salonId, staffId, branchId, rating, authorId, params }) {
+    async list({
+      status,
+      target,
+      salonId,
+      businessType,
+      staffId,
+      branchId,
+      rating,
+      authorId,
+      params,
+    }) {
       // The moderation queue defaults to PENDING; one author's reviews are shown whatever their status.
       const shown = status ?? (authorId === undefined ? 'PENDING' : undefined);
       const page = await reviews.findPage(
         {
           ...(shown === undefined ? {} : { status: shown }),
           ...(target === undefined ? {} : { target }),
-          ...(salonId === undefined ? {} : { salonId }),
+          ...(await salonIdFilter(salons, { salonId, businessType })),
           ...(staffId === undefined ? {} : { staffId }),
           ...(branchId === undefined ? {} : { branchId }),
           ...(rating === undefined ? {} : { rating }),

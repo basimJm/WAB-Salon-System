@@ -6,7 +6,14 @@ import {
   type BookingAction,
   type BookingTab,
 } from '../../constants/bookings';
-import type { BookingPaymentStatus, BookingStatus, Language } from '../../constants/enums';
+import type {
+  Audience,
+  BookingPaymentStatus,
+  BookingStatus,
+  BusinessType,
+  Gender,
+  Language,
+} from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import type { BookingRaw } from '../../models/booking.model';
 import type { BookingsRepository } from '../../repositories/bookings.repository';
@@ -51,6 +58,8 @@ export interface BookingQuery {
   readonly statuses?: readonly BookingStatus[] | undefined;
   readonly brideOnly?: boolean | undefined;
   readonly paymentStatus?: BookingPaymentStatus | undefined;
+  /** Salon or clinic bookings only (§5.19 bookings filter: all / salons / clinics). */
+  readonly businessType?: BusinessType | undefined;
   /** Admin only. */
   readonly salonId?: string | undefined;
   readonly customerId?: string | undefined;
@@ -62,6 +71,9 @@ export interface BookingRow {
   readonly id: string;
   readonly referenceNumber: string;
   readonly status: BookingStatus;
+  /** Snapshots of the business at booking time (§3.5, §5.19). */
+  readonly businessType: BusinessType;
+  readonly salonAudience: Audience;
   readonly paymentMethod: string;
   readonly paymentStatus: string;
   readonly hasBride: boolean;
@@ -104,6 +116,8 @@ export interface BookingDetail extends BookingRow {
   readonly persons: {
     name: string;
     isBride: boolean;
+    /** §5.19; `null` when unknown (BOTH business without it, or older bookings). */
+    gender: Gender | null;
     start: string;
     end: string;
     subtotal: string;
@@ -270,6 +284,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     }
     if (query.brideOnly === true) and.push({ hasBride: true });
     if (query.paymentStatus !== undefined) and.push({ paymentStatus: query.paymentStatus });
+    if (query.businessType !== undefined) and.push({ businessType: query.businessType });
 
     const text = query.q?.trim();
     if (text !== undefined && text !== '') {
@@ -368,6 +383,8 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     id: b.id,
     referenceNumber: b.referenceNumber,
     status: b.status,
+    businessType: b.businessType,
+    salonAudience: b.salonAudience,
     paymentMethod: b.paymentMethod,
     paymentStatus: b.paymentStatus,
     hasBride: b.hasBride,
@@ -438,6 +455,7 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
         persons: found.persons.map((p) => ({
           name: p.name,
           isBride: p.isBride,
+          gender: p.gender ?? null,
           start: iso(p.start),
           end: iso(p.end),
           subtotal: formatJod(p.subtotal),

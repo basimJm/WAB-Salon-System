@@ -147,7 +147,8 @@ beforeEach(() => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     weeklySchedule: week(['SAT']),
   });
@@ -294,7 +295,8 @@ describe('admin salon edit: services', () => {
       name: { ar: 'قص', en: 'Cut' },
       description: { ar: 'و', en: 'd' },
       imageKey: 'catalog/cut.jpg',
-      gender,
+      businessType: 'SALON',
+      audience: gender,
       active: true,
       sortOrder: 0,
     });
@@ -323,7 +325,7 @@ describe('admin salon edit: services', () => {
       reason: REASON,
     });
     expect(mismatch.status).toBe(400);
-    expect(bodyOf(mismatch).error?.code).toBe(ERROR_CODES.GENDER_MISMATCH);
+    expect(bodyOf(mismatch).error?.code).toBe(ERROR_CODES.BUSINESS_TYPE_MISMATCH);
     const ok = catalogEntry();
     expect(
       (await call('post', '/services', { catalogServiceId: ok, ...BASE, reason: REASON })).status,

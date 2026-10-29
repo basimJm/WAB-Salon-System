@@ -11,7 +11,13 @@ import {
   type Point,
 } from './branchPlaces';
 import type { QueryFilter } from 'mongoose';
-import type { Gender } from '../../constants/enums';
+import {
+  BUSINESS_TYPES,
+  type Audience,
+  type BusinessType,
+  type Gender,
+} from '../../constants/enums';
+import { visibleAudiences } from '../businessTypes/rules';
 import {
   DISTANCE_DECIMALS,
   EARTH_RADIUS_KM,
@@ -33,6 +39,9 @@ import { todaysHours } from '../salons/hours';
 export interface SalonCard {
   readonly id: string;
   readonly name: string;
+  /** SALON or CLINIC and who it serves (§5.19). */
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly profileImageUrl: string | null;
   readonly rating: number;
   readonly reviewsCount: number;
@@ -57,6 +66,8 @@ export interface BranchCard extends SalonCard {
 
 export interface SearchQuery {
   readonly gender: Gender;
+  /** Only salons or only clinics (§5.19); omitted = both. */
+  readonly businessType?: BusinessType | undefined;
   /** Part of the salon name or location text. */
   readonly q?: string | undefined;
   /** Catalog service ids; a salon must offer ALL of them. */
@@ -75,7 +86,8 @@ export interface SearchQuery {
 
 /** Which salons are currently recommended for an audience (placements arrive with SRV-066). */
 export interface RecommendedLookup {
-  salonIds(gender: Gender, at: Date): Promise<string[]>;
+  /** Active placements of one business type a customer of this gender may see, in order (§5.13). */
+  salonIds(input: { businessType: BusinessType; gender: Gender }, at: Date): Promise<string[]>;
 }
 export const noRecommendations: RecommendedLookup = { salonIds: () => Promise.resolve([]) };
 
@@ -96,6 +108,8 @@ export interface SearchService {
   /** Cards of these salons in the given order; salons that are not visible are left out. */
   cards(input: {
     ids: readonly string[];
+    /** Only businesses a customer of this gender may see (§5.19); omitted = no audience filter. */
+    gender?: Gender | undefined;
     customerId?: string | undefined;
     language?: Language | undefined;
   }): Promise<SalonCard[]>;
@@ -105,6 +119,7 @@ export interface SearchService {
    */
   nearestBranches(input: {
     gender: Gender;
+    businessType?: BusinessType | undefined;
     lat: number;
     lng: number;
     params: PaginationParams;
@@ -114,6 +129,7 @@ export interface SearchService {
   /** Slider bounds for the price filter: min/max of the sums over salons offering all services. */
   priceBounds(input: {
     gender: Gender;
+    businessType?: BusinessType | undefined;
     serviceIds: readonly string[];
   }): Promise<{ min: number; max: number } | null>;
 }
@@ -206,6 +222,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     return {
       id: s.id,
       name: s.name,
+      businessType: s.businessType,
+      audience: s.audience,
       profileImageUrl: s.profileKey === undefined ? null : storage.getPublicUrl(s.profileKey),
       rating: s.rating.avg,
       reviewsCount: s.rating.count,
@@ -262,10 +280,11 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     });
   };
 
-  /** Visible salons of an audience by id (LIVE, complete, that gender). */
+  /** Salons a customer of this gender may see, by id (LIVE, complete, audience fits, §5.19). */
   const visibleSalons = async (
     ids: readonly string[],
     gender: Gender,
+    businessType?: BusinessType,
   ): Promise<Map<string, Entity<SalonRaw>>> => {
     const found =
       ids.length === 0
@@ -274,7 +293,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
             _id: { $in: [...ids] },
             state: 'LIVE',
             'completeness.isComplete': true,
-            gender,
+            audience: { $in: visibleAudiences(gender) },
+            ...(businessType === undefined ? {} : { businessType }),
           });
     return new Map(found.map((salon) => [salon.id, salon]));
   };
@@ -308,7 +328,12 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       }
       let placementOrder: string[] | undefined;
       if (query.general === 'RECOMMENDED') {
-        const ids = await recommended.salonIds(query.gender, now());
+        // Recommended salons, then recommended clinics, each in the admin's order (§5.13).
+        const types = query.businessType === undefined ? BUSINESS_TYPES : [query.businessType];
+        const ids: string[] = [];
+        for (const businessType of types) {
+          ids.push(...(await recommended.salonIds({ businessType, gender: query.gender }, now())));
+        }
         placementOrder = ids;
         allowed = allowed === undefined ? ids : allowed.filter((id) => ids.includes(id));
       }
@@ -339,7 +364,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       const filter: QueryFilter<SalonRaw> = {
         state: 'LIVE',
         'completeness.isComplete': true,
-        gender: query.gender,
+        audience: { $in: visibleAudiences(query.gender) },
+        ...(query.businessType === undefined ? {} : { businessType: query.businessType }),
         ...(allowed === undefined ? {} : { _id: { $in: allowed } }),
         ...(query.minRating === undefined ? {} : { 'rating.avg': { $gte: query.minRating } }),
         ...(query.q === undefined || query.q === ''
@@ -401,10 +427,22 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       };
     },
 
-    async nearestBranches({ gender, lat, lng, params, customerId, language = DEFAULT_LANGUAGE }) {
+    async nearestBranches({
+      gender,
+      businessType,
+      lat,
+      lng,
+      params,
+      customerId,
+      language = DEFAULT_LANGUAGE,
+    }) {
       const here = { lat, lng };
       const near = await branchesNear(here);
-      const visible = await visibleSalons([...new Set(near.map((b) => b.salonId))], gender);
+      const visible = await visibleSalons(
+        [...new Set(near.map((b) => b.salonId))],
+        gender,
+        businessType,
+      );
       const entries = near
         .filter((b) => visible.has(b.salonId))
         .map((branch) => ({ branch, distance: distanceKm(here, pointOf(branch) ?? here) }))
@@ -449,26 +487,28 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       };
     },
 
-    async cards({ ids, customerId, language = DEFAULT_LANGUAGE }) {
+    async cards({ ids, gender, customerId, language = DEFAULT_LANGUAGE }) {
       if (ids.length === 0) return [];
       const found = await salons.findMany({
         _id: { $in: [...ids] },
         state: 'LIVE',
         'completeness.isComplete': true,
+        ...(gender === undefined ? {} : { audience: { $in: visibleAudiences(gender) } }),
       });
       const byId = new Map(found.map((s) => [s.id, s]));
       const ordered = ids.flatMap((id) => byId.get(id) ?? []);
       return toCards(ordered, { customerId, distances: new Map(), here: null, language });
     },
 
-    async priceBounds({ gender, serviceIds }) {
+    async priceBounds({ gender, businessType, serviceIds }) {
       const sums = await offering(serviceIds);
       if (sums.size === 0) return null;
       const live = await salons.findMany({
         _id: { $in: [...sums.keys()] },
         state: 'LIVE',
         'completeness.isComplete': true,
-        gender,
+        audience: { $in: visibleAudiences(gender) },
+        ...(businessType === undefined ? {} : { businessType }),
       });
       const values = live.map((s) => sums.get(s.id) ?? 0);
       return values.length === 0 ? null : { min: Math.min(...values), max: Math.max(...values) };
