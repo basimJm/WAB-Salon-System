@@ -98,7 +98,7 @@ class ServicesViewModelTest {
         val effects = effects(viewModel.sideEffect)
         val state = viewModel.state.first { !it.loading }
         assertEquals(listOf(BusinessKind(BusinessType.SALON, Audience.FEMALE)), services.catalogKinds)
-        assertTrue(state.womenSalon && state.hasMore)
+        assertTrue(state.kind?.brideAllowed == true && state.hasMore)
         assertEquals("s1", state.added["c1"])
         viewModel.onEvent(CatalogPickerContract.UiAction.OnLoadMore)
         assertEquals("x", viewModel.state.first().items.last().id)
@@ -109,13 +109,34 @@ class ServicesViewModelTest {
         assertEquals(CatalogPickerContract.SideEffect.OpenNew("c2"), effects.last())
     }
 
+    /** BUSINESS_DOMAIN §5.19: a clinic sees the clinic catalog only and never the bride option. */
+    @Test
+    fun aClinicGetsTheClinicCatalogAndNoBrideOption() = runTest(UnconfinedTestDispatcher()) {
+        salon.result = AppResult.Success(salon(type = BusinessType.CLINIC, audience = Audience.BOTH))
+        val state = picker().state.first { !it.loading }
+        assertEquals(listOf(BusinessKind(BusinessType.CLINIC, Audience.BOTH)), services.catalogKinds)
+        assertEquals(true, state.kind?.isClinic)
+        val viewModel = edit(null, "c2")
+        assertFalse(viewModel.state.first { !it.loading }.brideAllowed)
+        viewModel.onEvent(ServiceEditContract.UiAction.OnBrideOnly(true))
+        assertFalse(viewModel.state.first().draft.brideOnly, "bride-only is refused for clinics")
+    }
+
+    @Test
+    fun aMenSalonHasNoBrideOptionAndABothSalonHasIt() = runTest(UnconfinedTestDispatcher()) {
+        salon.result = AppResult.Success(salon(audience = Audience.MALE))
+        assertFalse(edit("s1", null).state.first { !it.loading }.brideAllowed)
+        salon.state.value = salon(audience = Audience.BOTH)
+        assertTrue(edit("s1", null).state.first { !it.loading }.brideAllowed)
+    }
+
     @Test
     fun newServiceValidatesThenCreatesWithUploadedMedia() = runTest(UnconfinedTestDispatcher()) {
         picker().state.first { !it.loading }
         val viewModel = edit(null, "c2")
         val effects = effects(viewModel.sideEffect)
         val state = viewModel.state.first { !it.loading }
-        assertTrue(state.isNew && state.womenSalon)
+        assertTrue(state.isNew && state.brideAllowed)
         assertEquals("Catalog c2", state.title)
         viewModel.onEvent(ServiceEditContract.UiAction.OnSave)
         assertEquals(setOf(ServiceField.PRICE, ServiceField.DURATION), viewModel.state.first().visibleErrors)

@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.core.data.mock
 
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -7,39 +9,56 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 private const val STATE_KEY = "state"
 private const val ROLE_KEY = "role"
 private const val PERMISSIONS_KEY = "permissions"
+private const val BUSINESS_TYPE_KEY = "businessType"
+private val AUDIENCE_KEYS = setOf("audience", "salonAudience")
 private val SALON_STATES = MockSalonState.entries.map { it.name }.toSet()
+private val AUDIENCES = Audience.entries.map { it.name }.toSet()
+
+private class Overrides(val salonState: MockSalonState?, val member: MockMember?, val kind: BusinessKind?)
 
 /**
  * Applies the dev overrides to a fixture: every salon `state` becomes [salonState], every member `role` / `permissions`
- * becomes [member]. Fields that are not salon states (other `state` values) stay; null overrides change nothing.
+ * becomes [member], every `businessType` / `audience` / `salonAudience` becomes [kind] (salon, catalog and bookings
+ * alike, BUSINESS_DOMAIN §5.19). Fields that are not salon states (other `state` values) stay; null overrides change nothing.
  */
-fun patchFixture(json: String, salonState: MockSalonState?, member: MockMember?): String {
-    if (salonState == null && member == null) return json
+fun patchFixture(json: String, salonState: MockSalonState?, member: MockMember?, kind: BusinessKind? = null): String {
+    if (salonState == null && member == null && kind == null) return json
     val root = try {
         Json.parseToJsonElement(json)
     } catch (ignored: SerializationException) {
         return json
     }
-    return patch(root, salonState, member).toString()
+    return patch(root, Overrides(salonState, member, kind)).toString()
 }
 
-private fun patch(element: JsonElement, salonState: MockSalonState?, member: MockMember?): JsonElement = when (element) {
-    is JsonObject -> JsonObject(element.mapValues { (key, value) -> patchField(key, value, salonState, member) })
-    is JsonArray -> JsonArray(element.map { patch(it, salonState, member) })
+private fun patch(element: JsonElement, overrides: Overrides): JsonElement = when (element) {
+    is JsonObject -> JsonObject(element.mapValues { (key, value) -> patchField(key, value, overrides) })
+    is JsonArray -> JsonArray(element.map { patch(it, overrides) })
     else -> element
 }
 
-private fun patchField(key: String, value: JsonElement, salonState: MockSalonState?, member: MockMember?): JsonElement = when {
-    key == STATE_KEY && salonState != null && value is JsonPrimitive && value.jsonPrimitive.contentOrNull in SALON_STATES ->
-        JsonPrimitive(salonState.name)
-    key == ROLE_KEY && member != null && value is JsonPrimitive -> JsonPrimitive(member.role)
-    key == PERMISSIONS_KEY && member != null && value is JsonArray -> JsonArray(member.permissions.sorted().map(::JsonPrimitive))
-    else -> patch(value, salonState, member)
+private fun patchField(key: String, value: JsonElement, overrides: Overrides): JsonElement {
+    val text = (value as? JsonPrimitive)?.contentOrNull
+    val state = overrides.salonState
+    val member = overrides.member
+    return when {
+        key == STATE_KEY && state != null && text in SALON_STATES -> JsonPrimitive(state.name)
+        key == ROLE_KEY && member != null && value is JsonPrimitive -> JsonPrimitive(member.role)
+        key == PERMISSIONS_KEY && member != null && value is JsonArray -> JsonArray(member.permissions.sorted().map(::JsonPrimitive))
+        else -> overrides.kind?.let { kindField(key, text, it) } ?: patch(value, overrides)
+    }
+}
+
+/** `businessType` / `audience` / `salonAudience` of the chosen kind; null = not a kind field. */
+private fun kindField(key: String, text: String?, kind: BusinessKind): JsonElement? = when {
+    text == null -> null
+    key == BUSINESS_TYPE_KEY -> JsonPrimitive(kind.type.name)
+    key in AUDIENCE_KEYS && text in AUDIENCES -> JsonPrimitive(kind.audience.name)
+    else -> null
 }
 
 private const val BOOKINGS_SEGMENT = "bookings"

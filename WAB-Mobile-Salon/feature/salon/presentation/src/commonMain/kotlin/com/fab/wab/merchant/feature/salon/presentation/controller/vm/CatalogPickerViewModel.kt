@@ -66,7 +66,7 @@ class CatalogPickerViewModel(
                 is AppResult.Success -> updateState {
                     copy(
                         loading = false,
-                        womenSalon = type.brideAllowed,
+                        kind = type,
                         items = result.data,
                         hasMore = result.data.size >= ServiceLimits.PAGE_SIZE,
                     )

@@ -38,8 +38,6 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.Res
 import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_added
 import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_cant_find
 import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_empty
-import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_note_men
-import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_note_women
 import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_request
 import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_search
 import com.fab.wab.merchant.feature.salon.presentation.resources.catalog_title
@@ -74,7 +72,7 @@ fun CatalogPickerScreen(
                             placeholder = stringResource(Res.string.catalog_search),
                         )
                         AppText(
-                            text = stringResource(if (state.womenSalon) Res.string.catalog_note_women else Res.string.catalog_note_men),
+                            text = stringResource(catalogNote(state.kind)),
                             style = AppTheme.typography.labelMedium,
                             color = AppTheme.colors.muted,
                         )

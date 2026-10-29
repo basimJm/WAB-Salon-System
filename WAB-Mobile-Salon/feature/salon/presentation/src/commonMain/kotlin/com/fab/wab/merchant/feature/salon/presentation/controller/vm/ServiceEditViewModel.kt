@@ -78,7 +78,7 @@ class ServiceEditViewModel(
         when (event) {
             is UiAction.OnPrice -> edit { copy(price = event.value) }
             is UiAction.OnDuration -> edit { copy(durationMinutes = event.value) }
-            is UiAction.OnBrideOnly -> if (uiState.value.womenSalon) edit { copy(brideOnly = event.value) }
+            is UiAction.OnBrideOnly -> if (uiState.value.brideAllowed) edit { copy(brideOnly = event.value) }
             is UiAction.OnDescription -> edit { copy(description = event.value.take(ServiceLimits.DESCRIPTION_MAX)) }
             is UiAction.OnActive -> edit { copy(active = event.value) }
             UiAction.OnAddMedia -> addMedia()
@@ -116,7 +116,7 @@ class ServiceEditViewModel(
     private fun load() {
         scope.launch {
             updateState { copy(loading = true, error = null) }
-            val women = deps.salon.currentKind()?.brideAllowed == true
+            val bride = deps.salon.currentKind()?.brideAllowed == true
             val id = serviceId
             if (id != null) {
                 val service = deps.services.cachedService(id)
@@ -129,7 +129,7 @@ class ServiceEditViewModel(
                         isNew = false,
                         title = service.name,
                         imageUrl = service.imageUrl,
-                        womenSalon = women,
+                        brideAllowed = bride,
                         original = draft,
                         draft = draft,
                         currentMedia = service.mediaUrls,
@@ -137,7 +137,7 @@ class ServiceEditViewModel(
                 }
             } else {
                 val catalog = catalogServiceId?.let(deps.services::cachedCatalog) ?: return@launch notFound()
-                updateState { copy(loading = false, isNew = true, title = catalog.name, imageUrl = catalog.imageUrl, womenSalon = women) }
+                updateState { copy(loading = false, isNew = true, title = catalog.name, imageUrl = catalog.imageUrl, brideAllowed = bride) }
             }
         }
     }

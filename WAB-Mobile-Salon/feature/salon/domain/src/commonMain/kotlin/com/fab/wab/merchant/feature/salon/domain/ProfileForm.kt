@@ -106,4 +106,7 @@ fun changesOf(original: ProfileForm, edited: ProfileForm): ProfileChanges {
 /** `PATCH /salon/profile`; on success the shared salon source is refreshed (completeness, hub, home). */
 interface SalonProfileRepository {
     suspend fun update(changes: ProfileChanges): AppResult<SalonProfile>
+
+    /** `PATCH /salon/audience` BOTH (owner, MALE/FEMALE salons only; else `AUDIENCE_CHANGE_NOT_ALLOWED`); the reloaded salon. */
+    suspend fun widenAudience(): AppResult<SalonProfile>
 }

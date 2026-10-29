@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
-import com.fab.wab.merchant.core.domain.salon.Audience
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.designsystem.components.avatar.AppAvatar
 import com.fab.wab.merchant.designsystem.components.badge.AppStatusBadge
@@ -41,11 +40,10 @@ import com.fab.wab.merchant.feature.salon.presentation.analytics.SalonAnalytics
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonHubContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonHubContract.UiState
 import com.fab.wab.merchant.feature.salon.presentation.resources.Res
-import com.fab.wab.merchant.feature.salon.presentation.resources.hub_men
 import com.fab.wab.merchant.feature.salon.presentation.resources.hub_missing
 import com.fab.wab.merchant.feature.salon.presentation.resources.hub_no_access
 import com.fab.wab.merchant.feature.salon.presentation.resources.hub_title
-import com.fab.wab.merchant.feature.salon.presentation.resources.hub_women
+import com.fab.wab.merchant.feature.salon.presentation.resources.hub_title_clinic
 import org.jetbrains.compose.resources.stringResource
 
 private const val HEADER_KEY = "hub-header"
@@ -88,7 +86,8 @@ fun SalonHubScreen(state: UiState, available: Set<HubTile>, onAction: (UiAction)
 private fun Header(state: UiState) {
     val spacing = AppTheme.spacing
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
-        AppText(text = stringResource(Res.string.hub_title), style = AppTheme.typography.headlineMedium)
+        val title = byType(state.salon?.businessType, Res.string.hub_title, Res.string.hub_title_clinic)
+        AppText(text = stringResource(title), style = AppTheme.typography.headlineMedium)
         state.salon?.let { SalonRow(it) }
         if (state.noAccess) AppText(
             text = stringResource(Res.string.hub_no_access),
@@ -115,8 +114,7 @@ private fun SalonRow(salon: SalonProfile) {
                 text = salon.name,
                 style = AppTheme.typography.titleMedium.copy(fontSize = HubDesign.salonNameSize, fontWeight = FontWeight.Bold),
             )
-            val type = if (salon.audience == Audience.FEMALE) Res.string.hub_women else Res.string.hub_men
-            AppText(text = stringResource(type), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            AppText(text = stringResource(kindLabel(salon.kind)), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
         }
         AppSalonStateChip(salon.state, salonStateLabel(salon.state))
     }

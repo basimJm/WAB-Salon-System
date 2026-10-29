@@ -36,6 +36,7 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.gallery_deleted
 import com.fab.wab.merchant.feature.salon.presentation.resources.hours_saved
 import com.fab.wab.merchant.feature.salon.presentation.resources.policy_saved
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_saved
+import com.fab.wab.merchant.feature.salon.presentation.resources.profile_widen_done
 import com.fab.wab.merchant.feature.salon.presentation.screen.GalleryScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.HoursScreen
 import com.fab.wab.merchant.feature.salon.presentation.screen.PolicyScreen
@@ -100,6 +101,10 @@ class SalonNavigation(override val navController: NavHostController) : Navigator
             when (effect) {
                 SalonProfileContract.SideEffect.Saved -> notifications.show(
                     getString(Res.string.profile_saved),
+                    style = NotificationStyle.Success,
+                )
+                SalonProfileContract.SideEffect.AudienceWidened -> notifications.show(
+                    getString(Res.string.profile_widen_done),
                     style = NotificationStyle.Success,
                 )
                 SalonProfileContract.SideEffect.NavigateBack -> navigateBack()

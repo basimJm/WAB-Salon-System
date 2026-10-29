@@ -63,14 +63,21 @@ fun registrationErrors(input: RegistrationInput, requireTerms: Boolean = true, r
 private fun outOfRange(count: Int, uploading: Boolean, min: Int): Boolean =
     uploading || count < min || count > RegistrationLimits.DOCUMENTS_MAX
 
-private fun allErrors(input: RegistrationInput, requireTerms: Boolean, requireMedical: Boolean): Set<RegistrationField> = buildSet {
-    if (input.businessType == null) add(RegistrationField.BUSINESS_TYPE)
-    if (!input.salonName.validName(RegistrationLimits.SALON_NAME_MAX)) add(RegistrationField.SALON_NAME)
-    if (input.businessType == BusinessType.SALON && input.audience == null) add(RegistrationField.AUDIENCE)
-    if (input.businessType == BusinessType.CLINIC) {
-        val min = if (requireMedical) RegistrationLimits.DOCUMENTS_MIN else 0
-        if (outOfRange(input.medicalLicenseKeys.size, input.medicalUploading, min)) add(RegistrationField.MEDICAL_LICENSE)
+/** §5.19: the type is chosen, a salon chose its audience, a clinic uploaded its medical license. */
+private fun typeErrors(input: RegistrationInput, requireMedical: Boolean): Set<RegistrationField> = buildSet {
+    when (input.businessType) {
+        null -> add(RegistrationField.BUSINESS_TYPE)
+        BusinessType.SALON -> if (input.audience == null) add(RegistrationField.AUDIENCE)
+        BusinessType.CLINIC -> {
+            val min = if (requireMedical) RegistrationLimits.DOCUMENTS_MIN else 0
+            if (outOfRange(input.medicalLicenseKeys.size, input.medicalUploading, min)) add(RegistrationField.MEDICAL_LICENSE)
+        }
     }
+}
+
+private fun allErrors(input: RegistrationInput, requireTerms: Boolean, requireMedical: Boolean): Set<RegistrationField> = buildSet {
+    addAll(typeErrors(input, requireMedical))
+    if (!input.salonName.validName(RegistrationLimits.SALON_NAME_MAX)) add(RegistrationField.SALON_NAME)
     if (!input.firstName.validName(RegistrationLimits.PERSON_NAME_MAX)) add(RegistrationField.FIRST_NAME)
     if (!input.lastName.validName(RegistrationLimits.PERSON_NAME_MAX)) add(RegistrationField.LAST_NAME)
     if (input.cityId == null) add(RegistrationField.CITY)
