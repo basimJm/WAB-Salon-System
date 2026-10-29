@@ -15,9 +15,7 @@
 | Area | What was done | Result |
 |---|---|---|
 | Sign-in + e-mail code | credentials → code → home | |
-| Items | list, search, filter, sort, create, edit, details, history | |
-| Alerts | list, acknowledge, bell dropdown | |
-| Exports | request XLSX / CSV / PDF, download | |
+| Items | list, search, filter, archive, restore, details, history | |
 | Settings | change a value with a reason, use default | |
 | Audit log | every action above appears | |
 

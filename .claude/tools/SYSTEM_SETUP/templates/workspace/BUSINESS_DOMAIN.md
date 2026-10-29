@@ -53,6 +53,35 @@
 
 ## 11. Error Codes (API `code` field)
 <!-- CODE → HTTP status → when → client behaviour. Every code has an AR+EN message in the server locales and in each client; tests enforce parity. -->
+The server's `src/constants/errorCodes.ts` and this block are the same list; the admin (`tests/errorCatalog.test.ts`) and the apps
+(`scripts/ci/policy/error_codes.py`) read the fenced block below, so a new code is added here first, with its status and the behaviour clients apply.
+
+```
+Code                      Status  Meaning / client behaviour
+VALIDATION_ERROR          400     a field of the request is invalid; `details[]` names the fields -> show the field errors
+UNAUTHORIZED              401     missing, expired or wrong credentials or token -> sign in again
+FORBIDDEN                 403     the token's scope cannot use this namespace -> leave the screen; contact support
+PERMISSION_DENIED         403     the member lacks the permission key for this action -> hide or explain the action
+NOT_FOUND                 404     the record does not exist or is not visible -> back to the list
+CONFLICT                  409     the action conflicts with the current state (duplicate, stale version) -> reload and retry
+RATE_LIMITED              429     too many requests from this client -> wait, then retry
+INTERNAL                  500     unexpected server failure (502/503 when a dependency is down) -> retry later; report the trace id
+OTP_BLOCKED               429     too many wrong codes or requests; verification blocked for a while -> wait for the block to lift
+OTP_INVALID               401     the verification code is wrong -> let the user retype it
+OTP_EXPIRED               401     the verification code or its token expired -> request a new code
+OTP_DELIVERY_FAILED       422     the code could not be delivered to the phone -> offer to resend
+PHONE_NOT_REGISTERED      404     login with a phone that has no account -> offer registration
+PHONE_ALREADY_REGISTERED  409     registration or phone change with a phone already in use -> offer login
+ACCOUNT_BLOCKED           403     the account is blocked by admin -> sign out; contact support
+MEMBER_INACTIVE           403     the merchant member is inactive -> sign out; contact the owner
+OWNER_REQUIRED            403     only the owner may do this (or grant this permission) -> hide the action
+PAYMENT_FAILED            402     the gateway refused or failed the payment; nothing was created -> let the user retry or change the method
+UPLOAD_INVALID            400     content type, size or key of an upload is not acceptable -> pick another file
+UPLOAD_TOO_LARGE          400     the file exceeds the limit for its purpose -> compress or pick a smaller file
+ITEM_NOT_FOUND            404     the item does not exist or belongs to someone else -> back to the list
+ITEM_ARCHIVED             422     the item is archived; the action needs an active item -> restore it first (admin) or refresh
+ITEM_LIMIT_REACHED        422     the owner reached the maximum number of items -> archive one first
+```
 
 ## 12. Open Points (assumptions in use — confirm or change)
 <!-- numbered owner questions with the assumption currently implemented; when the owner answers, move the answer into the section it belongs to and record the date -->

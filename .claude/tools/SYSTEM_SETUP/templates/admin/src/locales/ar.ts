@@ -6,10 +6,7 @@ import designKits from './ar/designKits.json';
 import design from './ar/design.json';
 import forms from './ar/forms.json';
 import settings from './ar/settings.json';
-import alerts from './ar/alerts.json';
-import profile from './ar/profile.json';
 import audit from './ar/audit.json';
-import exportsArea from './ar/exports.json';
 import status from './ar/status.json';
 
 /**
@@ -28,10 +25,7 @@ const ar = {
   ...gallery,
   ...forms,
   ...status,
-  ...exportsArea,
   ...audit,
-  ...alerts,
-  ...profile,
   ...settings,
 };
 

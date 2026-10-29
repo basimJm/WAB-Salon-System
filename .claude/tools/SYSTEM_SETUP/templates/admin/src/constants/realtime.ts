@@ -17,7 +17,7 @@ export const REALTIME_CONNECT_ERRORS = {
  * Events of the admin room, all emitted by the server (`ADMIN_SOCKET_EVENTS`; verify them against a real server with
  * `qa/socket-check.mjs`). A new module adds its events here and the queries they make stale below.
  */
-export const REALTIME_EVENTS = ['item.updated', 'alert.created'] as const;
+export const REALTIME_EVENTS = ['item.updated'] as const;
 export type RealtimeEvent = (typeof REALTIME_EVENTS)[number];
 
 /** Reconnect with exponential backoff (base * 2^attempt, capped) and jitter. */
@@ -33,5 +33,4 @@ export const REALTIME_RECONNECT = {
  */
 export const REALTIME_INVALIDATIONS: Record<RealtimeEvent, readonly (readonly string[])[]> = {
   'item.updated': [['getItems'], ['getItemsById']],
-  'alert.created': [['getAlerts'], ['getAlertsCount']],
 };

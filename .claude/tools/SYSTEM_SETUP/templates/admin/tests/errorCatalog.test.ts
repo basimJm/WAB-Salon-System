@@ -51,26 +51,26 @@ describe('error catalog', () => {
   });
 
   it('recognises codes and rejects look-alikes', () => {
-    expect(isErrorCode('ITEM_NAME_TAKEN')).toBe(true);
+    expect(isErrorCode('ITEM_ARCHIVED')).toBe(true);
     expect(isErrorCode('toString')).toBe(false);
-    expect(isErrorCode('item_name_taken')).toBe(false);
+    expect(isErrorCode('item_archived')).toBe(false);
     expect(isErrorCode(undefined)).toBe(false);
   });
 });
 
 describe('error handling by code', () => {
   it('a domain code decides the kind before the HTTP status', () => {
-    expect(kindFromResponse(422, 'INVALID_TRANSITION')).toBe('conflict');
+    expect(kindFromResponse(422, 'ITEM_ARCHIVED')).toBe('conflict');
     expect(kindFromResponse(400, 'OTP_INVALID')).toBe('validation');
-    expect(kindFromResponse(503, 'MAINTENANCE')).toBe('server');
+    expect(kindFromResponse(503, 'INTERNAL')).toBe('server');
     expect(kindFromResponse(409, 'NOT_A_CODE')).toBe('conflict');
     expect(kindFromResponse(500)).toBe('server');
     expect(kindFromResponse(418)).toBe('unknown');
   });
 
   it('AppError points at the specific message for a known code, the generic one otherwise', () => {
-    expect(new AppError({ kind: 'conflict', code: 'ITEM_NAME_TAKEN' }).messageKey).toBe(
-      'errors.codes.ITEM_NAME_TAKEN',
+    expect(new AppError({ kind: 'conflict', code: 'ITEM_ARCHIVED' }).messageKey).toBe(
+      'errors.codes.ITEM_ARCHIVED',
     );
     expect(new AppError({ kind: 'conflict', code: 'WHO_KNOWS' }).messageKey).toBe(
       'errors.conflict',

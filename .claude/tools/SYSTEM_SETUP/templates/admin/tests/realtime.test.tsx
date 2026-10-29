@@ -51,14 +51,14 @@ describe('invalidation bus', () => {
     const queryClient = new QueryClient();
     const spy = vi.spyOn(queryClient, 'invalidateQueries');
     const stop = startInvalidationBus(client, queryClient);
-    client.emit('alert.created');
+    client.emit('item.updated');
     expect(spy.mock.calls.map((c) => (c[0] as { queryKey: unknown }).queryKey)).toEqual([
-      ['getAlerts'],
-      ['getAlertsCount'],
+      ['getItems'],
+      ['getItemsById'],
     ]);
     spy.mockClear();
     stop();
-    client.emit('alert.created');
+    client.emit('item.updated');
     expect(spy).not.toHaveBeenCalled();
   });
 });

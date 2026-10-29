@@ -18,11 +18,8 @@ import { ApiClient } from '@/data/api/ApiClient';
 import { createMockRoutes } from '@/data/mock/fixtures';
 import { createMockTransport } from '@/data/mock/mockTransport';
 import { createScenarioStore } from '@/data/mock/scenarios';
-import { RemoteAlertsRepository } from '@/data/alerts/RemoteAlertsRepository';
 import { RemoteAuditRepository } from '@/data/audit/RemoteAuditRepository';
-import { RemoteExportsRepository } from '@/data/exports/RemoteExportsRepository';
 import { RemoteItemsRepository } from '@/data/items/RemoteItemsRepository';
-import { RemoteProfileRepository } from '@/data/profile/RemoteProfileRepository';
 import { RemoteSettingsRepository } from '@/data/settings/RemoteSettingsRepository';
 import { FakeRealtimeClient } from '@/data/realtime/FakeRealtimeClient';
 import { HttpClient } from '@/infrastructure/http/HttpClient';
@@ -59,10 +56,7 @@ export function makeContainer(
       auth,
       settings: new RemoteSettingsRepository(api),
       items: new RemoteItemsRepository(api),
-      exports: new RemoteExportsRepository(api),
       audit: new RemoteAuditRepository(api),
-      alerts: new RemoteAlertsRepository(api),
-      profile: new RemoteProfileRepository(api),
     },
     queryClient: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   };

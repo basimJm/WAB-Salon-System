@@ -15,7 +15,7 @@ Describe the business, who operates it, and what the operators cannot do today w
 
 ## 4. Scope
 ### 4.1 In scope
-Sign-in with a second factor, the items module (reference), alerts, exports, settings, audit log, profile.
+Sign-in with a second factor, the items module (reference), settings, audit log.
 ### 4.2 Out of scope
 Public pages, end-user apps, billing. Add product-specific exclusions here.
 
@@ -30,17 +30,15 @@ Public pages, end-user apps, billing. Add product-specific exclusions here.
 | ID | Requirement | PRD |
 |---|---|---|
 | BR-01 | Two-step sign-in, sessions end after inactivity | P00 |
-| BR-02 | Manage items: list, search, filter, create, edit, with a reason | P01, P02 |
-| BR-03 | Alerts raised by the platform reach the admins and can be acknowledged | P03 |
-| BR-04 | Lists can be exported for offline work | P04 |
-| BR-05 | Platform settings are editable in one place, audited | P05 |
-| BR-06 | Every action is visible in the audit log | P06 |
+| BR-02 | Moderate items: list, search, filter, archive and restore with a reason | P01, P02 |
+| BR-03 | Platform settings are editable in one place, audited | P05 |
+| BR-04 | Every action is visible in the audit log | P06 |
 
 ## 7. Business rules
 1. No write without a reason. 2. Records are never deleted from the panel: they change status. 3. Server messages are shown as sent; the client branches on error codes only.
 
 ## 8. KPIs the panel must surface
-Add the numbers the operators need on day one (counts per status, alert backlog, …).
+Add the numbers the operators need on day one (counts per status, archived items, …).
 
 ## 9. Assumptions, constraints and dependencies
 The server exposes `/admin/v1` as described by its OpenAPI; the panel is deployed as a static site with the headers from `scripts/lib/hosting.ts`.

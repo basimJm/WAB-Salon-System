@@ -70,15 +70,13 @@ describe('design shell: top bar', () => {
           menuExpanded={false}
           onMenu={() => undefined}
           onLogout={onLogout}
-          alertCount={3}
         />,
       ),
     );
 
-  it('shows the other language as a short button, theme, bell with count, admin avatar + name', async () => {
+  it('shows the other language as a short button, theme, admin avatar + name', async () => {
     bar();
     expect(screen.getByRole('button', { name: 'Switch language' })).toHaveTextContent('ع');
-    expect(screen.getByRole('button', { name: 'Alerts 3' })).toBeVisible();
     expect(screen.queryByRole('button', { name: 'Open menu' })).toBeNull();
     await userEvent.click(screen.getByRole('button', { name: ADMIN.name }));
     const menu = screen.getByRole('menu');

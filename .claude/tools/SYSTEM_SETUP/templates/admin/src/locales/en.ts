@@ -6,10 +6,7 @@ import designKits from './en/designKits.json';
 import design from './en/design.json';
 import forms from './en/forms.json';
 import settings from './en/settings.json';
-import alerts from './en/alerts.json';
-import profile from './en/profile.json';
 import audit from './en/audit.json';
-import exportsArea from './en/exports.json';
 import status from './en/status.json';
 
 /**
@@ -28,10 +25,7 @@ const en = {
   ...gallery,
   ...forms,
   ...status,
-  ...exportsArea,
   ...audit,
-  ...alerts,
-  ...profile,
   ...settings,
 };
 

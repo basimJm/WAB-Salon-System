@@ -35,9 +35,7 @@ function queryEnum(path: string, name: string): string[] {
 /** Enum values straight from the server contract; kinds not in a query filter come from the DTOs. */
 const EXPECTED: Record<StatusKind, string[]> = {
   item: queryEnum('/items', 'status'),
-  alert: queryEnum('/alerts', 'status'),
-  alertSeverity: ['INFO', 'WARNING', 'CRITICAL'],
-  export: ['QUEUED', 'RUNNING', 'DONE', 'FAILED'],
+  itemOwner: queryEnum('/items', 'ownerType'),
 };
 
 const labels = (tree: unknown, kind: string): Record<string, string> =>
@@ -86,10 +84,8 @@ describe('status registry', () => {
 
   it('matches the business meaning: failures red, success green, waiting amber', () => {
     expect(STATUS_TONES.item.ACTIVE).toBe('green');
-    expect(STATUS_TONES.item.INACTIVE).toBe('amber');
     expect(STATUS_TONES.item.ARCHIVED).toBe('grey');
-    expect(STATUS_TONES.export.FAILED).toBe('rose');
-    expect(STATUS_TONES.alertSeverity.CRITICAL).toBe('rose');
+    expect(STATUS_TONES.itemOwner.CUSTOMER).not.toBe(STATUS_TONES.itemOwner.MERCHANT);
   });
 });
 
@@ -105,9 +101,9 @@ describe('domain helpers', () => {
 
 describe('StatusBadge', () => {
   it('shows the translated label with the registry tone', () => {
-    renderWithApp(<StatusBadge kind="export" value="FAILED" />);
-    const badge = screen.getByText('Failed');
-    expect(badge).toHaveClass('app-badge--rose');
+    renderWithApp(<StatusBadge kind="item" value="ARCHIVED" />);
+    const badge = screen.getByText('Archived');
+    expect(badge).toHaveClass('app-badge--grey');
   });
 
   it('translates to Arabic', () => {

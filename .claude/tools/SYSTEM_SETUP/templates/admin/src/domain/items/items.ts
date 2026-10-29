@@ -1,79 +1,59 @@
 import type { Page, PageQuery } from '@/domain/shared/page';
 
-/** The sample resource of the template: a named record with a status, written by admins with a reason. */
-export const ITEM_STATUSES = ['ACTIVE', 'INACTIVE', 'ARCHIVED'] as const;
+/** The sample resource of the template: a user-owned record the admin can archive and restore with a reason. */
+export const ITEM_STATUSES = ['ACTIVE', 'ARCHIVED'] as const;
 export type ItemStatus = (typeof ITEM_STATUSES)[number];
-export const ITEM_SORT_KEYS = ['name', 'createdAt', 'updatedAt'] as const;
-export type ItemSortKey = (typeof ITEM_SORT_KEYS)[number];
+export const ITEM_OWNER_TYPES = ['CUSTOMER', 'MERCHANT'] as const;
+export type ItemOwnerType = (typeof ITEM_OWNER_TYPES)[number];
 
+export interface ItemOwner {
+  readonly type: ItemOwnerType;
+  readonly id: string;
+}
 export interface Item {
   readonly id: string;
-  readonly name: string;
+  readonly title: string;
   readonly description: string | null;
+  readonly tags: readonly string[];
+  readonly imageUrl: string | null;
   readonly status: ItemStatus;
+  readonly owner: ItemOwner;
+  /** Set while the item is archived (the reason the admin gave). */
+  readonly archivedReason: string | null;
+  readonly archivedAt: string | null;
   readonly createdAt: string;
   readonly updatedAt: string;
-  /** Admin id of the last writer; null for a seeded record. */
-  readonly updatedBy: string | null;
 }
-export interface ItemInput {
-  name: string;
-  description?: string | null;
-  status?: ItemStatus;
-}
-export type ItemPatch = Partial<ItemInput>;
 
-export interface ItemSort {
-  key: ItemSortKey;
-  direction: 'asc' | 'desc';
-}
 export interface ItemsQuery extends PageQuery {
   q?: string;
   status?: ItemStatus;
-  sort?: ItemSort;
+  ownerType?: ItemOwnerType;
+  ownerId?: string;
+  tag?: string;
 }
 
 export interface ItemsRepository {
   list(query: ItemsQuery): Promise<Page<Item>>;
   get(id: string): Promise<Item>;
-  create(input: ItemInput, reason: string): Promise<Item>;
-  update(id: string, patch: ItemPatch, reason: string): Promise<Item>;
+  /** Hides the item from its owner's audience; audited with the reason, the owner is notified. */
+  archive(id: string, reason: string): Promise<Item>;
+  /** Brings an archived item back; audited with the reason, the owner is notified. */
+  restore(id: string, reason: string): Promise<Item>;
 }
 
-export const MAX_ITEM_NAME = 120;
-export const MAX_ITEM_DESCRIPTION = 1000;
-export type ItemFormError = 'name' | 'description';
+/** The one state change the admin can apply to an item (`POST /items/{id}/<transition>`). */
+export const ITEM_TRANSITIONS = ['archive', 'restore'] as const;
+export type ItemTransition = (typeof ITEM_TRANSITIONS)[number];
 
-export interface ItemDraft {
-  name: string;
-  description: string;
-  status: ItemStatus;
-}
-
-/** A name between 1 and 120 characters; a description up to 1000. */
-export function validateItemForm(d: Pick<ItemDraft, 'name' | 'description'>): ItemFormError[] {
-  const errors: ItemFormError[] = [];
-  const name = d.name.trim();
-  if (name === '' || name.length > MAX_ITEM_NAME) errors.push('name');
-  if (d.description.length > MAX_ITEM_DESCRIPTION) errors.push('description');
-  return errors;
-}
-
-/** The body the server takes for a draft: trimmed name, empty description sent as null. */
-export const itemInputOf = (d: ItemDraft): ItemInput => ({
-  name: d.name.trim(),
-  description: d.description.trim() === '' ? null : d.description.trim(),
-  status: d.status,
-});
+/** Which transition the item accepts now: active items archive, archived items restore. */
+export const transitionOf = (item: Pick<Item, 'status'>): ItemTransition =>
+  item.status === 'ARCHIVED' ? 'restore' : 'archive';
 
 export const isItemStatus = (value: unknown): value is ItemStatus =>
   ITEM_STATUSES.some((s) => s === value);
-export const isItemSortKey = (value: unknown): value is ItemSortKey =>
-  ITEM_SORT_KEYS.some((k) => k === value);
+export const isItemOwnerType = (value: unknown): value is ItemOwnerType =>
+  ITEM_OWNER_TYPES.some((s) => s === value);
 
-/** `{key: 'name', direction: 'desc'}` -> `-name` (the server's sort parameter). */
-export const sortParamOf = (sort: ItemSort): string =>
-  sort.direction === 'desc' ? `-${sort.key}` : sort.key;
-
-/** The entity type the server writes in audit rows and alerts for an item. */
+/** The entity type the server writes in audit rows for an item. */
 export const ITEM_ENTITY_TYPE = 'ITEM';

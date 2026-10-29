@@ -23,8 +23,6 @@ export interface NavChild {
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'items', labelKey: 'nav.items', path: ROUTES.items, icon: 'grid' },
-  { id: 'exports', labelKey: 'nav.exports', path: ROUTES.exports, icon: 'file' },
-  { id: 'alerts', labelKey: 'nav.alerts', path: ROUTES.alerts, icon: 'bell' },
   { id: 'settings', labelKey: 'nav.settings', path: ROUTES.settings, icon: 'gear' },
   { id: 'audit', labelKey: 'nav.auditLog', path: ROUTES.auditLog, icon: 'shield' },
 ];

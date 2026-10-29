@@ -3,44 +3,62 @@ import { defineEndpoint } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
-import { sortParamOf, type ItemsRepository } from '@/domain/items/items';
+import type { Item, ItemsRepository } from '@/domain/items/items';
 
-const O = OPERATIONS;
-const list = defineEndpoint(O.getItems, {
+const list = defineEndpoint(OPERATIONS.getItems, {
   data: dto.getItemsDataSchema,
   query: dto.getItemsQuerySchema,
 });
-const get = defineEndpoint(O.getItemsById, { data: dto.getItemsByIdDataSchema });
-const create = defineEndpoint(O.postItems, {
-  data: dto.postItemsDataSchema,
-  body: dto.postItemsBodySchema,
+const get = defineEndpoint(OPERATIONS.getItemsById, { data: dto.getItemsByIdDataSchema });
+const archive = defineEndpoint(OPERATIONS.postItemsByIdArchive, {
+  data: dto.postItemsByIdArchiveDataSchema,
+  body: dto.postItemsByIdArchiveBodySchema,
 });
-const update = defineEndpoint(O.patchItemsById, {
-  data: dto.patchItemsByIdDataSchema,
-  body: dto.patchItemsByIdBodySchema,
+const restore = defineEndpoint(OPERATIONS.postItemsByIdRestore, {
+  data: dto.postItemsByIdRestoreDataSchema,
+  body: dto.postItemsByIdRestoreBodySchema,
+});
+
+/** The contract's `AdminItem` -> the domain record (optional fields become explicit nulls). */
+export const toItem = (row: dto.getItemsData[number]): Item => ({
+  id: row.id,
+  title: row.title,
+  description: row.description ?? null,
+  tags: row.tags,
+  imageUrl: row.imageUrl,
+  status: row.status,
+  owner: row.owner,
+  archivedReason: row.archivedReason ?? null,
+  archivedAt: row.archivedAt ?? null,
+  createdAt: row.createdAt,
+  updatedAt: row.updatedAt,
 });
 
 /** `/admin/v1/items`: the generated schemas check every query, body and answer against the contract. */
 export class RemoteItemsRepository implements ItemsRepository {
   constructor(private readonly api: ApiClient) {}
 
-  list: ItemsRepository['list'] = (q) =>
-    this.api.executePage(list, {
+  list: ItemsRepository['list'] = async (q) => {
+    const page = await this.api.executePage(list, {
       query: defined({
         page: q.page,
         pageSize: q.pageSize,
         q: q.q,
         status: q.status,
-        sort: q.sort ? (sortParamOf(q.sort) as dto.getItemsQuery['sort']) : undefined,
+        ownerType: q.ownerType,
+        ownerId: q.ownerId,
+        tag: q.tag,
       }),
     });
+    return { ...page, items: page.items.map(toItem) };
+  };
 
   get: ItemsRepository['get'] = async (id) =>
-    (await this.api.execute(get, { params: { id } })).data;
+    toItem((await this.api.execute(get, { params: { id } })).data);
 
-  create: ItemsRepository['create'] = async (input, reason) =>
-    (await this.api.execute(create, { body: { ...input, reason } })).data;
+  archive: ItemsRepository['archive'] = async (id, reason) =>
+    toItem((await this.api.execute(archive, { params: { id }, body: { reason } })).data);
 
-  update: ItemsRepository['update'] = async (id, patch, reason) =>
-    (await this.api.execute(update, { params: { id }, body: { ...patch, reason } })).data;
+  restore: ItemsRepository['restore'] = async (id, reason) =>
+    toItem((await this.api.execute(restore, { params: { id }, body: { reason } })).data);
 }

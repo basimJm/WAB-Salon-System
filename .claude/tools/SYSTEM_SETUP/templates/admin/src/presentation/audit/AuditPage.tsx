@@ -6,21 +6,17 @@ import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { hasDiff, humanizeAction, type AuditLog, type AuditQuery } from '@/domain/audit/audit';
 import { formatInstant } from '@/domain/shared/format';
-import { isLocalDate, localDayRange } from '@/domain/shared/time';
 import { KeyValue } from '../components/core/KeyValue';
-import { ExportMenu } from '../components/data/ExportMenu';
 import type { Column } from '../components/data/tableTypes';
-import { DateField } from '../components/form/DateField';
 import { SearchField } from '../components/form/SearchField';
 import { TextField } from '../components/form/TextField';
 import { Drawer } from '../components/overlay/Drawer';
 import { JsonViewer } from '../components/templates/JsonViewer';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
-import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 
-const OPTIONS = { filterKeys: ['action', 'entityType', 'entityId', 'admin', 'from', 'to'] };
+const OPTIONS = { filterKeys: ['action', 'entityType', 'entityId', 'admin'] };
 
 function queryOf(
   filters: Readonly<Record<string, readonly string[]>>,
@@ -28,8 +24,6 @@ function queryOf(
   pageSize: number,
 ): AuditQuery {
   const f = (k: string) => filters[k]?.[0];
-  const from = f('from');
-  const to = f('to');
   return {
     page,
     pageSize,
@@ -37,16 +31,8 @@ function queryOf(
     ...(f('entityType') ? { entityType: f('entityType') } : {}),
     ...(f('entityId') ? { entityId: f('entityId') } : {}),
     ...(f('admin') ? { adminId: f('admin') } : {}),
-    ...(from && isLocalDate(from) ? { from: localDayRange(from).start.toISOString() } : {}),
-    ...(to && isLocalDate(to) ? { to: localDayRange(to).end.toISOString() } : {}),
   };
 }
-
-const exportParams = ({
-  page: _page,
-  pageSize: _size,
-  ...filters
-}: AuditQuery): Record<string, unknown> => filters;
 
 function Details({ log }: { log: AuditLog }) {
   const { t } = useTranslation();
@@ -94,7 +80,6 @@ export default function AuditPage() {
   const { repositories } = useContainer();
   const list = useListController(OPTIONS);
   const { state } = list;
-  const runner = useExportRunner();
   const f = (k: string) => state.filters[k]?.[0] ?? '';
   const [open, setOpen] = useState<AuditLog | null>(null);
   const query = useQuery({
@@ -160,14 +145,6 @@ export default function AuditPage() {
           </Badge>
         }
         subtitle={t('audit.subtitle')}
-        exportMenu={
-          <ExportMenu
-            onExport={runner(
-              'AUDIT_LOGS',
-              exportParams(queryOf(state.filters, state.page, state.pageSize)),
-            )}
-          />
-        }
         search={
           <SearchField
             label={t('audit.searchAction')}
@@ -181,8 +158,6 @@ export default function AuditPage() {
             ...chip('entityType', t('audit.entityType')),
             ...chip('entityId', t('audit.entityId')),
             ...chip('admin', t('audit.admin')),
-            ...chip('from', t('audit.from')),
-            ...chip('to', t('audit.to')),
           ],
           onClearAll: list.clearFilters,
           controls: (
@@ -190,16 +165,6 @@ export default function AuditPage() {
               {text('entityType', t('audit.entityType'))}
               {text('entityId', t('audit.entityId'))}
               {text('admin', t('audit.admin'))}
-              <DateField
-                label={t('audit.from')}
-                value={f('from')}
-                onValueChange={(v) => list.setFilter('from', v ? [v] : [])}
-              />
-              <DateField
-                label={t('audit.to')}
-                value={f('to')}
-                onValueChange={(v) => list.setFilter('to', v ? [v] : [])}
-              />
             </>
           ),
         }}

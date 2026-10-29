@@ -22,8 +22,6 @@ export class RemoteAuditRepository implements AuditRepository {
         action: q.action,
         entityType: q.entityType,
         entityId: q.entityId,
-        from: q.from,
-        to: q.to,
       }),
     });
 }

@@ -16,8 +16,6 @@ const ServerErrorPage = lazyPage(() => import('@/presentation/pages/ServerErrorP
 /** Feature pages that replace the placeholder of their nav entry (one line per finished module task). */
 const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
   [ROUTES.items]: lazyPage(() => import('@/presentation/items/ItemsPage')),
-  [ROUTES.exports]: lazyPage(() => import('@/presentation/exports/ExportsPage')),
-  [ROUTES.alerts]: lazyPage(() => import('@/presentation/alerts/AlertsPage')),
   [ROUTES.settings]: lazyPage(() => import('@/presentation/settings/SettingsPage')),
   [ROUTES.auditLog]: lazyPage(() => import('@/presentation/audit/AuditPage')),
 };
@@ -25,7 +23,6 @@ const FEATURE_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>
 const DETAIL_PAGES: Readonly<Record<string, LazyExoticComponent<ComponentType>>> = {
   [`${ROUTES.items}/:id`]: lazyPage(() => import('@/presentation/items/ItemDetailsPage')),
 };
-const ProfilePage = lazyPage(() => import('@/presentation/profile/ProfilePage'));
 const AboutPage = lazyPage(() => import('@/presentation/pages/AboutPage'));
 /** Compile-time: `__SHOW_DESIGN_SYSTEM__` is false in prod builds, so the whole gallery chunk is dropped. */
 const DesignSystemPage = __SHOW_DESIGN_SYSTEM__
@@ -60,7 +57,6 @@ export function buildRoutes(showDesignSystem: boolean): RouteObject[] {
         { path: ROUTES.forbidden, element: <ForbiddenPage /> },
         { path: ROUTES.serverError, element: <ServerErrorPage /> },
         { path: ROUTES.about, element: <AboutPage /> },
-        { path: ROUTES.profile, element: <ProfilePage /> },
         ...(showDesignSystem && DesignSystemPage
           ? [{ path: DESIGN_SYSTEM_PATH, element: <DesignSystemPage /> }]
           : []),

@@ -21,8 +21,6 @@
   "nav": {
     "label": "Main navigation",
     "items": "Items",
-    "exports": "Exports",
-    "alerts": "Alerts",
     "settings": "Settings",
     "auditLog": "Audit log",
     "breadcrumbs": "Breadcrumbs",
@@ -32,7 +30,6 @@
     "expandSidebar": "Expand the sidebar"
   },
   "topbar": {
-    "alerts": "Alerts",
     "language": "Switch language",
     "lightTheme": "Switch to light theme",
     "darkTheme": "Switch to dark theme",
@@ -41,12 +38,7 @@
     "openMenu": "Open menu",
     "adminMenu": "Admin menu",
     "about": "About this build",
-    "profile": "My profile",
-    "otherLanguageShort": "ع",
-    "viewAll": "View all",
-    "markRead": "Mark as read",
-    "noAlerts": "No new alerts",
-    "alertsFailed": "Alerts could not be loaded."
+    "otherLanguageShort": "ع"
   },
   "module": {
     "comingSoon": "This section is coming soon",

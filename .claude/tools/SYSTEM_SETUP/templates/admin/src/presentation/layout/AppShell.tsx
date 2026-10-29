@@ -11,7 +11,6 @@ import { IdleWarningDialog } from '../components/feedback/IdleWarningDialog';
 import { useIdleTimeout } from '../hooks/useIdleTimeout';
 import { useProactiveRefresh } from '../hooks/useProactiveRefresh';
 import { useRealtimeConnection } from '../hooks/useRealtime';
-import { useShellCounters } from '../hooks/useShellCounters';
 import { Breadcrumbs } from '../components/layout/Breadcrumbs';
 import { useBreadcrumbs } from '../controllers/useBreadcrumbs';
 import { Sidebar } from './Sidebar';
@@ -66,7 +65,6 @@ export function AppShell() {
 
   useRealtimeConnection(current !== null);
   useProactiveRefresh(current);
-  const counters = useShellCounters(current !== null);
   const { status: idle, stay } = useIdleTimeout({
     onExpire: () => void sessionManager.signOut('idle'),
     enabled: current !== null,
@@ -79,7 +77,6 @@ export function AppShell() {
         collapsed={collapsed}
         open={drawerOpen}
         onNavigate={() => setDrawerOpen(false)}
-        counters={counters.sidebar}
         {...(current ? { admin: { name: current.admin.name, email: current.admin.email } } : {})}
         {...(docked ? { onToggleCollapse: onMenu } : {})}
       />
@@ -107,7 +104,6 @@ export function AppShell() {
           menuExpanded={docked ? !collapsed : drawerOpen}
           onMenu={onMenu}
           onLogout={onLogout}
-          alertCount={counters.alerts}
         />
         <main id="main" className="app-content">
           <Breadcrumbs crumbs={crumbs} />

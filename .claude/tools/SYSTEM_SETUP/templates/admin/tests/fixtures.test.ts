@@ -17,7 +17,8 @@ const WITHOUT_FIXTURE: Readonly<Record<string, string>> = {
   postAuthVerifyOtp: 'login runs on MockAuthRepository (mock mode)',
   postAuthRefresh: 'login runs on MockAuthRepository (mock mode)',
   postAuthLogout: 'login runs on MockAuthRepository (mock mode)',
-  getAuditLogsById: 'no screen reads one record: the list carries every field',
+  postUploadsPresign: 'no admin screen uploads a file yet (the items are owned by users)',
+  postUploadsConfirm: 'no admin screen uploads a file yet (the items are owned by users)',
 };
 
 const key = (o: { method: string; path: string }) => `${o.method} ${o.path}`;
@@ -63,6 +64,6 @@ describe('mock fixtures', () => {
       ).toBe(true);
       checked.push(op.id);
     }
-    expect(checked.length).toBeGreaterThan(5);
+    expect(checked.sort()).toEqual(['getAuditLogs', 'getItems', 'getSettings']);
   });
 });

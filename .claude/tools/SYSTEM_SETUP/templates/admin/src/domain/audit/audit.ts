@@ -19,8 +19,6 @@ export interface AuditQuery extends PageQuery {
   action?: string;
   entityType?: string;
   entityId?: string;
-  from?: string;
-  to?: string;
 }
 export interface AuditRepository {
   list(query: AuditQuery): Promise<Page<AuditLog>>;

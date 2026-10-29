@@ -63,8 +63,8 @@ describe('operations', () => {
   it.each([
     ['post', '/admin/v1/auth/login', 'postAuthLogin'],
     ['get', '/admin/v1/items/{id}', 'getItemsById'],
-    ['patch', '/admin/v1/items/{id}', 'patchItemsById'],
-    ['post', '/admin/v1/alerts/{id}/acknowledge', 'postAlertsByIdAcknowledge'],
+    ['post', '/admin/v1/items/{id}/archive', 'postItemsByIdArchive'],
+    ['post', '/admin/v1/uploads/presign', 'postUploadsPresign'],
     ['get', '/admin/v1/audit-logs', 'getAuditLogs'],
   ] as const)('%s %s is named %s', (method, path, id) => {
     expect(operationId(method, path)).toBe(id);
@@ -115,12 +115,13 @@ describe('generated DTOs behave like the server contract', () => {
   it('handles nullable fields and enums in list items, and shared components', () => {
     const item = {
       id: '1',
-      name: 'Starter plan',
-      description: null,
+      title: 'Starter plan',
+      tags: ['plan'],
+      imageUrl: null,
       status: 'ACTIVE',
+      owner: { type: 'CUSTOMER', id: '64c100000000000000000c01' },
       createdAt: '2026-10-14T10:00:00.000Z',
       updatedAt: '2026-10-14T10:00:00.000Z',
-      updatedBy: null,
     };
     expect(getItemsDataSchema().safeParse([item]).success).toBe(true);
     expect(getItemsDataSchema().safeParse([{ ...item, status: 'NOPE' }]).success).toBe(false);

@@ -6,23 +6,8 @@ import type { ToneName } from '@/design/tokens/colors';
  * (tests/status.test.ts fails otherwise); no page decides a tone itself.
  */
 export const STATUS_TONES = {
-  item: { ACTIVE: 'green', INACTIVE: 'amber', ARCHIVED: 'grey' },
-  // Design kit `S.alert` / `S.sev`: new = rose, info = purple.
-  alert: {
-    NEW: 'rose',
-    ACKNOWLEDGED: 'grey',
-  },
-  alertSeverity: {
-    INFO: 'purple',
-    WARNING: 'amber',
-    CRITICAL: 'rose',
-  },
-  export: {
-    QUEUED: 'grey',
-    RUNNING: 'amber',
-    DONE: 'green',
-    FAILED: 'rose',
-  },
+  item: { ACTIVE: 'green', ARCHIVED: 'grey' },
+  itemOwner: { CUSTOMER: 'purple', MERCHANT: 'amber' },
 } as const satisfies Record<string, Record<string, ToneName>>;
 
 export type StatusTone = ToneName;

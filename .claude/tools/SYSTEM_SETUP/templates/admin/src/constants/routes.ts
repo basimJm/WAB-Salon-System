@@ -2,12 +2,9 @@ export const ROUTES = {
   root: '/',
   login: '/login',
   items: '/items',
-  alerts: '/alerts',
-  exports: '/exports',
   settings: '/settings',
   auditLog: '/audit-log',
   about: '/about',
-  profile: '/profile',
   forbidden: '/forbidden',
   serverError: '/error',
 } as const;

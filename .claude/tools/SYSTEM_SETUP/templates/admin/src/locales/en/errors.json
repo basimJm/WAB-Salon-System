@@ -27,14 +27,17 @@
       "OTP_INVALID": "The verification code is incorrect.",
       "OTP_EXPIRED": "The verification code has expired. Request a new one.",
       "OTP_DELIVERY_FAILED": "The verification code could not be delivered. Try again.",
+      "PHONE_NOT_REGISTERED": "This phone number is not registered.",
+      "PHONE_ALREADY_REGISTERED": "This phone number is already registered.",
       "ACCOUNT_BLOCKED": "This account is blocked.",
-      "CURRENT_PASSWORD_INVALID": "The current password is not correct.",
-      "EMAIL_ALREADY_USED": "This email address is already used by another account.",
-      "INVALID_TRANSITION": "This status change is not allowed from the current status.",
-      "ALREADY_HANDLED": "This item was already handled.",
-      "ITEM_NAME_TAKEN": "An item with this name already exists.",
-      "MAINTENANCE": "The service is under maintenance. Please try again later.",
-      "UPDATE_REQUIRED": "An update is required to continue."
+      "MEMBER_INACTIVE": "This member account is inactive.",
+      "OWNER_REQUIRED": "Only the owner can do this.",
+      "PAYMENT_FAILED": "The payment failed. Nothing was created.",
+      "UPLOAD_INVALID": "This file cannot be uploaded.",
+      "UPLOAD_TOO_LARGE": "This file is too large.",
+      "ITEM_NOT_FOUND": "This item was not found.",
+      "ITEM_ARCHIVED": "This item is archived; the action needs an active item.",
+      "ITEM_LIMIT_REACHED": "The owner has reached the maximum number of items."
     }
   }
 }

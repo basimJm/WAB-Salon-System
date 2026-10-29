@@ -22,8 +22,8 @@ The admin panel is the back office of __SYSTEM_NAME__ (`__SYSTEM_NAME_AR__`): a 
 
 ## 3. Global UI rules
 
-- Shell: sidebar (collapsible rail on tablets, drawer on phones), top bar (language, theme, alerts bell, admin menu), breadcrumbs for sub-pages.
-- Lists keep page, size, search, sort and filters in the URL. Each list card shows the server total, a search box when the API supports `q`, filter chips, and an Export menu (XLSX / CSV / PDF) when the API offers the kind.
+- Shell: sidebar (collapsible rail on tablets, drawer on phones), top bar (language, theme, admin menu), breadcrumbs for sub-pages.
+- Lists keep page, size, search, sort and filters in the URL. Each list card shows the server total, a search box when the API supports `q`, filter chips, and an Export menu (XLSX / CSV / PDF, design kit) when the server offers an export operation (none in the template).
 - Every write asks for a **reason** (minimum length in `src/constants/ui.ts`); the server records it in the audit log.
 - States: loading (skeleton), empty, error with retry, forbidden, not found, validation errors next to the field, server messages shown as sent.
 - Realtime: the server emits `<entity>.updated` events on `/admin`; the panel invalidates the matching queries (`src/constants/realtime.ts`).
@@ -32,17 +32,14 @@ The admin panel is the back office of __SYSTEM_NAME__ (`__SYSTEM_NAME_AR__`): a 
 
 - `P00` Login: email + password, then an emailed one-time code. Wrong code → localized error; the session lands on `HOME_ROUTE`.
 - Access token in memory (mirrored to this tab's `sessionStorage` so a reload keeps the session), refresh token rotated by the server, idle timeout with a warning dialog, sign-out on 401.
-- Admin profile (`P07`): change password, change email (verified by code), alert e-mail addresses.
 
 ## 5. Navigation
 
 | Order | Module | Route | Page |
 |---|---|---|---|
 | 1 | Items | `/items` | P01, P02 |
-| 2 | Exports | `/exports` | P04 |
-| 3 | Alerts | `/alerts` | P03 |
-| 4 | Settings | `/settings` | P05 |
-| 5 | Audit log | `/audit-log` | P06 |
+| 2 | Settings | `/settings` | P05 |
+| 3 | Audit log | `/audit-log` | P06 |
 
 `src/constants/nav.ts` is the single source; a module with sub-pages lists them as `children`.
 
@@ -52,25 +49,19 @@ The admin panel is the back office of __SYSTEM_NAME__ (`__SYSTEM_NAME_AR__`): a 
 Two steps (credentials, code), resend countdown, masked e-mail on the second step, language and theme switches, brand panel.
 
 ### P01 — Items (sample module)
-List of items: name (link to `P02`), status badge, created, updated. Search by name, filter by status, sort by name / created / updated, server pagination, export (`ITEMS`). "New item" opens the side panel (`P02` form).
+List of user-owned items: title (link to `P02`), owner type badge, tags, status badge, updated. Search by title, filter by status (owner type and tag filters in the URL), server pagination. The row action archives an active item or restores an archived one; both ask for a reason (`ReasonDialog`) and are audited; the owner is notified by the server.
 
 ### P02 — Item details
-Header with status and **Edit**; tabs *Overview* (facts) and *History* (audit rows of this record). The edit panel edits name, description and status, needs a reason; a duplicate name is refused by the server (`ITEM_NAME_TAKEN`).
-
-### P03 — Alerts
-Newest first; severity, kind, link to the subject when the alert names one; acknowledge; filters by status and kind. The bell in the top bar shows the number of NEW alerts and the latest ones.
-
-### P04 — Exports
-History of requested files with status and a short-lived download link; running jobs refresh automatically.
+Header with status and **Archive** / **Restore**; tabs *Overview* (title, description, tags, owner, image, archive reason and date, timestamps, id) and *History* (audit rows of this record). Archiving an archived item is refused by the server (`ITEM_ARCHIVED`); a missing record answers `ITEM_NOT_FOUND`.
 
 ### P05 — Settings
 Registry-driven (`src/domain/settings/registry.ts`): groups per tab, validation per row (integer, list, object member), "Use default", one reason for all changed keys. Read-only platform facts (time zone, currency).
 
 ### P06 — Audit log
-Read-only list of every admin action: when, action, entity, reason, IP, device; filters by action, entity, admin and dates; record dialog with the before / after diff; export (`AUDIT_LOGS`).
+Read-only list of every admin action: when, action, entity, reason, IP, device; filters by action, entity and admin; record dialog with the before / after diff.
 
-### P07 — Profile and About
-Profile cards (password, e-mail, alert e-mails) and the About page (version, build id, environment, data source).
+### P07 — About
+The About page (version, build id, environment, data source), opened from the admin menu.
 
 ## 7. Validation
 

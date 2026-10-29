@@ -1,6 +1,4 @@
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, within } from '@testing-library/react';
 import { useTranslation } from 'react-i18next';
 import { describe, expect, it } from 'vitest';
 import { formatRelative } from '@/domain/shared/relativeTime';
@@ -9,16 +7,15 @@ import { CardGrid } from '@/presentation/components/data/CardGrid';
 import { ExportMenu } from '@/presentation/components/data/ExportMenu';
 import { SearchField } from '@/presentation/components/form/SearchField';
 import { ListPage } from '@/presentation/components/templates/ListPage';
-import { AlertsBell } from '@/presentation/layout/AlertsBell';
 import SettingsPage from '@/presentation/settings/SettingsPage';
 import { ITEMS_STRINGS } from '@/locales/lazy/items';
 import { useLazyStrings } from '@/presentation/hooks/useLazyStrings';
 import en from '@/locales/en';
-import { makeContainer, renderWithApp } from './helpers/render';
+import { renderWithApp } from './helpers/render';
 
 const NOW = new Date('2026-10-26T12:00:00Z');
 
-describe('formatRelative (bell rows)', () => {
+describe('formatRelative', () => {
   it('uses minutes under an hour, hours under a day, then days, in the panel language', () => {
     expect(formatRelative('2026-10-26T11:56:00Z', NOW, 'en')).toBe('4 minutes ago');
     expect(formatRelative('2026-10-26T09:00:00Z', NOW, 'en')).toBe('3 hours ago');
@@ -28,71 +25,6 @@ describe('formatRelative (bell rows)', () => {
 
   it('reads a future instant (clock skew) as now', () => {
     expect(formatRelative('2026-10-26T12:05:00Z', NOW, 'en')).toBe('this minute');
-  });
-});
-
-function Where() {
-  const location = useLocation();
-  return <output data-testid="where">{location.pathname}</output>;
-}
-
-const bell = (container = makeContainer(), count = 3) =>
-  renderWithApp(
-    <MemoryRouter initialEntries={['/here']}>
-      <Routes>
-        <Route path="/here" element={<AlertsBell count={count} />} />
-        <Route path="*" element={<Where />} />
-      </Routes>
-    </MemoryRouter>,
-    container,
-  );
-
-describe('top-bar bell dropdown (design Topbar)', () => {
-  it('shows the NEW count and opens the latest NEW alerts with severity and age', async () => {
-    bell();
-    await userEvent.click(screen.getByRole('button', { name: 'Alerts 3' }));
-    const panel = screen.getByRole('group', { name: 'Alerts 3' });
-    expect(await within(panel).findByText('Alert 1')).toBeInTheDocument();
-    expect(within(panel).getByText(/^Critical · /)).toBeInTheDocument();
-    expect(within(panel).getAllByRole('listitem')).toHaveLength(3);
-    expect(panel.querySelector('.app-bell__dot--rose')).not.toBeNull();
-  });
-
-  it('a row opens its subject', async () => {
-    bell();
-    await userEvent.click(screen.getByRole('button', { name: 'Alerts 3' }));
-    await userEvent.click(await screen.findByRole('link', { name: /Alert 3/ }));
-    expect(screen.getByTestId('where')).toHaveTextContent('/items/64d100000000000000000001');
-  });
-
-  it('"View all" goes to the alerts list', async () => {
-    bell();
-    await userEvent.click(screen.getByRole('button', { name: 'Alerts 3' }));
-    await userEvent.click(screen.getByRole('link', { name: 'View all' }));
-    expect(screen.getByTestId('where')).toHaveTextContent('/alerts');
-  });
-
-  it('mark as read acknowledges the alert and drops it from the dropdown', async () => {
-    bell();
-    await userEvent.click(screen.getByRole('button', { name: 'Alerts 3' }));
-    await userEvent.click(await screen.findByRole('button', { name: 'Mark as read: Alert 1' }));
-    await waitFor(() => expect(screen.queryByText('Alert 1')).not.toBeInTheDocument());
-    expect(screen.getByText('Alert 2')).toBeInTheDocument();
-  });
-
-  it('shows the empty and the error states', async () => {
-    const none = makeContainer();
-    none.mock?.scenarios.set('empty');
-    const first = bell(none, 0);
-    await userEvent.click(screen.getByRole('button', { name: 'Alerts' }));
-    expect(await screen.findByText('No new alerts')).toBeInTheDocument();
-    first.unmount();
-    const failing = makeContainer();
-    failing.mock?.scenarios.set('serverError');
-    bell(failing, 0);
-    await userEvent.click(screen.getByRole('button', { name: 'Alerts' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent('Alerts could not be loaded.');
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
 });
 

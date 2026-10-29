@@ -1,10 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
-import { ITEM_ENTITY_TYPE, type Item, type ItemInput } from '@/domain/items/items';
+import { ITEM_ENTITY_TYPE, transitionOf, type Item } from '@/domain/items/items';
 import { humanizeAction, type AuditLog } from '@/domain/audit/audit';
 import { formatInstant } from '@/domain/shared/format';
 import { ITEMS_STRINGS } from '@/locales/lazy/items';
@@ -13,27 +13,40 @@ import { KeyValue } from '../components/core/KeyValue';
 import { StatusBadge } from '../components/core/StatusBadge';
 import { DataTable } from '../components/data/DataTable';
 import type { Column } from '../components/data/tableTypes';
-import { useToast } from '../components/overlay/Toast';
 import { DetailPage } from '../components/templates/DetailPage';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLazyStrings } from '../hooks/useLazyStrings';
-import { ItemDrawer } from './ItemDrawer';
+import { useItemTransition } from './useItemTransition';
 
 const HISTORY_PAGE_SIZE = 25;
 
 function Overview({ item }: { item: Item }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const at = (iso: string) => formatInstant(iso, language, 'dateTime');
+  const at = (iso: string | null) => (iso ? formatInstant(iso, language, 'dateTime') : null);
   return (
     <KeyValue
       placeholder={t('common.none')}
       items={[
-        { key: 'name', label: t('items.name'), value: item.name },
+        { key: 'title', label: t('items.title'), value: item.title },
         { key: 'description', label: t('items.description'), value: item.description },
+        { key: 'tags', label: t('items.tags'), value: item.tags.join(', ') || null },
+        {
+          key: 'owner',
+          label: t('items.owner'),
+          value: `${t(`status.itemOwner.${item.owner.type}`)} · ${item.owner.id}`,
+          ltr: true,
+        },
+        {
+          key: 'image',
+          label: t('items.image'),
+          value: item.imageUrl ?? t('items.noImage'),
+          ltr: true,
+        },
+        { key: 'archivedReason', label: t('items.archivedReason'), value: item.archivedReason },
+        { key: 'archivedAt', label: t('items.archivedAt'), value: at(item.archivedAt), ltr: true },
         { key: 'created', label: t('items.createdAt'), value: at(item.createdAt), ltr: true },
         { key: 'updated', label: t('items.updatedAt'), value: at(item.updatedAt), ltr: true },
-        { key: 'by', label: t('items.updatedBy'), value: item.updatedBy, ltr: true },
         { key: 'id', label: t('items.id'), value: item.id, ltr: true },
       ]}
     />
@@ -79,47 +92,32 @@ function History({ id }: { id: string }) {
   );
 }
 
-/** PRD P02 · One item: facts, audit history, and edit in the same panel as the list (reason required). */
+/** PRD P02 · One item: facts, audit history, and archive / restore with a reason. */
 export default function ItemDetailsPage() {
   useLazyStrings(ITEMS_STRINGS);
   const { t } = useTranslation();
   const { id = '' } = useParams();
-  const toast = useToast();
-  const queryClient = useQueryClient();
   const { repositories } = useContainer();
   const [tab, setTab] = useState('overview');
-  const [editing, setEditing] = useState(false);
   const query = useQuery({
     queryKey: ['getItemsById', { id }],
     queryFn: () => repositories.items.get(id),
   });
-  const save = useMutation({
-    mutationFn: ({ values, reason }: { values: ItemInput; reason: string }) =>
-      repositories.items.update(id, values, reason),
-    onSuccess: async () => {
-      setEditing(false);
-      toast.show(t('items.saved'), 'success');
-      await queryClient.invalidateQueries({ queryKey: ['getItemsById'] });
-      await queryClient.invalidateQueries({ queryKey: ['getItems'] });
-      await queryClient.invalidateQueries({ queryKey: ['getAuditLogs'] });
-    },
-  });
+  const transition = useItemTransition();
   const item = query.data;
   return (
     <>
       <DetailPage
-        title={item?.name ?? t('nav.items')}
+        title={item?.title ?? t('nav.items')}
         back={{ to: ROUTES.items, label: t('nav.items') }}
         status={item ? <StatusBadge kind="item" value={item.status} /> : null}
         actions={
           item ? (
             <Button
-              onClick={() => {
-                save.reset();
-                setEditing(true);
-              }}
+              variant={item.status === 'ACTIVE' ? 'danger' : 'primary'}
+              onClick={() => transition.open(item)}
             >
-              {t('common.edit')}
+              {t(`items.${transitionOf(item)}`)}
             </Button>
           ) : null
         }
@@ -138,15 +136,7 @@ export default function ItemDetailsPage() {
         error={query.error}
         onRetry={() => void query.refetch()}
       />
-      {editing && item ? (
-        <ItemDrawer
-          item={item}
-          saving={save.isPending}
-          error={save.error}
-          onSubmit={(values, reason) => save.mutate({ values, reason })}
-          onClose={() => setEditing(false)}
-        />
-      ) : null}
+      {transition.dialog}
     </>
   );
 }

@@ -1,25 +1,31 @@
 {
   "items": {
-    "subtitle": "The sample resource of this panel: every write needs a reason and is audited.",
-    "search": "Search items by name",
-    "add": "New item",
-    "edit": "Edit item",
-    "name": "Name",
+    "subtitle": "The sample resource of this panel: records owned by users; archiving and restoring need a reason and are audited.",
+    "search": "Search items by title",
+    "title": "Title",
     "description": "Description",
+    "tags": "Tags",
+    "owner": "Owner",
+    "image": "Image",
+    "noImage": "No image",
+    "archivedReason": "Archive reason",
+    "archivedAt": "Archived",
     "createdAt": "Created",
     "updatedAt": "Updated",
-    "updatedBy": "Updated by",
     "id": "Identifier",
     "empty": "No items yet",
-    "saved": "Item saved",
     "overview": "Overview",
     "history": "History",
     "sections": "Item sections",
     "action": "Action",
     "noHistory": "No changes recorded yet",
-    "error": {
-      "name": "Enter a name of up to {{max}} characters",
-      "description": "Keep the description under {{max}} characters"
-    }
+    "archive": "Archive",
+    "restore": "Restore",
+    "archiveTitle": "Archive this item?",
+    "archiveDescription": "The item disappears from its audience; the owner is notified with your reason.",
+    "restoreTitle": "Restore this item?",
+    "restoreDescription": "The item becomes visible again; the owner is notified with your reason.",
+    "archived": "Item archived",
+    "restored": "Item restored"
   }
 }

@@ -73,14 +73,14 @@ describe('routing & auth guard', () => {
   });
 
   it('two-step login lands on the requested page', async () => {
-    const { router } = renderRoutes(`${ROUTES.login}?next=${encodeURIComponent(ROUTES.alerts)}`);
+    const { router } = renderRoutes(`${ROUTES.login}?next=${encodeURIComponent(ROUTES.settings)}`);
     await userEvent.type(await screen.findByLabelText(en.login.email), 'admin@example.test');
     await userEvent.type(screen.getByLabelText(en.login.password), PASSWORD);
     await userEvent.click(screen.getByRole('button', { name: en.login.continue }));
     await userEvent.type(await screen.findByLabelText(en.login.code), MOCK_OTP_CODE);
     await userEvent.click(screen.getByRole('button', { name: en.login.verify }));
-    await waitFor(() => expect(router.state.location.pathname).toBe(ROUTES.alerts));
-    expect(await screen.findByRole('heading', { name: en.nav.alerts })).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe(ROUTES.settings));
+    expect(await screen.findByRole('heading', { name: en.nav.settings })).toBeInTheDocument();
   });
 
   it('shows field errors without calling the repository, and a localized error for a wrong code', async () => {

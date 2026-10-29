@@ -1,58 +1,54 @@
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
-import { ITEM_SORT_KEYS, ITEM_STATUSES, type Item, type ItemInput } from '@/domain/items/items';
+import { ITEM_STATUSES, transitionOf, type Item } from '@/domain/items/items';
 import { formatInstant } from '@/domain/shared/format';
 import { ITEMS_STRINGS } from '@/locales/lazy/items';
 import { Button } from '../components/core/Button';
 import { StatusBadge } from '../components/core/StatusBadge';
-import { ExportMenu } from '../components/data/ExportMenu';
 import type { Column } from '../components/data/tableTypes';
 import { SearchField } from '../components/form/SearchField';
 import { Select } from '../components/form/Select';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
-import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLazyStrings } from '../hooks/useLazyStrings';
-import { useResourcePanel } from '../hooks/useResourcePanel';
-import { ItemDrawer } from './ItemDrawer';
-import { itemExportParams, itemQueryOf } from './itemFilters';
+import { ITEM_FILTER_KEYS, itemQueryOf } from './itemFilters';
+import { useItemTransition } from './useItemTransition';
 
-const OPTIONS = {
-  filterKeys: ['status'],
-  sortKeys: [...ITEM_SORT_KEYS],
-  defaultSort: { key: 'createdAt', direction: 'desc' as const },
-};
+const OPTIONS = { filterKeys: ITEM_FILTER_KEYS };
 
-/** PRD P01 · Items: searchable, filterable, sortable list; create and edit in a side panel with a reason. */
+/** PRD P01 · Items: searchable, filterable list of user-owned records; archive / restore with a reason. */
 export default function ItemsPage() {
   useLazyStrings(ITEMS_STRINGS);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();
-  const repo = repositories.items;
   const list = useListController(OPTIONS);
   const { state } = list;
   const query = itemQueryOf(state);
-  const runner = useExportRunner();
-  const resource = useResourcePanel<Item, ItemInput>(state, {
-    queryName: 'getItems',
-    load: (s) => repo.list(itemQueryOf(s)),
-    save: (editing, v, reason) =>
-      editing ? repo.update(editing.id, v, reason) : repo.create(v, reason),
+  const result = useQuery({
+    queryKey: ['getItems', query],
+    queryFn: () => repositories.items.list(query),
   });
-  const data = resource.query.data;
+  const transition = useItemTransition();
+  const data = result.data;
   const title = t('nav.items');
   const status = query.status;
   const columns: Column<Item>[] = [
     {
-      key: 'name',
-      header: t('items.name'),
-      sortable: true,
-      render: (r) => <RouterLink to={`${ROUTES.items}/${r.id}`}>{r.name}</RouterLink>,
+      key: 'title',
+      header: t('items.title'),
+      render: (r) => <RouterLink to={`${ROUTES.items}/${r.id}`}>{r.title}</RouterLink>,
     },
+    {
+      key: 'owner',
+      header: t('items.owner'),
+      render: (r) => <StatusBadge kind="itemOwner" value={r.owner.type} />,
+    },
+    { key: 'tags', header: t('items.tags'), render: (r) => r.tags.join(', ') },
     {
       key: 'status',
       header: t('common.status'),
@@ -61,16 +57,8 @@ export default function ItemsPage() {
     {
       key: 'updatedAt',
       header: t('items.updatedAt'),
-      sortable: true,
       ltr: true,
       render: (r) => formatInstant(r.updatedAt, language, 'dateTime'),
-    },
-    {
-      key: 'createdAt',
-      header: t('items.createdAt'),
-      sortable: true,
-      ltr: true,
-      render: (r) => formatInstant(r.createdAt, language, 'dateTime'),
     },
   ];
   return (
@@ -78,7 +66,6 @@ export default function ItemsPage() {
       <ListPage
         title={title}
         subtitle={t('items.subtitle')}
-        actions={<Button onClick={resource.openCreate}>{t('items.add')}</Button>}
         search={
           <SearchField
             label={t('items.search')}
@@ -86,7 +73,6 @@ export default function ItemsPage() {
             onSearch={list.setSearch}
           />
         }
-        exportMenu={<ExportMenu onExport={runner('ITEMS', itemExportParams(query))} />}
         filters={{
           active: status
             ? [
@@ -115,15 +101,13 @@ export default function ItemsPage() {
           rows: data?.items ?? [],
           rowKey: (r) => r.id,
           caption: title,
-          loading: resource.query.isPending,
-          error: resource.query.error,
-          onRetry: () => void resource.query.refetch(),
+          loading: result.isPending,
+          error: result.error,
+          onRetry: () => void result.refetch(),
           emptyTitle: t('items.empty'),
-          sort: state.sort ?? undefined,
-          onSortChange: list.setSort,
           rowActions: (r) => (
-            <Button variant="ghost" size="sm" onClick={() => resource.openEdit(r)}>
-              {t('common.edit')}
+            <Button variant="ghost" size="sm" onClick={() => transition.open(r)}>
+              {t(`items.${transitionOf(r)}`)}
             </Button>
           ),
         }}
@@ -140,16 +124,7 @@ export default function ItemsPage() {
             : undefined
         }
       />
-      {resource.panel ? (
-        <ItemDrawer
-          key={resource.panel.editing?.id ?? 'new'}
-          item={resource.panel.editing}
-          saving={resource.saving}
-          error={resource.saveError}
-          onSubmit={(v, reason) => resource.submit(v, reason)}
-          onClose={resource.close}
-        />
-      ) : null}
+      {transition.dialog}
     </>
   );
 }

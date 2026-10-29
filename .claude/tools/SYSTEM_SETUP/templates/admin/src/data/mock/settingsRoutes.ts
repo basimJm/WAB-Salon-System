@@ -18,11 +18,13 @@ const updateSettingEndpoint = defineEndpoint(OPERATIONS.putSettingsByKey, {
 /** Settings server: overrides live in the closure, so every container gets its own state. */
 export function settingsRoutes(): readonly MockRoute[] {
   const overrides = new Map<string, unknown>();
-  const entry = (key: string) => {
-    const def = MOCK_SETTING_DEFAULTS[key];
-    const isDefault = !overrides.has(key);
-    return { key, value: isDefault ? def : overrides.get(key), default: def, isDefault };
-  };
+  const valueOf = (key: string) =>
+    overrides.has(key) ? overrides.get(key) : MOCK_SETTING_DEFAULTS[key];
+  const entry = (key: string) => ({
+    key,
+    value: valueOf(key),
+    default: MOCK_SETTING_DEFAULTS[key],
+  });
   return [
     mockRoute(settingsEndpoint, () => {
       const data = Object.keys(MOCK_SETTING_DEFAULTS).map(entry);
@@ -35,7 +37,7 @@ export function settingsRoutes(): readonly MockRoute[] {
     mockRoute(updateSettingEndpoint, ({ params, body }) => {
       const key = params['key'] ?? '';
       overrides.set(key, (body as { value: unknown }).value);
-      return { data: entry(key) };
+      return { data: { key, value: valueOf(key) } };
     }),
   ];
 }

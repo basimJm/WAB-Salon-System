@@ -21,8 +21,6 @@
   "nav": {
     "label": "التنقل الرئيسي",
     "items": "العناصر",
-    "exports": "عمليات التصدير",
-    "alerts": "التنبيهات",
     "settings": "الإعدادات",
     "auditLog": "سجل الأفعال",
     "breadcrumbs": "مسار التنقل",
@@ -32,7 +30,6 @@
     "expandSidebar": "توسيع القائمة"
   },
   "topbar": {
-    "alerts": "التنبيهات",
     "language": "تبديل اللغة",
     "lightTheme": "التبديل إلى الوضع الفاتح",
     "darkTheme": "التبديل إلى الوضع الداكن",
@@ -41,12 +38,7 @@
     "openMenu": "فتح القائمة",
     "adminMenu": "قائمة المدير",
     "about": "حول هذا الإصدار",
-    "profile": "ملفي الشخصي",
-    "otherLanguageShort": "EN",
-    "viewAll": "عرض الكل",
-    "markRead": "تمييز كمقروء",
-    "noAlerts": "لا توجد تنبيهات جديدة",
-    "alertsFailed": "تعذّر تحميل التنبيهات."
+    "otherLanguageShort": "EN"
   },
   "module": {
     "comingSoon": "هذا القسم قادم قريبًا",

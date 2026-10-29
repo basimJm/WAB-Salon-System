@@ -53,14 +53,17 @@
                   "OTP_INVALID",
                   "OTP_EXPIRED",
                   "OTP_DELIVERY_FAILED",
+                  "PHONE_NOT_REGISTERED",
+                  "PHONE_ALREADY_REGISTERED",
                   "ACCOUNT_BLOCKED",
-                  "CURRENT_PASSWORD_INVALID",
-                  "EMAIL_ALREADY_USED",
-                  "INVALID_TRANSITION",
-                  "ALREADY_HANDLED",
-                  "ITEM_NAME_TAKEN",
-                  "MAINTENANCE",
-                  "UPDATE_REQUIRED"
+                  "MEMBER_INACTIVE",
+                  "OWNER_REQUIRED",
+                  "PAYMENT_FAILED",
+                  "UPLOAD_INVALID",
+                  "UPLOAD_TOO_LARGE",
+                  "ITEM_NOT_FOUND",
+                  "ITEM_ARCHIVED",
+                  "ITEM_LIMIT_REACHED"
                 ]
               },
               "details": {
@@ -139,35 +142,154 @@
           "email"
         ]
       },
-      "AdminProfile": {
+      "Setting": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {},
+          "default": {}
+        },
+        "required": [
+          "key"
+        ]
+      },
+      "AuditLogEntry": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
-          "email": {
+          "adminId": {
             "type": "string"
           },
-          "alertEmails": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "Addresses that receive the platform alerts; empty = the sign-in address."
+          "action": {
+            "type": "string"
           },
-          "lastLoginAt": {
-            "type": [
-              "string",
-              "null"
-            ],
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "before": {},
+          "after": {},
+          "reason": {
+            "type": "string"
+          },
+          "ip": {
+            "type": "string"
+          },
+          "userAgent": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
             "format": "date-time"
           }
         },
         "required": [
           "id",
-          "email",
-          "alertEmails",
-          "lastLoginAt"
+          "adminId",
+          "action",
+          "entityType",
+          "entityId",
+          "reason",
+          "ip",
+          "userAgent",
+          "createdAt"
+        ]
+      },
+      "AdminItem": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Item"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "owner": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "CUSTOMER",
+                      "MERCHANT"
+                    ]
+                  },
+                  "id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "id"
+                ]
+              },
+              "archivedReason": {
+                "type": "string"
+              },
+              "archivedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "owner"
+            ]
+          }
+        ]
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "imageUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "tags",
+          "imageUrl",
+          "status",
+          "createdAt",
+          "updatedAt"
         ]
       }
     },
@@ -732,9 +854,9 @@
     "/admin/v1/settings": {
       "get": {
         "tags": [
-          "Admin settings"
+          "Settings"
         ],
-        "summary": "Every platform setting with its effective value and its default",
+        "summary": "Every setting with its effective value and default",
         "parameters": [
           {
             "schema": {
@@ -771,21 +893,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "key": {
-                            "type": "string"
-                          },
-                          "value": {},
-                          "default": {},
-                          "isDefault": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "key",
-                          "isDefault"
-                        ]
+                        "$ref": "#/components/schemas/Setting"
                       }
                     },
                     "meta": {
@@ -831,16 +939,6 @@
               }
             }
           },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "content": {
@@ -867,15 +965,35 @@
     "/admin/v1/settings/{key}": {
       "put": {
         "tags": [
-          "Admin settings"
+          "Settings"
         ],
-        "summary": "Change one setting (validated, applied at once everywhere, audited with reason)",
+        "summary": "Change one setting (validated by its own rule; reason required; audited; applies to every instance at once)",
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "minLength": 1,
-              "maxLength": 100
+              "enum": [
+                "timezone",
+                "otp.length",
+                "otp.resendAfterSec",
+                "otp.maxRequests",
+                "otp.requestWindowSec",
+                "otp.maxWrong",
+                "otp.blockSec",
+                "otp.codeTtlSec",
+                "otp.proofTtlSec",
+                "auth.accessTokenTtlSec",
+                "auth.refreshTokenTtlDays",
+                "admin.maxFailedLogins",
+                "admin.lockSec",
+                "admin.sessionIdleSec",
+                "pagination.appPageSize",
+                "pagination.adminPageSize",
+                "uploads.imageMaxMb",
+                "uploads.docMaxMb",
+                "notifications.retentionDays",
+                "items.maxPerOwner"
+              ]
             },
             "required": true,
             "name": "key",
@@ -906,12 +1024,11 @@
                   "value": {},
                   "reason": {
                     "type": "string",
-                    "minLength": 1,
+                    "minLength": 3,
                     "maxLength": 1000
                   }
                 },
                 "required": [
-                  "value",
                   "reason"
                 ]
               }
@@ -920,7 +1037,7 @@
         },
         "responses": {
           "200": {
-            "description": "Setting",
+            "description": "Saved",
             "content": {
               "application/json": {
                 "schema": {
@@ -941,15 +1058,10 @@
                         "key": {
                           "type": "string"
                         },
-                        "value": {},
-                        "default": {},
-                        "isDefault": {
-                          "type": "boolean"
-                        }
+                        "value": {}
                       },
                       "required": [
-                        "key",
-                        "isDefault"
+                        "key"
                       ]
                     },
                     "meta": {
@@ -995,16 +1107,6 @@
               }
             }
           },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "content": {
@@ -1031,9 +1133,9 @@
     "/admin/v1/audit-logs": {
       "get": {
         "tags": [
-          "Admin audit log"
+          "Audit"
         ],
-        "summary": "Audit log, newest first; filter by admin, action, entity and dates",
+        "summary": "Audit log, newest first (admin, action, entity filters)",
         "parameters": [
           {
             "schema": {
@@ -1069,7 +1171,7 @@
           {
             "schema": {
               "type": "string",
-              "maxLength": 100
+              "maxLength": 80
             },
             "required": false,
             "name": "action",
@@ -1078,7 +1180,7 @@
           {
             "schema": {
               "type": "string",
-              "maxLength": 100
+              "maxLength": 60
             },
             "required": false,
             "name": "entityType",
@@ -1087,34 +1189,10 @@
           {
             "schema": {
               "type": "string",
-              "maxLength": 100
+              "maxLength": 64
             },
             "required": false,
             "name": "entityId",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "format": "date-time"
-            },
-            "required": false,
-            "name": "from",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": [
-                "string",
-                "null"
-              ],
-              "format": "date-time"
-            },
-            "required": false,
-            "name": "to",
             "in": "query"
           },
           {
@@ -1134,7 +1212,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Page",
+            "description": "Entries",
             "content": {
               "application/json": {
                 "schema": {
@@ -1152,49 +1230,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "adminId": {
-                            "type": "string"
-                          },
-                          "action": {
-                            "type": "string"
-                          },
-                          "entityType": {
-                            "type": "string"
-                          },
-                          "entityId": {
-                            "type": "string"
-                          },
-                          "before": {},
-                          "after": {},
-                          "reason": {
-                            "type": "string"
-                          },
-                          "ip": {
-                            "type": "string"
-                          },
-                          "userAgent": {
-                            "type": "string"
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "adminId",
-                          "action",
-                          "entityType",
-                          "entityId",
-                          "reason",
-                          "ip",
-                          "userAgent",
-                          "createdAt"
-                        ]
+                        "$ref": "#/components/schemas/AuditLogEntry"
                       }
                     },
                     "meta": {
@@ -1241,16 +1277,6 @@
               }
             }
           },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
           "429": {
             "description": "Too many requests",
             "content": {
@@ -1274,560 +1300,13 @@
         }
       }
     },
-    "/admin/v1/audit-logs/{id}": {
-      "get": {
-        "tags": [
-          "Admin audit log"
-        ],
-        "summary": "One audit entry with before and after",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "pattern": "^[a-fA-F0-9]{24}$"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Entry",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "adminId": {
-                          "type": "string"
-                        },
-                        "action": {
-                          "type": "string"
-                        },
-                        "entityType": {
-                          "type": "string"
-                        },
-                        "entityId": {
-                          "type": "string"
-                        },
-                        "before": {},
-                        "after": {},
-                        "reason": {
-                          "type": "string"
-                        },
-                        "ip": {
-                          "type": "string"
-                        },
-                        "userAgent": {
-                          "type": "string"
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "adminId",
-                        "action",
-                        "entityType",
-                        "entityId",
-                        "reason",
-                        "ip",
-                        "userAgent",
-                        "createdAt"
-                      ]
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/alerts": {
-      "get": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "Alerts, newest first (filter by status or kind)",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 1000000,
-              "default": 1
-            },
-            "required": false,
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 25
-            },
-            "required": false,
-            "name": "pageSize",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "NEW",
-                "ACKNOWLEDGED"
-              ]
-            },
-            "required": false,
-            "name": "status",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ERROR_RATE_SPIKE",
-                "JOB_FAILED",
-                "ITEM_FLAGGED"
-              ]
-            },
-            "required": false,
-            "name": "kind",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Alerts",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "ERROR_RATE_SPIKE",
-                              "JOB_FAILED",
-                              "ITEM_FLAGGED"
-                            ]
-                          },
-                          "severity": {
-                            "type": "string",
-                            "enum": [
-                              "INFO",
-                              "WARNING",
-                              "CRITICAL"
-                            ]
-                          },
-                          "title": {
-                            "type": "string"
-                          },
-                          "titles": {
-                            "type": "object",
-                            "properties": {
-                              "ar": {
-                                "type": "string"
-                              },
-                              "en": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "ar",
-                              "en"
-                            ]
-                          },
-                          "entityType": {
-                            "type": [
-                              "string",
-                              "null"
-                            ],
-                            "enum": [
-                              "ITEM",
-                              null
-                            ]
-                          },
-                          "entityId": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "data": {
-                            "type": "object",
-                            "additionalProperties": {}
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "NEW",
-                              "ACKNOWLEDGED"
-                            ]
-                          },
-                          "emailedAt": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "acknowledgedAt": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "kind",
-                          "severity",
-                          "title",
-                          "titles",
-                          "entityType",
-                          "entityId",
-                          "data",
-                          "status",
-                          "emailedAt",
-                          "acknowledgedAt",
-                          "createdAt"
-                        ]
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/alerts/count": {
-      "get": {
-        "tags": [
-          "Alerts"
-        ],
-        "summary": "How many alerts are still NEW (the bell badge)",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Count",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "new": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "new"
-                      ]
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/alerts/{id}/acknowledge": {
+    "/admin/v1/uploads/presign": {
       "post": {
         "tags": [
-          "Alerts"
+          "Uploads"
         ],
-        "summary": "Acknowledge an alert (repeating it is harmless)",
+        "summary": "Get a presigned upload URL for a purpose (type, size and expiry are restricted)",
         "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "pattern": "^[a-fA-F0-9]{24}$"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          },
           {
             "schema": {
               "type": "string",
@@ -1843,9 +1322,44 @@
             "in": "header"
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "purpose": {
+                    "type": "string",
+                    "enum": [
+                      "CUSTOMER_AVATAR",
+                      "MEMBER_PHOTO",
+                      "ITEM_IMAGE",
+                      "PRIVATE_DOCUMENT"
+                    ]
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*\\/[a-z0-9][a-z0-9!#$&^_.+-]*$"
+                  },
+                  "size": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "purpose",
+                  "contentType",
+                  "size"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Alert",
+            "description": "Upload target",
             "content": {
               "application/json": {
                 "schema": {
@@ -1863,99 +1377,48 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "kind": {
+                        "key": {
                           "type": "string",
-                          "enum": [
-                            "ERROR_RATE_SPIKE",
-                            "JOB_FAILED",
-                            "ITEM_FLAGGED"
-                          ]
+                          "description": "Server-generated storage key; save it in the entity after confirming."
                         },
-                        "severity": {
-                          "type": "string",
-                          "enum": [
-                            "INFO",
-                            "WARNING",
-                            "CRITICAL"
-                          ]
+                        "maxBytes": {
+                          "type": "number"
                         },
-                        "title": {
-                          "type": "string"
-                        },
-                        "titles": {
+                        "upload": {
                           "type": "object",
                           "properties": {
-                            "ar": {
+                            "url": {
                               "type": "string"
                             },
-                            "en": {
+                            "method": {
+                              "type": "string",
+                              "enum": [
+                                "PUT"
+                              ]
+                            },
+                            "headers": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "string"
+                              },
+                              "description": "Send these headers with the PUT."
+                            },
+                            "expiresAt": {
                               "type": "string"
                             }
                           },
                           "required": [
-                            "ar",
-                            "en"
+                            "url",
+                            "method",
+                            "headers",
+                            "expiresAt"
                           ]
-                        },
-                        "entityType": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "enum": [
-                            "ITEM",
-                            null
-                          ]
-                        },
-                        "entityId": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "data": {
-                          "type": "object",
-                          "additionalProperties": {}
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "NEW",
-                            "ACKNOWLEDGED"
-                          ]
-                        },
-                        "emailedAt": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "acknowledgedAt": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string"
                         }
                       },
                       "required": [
-                        "id",
-                        "kind",
-                        "severity",
-                        "title",
-                        "titles",
-                        "entityType",
-                        "entityId",
-                        "data",
-                        "status",
-                        "emailedAt",
-                        "acknowledgedAt",
-                        "createdAt"
+                        "key",
+                        "maxBytes",
+                        "upload"
                       ]
                     },
                     "meta": {
@@ -2011,6 +1474,16 @@
               }
             }
           },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
           "503": {
             "description": "A dependency is unavailable",
             "content": {
@@ -2024,13 +1497,12 @@
         }
       }
     },
-    "/admin/v1/exports": {
+    "/admin/v1/uploads/confirm": {
       "post": {
         "tags": [
-          "Exports"
+          "Uploads"
         ],
-        "summary": "Request an Excel / CSV / PDF export of the items or the audit log",
-        "description": "Runs in the background (audited). Poll `GET /exports/{id}` until `status` is DONE and use `downloadUrl`. More than 10 000 rows fails with `TOO_MANY_ROWS`: narrow the filter. PDF text is Latin only.",
+        "summary": "Confirm an uploaded file (real type and size are checked); rejected files are deleted",
         "parameters": [
           {
             "schema": {
@@ -2048,116 +1520,28 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "ITEMS"
-                        ]
-                      },
-                      "format": {
-                        "type": "string",
-                        "enum": [
-                          "XLSX",
-                          "CSV",
-                          "PDF"
-                        ]
-                      },
-                      "params": {
-                        "type": "object",
-                        "properties": {
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "ACTIVE",
-                              "INACTIVE",
-                              "ARCHIVED"
-                            ]
-                          },
-                          "q": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 100
-                          }
-                        }
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "format",
-                      "params"
-                    ]
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "kind": {
-                        "type": "string",
-                        "enum": [
-                          "AUDIT_LOGS"
-                        ]
-                      },
-                      "format": {
-                        "type": "string",
-                        "enum": [
-                          "XLSX",
-                          "CSV",
-                          "PDF"
-                        ]
-                      },
-                      "params": {
-                        "type": "object",
-                        "properties": {
-                          "adminId": {
-                            "type": "string",
-                            "pattern": "^[a-fA-F0-9]{24}$"
-                          },
-                          "action": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 100
-                          },
-                          "entityType": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 100
-                          },
-                          "entityId": {
-                            "type": "string",
-                            "minLength": 1,
-                            "maxLength": 100
-                          },
-                          "from": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "to": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
-                      }
-                    },
-                    "required": [
-                      "kind",
-                      "format",
-                      "params"
-                    ]
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   }
+                },
+                "required": [
+                  "key"
                 ]
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Export",
+          "200": {
+            "description": "Confirmed",
             "content": {
               "application/json": {
                 "schema": {
@@ -2175,82 +1559,20 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "id": {
+                        "key": {
                           "type": "string"
                         },
-                        "kind": {
-                          "type": "string",
-                          "enum": [
-                            "ITEMS",
-                            "AUDIT_LOGS"
-                          ]
-                        },
-                        "format": {
-                          "type": "string",
-                          "enum": [
-                            "XLSX",
-                            "CSV",
-                            "PDF"
-                          ]
-                        },
-                        "params": {
-                          "type": "object",
-                          "additionalProperties": {}
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "QUEUED",
-                            "RUNNING",
-                            "DONE",
-                            "FAILED"
-                          ]
-                        },
-                        "rowCount": {
-                          "type": [
-                            "number",
-                            "null"
-                          ]
-                        },
-                        "failure": {
+                        "url": {
                           "type": [
                             "string",
                             "null"
                           ],
-                          "enum": [
-                            "TOO_MANY_ROWS",
-                            "GENERATION_FAILED",
-                            null
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        },
-                        "finishedAt": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "downloadUrl": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "description": "Signed link valid for 5 minutes; only when DONE"
+                          "description": "CDN URL; null for private files."
                         }
                       },
                       "required": [
-                        "id",
-                        "kind",
-                        "format",
-                        "params",
-                        "status",
-                        "rowCount",
-                        "failure",
-                        "createdAt",
-                        "finishedAt",
-                        "downloadUrl"
+                        "key",
+                        "url"
                       ]
                     },
                     "meta": {
@@ -2298,1201 +1620,6 @@
           },
           "404": {
             "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Exports"
-        ],
-        "summary": "Exports, newest first",
-        "parameters": [
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 1000000,
-              "default": 1
-            },
-            "required": false,
-            "name": "page",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 100,
-              "default": 25
-            },
-            "required": false,
-            "name": "pageSize",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Exports",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "kind": {
-                            "type": "string",
-                            "enum": [
-                              "ITEMS",
-                              "AUDIT_LOGS"
-                            ]
-                          },
-                          "format": {
-                            "type": "string",
-                            "enum": [
-                              "XLSX",
-                              "CSV",
-                              "PDF"
-                            ]
-                          },
-                          "params": {
-                            "type": "object",
-                            "additionalProperties": {}
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "QUEUED",
-                              "RUNNING",
-                              "DONE",
-                              "FAILED"
-                            ]
-                          },
-                          "rowCount": {
-                            "type": [
-                              "number",
-                              "null"
-                            ]
-                          },
-                          "failure": {
-                            "type": [
-                              "string",
-                              "null"
-                            ],
-                            "enum": [
-                              "TOO_MANY_ROWS",
-                              "GENERATION_FAILED",
-                              null
-                            ]
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          },
-                          "finishedAt": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "downloadUrl": {
-                            "type": [
-                              "string",
-                              "null"
-                            ],
-                            "description": "Signed link valid for 5 minutes; only when DONE"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "kind",
-                          "format",
-                          "params",
-                          "status",
-                          "rowCount",
-                          "failure",
-                          "createdAt",
-                          "finishedAt",
-                          "downloadUrl"
-                        ]
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/exports/{id}": {
-      "get": {
-        "tags": [
-          "Exports"
-        ],
-        "summary": "One export with its status and, when DONE, a fresh download link",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "pattern": "^[a-fA-F0-9]{24}$"
-            },
-            "required": true,
-            "name": "id",
-            "in": "path"
-          },
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Export",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "kind": {
-                          "type": "string",
-                          "enum": [
-                            "ITEMS",
-                            "AUDIT_LOGS"
-                          ]
-                        },
-                        "format": {
-                          "type": "string",
-                          "enum": [
-                            "XLSX",
-                            "CSV",
-                            "PDF"
-                          ]
-                        },
-                        "params": {
-                          "type": "object",
-                          "additionalProperties": {}
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "QUEUED",
-                            "RUNNING",
-                            "DONE",
-                            "FAILED"
-                          ]
-                        },
-                        "rowCount": {
-                          "type": [
-                            "number",
-                            "null"
-                          ]
-                        },
-                        "failure": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "enum": [
-                            "TOO_MANY_ROWS",
-                            "GENERATION_FAILED",
-                            null
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        },
-                        "finishedAt": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "downloadUrl": {
-                          "type": [
-                            "string",
-                            "null"
-                          ],
-                          "description": "Signed link valid for 5 minutes; only when DONE"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "kind",
-                        "format",
-                        "params",
-                        "status",
-                        "rowCount",
-                        "failure",
-                        "createdAt",
-                        "finishedAt",
-                        "downloadUrl"
-                      ]
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/profile": {
-      "get": {
-        "tags": [
-          "Admin profile"
-        ],
-        "summary": "The signed-in admin’s profile",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/AdminProfile"
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict with the current state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Business rule violated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Admin profile"
-        ],
-        "summary": "Replace the alert recipients",
-        "description": "Audited. At most `ADMIN_ALERT_EMAILS_MAX` distinct addresses; an empty list sends the alerts to the sign-in address.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "alertEmails": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "maxLength": 254,
-                      "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
-                    },
-                    "maxItems": 10
-                  }
-                },
-                "required": [
-                  "alertEmails"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Profile",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/AdminProfile"
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict with the current state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Business rule violated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/profile/password": {
-      "post": {
-        "tags": [
-          "Admin profile"
-        ],
-        "summary": "Change the password",
-        "description": "A wrong current password counts toward the sign-in lockout and answers 403 `CURRENT_PASSWORD_INVALID` (not 401, so the panel keeps the session); 429 while locked. The new password is at least 12 characters and differs from the current one (422 `VALIDATION_ERROR`). Every session of the admin ends: sign in again.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "currentPassword": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  },
-                  "newPassword": {
-                    "type": "string",
-                    "minLength": 12,
-                    "maxLength": 256
-                  }
-                },
-                "required": [
-                  "currentPassword",
-                  "newPassword"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Changed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "null"
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict with the current state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Business rule violated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/profile/email/request": {
-      "post": {
-        "tags": [
-          "Admin profile"
-        ],
-        "summary": "Step 1 of an email change: code to the new address",
-        "description": "Needs the current password (same lockout rules, 403 `CURRENT_PASSWORD_INVALID`). The new address must be free (409 `EMAIL_ALREADY_USED`). A code is emailed to the NEW address; nothing changes until step 2.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "newEmail": {
-                    "type": "string",
-                    "maxLength": 254,
-                    "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
-                  },
-                  "password": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 256
-                  }
-                },
-                "required": [
-                  "newEmail",
-                  "password"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Code sent",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "expiresAt": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "The emailed code stops working at this instant."
-                        },
-                        "resendAfterSeconds": {
-                          "type": "integer"
-                        }
-                      },
-                      "required": [
-                        "expiresAt",
-                        "resendAfterSeconds"
-                      ]
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict with the current state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Business rule violated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "Too many requests",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "503": {
-            "description": "A dependency is unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/admin/v1/profile/email/verify": {
-      "post": {
-        "tags": [
-          "Admin profile"
-        ],
-        "summary": "Step 2 of an email change: confirm the code",
-        "description": "The right code (once, 5 minutes) changes the sign-in email and ends every session. Errors: 422 `OTP_INVALID` / `OTP_EXPIRED`; a wrong code counts toward the lockout (429 while locked); 409 `EMAIL_ALREADY_USED` if the address was taken meanwhile.",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                    "type": "string",
-                    "pattern": "^[0-9]{4,10}$"
-                  }
-                },
-                "required": [
-                  "code"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Changed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/AdminProfile"
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/PaginationMeta"
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing or invalid access token",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Not allowed (token scope or permission)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict with the current state",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Business rule violated",
             "content": {
               "application/json": {
                 "schema": {
@@ -3527,9 +1654,9 @@
     "/admin/v1/items": {
       "get": {
         "tags": [
-          "Admin items"
+          "Items"
         ],
-        "summary": "List items (paginated, searchable, filterable by status)",
+        "summary": "All items (owner, status, tag and title filters)",
         "parameters": [
           {
             "schema": {
@@ -3556,18 +1683,8 @@
           {
             "schema": {
               "type": "string",
-              "maxLength": 100
-            },
-            "required": false,
-            "name": "q",
-            "in": "query"
-          },
-          {
-            "schema": {
-              "type": "string",
               "enum": [
                 "ACTIVE",
-                "INACTIVE",
                 "ARCHIVED"
               ]
             },
@@ -3579,16 +1696,40 @@
             "schema": {
               "type": "string",
               "enum": [
-                "name",
-                "-name",
-                "createdAt",
-                "-createdAt",
-                "updatedAt",
-                "-updatedAt"
+                "CUSTOMER",
+                "MERCHANT"
               ]
             },
             "required": false,
-            "name": "sort",
+            "name": "ownerType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{24}$"
+            },
+            "required": false,
+            "name": "ownerId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 30
+            },
+            "required": false,
+            "name": "tag",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "required": false,
+            "name": "q",
             "in": "query"
           },
           {
@@ -3626,50 +1767,7 @@
                     "data": {
                       "type": "array",
                       "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          },
-                          "status": {
-                            "type": "string",
-                            "enum": [
-                              "ACTIVE",
-                              "INACTIVE",
-                              "ARCHIVED"
-                            ]
-                          },
-                          "createdAt": {
-                            "type": "string"
-                          },
-                          "updatedAt": {
-                            "type": "string"
-                          },
-                          "updatedBy": {
-                            "type": [
-                              "string",
-                              "null"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "name",
-                          "description",
-                          "status",
-                          "createdAt",
-                          "updatedAt",
-                          "updatedBy"
-                        ]
+                        "$ref": "#/components/schemas/AdminItem"
                       }
                     },
                     "meta": {
@@ -3697,7 +1795,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "Missing or invalid access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -3707,154 +1805,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Admin items"
-        ],
-        "summary": "Create an item (audited, reason required)",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ar",
-                "en"
-              ],
-              "description": "Response language; default ar."
-            },
-            "required": false,
-            "description": "Response language; default ar.",
-            "name": "Accept-Language",
-            "in": "header"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 120
-                  },
-                  "description": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "maxLength": 1000
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "ACTIVE",
-                      "INACTIVE",
-                      "ARCHIVED"
-                    ]
-                  },
-                  "reason": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 1000
-                  }
-                },
-                "required": [
-                  "name",
-                  "reason"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Item",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "enum": [
-                        true
-                      ]
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "ACTIVE",
-                            "INACTIVE",
-                            "ARCHIVED"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string"
-                        },
-                        "updatedBy": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "status",
-                        "createdAt",
-                        "updatedAt",
-                        "updatedBy"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "success",
-                    "message",
-                    "data"
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation error",
+            "description": "Not allowed (token scope or permission)",
             "content": {
               "application/json": {
                 "schema": {
@@ -3863,8 +1814,8 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
+          "404": {
+            "description": "Not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -3873,8 +1824,8 @@
               }
             }
           },
-          "403": {
-            "description": "Forbidden",
+          "422": {
+            "description": "Business rule violated",
             "content": {
               "application/json": {
                 "schema": {
@@ -3883,8 +1834,18 @@
               }
             }
           },
-          "409": {
-            "description": "ITEM_NAME_TAKEN",
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -3899,13 +1860,14 @@
     "/admin/v1/items/{id}": {
       "get": {
         "tags": [
-          "Admin items"
+          "Items"
         ],
-        "summary": "Read one item",
+        "summary": "One item with its owner",
         "parameters": [
           {
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -3944,50 +1906,10 @@
                       "type": "string"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "ACTIVE",
-                            "INACTIVE",
-                            "ARCHIVED"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string"
-                        },
-                        "updatedBy": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "status",
-                        "createdAt",
-                        "updatedAt",
-                        "updatedBy"
-                      ]
+                      "$ref": "#/components/schemas/AdminItem"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
                     }
                   },
                   "required": [
@@ -4010,7 +1932,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "Missing or invalid access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -4020,7 +1942,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "Not allowed (token scope or permission)",
             "content": {
               "application/json": {
                 "schema": {
@@ -4038,18 +1960,51 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
-      },
-      "patch": {
+      }
+    },
+    "/admin/v1/items/{id}/archive": {
+      "post": {
         "tags": [
-          "Admin items"
+          "Items"
         ],
-        "summary": "Edit an item (audited, reason required)",
+        "summary": "Archive an item with a reason (audit log + owner notification)",
         "parameters": [
           {
             "schema": {
-              "type": "string"
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{24}$"
             },
             "required": true,
             "name": "id",
@@ -4077,29 +2032,9 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string",
-                    "minLength": 1,
-                    "maxLength": 120
-                  },
-                  "description": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "maxLength": 1000
-                  },
-                  "status": {
-                    "type": "string",
-                    "enum": [
-                      "ACTIVE",
-                      "INACTIVE",
-                      "ARCHIVED"
-                    ]
-                  },
                   "reason": {
                     "type": "string",
-                    "minLength": 1,
+                    "minLength": 3,
                     "maxLength": 1000
                   }
                 },
@@ -4128,50 +2063,10 @@
                       "type": "string"
                     },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "status": {
-                          "type": "string",
-                          "enum": [
-                            "ACTIVE",
-                            "INACTIVE",
-                            "ARCHIVED"
-                          ]
-                        },
-                        "createdAt": {
-                          "type": "string"
-                        },
-                        "updatedAt": {
-                          "type": "string"
-                        },
-                        "updatedBy": {
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "name",
-                        "description",
-                        "status",
-                        "createdAt",
-                        "updatedAt",
-                        "updatedBy"
-                      ]
+                      "$ref": "#/components/schemas/AdminItem"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
                     }
                   },
                   "required": [
@@ -4194,7 +2089,7 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "Missing or invalid access token",
             "content": {
               "application/json": {
                 "schema": {
@@ -4204,7 +2099,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "Not allowed (token scope or permission)",
             "content": {
               "application/json": {
                 "schema": {
@@ -4223,8 +2118,185 @@
               }
             }
           },
-          "409": {
-            "description": "ITEM_NAME_TAKEN or INVALID_TRANSITION",
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/v1/items/{id}/restore": {
+      "post": {
+        "tags": [
+          "Items"
+        ],
+        "summary": "Restore an archived item with a reason (audit log + owner notification)",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{24}$"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 1000
+                  }
+                },
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminItem"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
             "content": {
               "application/json": {
                 "schema": {

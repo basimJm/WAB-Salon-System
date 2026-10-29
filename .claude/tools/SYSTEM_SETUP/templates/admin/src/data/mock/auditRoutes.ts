@@ -10,7 +10,7 @@ const log = (n: number, action: string, entityType: string, withDiff: boolean) =
   action,
   entityType,
   entityId: entityType === 'ITEM' ? '64d100000000000000000001' : '64c000000000000000000001',
-  ...(withDiff ? { before: { status: 'ACTIVE' }, after: { status: 'INACTIVE' } } : {}),
+  ...(withDiff ? { before: { status: 'ACTIVE' }, after: { status: 'ARCHIVED' } } : {}),
   reason: `Reason ${String(n)}`,
   ip: '203.0.113.7', // hardcoded-ok: mock data
   userAgent: 'Mozilla/5.0',

@@ -10,9 +10,7 @@ import { makeContainer, renderWithApp } from './helpers/render';
 const PAGES: ReadonlyArray<readonly [string, () => Promise<{ default: ComponentType }>]> = [
   ['items', () => import('@/presentation/items/ItemsPage')],
   ['settings', () => import('@/presentation/settings/SettingsPage')],
-  ['alerts', () => import('@/presentation/alerts/AlertsPage')],
   ['audit', () => import('@/presentation/audit/AuditPage')],
-  ['exports', () => import('@/presentation/exports/ExportsPage')],
 ];
 const LANGUAGES: readonly Language[] = ['en', 'ar'];
 

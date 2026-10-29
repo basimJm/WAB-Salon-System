@@ -7,7 +7,6 @@ import { IconButton } from '../components/core/IconButton';
 import { useTheme } from '@/design/theme/useTheme';
 import { useLanguage } from '../hooks/useLanguage';
 import { AdminAvatar } from './AdminAvatar';
-import { AlertsBell } from './AlertsBell';
 
 export interface TopbarProps {
   adminName: string;
@@ -18,11 +17,9 @@ export interface TopbarProps {
   menuExpanded: boolean;
   onMenu: () => void;
   onLogout: () => void;
-  /** Alerts still NEW: the bell counter; the bell opens the latest ones (design dropdown). */
-  alertCount?: number;
 }
 
-/** Design `Admin Topbar`: language, theme, alerts bell and the admin menu. */
+/** Design `Admin Topbar`: language, theme and the admin menu. */
 export function Topbar({
   adminName,
   adminEmail,
@@ -31,7 +28,6 @@ export function Topbar({
   menuExpanded,
   onMenu,
   onLogout,
-  alertCount,
 }: TopbarProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -64,7 +60,6 @@ export function Topbar({
         label={t(theme === 'dark' ? 'topbar.lightTheme' : 'topbar.darkTheme')}
         onClick={toggleTheme}
       />
-      <AlertsBell count={alertCount ?? 0} />
       <Menu
         label={name}
         triggerClassName="app-topbar__admin"
@@ -86,11 +81,6 @@ export function Topbar({
           </>
         }
         items={[
-          {
-            key: 'profile',
-            label: t('topbar.profile'),
-            onSelect: () => void navigate(ROUTES.profile),
-          },
           { key: 'about', label: t('topbar.about'), onSelect: () => void navigate(ROUTES.about) },
           { key: 'logout', label: t('topbar.logout'), onSelect: onLogout, danger: true },
         ]}

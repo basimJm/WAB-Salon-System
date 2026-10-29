@@ -45,16 +45,16 @@ describe('navigation tree', () => {
   });
 
   it('matches the PRD sidebar: one entry per module, the items module first', () => {
-    expect(NAV_ITEMS.map((i) => i.id)).toEqual(['items', 'exports', 'alerts', 'settings', 'audit']);
+    expect(NAV_ITEMS.map((i) => i.id)).toEqual(['items', 'settings', 'audit']);
     expect(NAV_ITEMS.every((i) => (i.children ?? []).length === 0)).toBe(true);
   });
 });
 
 describe('Sidebar counters', () => {
   it('marks the current module and shows its counter; 99+ above 99; nothing for zero', () => {
-    sidebar(ROUTES.alerts, { alerts: 150, items: 0 });
-    expect(screen.getByRole('link', { name: /^Alerts/ })).toHaveClass('app-navitem--active');
-    expect(within(screen.getByRole('link', { name: /^Alerts/ })).getByText('99+')).toBeVisible();
+    sidebar(ROUTES.settings, { settings: 150, items: 0 });
+    expect(screen.getByRole('link', { name: /^Settings/ })).toHaveClass('app-navitem--active');
+    expect(within(screen.getByRole('link', { name: /^Settings/ })).getByText('99+')).toBeVisible();
     expect(within(screen.getByRole('link', { name: /^Items/ })).queryByText('0')).toBeNull();
   });
 
@@ -67,7 +67,7 @@ describe('Sidebar counters', () => {
           collapsed={false}
           open
           onNavigate={() => undefined}
-          counters={{ alerts: 12 }}
+          counters={{ settings: 12 }}
         />,
       ),
       undefined,
@@ -77,9 +77,9 @@ describe('Sidebar counters', () => {
   });
 
   it('a collapsed sidebar is the icon rail with counter badges', () => {
-    sidebar(ROUTES.alerts, { alerts: 4 }, true);
+    sidebar(ROUTES.settings, { settings: 4 }, true);
     expect(screen.queryByRole('button', { name: /^(Expand|Collapse) / })).toBeNull();
-    expect(within(screen.getByRole('link', { name: /^Alerts/ })).getByText('4')).toBeVisible();
+    expect(within(screen.getByRole('link', { name: /^Settings/ })).getByText('4')).toBeVisible();
   });
 });
 
