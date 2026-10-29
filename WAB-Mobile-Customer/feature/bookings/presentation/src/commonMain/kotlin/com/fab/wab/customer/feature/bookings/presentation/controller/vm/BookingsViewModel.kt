@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.bookings.presentation.controller.vm
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.AnalyticsAction
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.analyticsParams
@@ -77,6 +78,7 @@ class BookingsViewModel(
             UiAction.OnLoginClick -> emitSideEffect(SideEffect.OpenLogin)
             UiAction.OnBookNowClick -> emitSideEffect(SideEffect.OpenHome)
             is UiAction.OnTabSelect -> selectTab(event.tab)
+            is UiAction.OnBusinessTypeSelect -> selectBusinessType(event.businessType)
             is UiAction.OnQueryChange -> {
                 updateState { copy(query = event.value.take(BookingsDefaults.MAX_QUERY_LENGTH)) }
                 typed.value = uiState.value.query.trim()
@@ -112,12 +114,19 @@ class BookingsViewModel(
         load()
     }
 
+    private fun selectBusinessType(type: BusinessType?) {
+        if (type == uiState.value.businessType) return
+        track(BookingsAnalytics.ACTION_BUSINESS_TYPE, BookingsAnalytics.PARAM_VALUE to (type?.code ?: BookingsAnalytics.VALUE_ALL))
+        updateState { copy(businessType = type, bookings = emptyList(), loaded = false) }
+        load()
+    }
+
     private fun load(refresh: Boolean = false) {
         loadJob?.cancel()
         loadJob = scope.launch {
             updateState { copy(loading = !refresh, refreshing = refresh, loadingMore = false, error = null, offline = false) }
             val current = uiState.value
-            when (val result = deps.loadBookings(current.tab, current.query, BookingsDefaults.FIRST_PAGE)) {
+            when (val result = deps.loadBookings(current.tab, current.query, BookingsDefaults.FIRST_PAGE, current.businessType)) {
                 is AppResult.Success -> updateState {
                     copy(loading = false, refreshing = false, loaded = true, bookings = result.data, hasMore = result.data.isFull())
                 }
@@ -139,7 +148,7 @@ class BookingsViewModel(
         loadJob = scope.launch {
             updateState { copy(loadingMore = true) }
             val page = current.bookings.size / BookingsDefaults.PAGE_SIZE + BookingsDefaults.FIRST_PAGE
-            when (val result = deps.loadBookings(current.tab, current.query, page)) {
+            when (val result = deps.loadBookings(current.tab, current.query, page, current.businessType)) {
                 is AppResult.Success -> updateState {
                     copy(loadingMore = false, bookings = bookings + result.data, hasMore = result.data.isFull())
                 }

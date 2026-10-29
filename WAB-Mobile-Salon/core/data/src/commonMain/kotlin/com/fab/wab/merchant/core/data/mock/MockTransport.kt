@@ -1,14 +1,19 @@
 package com.fab.wab.merchant.core.data.mock
 
+import com.fab.wab.merchant.core.data.contract.generated.MerchantOperations
 import com.fab.wab.merchant.core.domain.ErrorCode
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.delay
 import kotlinx.io.IOException
+
+/** Mock `PATCH /salon/audience` widens the mock salon so the re-read salon serves both (BUSINESS_DOMAIN §5.19). */
+private val AUDIENCE_PATH = MerchantOperations.patchSalonAudience.path
 
 private const val PATH_PARAM_PATTERN = "[^/]+"
 private const val ARABIC = "ar"
@@ -75,7 +80,8 @@ fun createMockEngine(
                 respond(errorEnvelope(ErrorCode.NOT_FOUND, request.url.encodedPath), HttpStatusCode.NotFound, json)
             } else {
                 val body = if (scenarios.current.value == MockScenario.Empty) emptyData(fixture) else fixture
-                val patched = patchFixture(body, scenarios.salonState.value, scenarios.member.value)
+                if (request.method == HttpMethod.Patch && request.url.encodedPath.endsWith(AUDIENCE_PATH)) scenarios.widenAudience()
+                val patched = patchFixture(body, scenarios.salonState.value, scenarios.member.value, scenarios.businessKind.value)
                     .let { patchPendingBooking(it, request.url.encodedPath, scenarios.pendingBookings.value) }
                 respond(localizeFixture(patched, language), HttpStatusCode.OK, json)
             }

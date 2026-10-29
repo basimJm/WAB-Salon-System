@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.bookings.presentation
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.auth.AuthTokens
@@ -46,9 +47,17 @@ private fun booking(id: String) = BookingSummary(
 
 private class BookingsFake : BookingsRepository {
     val calls = mutableListOf<Triple<BookingTab, String, Int>>()
+    val types = mutableListOf<BusinessType?>()
     var perPage = 10
-    override suspend fun list(tab: BookingTab, query: String, page: Int, pageSize: Int): AppResult<List<BookingSummary>> {
+    override suspend fun list(
+        tab: BookingTab,
+        query: String,
+        page: Int,
+        pageSize: Int,
+        businessType: BusinessType?,
+    ): AppResult<List<BookingSummary>> {
         calls += Triple(tab, query, page)
+        types += businessType
         return AppResult.Success(List(perPage) { booking("$page-$it") })
     }
     override suspend fun details(bookingId: String): AppResult<BookingDetails> = AppResult.Loading
@@ -109,6 +118,23 @@ class BookingsViewModelTest {
         user.onEvent(UiAction.OnLoadMore)
         assertEquals(2, repository.calls.last().third)
         assertEquals(20, user.state.value.bookings.size)
+    }
+
+    @Test
+    fun businessTypeFilterReloadsAndKeepsTheTypeWhilePaging() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(USER)
+        assertEquals(listOf<BusinessType?>(null), repository.types, "All by default")
+        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.CLINIC))
+        assertEquals(BusinessType.CLINIC, vm.state.value.businessType)
+        assertEquals(BusinessType.CLINIC, repository.types.last())
+        vm.onEvent(UiAction.OnLoadMore)
+        assertEquals(2, repository.calls.last().third)
+        assertEquals(BusinessType.CLINIC, repository.types.last())
+        val count = repository.calls.size
+        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.CLINIC))
+        assertEquals(count, repository.calls.size, "the selected filter does not reload")
+        vm.onEvent(UiAction.OnBusinessTypeSelect(null))
+        assertEquals(null, repository.types.last())
     }
 
     @Test

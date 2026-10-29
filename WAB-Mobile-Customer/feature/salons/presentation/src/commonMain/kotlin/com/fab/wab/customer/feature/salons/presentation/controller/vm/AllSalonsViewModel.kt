@@ -7,6 +7,7 @@ import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.SalonQuery
@@ -56,7 +57,10 @@ class AllSalonsViewModel(
     entry: AllSalonsEntry,
     private val deps: AllSalonsDependencies,
     testScope: CoroutineScope? = null,
-) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(filters = entry.toFilters()), testScope) {
+) : BaseViewModel<UiState, UiAction, SideEffect>(
+    initialState = UiState(filters = entry.toFilters(), businessType = entry.businessType),
+    testScope,
+) {
 
     private val entryGender = entry.gender
     private var started = false
@@ -91,6 +95,7 @@ class AllSalonsViewModel(
                 emitSideEffect(SideEffect.OpenFilters(uiState.value.filters))
             }
             is UiAction.OnChipRemove -> removeChip(event.chip)
+            is UiAction.OnBusinessTypeSelect -> selectBusinessType(event.businessType)
             is UiAction.OnFiltersApplied -> {
                 updateState { copy(filters = event.filters) }
                 load()
@@ -106,6 +111,13 @@ class AllSalonsViewModel(
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
         }
+    }
+
+    private fun selectBusinessType(type: BusinessType?) {
+        if (type == uiState.value.businessType) return
+        track(SalonsAnalytics.ACTION_BUSINESS_TYPE, SalonsAnalytics.PARAM_VALUE to (type?.code ?: SalonsAnalytics.VALUE_ALL))
+        updateState { copy(businessType = type) }
+        load()
     }
 
     private fun removeChip(chip: FilterChipId) {
@@ -131,7 +143,7 @@ class AllSalonsViewModel(
         loadJob = scope.launch {
             updateState { copy(loading = !refresh, refreshing = refresh, loadingMore = false, error = null, offline = false) }
             val location = locationForNearest() ?: return@launch
-            val query = SalonQuery(gender, uiState.value.text, uiState.value.filters, location.value)
+            val query = SalonQuery(gender, uiState.value.businessType, uiState.value.text, uiState.value.filters, location.value)
             when (val result = deps.searchSalons(query)) {
                 is AppResult.Success -> updateState {
                     copy(
@@ -153,7 +165,7 @@ class AllSalonsViewModel(
             updateState { copy(loadingMore = true) }
             val location = locationForNearest() ?: return@launch
             val page = current.salons.size / SalonQueryDefaults.PAGE_SIZE + SalonQueryDefaults.FIRST_PAGE
-            val query = SalonQuery(gender, current.text, current.filters, location.value, page = page)
+            val query = SalonQuery(gender, current.businessType, current.text, current.filters, location.value, page = page)
             when (val result = deps.searchSalons(query)) {
                 is AppResult.Success -> updateState {
                     copy(loadingMore = false, salons = salons + result.data, hasMore = result.data.size >= query.pageSize)

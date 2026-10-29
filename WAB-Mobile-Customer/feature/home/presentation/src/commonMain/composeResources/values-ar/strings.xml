@@ -5,11 +5,15 @@
     <string name="home_search_hint">ابحث عن اسم الصالون، الخدمة أو الفئة</string>
     <string name="home_tab_men">رجال</string>
     <string name="home_tab_women">نساء</string>
-    <string name="home_services">الخدمات</string>
+    <string name="home_salon_services">خدمات الصالونات</string>
+    <string name="home_clinic_services">خدمات العيادات</string>
     <string name="home_see_more">عرض المزيد</string>
     <string name="home_recommended">صالونات موصى بها</string>
+    <string name="home_recommended_clinics">عيادات موصى بها</string>
     <string name="home_see_all">عرض الكل</string>
-    <string name="home_nearest">الأقرب إليك</string>
+    <string name="home_nearest">أقرب الصالونات</string>
+    <string name="home_nearest_clinics">أقرب العيادات</string>
+    <string name="home_nearest_clinics_empty">لا توجد عيادات تجميل ضمن نطاق 10 كم من موقعك حالياً.</string>
     <string name="home_nearest_empty">لا توجد صالونات ضمن نطاق 10 كم من موقعك حالياً.</string>
     <string name="home_nearest_location_off">فعّل خدمات الموقع لعرض الصالونات القريبة منك</string>
     <string name="home_enable_location">تفعيل خدمات الموقع</string>

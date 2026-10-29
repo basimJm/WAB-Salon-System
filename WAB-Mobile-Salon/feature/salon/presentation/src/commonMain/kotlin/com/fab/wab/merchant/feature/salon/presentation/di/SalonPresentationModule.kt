@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.common.BusinessTime
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.domain.branch.BranchSelection
 import com.fab.wab.merchant.core.domain.branch.branchScopeOf
+import com.fab.wab.merchant.core.domain.permission.permissionSet
 import com.fab.wab.merchant.core.domain.session.SessionStore
 import com.fab.wab.merchant.designsystem.components.map.MapPickerController
 import com.fab.wab.merchant.designsystem.components.map.MapPickerDependencies
@@ -24,6 +25,7 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.Res
 import com.fab.wab.merchant.feature.salon.presentation.resources.schedule_change_reason
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
@@ -58,6 +60,7 @@ val salonPresentationModule = module {
             upload = get(),
             map = get(),
             analytics = get(),
+            isOwner = get<SessionStore>().state.map { it.permissionSet().isOwner },
         )
     }
     viewModel { SalonProfileViewModel(deps = get()) }

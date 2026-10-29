@@ -9,7 +9,8 @@ const val MOCK_DASHBOARD_FIXTURE = "mockDashboard"
 private const val BRANCH = """{"id":"b-main","name":"__TEXT__"}"""
 
 private fun row(id: String, ref: String, status: String, bride: Boolean, start: String, end: String, persons: String) =
-    """{"id":"$id","referenceNumber":"$ref","status":"$status","paymentMethod":"DEPOSIT","paymentStatus":"PAID_DEPOSIT",""" +
+    """{"id":"$id","referenceNumber":"$ref","status":"$status","businessType":"SALON","salonAudience":"FEMALE",""" +
+        """"paymentMethod":"DEPOSIT","paymentStatus":"PAID_DEPOSIT",""" +
         """"hasBride":$bride,"appointmentStart":"$start","appointmentEnd":"$end","respondBy":"2026-10-26T18:00:00Z",""" +
         """"requestedAt":"2026-10-25T08:30:00Z","personsCount":$persons,"total":"45.000","branch":$BRANCH,""" +
         """"customer":{"id":"c-$id","name":"__TEXT__","phone":"+962790000000"},""" +

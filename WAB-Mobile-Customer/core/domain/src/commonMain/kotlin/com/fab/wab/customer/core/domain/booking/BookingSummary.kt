@@ -1,5 +1,6 @@
 package com.fab.wab.customer.core.domain.booking
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.BranchRef
 
 /** One row of `GET /bookings` (PRD S14 card); instants are ISO UTC, money is JOD text. */
@@ -20,4 +21,6 @@ data class BookingSummary(
     val staffNames: List<String>,
     /** The salon's rejection reason; null unless REJECTED (PRD S14 card, SRV-170). */
     val rejection: BookingReason? = null,
+    /** Salon or clinic, snapshotted on the booking (BUSINESS_DOMAIN §5.19). */
+    val businessType: BusinessType = BusinessType.SALON,
 )

@@ -34,7 +34,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "a7f908fa3ea86a5dade4d23f",
@@ -74,7 +76,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "6e484f368c336684ad444753",
@@ -108,7 +112,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "7465488b4e44ddcaf2787630",
@@ -142,7 +148,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "f6f7997b6985ea68e4a38ae8",
@@ -176,7 +184,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "c27cb1bcaf1715c362c865ef",
@@ -216,7 +226,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "0f8a7121b242ff9c108d869b",
@@ -262,7 +274,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "d1103ee9ea5694d040ecd0fc",
@@ -296,7 +310,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "e54d30ae1a5c023e7070aa17",
@@ -330,7 +346,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     },
     {
       "id": "2860cfaa6addb4a3a2719a9a",
@@ -370,7 +388,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "businessType": "SALON",
+      "salonAudience": "FEMALE"
     }
   ],
   "meta": {

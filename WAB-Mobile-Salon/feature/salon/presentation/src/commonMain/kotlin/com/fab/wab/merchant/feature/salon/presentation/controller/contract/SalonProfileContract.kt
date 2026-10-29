@@ -38,7 +38,12 @@ sealed interface SalonProfileContract {
         val unsavedDialog: Boolean = false,
         val previewOpen: Boolean = false,
         val error: String? = null,
+        /** Only the owner may widen the audience (BUSINESS_DOMAIN §5.19); hidden for everyone else. */
+        val isOwner: Boolean = false,
+        val widenDialog: Boolean = false,
+        val widening: Boolean = false,
     ) {
+        val canWidenAudience: Boolean get() = isOwner && salon?.kind?.canWidenAudience == true
         val errors: Set<ProfileField> get() = profileErrors(form)
         val visibleErrors: Set<ProfileField> get() = if (showErrors) errors else emptySet()
         val uploading: Boolean get() = listOfNotNull(cover, profile).any { it.status is UploadStatus.Uploading }
@@ -71,10 +76,14 @@ sealed interface SalonProfileContract {
         data object OnSaveAndLeave : UiAction
         data object OnKeepEditing : UiAction
         data object OnRetry : UiAction
+        data object OnWidenAudience : UiAction
+        data object OnConfirmWiden : UiAction
+        data object OnDismissWiden : UiAction
     }
 
     sealed interface SideEffect {
         data object Saved : SideEffect
+        data object AudienceWidened : SideEffect
         data object NavigateBack : SideEffect
         data class ShowError(val message: String) : SideEffect
         data class OpenInMaps(val latitude: Double, val longitude: Double, val label: String) : SideEffect

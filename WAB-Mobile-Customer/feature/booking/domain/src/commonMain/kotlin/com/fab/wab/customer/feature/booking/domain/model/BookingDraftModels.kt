@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.booking.domain.model
 
+import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.core.domain.salon.SalonService
 
@@ -30,6 +31,8 @@ data class DraftPerson(
     val staff: StaffChoice? = null,
     /** End of the picked slot (server `slots[].end`); other persons' picks are sent with start AND end (CUS-060). */
     val end: String? = null,
+    /** The person's gender, sent with the draft and availability (BUSINESS_DOMAIN §5.19); null until chosen. */
+    val gender: Gender? = null,
 ) {
     val hasSlot: Boolean get() = start != null
 }
@@ -62,6 +65,10 @@ fun servicesOfferedTo(services: List<SalonService>, isBride: Boolean): List<Salo
     if (isBride) services else services.filterNot { it.brideOnly }
 
 /** A person who stops being a bride keeps only the services still offered to them. */
+/** §5.19: the person's gender; a man is never a bride, so the bride flag and bride-only picks are dropped. */
+fun DraftPerson.withGender(gender: Gender, salonServices: List<SalonService>): DraftPerson =
+    copy(gender = gender).let { if (gender != Gender.FEMALE && it.isBride) it.withBride(false, salonServices) else it }
+
 fun DraftPerson.withBride(isBride: Boolean, services: List<SalonService>): DraftPerson {
     val offered = servicesOfferedTo(services, isBride).mapTo(HashSet()) { it.id }
     return copy(isBride = isBride, serviceIds = serviceIds.filter { it in offered })

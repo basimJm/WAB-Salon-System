@@ -19,6 +19,7 @@ import kotlinx.serialization.json.JsonObject
 private const val ID = "id"
 private const val PAGE = "page"
 private const val PAGE_SIZE = "pageSize"
+private const val BUSINESS_TYPE = "businessType"
 private const val GENDER = "gender"
 
 class ServicesApi(private val client: HttpClient) {
@@ -28,9 +29,11 @@ class ServicesApi(private val client: HttpClient) {
             parameter(PAGE_SIZE, pageSize)
         }.body()
 
-    suspend fun catalog(gender: String, page: Int, pageSize: Int): BaseResponse<List<GetCatalogServicesDataItem>> =
+    /** BUSINESS_DOMAIN §5.19: the business's own type; [gender] narrows a MALE/FEMALE salon to its audience + BOTH. */
+    suspend fun catalog(businessType: String, gender: String?, page: Int, pageSize: Int): BaseResponse<List<GetCatalogServicesDataItem>> =
         client.get(MerchantOperations.getCatalogServices.path) {
-            parameter(GENDER, gender)
+            parameter(BUSINESS_TYPE, businessType)
+            gender?.let { parameter(GENDER, it) }
             parameter(PAGE, page)
             parameter(PAGE_SIZE, pageSize)
         }.body()

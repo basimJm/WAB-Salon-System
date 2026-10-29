@@ -20,8 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.fab.wab.merchant.app.resources.Res
+import com.fab.wab.merchant.app.resources.mock_business
 import com.fab.wab.merchant.app.resources.mock_chip
 import com.fab.wab.merchant.app.resources.mock_employee
+import com.fab.wab.merchant.app.resources.mock_kind_both
+import com.fab.wab.merchant.app.resources.mock_kind_clinic
+import com.fab.wab.merchant.app.resources.mock_kind_men
+import com.fab.wab.merchant.app.resources.mock_kind_women
 import com.fab.wab.merchant.app.resources.mock_manager
 import com.fab.wab.merchant.app.resources.mock_member
 import com.fab.wab.merchant.app.resources.mock_none
@@ -30,6 +35,9 @@ import com.fab.wab.merchant.app.resources.mock_salon
 import com.fab.wab.merchant.app.resources.mock_title
 import com.fab.wab.merchant.core.domain.dev.MockMemberPreset
 import com.fab.wab.merchant.core.domain.dev.SwitchMockWorldUseCase
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.session.SalonState
 import com.fab.wab.merchant.designsystem.components.chip.AppFilterChip
 import com.fab.wab.merchant.designsystem.components.dashboard.salonStateLabel
@@ -70,6 +78,18 @@ fun MockWorldSwitcher(useCase: SwitchMockWorldUseCase, modifier: Modifier = Modi
                     })
                 }
             }
+            AppText(text = stringResource(Res.string.mock_business), style = AppTheme.typography.labelLarge)
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+                verticalArrangement = Arrangement.spacedBy(spacing.space8),
+            ) {
+                MOCK_KINDS.forEach { (kind, label) ->
+                    AppFilterChip(stringResource(label), selected = false, onClick = {
+                        open = false
+                        scope.launch { useCase.businessKind(kind) }
+                    })
+                }
+            }
             AppText(text = stringResource(Res.string.mock_member), style = AppTheme.typography.labelLarge)
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(spacing.space8),
@@ -85,6 +105,14 @@ fun MockWorldSwitcher(useCase: SwitchMockWorldUseCase, modifier: Modifier = Modi
         }
     }
 }
+
+/** Salon or clinic presets (BUSINESS_DOMAIN §5.19) the fixtures answer with. */
+private val MOCK_KINDS: List<Pair<BusinessKind, StringResource>> = listOf(
+    BusinessKind(BusinessType.SALON, Audience.FEMALE) to Res.string.mock_kind_women,
+    BusinessKind(BusinessType.SALON, Audience.MALE) to Res.string.mock_kind_men,
+    BusinessKind(BusinessType.SALON, Audience.BOTH) to Res.string.mock_kind_both,
+    BusinessKind(BusinessType.CLINIC, Audience.BOTH) to Res.string.mock_kind_clinic,
+)
 
 private fun presetLabel(preset: MockMemberPreset): StringResource = when (preset) {
     MockMemberPreset.OWNER -> Res.string.mock_owner

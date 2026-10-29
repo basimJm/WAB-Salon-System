@@ -5,6 +5,9 @@
     <string name="hub_missing">ناقص</string>
     <string name="hub_women">صالون نسائي</string>
     <string name="hub_men">صالون رجالي</string>
+    <string name="hub_both">صالون للرجال والنساء</string>
+    <string name="hub_clinic">عيادة تجميل · للرجال والنساء</string>
+    <string name="hub_title_clinic">إدارة العيادة</string>
     <string name="tile_profile">الملف والصور</string>
     <string name="tile_profile_sub">الاسم، الوصف، الموقع والتواصل</string>
     <string name="tile_gallery">المعرض</string>
@@ -31,6 +34,7 @@
     <string name="profile_cover_hint">صورة الغلاف 16:9</string>
     <string name="profile_logo_hint">الشعار</string>
     <string name="profile_name">اسم الصالون</string>
+    <string name="profile_name_clinic">اسم العيادة</string>
     <string name="profile_description">الوصف</string>
     <string name="profile_count">%1$d / %2$d</string>
     <string name="profile_location">الموقع على الخريطة</string>
@@ -42,8 +46,15 @@
     <string name="profile_phone">رقم الهاتف</string>
     <string name="profile_whatsapp">واتساب (اختياري)</string>
     <string name="profile_phone_hint">مثال: ‎+962 7X XXX XXXX</string>
-    <string name="profile_type">نوع الصالون</string>
-    <string name="profile_locked">لا يمكن تغييره</string>
+    <string name="profile_type">نوع النشاط</string>
+    <string name="profile_locked">لا يمكن تغيير النوع، ويمكن للمالك اختيار خدمة الرجال والنساء.</string>
+    <string name="profile_clinic_note">العيادات تخدم الرجال والنساء، ولا يمكن تغيير النوع.</string>
+    <string name="profile_widen">خدمة الرجال والنساء</string>
+    <string name="profile_widen_title">خدمة الرجال والنساء؟</string>
+    <string name="profile_widen_body">سيرى عملاء من الجنسين صالونك ويمكنهم الحجز فوراً. لا يمكن التراجع عن ذلك إلا عن طريق WAB.</string>
+    <string name="profile_widen_confirm">خدمة الجنسين</string>
+    <string name="profile_widen_cancel">ليس الآن</string>
+    <string name="profile_widen_done">صالونك يخدم الآن الرجال والنساء</string>
     <string name="profile_preview">معاينة كما يراه الزبون</string>
     <string name="profile_save">حفظ التغييرات</string>
     <string name="profile_saved">تم حفظ التغييرات</string>
@@ -157,6 +168,8 @@
     <string name="catalog_search">ابحث في الكتالوج</string>
     <string name="catalog_note_women">كتالوج الصالونات النسائية</string>
     <string name="catalog_note_men">كتالوج الصالونات الرجالية</string>
+    <string name="catalog_note_both">كتالوج صالونات الرجال والنساء</string>
+    <string name="catalog_note_clinic">كتالوج عيادات التجميل</string>
     <string name="catalog_added">مضافة</string>
     <string name="catalog_cant_find">لا تجد خدمتك؟</string>
     <string name="catalog_request">اطلب إضافتها للكتالوج</string>

@@ -24,7 +24,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Full-width salon row of All Salons (design S04 `listSalons`): 88 dp image at Start, then name + heart,
- * rating · reviews · distance, location, description + "more", status line. 18 dp radius, hairline, soft shadow.
+ * type · audience, rating · reviews · distance, location, description + "more", status line. 18 dp radius, hairline, soft shadow.
  */
 @Composable
 fun DiscoverySalonRow(
@@ -57,6 +57,7 @@ fun DiscoverySalonRow(
                     iconSize = DiscoveryDesign.ROW_HEART_ICON,
                 )
             }
+            BusinessLine(salon)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 DiscoveryRatingLine(salon.rating, salon.reviewsCount, DiscoveryDesign.TEXT_12)
                 salon.distanceKm?.let { km ->

@@ -27,6 +27,7 @@ class ErrorCodeTest {
             "UPLOAD_INVALID", "UPLOAD_TOO_LARGE", "MAINTENANCE", "UPDATE_REQUIRED", "CURRENT_PASSWORD_INVALID", "EMAIL_ALREADY_USED",
             "BRANCH_NOT_FOUND", "BRANCH_NOT_BOOKABLE", "BRANCH_REQUIRED", "BRANCH_LIMIT_REACHED",
             "BRANCH_HAS_UPCOMING_BOOKINGS", "LAST_BRANCH", "BRANCH_SCOPE_DENIED",
+            "BUSINESS_TYPE_MISMATCH", "AUDIENCE_CHANGE_NOT_ALLOWED", "BRIDE_NOT_ALLOWED",
         )
         val names = ErrorCode.entries.map { it.name }
         expected.forEach { assertTrue(it in names, "missing $it") }

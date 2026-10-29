@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.bookings.presentation
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
@@ -45,7 +46,13 @@ private fun ratingBooking(persons: List<BookingPerson>) = BookingDetails(
 )
 
 private class RatingBookingsFake(val details: AppResult<BookingDetails>) : BookingsRepository {
-    override suspend fun list(tab: BookingTab, query: String, page: Int, pageSize: Int): AppResult<List<BookingSummary>> = AppResult.Loading
+    override suspend fun list(
+        tab: BookingTab,
+        query: String,
+        page: Int,
+        pageSize: Int,
+        businessType: BusinessType?,
+    ): AppResult<List<BookingSummary>> = AppResult.Loading
     override suspend fun details(bookingId: String): AppResult<BookingDetails> = details
     override suspend fun cancel(bookingId: String, reasonText: String?): AppResult<String> = AppResult.Loading
 }

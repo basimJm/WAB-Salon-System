@@ -3,6 +3,7 @@ package com.fab.wab.merchant.core.data.mock
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.domain.dev.MockControls
 import com.fab.wab.merchant.core.domain.dev.MockMemberPreset
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
 import com.fab.wab.merchant.core.domain.session.SalonState
 
 /** [MockControls] over [MockScenarios]; active only when the build uses the mock data source. */
@@ -22,6 +23,10 @@ class MockWorldControls(environment: AppEnvironment) : MockControls {
                 MockMemberPreset.NONE -> MockPresets.noPermissions
             },
         )
+    }
+
+    override fun setBusinessKind(kind: BusinessKind) {
+        if (enabled) MockScenarios.setBusinessKind(kind)
     }
 
     override fun markBookingPending(bookingId: String) {

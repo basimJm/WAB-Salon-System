@@ -57,7 +57,7 @@ class BookingFlowViewModelTest : BookingFlowHarness() {
     fun prefillsTheAccountNameAndGatesTheBrideToggleByGender() = runTest(UnconfinedTestDispatcher()) {
         val women = viewModel(Gender.FEMALE)
         assertEquals("Sara", women.state.value.person.name)
-        assertTrue(women.state.value.isWomenSalon)
+        assertTrue(women.state.value.showsBride)
         women.onEvent(UiAction.OnBrideChange(true))
         assertTrue(women.state.value.person.isBride)
 
