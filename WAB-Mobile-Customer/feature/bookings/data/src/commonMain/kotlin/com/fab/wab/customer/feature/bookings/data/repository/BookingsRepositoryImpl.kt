@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.bookings.data.repository
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.data.contract.generated.GetBookingsDataItem
 import com.fab.wab.customer.core.data.contract.generated.PostBookingsByIdCancelBody
 import com.fab.wab.customer.core.domain.AppResult
@@ -17,8 +18,14 @@ import com.fab.wab.customer.feature.bookings.data.remote.BookingsApi
 import com.fab.wab.customer.feature.bookings.domain.repository.BookingsRepository
 
 class BookingsRepositoryImpl(private val api: BookingsApi) : BookingsRepository {
-    override suspend fun list(tab: BookingTab, query: String, page: Int, pageSize: Int): AppResult<List<BookingSummary>> =
-        safeApiCall { api.list(tab.code, query, page, pageSize) }.mapSuccess { response -> response.data.map { it.toDomain() } }
+    override suspend fun list(
+        tab: BookingTab,
+        query: String,
+        page: Int,
+        pageSize: Int,
+        businessType: BusinessType?,
+    ): AppResult<List<BookingSummary>> =
+        safeApiCall { api.list(tab.code, query, page, pageSize, businessType?.code) }.mapSuccess { response -> response.data.map { it.toDomain() } }
 
     override suspend fun details(bookingId: String): AppResult<BookingDetails> =
         safeApiCall { api.details(bookingId) }.mapSuccess { it.data.toDomain() }
@@ -43,6 +50,7 @@ fun GetBookingsDataItem.toDomain(): BookingSummary = BookingSummary(
     branch = branch?.let { bookedBranchOf(it.id, it.name, it.locationText) },
     staffNames = staff.map { it.name },
     rejection = rejection?.let { BookingReason(it.reasonCode, it.reasonText, it.at) },
+    businessType = BusinessType.fromCode(businessType),
 )
 
 /** The branch as booked (`branch {id,name,locationText}`); null on bookings made before branches. */

@@ -32,6 +32,7 @@ fun draftBodyOf(
         PostBookingsDraftsBodyPersonsItem(
             name = person.name.trim(),
             isBride = person.isBride,
+            gender = person.gender?.code,
             serviceIds = person.serviceIds,
             staffId = (person.staff as? StaffChoice.Specific)?.staffId,
             start = start,

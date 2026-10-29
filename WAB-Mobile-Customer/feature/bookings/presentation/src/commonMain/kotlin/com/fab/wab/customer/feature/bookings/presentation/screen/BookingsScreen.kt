@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.booking.BookingTab
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeTabs
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -101,6 +102,11 @@ private fun RegisteredContent(state: UiState, onAction: (UiAction) -> Unit) {
             selectedIndex = tabs.indexOf(state.tab),
             onSelect = { onAction(UiAction.OnTabSelect(tabs[it])) },
             modifier = Modifier.fillMaxWidth().padding(top = spacing.space12, bottom = spacing.space12),
+        )
+        BusinessTypeTabs(
+            selected = state.businessType,
+            onSelect = { onAction(UiAction.OnBusinessTypeSelect(it)) },
+            modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space12),
         )
         AppPullToRefresh(refreshing = state.refreshing, onRefresh = { onAction(UiAction.OnRefresh) }) {
             ListContent(state, onAction)

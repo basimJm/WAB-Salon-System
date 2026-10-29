@@ -26,6 +26,7 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllS
 internal object BookingAccountActionEvents {
     fun bookings(a: BookingsContract.UiAction): ActionEvent = when (a) {
         is BookingsContract.UiAction.OnTabSelect, is BookingsContract.UiAction.OnQueryChange, is BookingsContract.UiAction.OnBookingClick,
+        is BookingsContract.UiAction.OnBusinessTypeSelect,
         -> ActionEvent.ByViewModel
         BookingsContract.UiAction.OnLoginClick -> ActionEvent.Named(Events.LOGIN_OPEN)
         BookingsContract.UiAction.OnBookNowClick -> ActionEvent.Named(Events.BOOK_NOW_CLICK)
@@ -49,7 +50,8 @@ internal object BookingAccountActionEvents {
     }
     fun bookingFlow(a: BookingFlowContract.UiAction): ActionEvent = when (a) {
         BookingFlowContract.UiAction.OnContinue, BookingFlowContract.UiAction.OnJustMe, is BookingFlowContract.UiAction.OnServiceToggle,
-        is BookingFlowContract.UiAction.OnPaymentMethodSelect, is BookingFlowContract.UiAction.OnBranchSelect, -> ActionEvent.ByViewModel
+        is BookingFlowContract.UiAction.OnPaymentMethodSelect, is BookingFlowContract.UiAction.OnBranchSelect,
+        is BookingFlowContract.UiAction.OnGenderChange, -> ActionEvent.ByViewModel
         BookingFlowContract.UiAction.OnConfirm -> ActionEvent.Named(Events.BOOKING_SUBMIT)
         is BookingFlowContract.UiAction.OnDateSelect -> ActionEvent.Named(Events.BOOKING_DATE_SELECT)
         is BookingFlowContract.UiAction.OnSlotSelect -> ActionEvent.Named(Events.BOOKING_SLOT_SELECT)

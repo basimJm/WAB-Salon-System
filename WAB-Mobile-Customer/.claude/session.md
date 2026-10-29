@@ -9,6 +9,22 @@
 
 ## Current task
 
+### CUS-099 — Booking + bookings by business type
+- Branch: `feat/cus-099-clinics-booking`
+- Status: IN PROGRESS
+- Acceptance criteria (BUSINESS_DOMAIN §5.4, §5.19; contract 1.10.0: `POST /bookings/drafts` + `POST /salons/{id}/availability` `persons[].gender` / `person.gender`, `GET /bookings?businessType`):
+  - [x] Gender lock only for MALE/FEMALE salons (every person = the salon's gender, no choice); BOTH salons and clinics ask each person's gender (main person prefilled with the customer's gender, companions must choose; Continue shows an error until chosen)
+  - [x] Each person's gender sent with the draft and with the availability request
+  - [x] Bride option only at FEMALE/BOTH salons and only for a woman; hidden for clinics and men's salons; switching a person to man drops the bride and bride-only picks
+  - [x] Rest of the flow unchanged (branch, services, slot, staff, companions, summary)
+  - [x] Bookings list filter All / Salons / Clinics (`businessType` query, kept while paging); `BookingSummary.businessType`
+  - [x] AR+EN strings; analytics actions `booking_person_gender`, `bookings_business_type`
+  - [x] Tests: `BookingFlowBusinessTypeTest` (clinic mixed genders → draft genders, BOTH bride rule, men's lock), `PersonGenderBodiesTest`, `BookingsViewModelTest` (type filter), `BookingFlowViewModelTest` (bride gate)
+- Tests: `./gradlew testAndroidHostTest` green (all modules); `policy_checks.py all` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: batch flow with CUS-098 (branch chained from it). Booking cards/details do not label the business type (not asked).
+
 ### CUS-098 — Business types in discovery: salons and beauty clinics
 - Branch: `feat/cus-098-clinics-discovery`
 - Status: IN PROGRESS
@@ -40,15 +56,3 @@
 - Loops: 1/1 — re-checked the committed changes once: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green; KMP_TEMPLATE tool tests green (build-logic changed). DEFERRED (owner 2026-10-28: skip measuring): before/after numbers, device checks of CUS-094; an extra uncommitted r8-analyzer change (drop the blanket `core.data` keep) was reverted because no release run proved it
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: release keep rules limited to the class names read at runtime (route/screen/ViewModel), secure store off the main thread with an in-memory cache + test, glass cost cuts, Compose caching, generated Baseline + Startup Profiles + `:baselineprofile` producer; temporary local manifests/overrides removed, none committed.
 - Notes: local overrides untracked (local.properties, cleartext manifest), removed at the end.
-### CUS-096 — Performance: iOS release build + Compose iOS settings
-- Branch: `perf/cus-096-ios-performance`
-- Status: IN PROGRESS
-- Acceptance criteria (owner 2026-10-27 "iOS lags"; no PRD screen; iOS host + K/N framework only):
-  - [x] Release-Dev / Release-Prod: release Kotlin framework (`KOTLIN_FRAMEWORK_BUILD_TYPE = release`, already set; `embedAndSignAppleFrameworkForXcode` honours it), Swift `-O` whole-module, clang `-Os`, dead-code stripping, `ONLY_ACTIVE_ARCH = NO`, dSYM; Debug configs unchanged (fast dev loop)
-  - [x] K/N binary options on every iOS binary: `bundleId` (from `AndroidSdk.NAMESPACE_ROOT`, no literal), `gc=cms` (concurrent marking), `appStateTracking=enabled`
-  - [x] `ComposeUIViewController` `parallelRendering = true`, `opaque = true` (named constants); `CADisableMinimumFrameDurationOnPhone` (120 Hz ProMotion) already in Info.plist
-  - [ ] iosApp-Dev Debug + Release, iosApp-Prod Release simulator builds green (see Tests)
-- Tests: no Kotlin logic changed (build settings + one view-controller configuration), so no new unit tests; `policy_checks.py all` ok; policy tests 93 OK; simulator builds: see Notes
-- Loops: 1/1 — batch verification (rules §3.13): all four iOS simulator configurations (Debug/Release × Dev/Prod) build with the new K/N and Xcode settings. DEFERRED: launch/scroll measurements; parallelRendering is experimental (switch PARALLEL_RENDERING off first if native views glitch)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
-- Notes: DEVIATIONS — time-boxed (25 min); startup work (Koin/Firebase on the main thread, push permission prompt at launch) left as is: both must run on the main thread before the first frame; no cold-launch / scroll measurement done; simulator builds NOT verified: Debug-Dev failed in the `Compile Kotlin Framework` phase on `Timeout waiting to lock journal cache (~/.gradle/caches/journal-1)` held by a parallel agent's Gradle, Release-Dev stalled > 8 min at the K/N compile tasks (same lock) and was stopped; iosApp-Prod Release and the framework link were not reached. Rerun `xcodebuild -scheme iosApp-Dev -configuration Release-Dev -destination 'generic/platform=iOS Simulator' build` (and Debug-Dev, iosApp-Prod Release-Prod) once no other Gradle runs; `gc=cms` and `parallelRendering` need a scroll check on device/simulator.

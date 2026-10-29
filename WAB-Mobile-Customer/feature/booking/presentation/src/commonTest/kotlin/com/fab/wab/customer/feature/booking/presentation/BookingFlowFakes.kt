@@ -93,6 +93,7 @@ class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraf
     val created = mutableListOf<PaymentMethod>()
     val branches = mutableListOf<String?>()
     val deleted = mutableListOf<String>()
+    val sentPersons = mutableListOf<List<DraftPerson>>()
     override suspend fun create(
         salonId: String,
         branchId: String?,
@@ -100,6 +101,7 @@ class DraftFake(val allowed: Set<PaymentMethod> = DEFAULT_ALLOWED) : BookingDraf
         persons: List<DraftPerson>,
     ): AppResult<BookingDraft> {
         created += paymentMethod
+        sentPersons += listOf(persons)
         branches += branchId
         if (paymentMethod !in allowed) {
             return AppResult.Error(AppError.ServerError(ErrorCode.PAYMENT_OPTION_NOT_ALLOWED, 422, null))

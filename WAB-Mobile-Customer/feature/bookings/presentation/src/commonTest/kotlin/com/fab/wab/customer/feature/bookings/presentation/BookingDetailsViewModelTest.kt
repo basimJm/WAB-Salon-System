@@ -75,7 +75,13 @@ private class DetailsBookingsFake(var details: AppResult<BookingDetails>) : Book
     val detailCalls = mutableListOf<String>()
     val cancels = mutableListOf<String>()
     var cancelResult: AppResult<String> = AppResult.Success("6")
-    override suspend fun list(tab: BookingTab, query: String, page: Int, pageSize: Int): AppResult<List<BookingSummary>> = AppResult.Loading
+    override suspend fun list(
+        tab: BookingTab,
+        query: String,
+        page: Int,
+        pageSize: Int,
+        businessType: BusinessType?,
+    ): AppResult<List<BookingSummary>> = AppResult.Loading
     override suspend fun details(bookingId: String): AppResult<BookingDetails> {
         detailCalls += bookingId
         return details

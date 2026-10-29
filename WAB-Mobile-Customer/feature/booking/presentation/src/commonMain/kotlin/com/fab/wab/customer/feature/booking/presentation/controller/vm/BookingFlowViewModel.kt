@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.booking.presentation.controller.vm
 
+import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.analytics.AnalyticsAction
 import com.fab.wab.customer.core.analytics.AnalyticsTracker
 import com.fab.wab.customer.core.analytics.analyticsParams
@@ -73,9 +74,10 @@ class BookingFlowViewModel(
             is UiAction.OnBranchSelect -> selectBranch(event.branchId)
             is UiAction.OnNameChange -> updatePerson { copy(name = event.value.take(BookingFlowDefaults.MAX_NAME_LENGTH)) }
                 .also { updateState { copy(nameError = false) } }
-            is UiAction.OnBrideChange -> if (uiState.value.isWomenSalon) {
+            is UiAction.OnBrideChange -> if (uiState.value.showsBride) {
                 updatePerson { withBride(event.isBride, uiState.value.salon?.services.orEmpty()) }
             }
+            is UiAction.OnGenderChange -> changeGender(event.gender)
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
             else -> return false
         }
@@ -114,7 +116,12 @@ class BookingFlowViewModel(
             val accountName = (session as? SessionState.SignedIn)?.user?.firstName.orEmpty()
             when (val result = deps.salonDetails.details(salonId)) {
                 is AppResult.Success -> updateState {
-                    val prefilled = persons.mapIndexed { index, p -> if (index == 0 && p.name.isBlank()) p.copy(name = accountName) else p }
+                    val locked = result.data.lockedGender
+                    val prefilled = persons.mapIndexed { index, p ->
+                        val named = if (index == 0 && p.name.isBlank()) p.copy(name = accountName) else p
+                        // §5.19: the salon's gender when it is fixed; else the customer's own gender for the main person.
+                        named.copy(gender = locked ?: named.gender ?: session.genderScope.takeIf { index == 0 })
+                    }
                     copy(loading = false, persons = prefilled).withLoadedSalon(result.data, initialBranchId)
                 }
                 is AppResult.Error -> {
@@ -125,6 +132,15 @@ class BookingFlowViewModel(
                 AppResult.Loading -> Unit
             }
         }
+    }
+
+    /** BOTH salons and clinics (§5.19): each person's gender; a man is never a bride, so bride picks are dropped. */
+    private fun changeGender(gender: Gender) {
+        if (!uiState.value.asksGender) return
+        track(BookingAnalytics.ACTION_GENDER, BookingAnalytics.PARAM_VALUE to gender.code.lowercase())
+        val services = uiState.value.salon?.services.orEmpty()
+        updatePerson { copy(gender = gender).let { if (gender != Gender.FEMALE && it.isBride) it.withBride(false, services) else it } }
+        updateState { copy(genderError = false) }
     }
 
     private fun selectBranch(branchId: String) {
@@ -152,7 +168,11 @@ class BookingFlowViewModel(
         val state = uiState.value
         when (state.step) {
             BookingStep.BRANCH -> if (state.canContinueBranch) go(BookingStep.PERSON)
-            BookingStep.PERSON -> if (state.canContinuePerson) go(BookingStep.SERVICES) else updateState { copy(nameError = true) }
+            BookingStep.PERSON -> if (state.canContinuePerson) {
+                go(BookingStep.SERVICES)
+            } else {
+                updateState { copy(nameError = state.person.name.isBlank(), genderError = state.personGender == null) }
+            }
             BookingStep.SERVICES -> if (state.canContinueServices) go(BookingStep.SLOT)
             BookingStep.SLOT -> if (state.canContinueSlot) go(BookingStep.STAFF)
             BookingStep.STAFF -> if (state.canContinueStaff) finishPerson()
@@ -212,10 +232,11 @@ class BookingFlowViewModel(
         go(BookingStep.COMPANIONS)
     }
 
-    /** Step 4 (PRD S16): up to 5 companions, each repeating steps 0–3; same gender as the salon by construction. */
+    /** Step 4 (PRD S16): up to 5 companions, each repeating steps 0–3; the salon's gender, or chosen per companion (§5.19). */
     private fun addCompanion() {
         if (!uiState.value.canAddCompanion) return
-        updateState { copy(persons = persons + DraftPerson(), currentPerson = persons.size, availability = null, selectedDate = null) }
+        val companion = DraftPerson(gender = uiState.value.lockedGender)
+        updateState { copy(persons = persons + companion, genderError = false, currentPerson = persons.size, availability = null, selectedDate = null) }
         go(BookingStep.PERSON)
     }
 
