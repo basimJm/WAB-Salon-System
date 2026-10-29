@@ -1,6 +1,6 @@
 const MAX_INITIALS = 2;
 
-/** Up to two initials of a person or salon name ("Layth Al-Hasan" -> "LA"; Arabic names work the same way). */
+/** Up to two initials of a person or organisation name ("Layth Al-Hasan" -> "LA"; Arabic names work the same way). */
 export function initialsOf(name: string): string {
   const words = name
     .trim()

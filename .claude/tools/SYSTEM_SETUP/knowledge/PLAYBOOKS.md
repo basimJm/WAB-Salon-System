@@ -79,7 +79,7 @@
 ## 10. Adding a project to the workspace
 1. Folder `<Name>/` with `CLAUDE.md` (from `docs/templates/PROJECT_CLAUDE_TEMPLATE.md`: stack, gate command, layers), `.claude/{session,memory,Integration}.md` (templates in `docs/templates/`), `docs/<Name>_PRD.md`, `docs/<Name>_BRD.md`, `docs/<Name>_Tasks.md` (TASKS_TEMPLATE: Stage A scaffold rows, rows needing other projects start BLOCKED).
 2. One entry in `.claude/projects.json`: key, `title`, `prefix` (unique, upper-case), `dir`, `master` (an existing master, e.g. SDKs ship with `server`, or a new one), `backlog`, `session`, `memory`, `integration`.
-3. New master? `git branch --no-track <master> origin/main && git push origin <master>` from the Terminal panel; protect it like the others; add it to `__MASTERS_LIST__` places: rules §3.2, memory, `INTEGRATION.md` §1.
+3. New master? `git branch --no-track <master> origin/main && git push origin <master>` from the Terminal panel; protect it like the others; add it everywhere the masters are listed: rules §3.2, memory, `INTEGRATION.md` §1.
 4. `INTEGRATION.md` §1 row (role, master, backlog), §3 edges it adds, §6 readiness; root `.claude/session.md` index row; root `CLAUDE.md` §2 map row.
 5. `python3 scripts/tasks.py check` OK, `python3 .claude/hooks/test_hooks.py` green (masters and session files are read from the registry — no hook edit needed), `tasks.py board`.
 6. Commit on a `docs/` or `chore/` branch into the owning master; the first `tasks.py next <key>` must return its scaffold row.

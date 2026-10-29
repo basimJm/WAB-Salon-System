@@ -69,9 +69,9 @@ describe('feature slices', () => {
     expect(
       cruise({
         'src/domain/shared/money.ts': ok,
-        'src/domain/salons/salon.ts': ok,
-        'src/domain/salons/rules.ts':
-          "import { x } from './salon'; import { x as y } from '../shared/money'; export const z = x + y;",
+        'src/domain/items/item.ts': ok,
+        'src/domain/items/rules.ts':
+          "import { x } from './item'; import { x as y } from '../shared/money'; export const z = x + y;",
         'src/data/mock/fixtures.ts': ok,
         'src/data/salons/repo.ts':
           "import { x } from '../../domain/salons/salon'; import { x as m } from '../mock/fixtures'; export const r = x + m;",
