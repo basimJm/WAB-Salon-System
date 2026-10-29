@@ -177,13 +177,14 @@ fun App(androidContext: Any?) {
             LocalDarkTheme provides isDarkTheme,
             LocalAnalyticsTracker provides analyticsTracker,
         ) {
-            when (val gate = state.gate) {
-                null -> AppTheme { SplashScreen(state, mainViewModel::onEvent) }
-                is LaunchGate.Maintenance ->
+            val gate = state.gate
+            when {
+                state.showSplash || gate == null -> AppTheme { SplashScreen(state, mainViewModel::onEvent) }
+                gate is LaunchGate.Maintenance ->
                     AppTheme { MaintenanceScreen(gate.message, onRetry = { mainViewModel.onEvent(UiAction.OnRetryClicked) }) }
-                is LaunchGate.ForceUpdate ->
+                gate is LaunchGate.ForceUpdate ->
                     AppTheme { ForceUpdateScreen(onUpdate = { mainViewModel.onEvent(UiAction.OnUpdateClicked) }) }
-                is LaunchGate.OptionalUpdate, LaunchGate.Ready -> AppTheme {
+                else -> AppTheme {
                     if (state.showOnboarding) {
                         OnboardingRoute(onFinish = { mainViewModel.onEvent(UiAction.OnOnboardingFinished) })
                         return@AppTheme
