@@ -1,8 +1,8 @@
-# __SERVER_DIR__
+# **SERVER_DIR**
 
-Backend API of __SYSTEM_NAME__ (__SYSTEM_NAME_AR__): the customer app, the merchant app and the admin panel (`__ADMIN_DIR__`) talk to it. Rules for agents: [`CLAUDE.md`](CLAUDE.md). Task list: [`docs/__SYSTEM_PREFIX___Server_Tasks.md`](docs/__SYSTEM_PREFIX___Server_Tasks.md). Repository: `github.com/__OWNER_GITHUB__/__REPO_NAME__`.
+Backend API of **SYSTEM_NAME** (**SYSTEM_NAME_AR**): the customer app, the merchant app and the admin panel (`__ADMIN_DIR__`) talk to it. Rules for agents: [`CLAUDE.md`](CLAUDE.md). Task list: [`docs/__SYSTEM_PREFIX___Server_Tasks.md`](docs/__SYSTEM_PREFIX___Server_Tasks.md). Repository: `github.com/__OWNER_GITHUB__/__REPO_NAME__`.
 
-| Environment | API |
+| Environment | API                |
 | ----------- | ------------------ |
 | dev         | `__DEV_API_URL__`  |
 | prod        | `__PROD_API_URL__` |
@@ -17,9 +17,9 @@ Backend API of __SYSTEM_NAME__ (__SYSTEM_NAME_AR__): the customer app, the merch
 | `npm run build` / `npm start`                 | Compile to `dist/` / run the built server                                                                                    |
 | `npm run docs`                                | Regenerate Swagger (`docs/api/openapi.*.json`) and Postman (`docs/api/postman/`). Required after every endpoint change (§11) |
 | `npm run contract:bump -- <name> "<impact>"`  | Record a contract change (fingerprint + minor version + client impact); `tests/contractGuard.test.ts` enforces it            |
-| `npm run seed` / `seed:admin` / `seed:dev`    | Indexes (+ reference data) / the first admin from `ADMIN_EMAIL` + `ADMIN_PASSWORD` / one-command development data           |
+| `npm run seed` / `seed:admin` / `seed:dev`    | Indexes (+ reference data) / the first admin from `ADMIN_EMAIL` + `ADMIN_PASSWORD` / one-command development data            |
 | `npm run env:check -- <file>`                 | Validate an env file exactly as the server does at startup (names only, never values)                                        |
-| `npm run loadtest`                            | Drive the read endpoints of a running server (`LOADTEST_BASE_URL`, `LOADTEST_CUSTOMER_TOKEN`)                               |
+| `npm run loadtest`                            | Drive the read endpoints of a running server (`LOADTEST_BASE_URL`, `LOADTEST_CUSTOMER_TOKEN`)                                |
 
 ## Local environment
 

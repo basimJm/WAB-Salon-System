@@ -1,4 +1,4 @@
-# __SERVER_DIR__ — Memory (durable server facts; keep short, replace instead of append)
+# **SERVER_DIR** — Memory (durable server facts; keep short, replace instead of append)
 
 - Stack: Node 22, Express 5, Mongoose 9, ioredis, Socket.IO (Redis adapter), BullMQ, zod 4, TypeScript strict. Gate: `npm run verify`.
 - Namespaces `/customer/v1`, `/merchant/v1`, `/admin/v1`; JWT scopes `customer|merchant|admin`; `Accept-Language: ar|en` (default `ar`).
