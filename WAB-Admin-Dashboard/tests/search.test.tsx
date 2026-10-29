@@ -14,7 +14,9 @@ describe('toSearchResults', () => {
     const results = toSearchResults(
       {
         customers: [{ id: 'c1', name: 'Dana', phone: '+962790000001', status: 'ACTIVE' }],
-        salons: [{ id: 's1', name: 'Noor', gender: 'FEMALE', state: 'LIVE' }],
+        salons: [
+          { id: 's1', name: 'Noor', businessType: 'SALON', audience: 'FEMALE', state: 'LIVE' },
+        ],
         bookings: [
           {
             id: 'b1',

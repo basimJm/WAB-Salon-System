@@ -7,7 +7,7 @@ import {
   type Placement,
   type PlacementsRepository,
 } from '@/domain/placements/placements';
-import type { SalonGender } from '@/domain/salons/salons';
+import type { BusinessType } from '@/domain/shared/businessType';
 import { localDateOf, localDayRange } from '@/domain/shared/time';
 import { MAX_PAGE_SIZE } from '@/constants/ui';
 import { DateField } from '../components/form/DateField';
@@ -69,11 +69,11 @@ function submitPlacement(
 /** Add a salon to the Recommended list, or edit its period, order, amount and note. */
 export function PlacementDrawer({
   item,
-  gender,
+  businessType,
   onClose,
 }: {
   item: Placement | null;
-  gender: SalonGender;
+  businessType: BusinessType;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -83,9 +83,9 @@ export function PlacementDrawer({
   const [v, setV] = useState(() => initialForm(item));
   const [bad, setBad] = useState<ReadonlySet<string>>(new Set());
   const salons = useQuery({
-    queryKey: ['getSalons', 'placement-options', gender],
+    queryKey: ['getSalons', 'placement-options', businessType],
     queryFn: () =>
-      repositories.salons.list({ page: 1, pageSize: MAX_PAGE_SIZE, gender, state: 'LIVE' }),
+      repositories.salons.list({ page: 1, pageSize: MAX_PAGE_SIZE, businessType, state: 'LIVE' }),
     enabled: item === null,
   });
   const save = useMutation({

@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
-import { SALON_GENDERS, type SalonDetails, type SalonGender } from '@/domain/salons/salons';
+import type { SalonDetails } from '@/domain/salons/salons';
+import { AUDIENCES, canChangeAudience, type Audience } from '@/domain/shared/businessType';
 import { Button } from '../components/core/Button';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
 import { reasonError, ResourceDrawer, Select } from '../components/overlay/ResourceDrawer';
 import { useToast } from '../components/overlay/Toast';
 
-type Open = 'offline' | 'online' | 'gender' | null;
+type Open = 'offline' | 'online' | 'audience' | null;
 
 /** Header actions of a salon: offline/online (owner is notified) and change of audience (services switch off). */
 export function SalonActions({ salon }: { salon: SalonDetails }) {
@@ -20,7 +21,7 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
   const queryClient = useQueryClient();
   const { repositories } = useContainer();
   const [open, setOpen] = useState<Open>(null);
-  const [gender, setGender] = useState<SalonGender>(salon.gender);
+  const [audience, setAudience] = useState<Audience>(salon.audience);
   const [reason, setReason] = useState('');
   const [reasonBad, setReasonBad] = useState(false);
   const act = useMutation({
@@ -28,7 +29,7 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
       const repo = repositories.salons;
       if (kind === 'offline') await repo.setOffline(salon.id, why);
       else if (kind === 'online') await repo.setOnline(salon.id, why);
-      else await repo.changeGender(salon.id, gender, why);
+      else await repo.changeAudience(salon.id, audience, why);
     },
     onSuccess: async () => {
       setOpen(null);
@@ -39,10 +40,10 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
     },
   });
   const close = () => setOpen(null);
-  const saveGender = () => {
-    const bad = reasonError(reason) !== undefined || gender === salon.gender;
+  const saveAudience = () => {
+    const bad = reasonError(reason) !== undefined || audience === salon.audience;
     setReasonBad(bad);
-    if (!bad) act.mutate({ kind: 'gender', why: reason.trim() });
+    if (!bad) act.mutate({ kind: 'audience', why: reason.trim() });
   };
   return (
     <>
@@ -62,18 +63,20 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
           {t('salons.putOnline')}
         </Button>
       ) : null}
-      <Button
-        variant="secondary"
-        onClick={() => {
-          act.reset();
-          setGender(salon.gender);
-          setReason('');
-          setReasonBad(false);
-          setOpen('gender');
-        }}
-      >
-        {t('salons.changeGender')}
-      </Button>
+      {canChangeAudience(salon.businessType) ? (
+        <Button
+          variant="secondary"
+          onClick={() => {
+            act.reset();
+            setAudience(salon.audience);
+            setReason('');
+            setReasonBad(false);
+            setOpen('audience');
+          }}
+        >
+          {t('salons.changeAudience')}
+        </Button>
+      ) : null}
       <ReasonDialog
         open={open === 'offline' || open === 'online'}
         destructive={open === 'offline'}
@@ -83,32 +86,32 @@ export function SalonActions({ salon }: { salon: SalonDetails }) {
         description={t(open === 'offline' ? 'salons.offlineText' : 'salons.onlineText')}
         confirmLabel={t(open === 'offline' ? 'salons.takeOffline' : 'salons.putOnline')}
         loading={act.isPending}
-        onConfirm={(why) => open && open !== 'gender' && act.mutate({ kind: open, why })}
+        onConfirm={(why) => open && open !== 'audience' && act.mutate({ kind: open, why })}
         onClose={close}
       />
-      {open === 'gender' ? (
+      {open === 'audience' ? (
         <ResourceDrawer
-          title={t('salons.changeGender')}
+          title={t('salons.changeAudience')}
           reason={reason}
           reasonErr={reasonBad && reasonError(reason) ? 'appConfig.error.reason' : undefined}
           onReason={setReason}
           saving={act.isPending}
           error={act.error}
-          onSubmit={saveGender}
+          onSubmit={saveAudience}
           onClose={close}
         >
           <p className="wab-field__hint" role="note">
-            {t('salons.genderWarning')}
+            {t('salons.audienceWarning')}
           </p>
           <Select
-            label={t('salons.gender')}
-            value={gender}
-            options={SALON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) }))}
-            onChange={(e) => setGender(SALON_GENDERS.find((g) => g === e.target.value) ?? gender)}
+            label={t('business.audience')}
+            value={audience}
+            options={AUDIENCES.map((a) => ({ value: a, label: t(`status.audience.${a}`) }))}
+            onChange={(e) => setAudience(AUDIENCES.find((a) => a === e.target.value) ?? audience)}
           />
-          {reasonBad && gender === salon.gender ? (
+          {reasonBad && audience === salon.audience ? (
             <p className="wab-field__error" role="alert">
-              {t('salons.genderSame')}
+              {t('salons.audienceSame')}
             </p>
           ) : null}
         </ResourceDrawer>

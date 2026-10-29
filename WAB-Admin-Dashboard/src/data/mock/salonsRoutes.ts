@@ -2,7 +2,7 @@ import * as dto from '../contract/generated/dto';
 import { OPERATIONS } from '../contract/generated/operations';
 import { defineEndpoint } from '../api/endpoint';
 import { mockRoute } from './mockRoute';
-import type { MockRoute } from './mockTransport';
+import { MockBusinessError, type MockRoute } from './mockTransport';
 import { createBranchStore, type BranchStore } from './branchStore';
 
 const AMMAN = '64a000000000000000000001';
@@ -10,15 +10,17 @@ const IRBID = '64a000000000000000000002';
 interface Seed {
   n: number;
   name: string;
-  gender: 'FEMALE' | 'MALE';
+  businessType: 'SALON' | 'CLINIC';
+  audience: 'FEMALE' | 'MALE' | 'BOTH';
   state: 'LIVE' | 'OFFLINE' | 'APPROVED_INCOMPLETE';
   cityId: string;
   sub: 'TRIAL' | 'ACTIVE' | 'EXPIRED' | null;
 }
-const salon = ({ n, name, gender, state, cityId, sub }: Seed) => ({
+const salon = ({ n, name, businessType, audience, state, cityId, sub }: Seed) => ({
   id: `64f${String(n).padStart(21, '0')}`,
   name,
-  gender,
+  businessType,
+  audience,
   state,
   cityId,
   areaId: null,
@@ -34,7 +36,8 @@ export const MOCK_SALONS = [
   salon({
     n: 1,
     name: 'Noor Salon',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     cityId: AMMAN,
     sub: 'ACTIVE',
@@ -42,7 +45,8 @@ export const MOCK_SALONS = [
   salon({
     n: 2,
     name: 'Royal Barber',
-    gender: 'MALE',
+    businessType: 'SALON',
+    audience: 'MALE',
     state: 'OFFLINE',
     cityId: AMMAN,
     sub: 'TRIAL',
@@ -50,10 +54,20 @@ export const MOCK_SALONS = [
   salon({
     n: 3,
     name: 'Lama Beauty',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'BOTH',
     state: 'APPROVED_INCOMPLETE',
     cityId: IRBID,
     sub: 'TRIAL',
+  }),
+  salon({
+    n: 4,
+    name: 'Glow Clinic',
+    businessType: 'CLINIC',
+    audience: 'BOTH',
+    state: 'LIVE',
+    cityId: AMMAN,
+    sub: 'ACTIVE',
   }),
 ];
 
@@ -116,16 +130,19 @@ export function salonsRoutes(store: BranchStore = createBranchStore()): readonly
       ({ params }) => setState(params['id'], 'LIVE'),
     ),
     mockRoute(
-      defineEndpoint(O.patchSalonsByIdGender, {
-        data: dto.patchSalonsByIdGenderDataSchema,
-        body: dto.patchSalonsByIdGenderBodySchema,
+      defineEndpoint(O.patchSalonsByIdAudience, {
+        data: dto.patchSalonsByIdAudienceDataSchema,
+        body: dto.patchSalonsByIdAudienceBodySchema,
       }),
       ({ params, body }) => {
         const salon = find(params['id']);
-        changes.set(salon.id, {
-          ...changes.get(salon.id),
-          gender: (body as { gender: 'MALE' | 'FEMALE' }).gender,
-        });
+        const { audience } = body as { audience: Mock['audience'] };
+        // Like the server (§5.19): a clinic is always BOTH, the same audience is not a change.
+        if (salon.businessType === 'CLINIC') {
+          throw new MockBusinessError(422, 'AUDIENCE_CHANGE_NOT_ALLOWED');
+        }
+        if (salon.audience === audience) throw new MockBusinessError(422, 'INVALID_TRANSITION');
+        changes.set(salon.id, { ...changes.get(salon.id), audience });
         return { data: details(find(params['id']), store) };
       },
     ),
@@ -171,7 +188,8 @@ export function salonsRoutes(store: BranchStore = createBranchStore()): readonly
         const rows = MOCK_SALONS.filter(
           (s) =>
             (!query.get('state') || s.state === query.get('state')) &&
-            (!query.get('gender') || s.gender === query.get('gender')) &&
+            (!query.get('businessType') || s.businessType === query.get('businessType')) &&
+            (!query.get('audience') || s.audience === query.get('audience')) &&
             (!query.get('cityId') || s.cityId === query.get('cityId')) &&
             (!query.get('subscription') || s.subscriptionStatus === query.get('subscription')) &&
             (!query.get('recommended') || String(s.recommended) === query.get('recommended')) &&

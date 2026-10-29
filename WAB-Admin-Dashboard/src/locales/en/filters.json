@@ -42,5 +42,16 @@
     "viewData": "View data",
     "hideData": "Hide data",
     "exportCsv": "Export CSV"
+  },
+  "business": {
+    "type": "Business type",
+    "audience": "Audience",
+    "filter": {
+      "ALL": "All",
+      "SALON": "Salons",
+      "CLINIC": "Clinics"
+    },
+    "clinicAudience": "Clinics serve everyone",
+    "gender": "Gender"
   }
 }

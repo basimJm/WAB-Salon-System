@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { MAX_PAGE_SIZE } from '@/constants/ui';
 import type { BranchScope, SalonService } from '@/domain/salonEdit/salonEdit';
+import { brideAllowed, catalogFits, type BusinessKind } from '@/domain/shared/businessType';
 import { formatJodAmount, formatNumber } from '@/domain/shared/format';
 import { Button } from '../components/core/Button';
 import { DataTable } from '../components/data/DataTable';
@@ -14,7 +15,7 @@ import { useSalonMutation } from './useSalonMutation';
 
 const REFRESH = [['getSalonsByIdServices']] as const;
 
-export function ServicesTab({ scope, gender }: { scope: BranchScope; gender: 'MALE' | 'FEMALE' }) {
+export function ServicesTab({ scope, business }: { scope: BranchScope; business: BusinessKind }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { repositories } = useContainer();
@@ -25,8 +26,13 @@ export function ServicesTab({ scope, gender }: { scope: BranchScope; gender: 'MA
     queryFn: () => edit.services(scope),
   });
   const catalog = useQuery({
-    queryKey: ['getServices', 'options', gender],
-    queryFn: () => repositories.catalog.services.list({ page: 1, pageSize: MAX_PAGE_SIZE, gender }),
+    queryKey: ['getServices', 'options', business.businessType],
+    queryFn: () =>
+      repositories.catalog.services.list({
+        page: 1,
+        pageSize: MAX_PAGE_SIZE,
+        businessType: business.businessType,
+      }),
   });
   const close = () => setOpen(null);
   const create = useSalonMutation(
@@ -68,7 +74,7 @@ export function ServicesTab({ scope, gender }: { scope: BranchScope; gender: 'MA
   ];
   const taken = new Set((list.data ?? []).map((s) => s.catalogServiceId));
   const options = (catalog.data?.items ?? [])
-    .filter((c) => !taken.has(c.id))
+    .filter((c) => !taken.has(c.id) && catalogFits(c, business))
     .map((c) => ({ value: c.id, label: c.name[language] }));
   return (
     <div className="wab-stack">
@@ -95,7 +101,7 @@ export function ServicesTab({ scope, gender }: { scope: BranchScope; gender: 'MA
           key={open === 'new' ? 'new' : open.id}
           service={open === 'new' ? null : open}
           catalog={options}
-          allowBride={gender === 'FEMALE'}
+          allowBride={brideAllowed(business)}
           saving={create.isPending || update.isPending}
           error={create.error ?? update.error}
           onCreate={(input, reason) => create.mutate({ input, reason })}

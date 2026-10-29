@@ -10,7 +10,7 @@ import {
   type ProfileField,
 } from '@/domain/customers/customerRules';
 import type { CustomerDetails } from '@/domain/customers/customers';
-import { SALON_GENDERS } from '@/domain/salons/salons';
+import { PERSON_GENDERS } from '@/domain/shared/businessType';
 import { Select } from '../components/form/Select';
 import { TextField } from '../components/form/TextField';
 import { reasonError, ResourceDrawer } from '../components/overlay/ResourceDrawer';
@@ -75,11 +75,11 @@ export function CustomerEditDrawer({ c, onClose }: { c: CustomerDetails; onClose
         onChange={(e) => setD({ ...d, email: e.target.value.trim() })}
       />
       <Select
-        label={t('salons.gender')}
+        label={t('business.gender')}
         value={d.gender}
-        options={SALON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) }))}
+        options={PERSON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) }))}
         onChange={(e) =>
-          setD({ ...d, gender: SALON_GENDERS.find((g) => g === e.target.value) ?? d.gender })
+          setD({ ...d, gender: PERSON_GENDERS.find((g) => g === e.target.value) ?? d.gender })
         }
       />
       <Select

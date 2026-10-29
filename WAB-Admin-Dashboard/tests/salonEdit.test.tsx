@@ -29,7 +29,6 @@ const SALON = '64f000000000000000000001';
 const profile: SalonProfile = {
   id: SALON,
   name: 'Noor',
-  gender: 'FEMALE',
   state: 'LIVE',
   description: 'Hair',
   coverUrl: null,

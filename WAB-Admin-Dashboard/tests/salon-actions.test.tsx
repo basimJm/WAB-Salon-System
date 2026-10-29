@@ -39,7 +39,7 @@ describe('salon actions', () => {
     at(MOCK_SALONS[0]!.id);
     await userEvent.click(await screen.findByRole('button', { name: 'Change audience' }));
     const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByRole('note')).toHaveTextContent('switched off');
+    expect(within(dialog).getByRole('note')).toHaveTextContent('switches off');
     await userEvent.type(within(dialog).getByLabelText('Reason'), 'Wrong audience');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
     expect(await within(dialog).findByText('Choose a different audience')).toBeInTheDocument();

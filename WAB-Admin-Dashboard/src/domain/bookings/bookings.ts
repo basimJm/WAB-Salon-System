@@ -1,4 +1,5 @@
 import type { Page, PageQuery } from '@/domain/shared/page';
+import type { Audience, BusinessType, PersonGender } from '@/domain/shared/businessType';
 
 export const BOOKING_STATUSES = [
   'PENDING',
@@ -34,6 +35,9 @@ export interface BookingSummary {
   readonly id: string;
   readonly referenceNumber: string;
   readonly status: string;
+  /** Snapshots of the salon/clinic at booking time (§5.19). */
+  readonly businessType: BusinessType;
+  readonly salonAudience: Audience;
   readonly paymentMethod: string;
   readonly paymentStatus: string;
   readonly hasBride: boolean;
@@ -60,6 +64,8 @@ export interface BookingSummary {
 export interface BookingPerson {
   readonly name: string;
   readonly isBride: boolean;
+  /** A BOTH salon or a clinic may book men and women together (§5.19); null when unknown. */
+  readonly gender: PersonGender | null;
   readonly start: string;
   readonly end: string;
   readonly subtotal: string;
@@ -104,6 +110,7 @@ export interface BookingQuery extends PageQuery {
   salonId?: string;
   branchId?: string;
   customerId?: string;
+  businessType?: BusinessType;
 }
 export interface StatusChangeResult {
   readonly referenceNumber: string;

@@ -102,7 +102,7 @@ const SITES: ReadonlyArray<readonly [string, () => z.ZodType, (id: string) => un
   [
     'putRecommendedReorder',
     dto.putRecommendedReorderBodySchema,
-    (id) => ({ gender: 'FEMALE', ids: [id], reason: REASON }),
+    (id) => ({ businessType: 'SALON', ids: [id], reason: REASON }),
   ],
   [
     'getPayoutsPreview',

@@ -40,6 +40,7 @@ export class RemoteReviewsRepository implements ReviewsRepository {
         branchId: q.branchId,
         staffId: q.staffId,
         rating: q.rating,
+        businessType: q.businessType,
       }),
     });
 

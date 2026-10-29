@@ -31,18 +31,25 @@ describe('CatalogPage', () => {
       </MemoryRouter>,
     );
 
-  it('shows the women tab first and switches to men', async () => {
+  it('shows every business type with its badges, and the server filters clinics (§5.19)', async () => {
     open();
     expect(await screen.findByText('Haircut')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('radio', { name: 'Men' }));
-    expect(await screen.findByText('Shave')).toBeInTheDocument();
-    expect(screen.queryByText('Haircut')).toBeNull();
+    expect(screen.getByText('Botox')).toBeInTheDocument();
+    expect(screen.getAllByText('Clinic').length).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
+    await waitFor(() => expect(screen.queryByText('Haircut')).toBeNull());
+    expect(screen.getByText('Botox')).toBeInTheDocument();
   });
 
   it('warns before deactivating, and saves with a reason', async () => {
     open();
-    await userEvent.click(await screen.findByRole('button', { name: 'Edit' }));
+    const [edit] = await screen.findAllByRole('button', { name: 'Edit' });
+    if (!edit) throw new Error('no row');
+    await userEvent.click(edit);
     const dialog = await screen.findByRole('dialog');
+    // Type and audience are fixed once the service exists (the server's patch takes neither).
+    expect(within(dialog).getByLabelText('Business type')).toBeDisabled();
+    expect(within(dialog).getByLabelText('Audience')).toBeDisabled();
     await userEvent.click(within(dialog).getByRole('switch', { name: 'Active' }));
     expect(within(dialog).getByText(/keep it/)).toBeInTheDocument();
     await userEvent.type(within(dialog).getByLabelText('Reason'), 'Retired service');

@@ -15,7 +15,8 @@
       "SALON_APPLICATION": "طلب صالون جديد",
       "REVIEW_PENDING": "تقييم بانتظار المراجعة",
       "CATALOG_REQUEST": "طلب خدمة للكتالوج",
-      "SALON_DELETION_REQUEST": "طلب حذف صالون"
+      "SALON_DELETION_REQUEST": "طلب حذف صالون",
+      "SALON_AUDIENCE_WIDENED": "توسيع فئة صالون"
     }
   }
 }

@@ -1,4 +1,5 @@
 import type { Page, PageQuery } from '@/domain/shared/page';
+import type { BusinessType } from '@/domain/shared/businessType';
 
 export const REVIEW_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'REMOVED'] as const;
 export const REVIEW_TARGETS = ['SALON', 'STAFF'] as const;
@@ -36,6 +37,7 @@ export interface ReviewQuery extends PageQuery {
   branchId?: string;
   staffId?: string;
   rating?: number;
+  businessType?: BusinessType;
 }
 export interface BulkResult {
   readonly id: string;
