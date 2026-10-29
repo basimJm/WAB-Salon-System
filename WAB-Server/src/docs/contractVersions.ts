@@ -25,8 +25,8 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-177: application medicalLicenseKeys (required for CLINIC; guest license presign takes purpose MEDICAL_LICENSE), PATCH /salon/audience (owner widens MALE/FEMALE -> BOTH; else 422 AUDIENCE_CHANGE_NOT_ALLOWED), notification salon.audience_widened. Client: MER-080, MER-081',
   },
   admin: {
-    version: '1.11.0',
-    sha256: '53d42822410bfb03fabc202d1694624e29f7f7d6ee26471598623a310a8446e5',
-    note: 'SRV-177: alert kind SALON_AUDIENCE_WIDENED (additive; ADM-110 shows it)',
+    version: '1.12.0',
+    sha256: '67581175ea2080f4ad2e9aaad72b5b36c3e9c1ef400151ecaed7af52e2620e94',
+    note: 'SRV-178: businessType filter on applications, bookings (+ BOOKINGS export), reviews, catalog requests (salons/catalog/placements since SRV-174); application detail medicalLicenseUrls (signed). Client: ADM-109, ADM-110',
   },
 };

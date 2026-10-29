@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   "servers": [
     {
@@ -9363,6 +9363,18 @@
             "schema": {
               "type": "string",
               "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
                 "ar",
                 "en"
               ],
@@ -9699,6 +9711,13 @@
                             "type": "string"
                           },
                           "description": "Signed, short-lived URLs of the private documents."
+                        },
+                        "medicalLicenseUrls": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "A clinic’s medical license (§5.19): signed, short-lived URLs; empty for a salon."
                         }
                       },
                       "required": [
@@ -9714,7 +9733,8 @@
                         "rejectionReason",
                         "description",
                         "areaId",
-                        "documentUrls"
+                        "documentUrls",
+                        "medicalLicenseUrls"
                       ]
                     },
                     "meta": {
@@ -12666,6 +12686,18 @@
             "schema": {
               "type": "string",
               "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
                 "ar",
                 "en"
               ],
@@ -13421,6 +13453,18 @@
             },
             "required": false,
             "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
             "in": "query"
           },
           {
@@ -16310,6 +16354,18 @@
             },
             "required": false,
             "name": "branchId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
             "in": "query"
           },
           {
@@ -23207,6 +23263,13 @@
                           "salonId": {
                             "type": "string",
                             "pattern": "^[a-fA-F0-9]{24}$"
+                          },
+                          "businessType": {
+                            "type": "string",
+                            "enum": [
+                              "SALON",
+                              "CLINIC"
+                            ]
                           },
                           "branchId": {
                             "type": "string",

@@ -66,6 +66,8 @@ export const adminBookingsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   salonId: id.optional(),
   customerId: id.optional(),
   branchId: id.optional(),
+  /** Salon or clinic bookings only (§5.19). */
+  businessType: z.enum(BUSINESS_TYPES).optional(),
 });
 
 export type MerchantBookingsQuery = z.infer<typeof merchantBookingsQuery>;

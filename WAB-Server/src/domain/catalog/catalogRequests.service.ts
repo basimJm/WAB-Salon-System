@@ -18,6 +18,8 @@ import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
 import { catalogFits } from '../businessTypes/rules';
+import type { BusinessType } from '../../constants/enums';
+import { salonIdFilter } from '../businessTypes/salonFilter';
 
 export interface CatalogRequestView {
   readonly id: string;
@@ -61,6 +63,8 @@ export interface CatalogRequestsService {
   /** Admin queue (pending by default, oldest first). */
   listForAdmin(input: {
     status?: CatalogRequestStatus | undefined;
+    /** Requests of salons or of clinics only (§5.19). */
+    businessType?: BusinessType | undefined;
     params: PaginationParams;
   }): Promise<{ items: CatalogRequestView[]; meta: PaginationMeta }>;
   /**
@@ -204,8 +208,12 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
       return { items: page.items.map((r) => view(r)), meta: page.meta };
     },
 
-    async listForAdmin({ status = 'PENDING', params }) {
-      const page = await requests.findPage({ status }, params, { createdAt: 1 });
+    async listForAdmin({ status = 'PENDING', businessType, params }) {
+      const page = await requests.findPage(
+        { status, ...(await salonIdFilter(salons, { businessType })) },
+        params,
+        { createdAt: 1 },
+      );
       const byId = await names(page.items);
       return {
         items: page.items.map((r) => view(r, byId.get(r.salonId) ?? null)),

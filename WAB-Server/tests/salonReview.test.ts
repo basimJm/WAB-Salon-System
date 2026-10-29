@@ -137,6 +137,41 @@ describe('GET /admin/v1/salons/applications', () => {
     expect(bodyOf(live).data.map((r) => r['name'])).toEqual(['Done']);
   });
 
+  it('filters by business type and shows a clinic’s medical license as signed links (§5.19)', async () => {
+    addSalon('Salon', '2026-10-01T00:00:00Z');
+    const clinic = addSalon('Clinic', '2026-10-02T00:00:00Z', {
+      businessType: 'CLINIC',
+      audience: 'BOTH',
+      application: {
+        submittedAt: new Date('2026-10-02T00:00:00Z'),
+        resubmissionCount: 0,
+        documentKeys: ['licenses/c.pdf'],
+        medicalLicenseKeys: ['medical-licenses/m.pdf'],
+      },
+    });
+    const list = await request(app)
+      .get('/admin/v1/salons/applications?businessType=CLINIC')
+      .set(auth());
+    expect(bodyOf(list).data.map((r) => [r['name'], r['businessType'], r['audience']])).toEqual([
+      ['Clinic', 'CLINIC', 'BOTH'],
+    ]);
+    const detail = bodyOf(
+      await request(app).get(`/admin/v1/salons/applications/${clinic}`).set(auth()),
+    ).data;
+    expect(detail['medicalLicenseUrls']).toHaveLength(1);
+    expect(String((detail['medicalLicenseUrls'] as string[])[0])).toContain(
+      'medical-licenses/m.pdf',
+    );
+    const salonOnly = await request(app)
+      .get('/admin/v1/salons/applications?businessType=SALON')
+      .set(auth());
+    const salonId = String(bodyOf(salonOnly).data[0]?.['id']);
+    const salonDetail = bodyOf(
+      await request(app).get(`/admin/v1/salons/applications/${salonId}`).set(auth()),
+    ).data;
+    expect(salonDetail['medicalLicenseUrls']).toEqual([]);
+  });
+
   it('shows one application with signed document links; 404 and 400 for bad ids', async () => {
     const id = addSalon('Glow', '2026-10-01T00:00:00Z');
     const res = await request(app).get(`/admin/v1/salons/applications/${id}`).set(auth());

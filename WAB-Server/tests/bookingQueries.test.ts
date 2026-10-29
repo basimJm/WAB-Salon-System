@@ -437,6 +437,11 @@ describe('admin', () => {
     expect(refsOf(await admin(`?customerId=${c2.toHexString()}`))).toEqual([refs.b4]);
     expect(refsOf(await admin('?status=COMPLETED'))).toEqual([refs.b3]);
   });
+  it('filters by business type (§5.19)', async () => {
+    expect(refsOf(await admin('?tab=UPCOMING&businessType=CLINIC'))).toEqual([refs.b2]);
+    expect(refsOf(await admin('?tab=UPCOMING&businessType=SALON'))).not.toContain(refs.b2);
+    expect((await admin('?businessType=SPA')).status).toBe(400);
+  });
   it('SRV-171 S5: q finds full and partial references, with or without the prefix', async () => {
     expect(refsOf(await admin('?q=PQR345'))).toEqual([refs.b5]);
     expect(refsOf(await admin('?q=pqr'))).toEqual([refs.b5]);

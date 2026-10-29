@@ -34,6 +34,9 @@ const detail = row.extend({
   description: z.string().nullable(),
   areaId: z.string().nullable(),
   documentUrls: z.array(z.string()).describe('Signed, short-lived URLs of the private documents.'),
+  medicalLicenseUrls: z
+    .array(z.string())
+    .describe('A clinic’s medical license (§5.19): signed, short-lived URLs; empty for a salon.'),
 });
 
 export const registerAdminApplicationDocs = (registry: OpenAPIRegistry): void => {

@@ -399,6 +399,15 @@ describe('catalog requests', () => {
     expect(bodyOf(res).data.map((r) => r['name'])).toEqual(['Earlier', 'Later']);
     expect(bodyOf(res).data[0]?.['salonName']).toBe('Barber');
     expect((await request(app).get('/admin/v1/catalog/requests')).status).toBe(401);
+    // §5.19: requests of salons or of clinics only.
+    const clinics = await request(app)
+      .get('/admin/v1/catalog/requests?businessType=CLINIC')
+      .set(admin());
+    expect(bodyOf(clinics).data).toEqual([]);
+    const salons = await request(app)
+      .get('/admin/v1/catalog/requests?businessType=SALON')
+      .set(admin());
+    expect(bodyOf(salons).data.map((r) => r['name'])).toEqual(['Earlier', 'Later']);
   });
 
   it('approve creates a catalog service of the salon’s type and audience, marks the request, audits and tells the salon', async () => {

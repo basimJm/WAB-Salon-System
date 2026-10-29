@@ -5,6 +5,7 @@ import { REVIEW_STATUSES, REVIEW_TARGETS } from '../../../constants/enums';
 import { ADMIN_PAGE_SIZE } from '../../../constants/pagination';
 import { REVIEW_BULK_MAX, REVIEW_RATING_MAX, REVIEW_RATING_MIN } from '../../../constants/reviews';
 import { paginationQuery } from '../../../utils/pagination';
+import { BUSINESS_TYPES } from '../../../constants/enums';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 const reason = z.string().trim().min(1).max(AUDIT_REASON_MAX_LENGTH);
@@ -13,6 +14,7 @@ export const adminReviewsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   status: z.enum(REVIEW_STATUSES).optional(),
   target: z.enum(REVIEW_TARGETS).optional(),
   salonId: objectId.optional(),
+  businessType: z.enum(BUSINESS_TYPES).optional(),
   staffId: objectId.optional(),
   branchId: objectId.optional(),
   rating: z.coerce.number().int().min(REVIEW_RATING_MIN).max(REVIEW_RATING_MAX).optional(),

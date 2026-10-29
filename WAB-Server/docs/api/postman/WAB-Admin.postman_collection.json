@@ -2225,6 +2225,11 @@
                   "key": "state",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -2884,6 +2889,11 @@
                   "key": "status",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -3060,6 +3070,11 @@
                 },
                 {
                   "key": "salonId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "businessType",
                   "value": "",
                   "disabled": true
                 },
@@ -3670,6 +3685,11 @@
                 },
                 {
                   "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "businessType",
                   "value": "",
                   "disabled": true
                 }
