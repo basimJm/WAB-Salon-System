@@ -49,6 +49,8 @@ export const MERCHANT_SALON_ROUTES = {
   resubmit: '/application/resubmit',
   /** Owner: ask WAB to delete the salon (M25, SRV-133). */
   deletionRequest: '/deletion-request',
+  /** Owner: widen a men's/women's salon to BOTH (§5.19). */
+  audience: '/audience',
 } as const;
 
 /** Admin review of salon applications (SRV-042, Admin PRD A14). */
@@ -88,6 +90,7 @@ export const SALON_STATE_EVENTS = [
   'salon.offline',
   'salon.online',
   'salon.audience_changed',
+  'salon.audience_widened',
   'salon.edited_by_admin',
   'salon.deletion_rejected',
   'branch.live',

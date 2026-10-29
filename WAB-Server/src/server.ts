@@ -192,6 +192,7 @@ import {
   type Closable,
   type ProcessLike,
 } from './utils/process/lifecycle';
+import { createSalonAudienceService } from './domain/salons/salonAudience.service';
 
 /** What the services need from the background-job system, and how they register their work. */
 interface JobRuntime {
@@ -1015,6 +1016,12 @@ const buildServices = (
     merchantStatistics: merchantStatisticsService,
     merchantDashboard: merchantDashboardService,
     salonDeletion: salonDeletionService,
+    salonAudience: createSalonAudienceService({
+      salons: new SalonsRepository(),
+      notifier: producers.salonStateNotifier,
+      alerts: adminAlerts,
+      logger,
+    }),
     memberSelf: createMemberSelfService({
       members: new MembersRepository(),
       storage: providers.storage,

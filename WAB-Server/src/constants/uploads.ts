@@ -17,6 +17,7 @@ export const UPLOAD_PURPOSES = [
   'GALLERY_VIDEO',
   'SERVICE_MEDIA',
   'LICENSE_DOCUMENT',
+  'MEDICAL_LICENSE',
   'CATALOG_IMAGE',
   'BANNER_IMAGE',
 ] as const;
@@ -50,6 +51,9 @@ export interface UploadPolicy {
   /** Merchant members only: owners only. */
   readonly ownerOnly?: boolean;
 }
+
+/** What a guest may upload before applying; the first is the default. */
+export const GUEST_LICENSE_PURPOSES = ['LICENSE_DOCUMENT', 'MEDICAL_LICENSE'] as const;
 
 export const UPLOAD_POLICIES: Readonly<Record<UploadPurpose, UploadPolicy>> = {
   CUSTOMER_AVATAR: {
@@ -98,6 +102,14 @@ export const UPLOAD_POLICIES: Readonly<Record<UploadPurpose, UploadPolicy>> = {
     kind: 'document',
     visibility: 'PRIVATE',
     prefix: 'licenses',
+    scopes: ['guest', 'merchant'],
+    ownerOnly: true,
+  },
+  // A clinic's medical license (§5.19): required besides the trade license, private like it.
+  MEDICAL_LICENSE: {
+    kind: 'document',
+    visibility: 'PRIVATE',
+    prefix: 'medical-licenses',
     scopes: ['guest', 'merchant'],
     ownerOnly: true,
   },

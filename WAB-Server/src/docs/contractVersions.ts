@@ -15,18 +15,18 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.9.0',
-    sha256: '96bae9f6fde6056b18303397858711b4f736663c7048ffdc28c7a0b928d31511',
-    note: 'SRV-176: booking person gender (optional; mixed persons at BOTH salons and clinics, GENDER_MISMATCH at men\'s/women\'s salons; bride sent as MALE = GENDER_MISMATCH), availability person gender, draft 404 for a business the customer may not see, bookings ?businessType= filter, rows businessType + salonAudience, detail persons gender. Client: CUS-099',
+    version: '1.10.0',
+    sha256: '165d6924157ccd7178184be5775480626a5effae53d84aeddce50bd08c6fdbb7',
+    note: 'SRV-177: upload purpose enum gains MEDICAL_LICENSE (merchant-only purpose; no client change)',
   },
   merchant: {
-    version: '1.8.0',
-    sha256: 'ee4f92324e6e8e08950df99660a336af892fecfc2f2ae4a6f54761ed78c484d4',
-    note: 'SRV-176: booking rows businessType + salonAudience, detail persons gender (additive, no client row)',
+    version: '1.9.0',
+    sha256: 'b616a55ad461714e21471fed7dc3aaedeb23c68be45a9e476f048269a21d181e',
+    note: 'SRV-177: application medicalLicenseKeys (required for CLINIC; guest license presign takes purpose MEDICAL_LICENSE), PATCH /salon/audience (owner widens MALE/FEMALE -> BOTH; else 422 AUDIENCE_CHANGE_NOT_ALLOWED), notification salon.audience_widened. Client: MER-080, MER-081',
   },
   admin: {
-    version: '1.10.0',
-    sha256: 'ad26beaad47e7dc388700172e38e6ac072bc2e92b198be21f62b4c31960071f0',
-    note: 'SRV-176: booking rows businessType + salonAudience, detail persons gender (additive; admin filter in SRV-178)',
+    version: '1.11.0',
+    sha256: '53d42822410bfb03fabc202d1694624e29f7f7d6ee26471598623a310a8446e5',
+    note: 'SRV-177: alert kind SALON_AUDIENCE_WIDENED (additive; ADM-110 shows it)',
   },
 };

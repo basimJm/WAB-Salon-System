@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.10.0"
+    "version": "1.11.0"
   },
   "servers": [
     {
@@ -12302,6 +12302,7 @@
                       "GALLERY_VIDEO",
                       "SERVICE_MEDIA",
                       "LICENSE_DOCUMENT",
+                      "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
                       "BANNER_IMAGE"
                     ]
@@ -21414,7 +21415,8 @@
                 "SALON_APPLICATION",
                 "REVIEW_PENDING",
                 "CATALOG_REQUEST",
-                "SALON_DELETION_REQUEST"
+                "SALON_DELETION_REQUEST",
+                "SALON_AUDIENCE_WIDENED"
               ]
             },
             "required": false,
@@ -21472,7 +21474,8 @@
                               "SALON_APPLICATION",
                               "REVIEW_PENDING",
                               "CATALOG_REQUEST",
-                              "SALON_DELETION_REQUEST"
+                              "SALON_DELETION_REQUEST",
+                              "SALON_AUDIENCE_WIDENED"
                             ]
                           },
                           "severity": {
@@ -21810,7 +21813,8 @@
                             "SALON_APPLICATION",
                             "REVIEW_PENDING",
                             "CATALOG_REQUEST",
-                            "SALON_DELETION_REQUEST"
+                            "SALON_DELETION_REQUEST",
+                            "SALON_AUDIENCE_WIDENED"
                           ]
                         },
                         "severity": {

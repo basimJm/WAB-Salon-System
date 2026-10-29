@@ -279,7 +279,15 @@ describe('staff profile', () => {
       (): object => ({ brideQualified: true }),
       'body.brideQualified',
     ],
+    [
+      'bride qualification in a clinic (§5.19)',
+      (): object => ({ brideQualified: true }),
+      'body.brideQualified',
+    ],
   ])('rejects %s and saves nothing', async (name, make, field) => {
+    if (name.includes('clinic')) {
+      Object.assign(salonsM.docs[0] ?? {}, { businessType: 'CLINIC', audience: 'BOTH' });
+    }
     const salon = name.includes('men’s') ? menSalon : womenSalon;
     const owner = addMember(salon, 'OWNER');
     const member = addMember(salon, 'EMPLOYEE');

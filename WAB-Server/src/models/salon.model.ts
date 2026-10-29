@@ -48,6 +48,8 @@ export interface SalonApplication {
   resubmissionCount: number;
   /** Private license documents (1-5 storage keys, admin-only signed URLs). */
   documentKeys: string[];
+  /** A CLINIC's medical license (§5.19; 1-5 private keys, required for clinics). */
+  medicalLicenseKeys?: string[];
 }
 
 /** A salon (BUSINESS_DOMAIN.md §3.3). Later tasks fill location, hours, policy, payout details. */
@@ -133,6 +135,7 @@ const applicationSchema = new Schema<SalonApplication>(
     rejectionReason: { type: String, maxlength: SALON_REJECTION_REASON_MAX_LENGTH },
     resubmissionCount: { type: Number, default: 0, min: 0 },
     documentKeys: { type: [String], default: [] },
+    medicalLicenseKeys: { type: [String], default: undefined },
   },
   { _id: false },
 );

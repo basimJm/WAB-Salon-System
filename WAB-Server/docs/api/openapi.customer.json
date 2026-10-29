@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.9.0"
+    "version": "1.10.0"
   },
   "servers": [
     {
@@ -3006,6 +3006,7 @@
                       "GALLERY_VIDEO",
                       "SERVICE_MEDIA",
                       "LICENSE_DOCUMENT",
+                      "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
                       "BANNER_IMAGE"
                     ]

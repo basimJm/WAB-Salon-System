@@ -109,6 +109,7 @@ export const NOTIFICATION_EVENTS = {
   'salon.offline': { type: 'SYSTEM', audiences: [owner] },
   'salon.online': { type: 'SYSTEM', audiences: [owner] },
   'salon.audience_changed': { type: 'SYSTEM', audiences: [owner] },
+  'salon.audience_widened': { type: 'SYSTEM', audiences: [owner] },
   'salon.edited_by_admin': { type: 'SYSTEM', audiences: [owner] },
   'salon.deletion_rejected': { type: 'SYSTEM', audiences: [owner] },
   'branch.live': { type: 'SYSTEM', audiences: [owner, branchManagers] },

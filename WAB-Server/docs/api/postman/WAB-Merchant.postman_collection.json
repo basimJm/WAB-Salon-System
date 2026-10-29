@@ -638,7 +638,7 @@
             "description": "Public. The phone is proven by an `otpToken` (purpose REGISTER, from `POST /auth/otp/verify`). The salon waits for admin approval; license documents are private storage keys.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"salon\": {\n    \"name\": \"string\",\n    \"businessType\": \"SALON\",\n    \"audience\": \"MALE\",\n    \"description\": \"string\",\n    \"cityId\": \"string\",\n    \"areaId\": \"string\"\n  },\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
+              "raw": "{\n  \"phone\": {\n    \"countryCode\": \"string\",\n    \"number\": \"string\"\n  },\n  \"otpToken\": \"string\",\n  \"firstName\": \"string\",\n  \"lastName\": \"string\",\n  \"salon\": {\n    \"name\": \"string\",\n    \"businessType\": \"SALON\",\n    \"audience\": \"MALE\",\n    \"description\": \"string\",\n    \"cityId\": \"string\",\n    \"areaId\": \"string\"\n  },\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"medicalLicenseKeys\": [\n    \"string\"\n  ],\n  \"installation\": {\n    \"installationId\": \"string\",\n    \"platform\": \"ANDROID\",\n    \"appVersion\": \"string\",\n    \"osVersion\": \"string\",\n    \"deviceModel\": \"string\",\n    \"fcmToken\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -724,7 +724,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"audience\": \"MALE\",\n  \"description\": \"string\",\n  \"documentKeys\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"name\": \"string\",\n  \"audience\": \"MALE\",\n  \"description\": \"string\",\n  \"documentKeys\": [\n    \"string\"\n  ],\n  \"medicalLicenseKeys\": [\n    \"string\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -956,7 +956,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"contentType\": \"string\",\n  \"size\": 0\n}",
+              "raw": "{\n  \"contentType\": \"string\",\n  \"size\": 0,\n  \"purpose\": \"LICENSE_DOCUMENT\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4760,6 +4760,55 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"note\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Owner: widen a men’s or women’s salon to BOTH (§5.19), instantly; the owner is notified and WAB alerted. Narrowing, a clinic or the same audience: 422 AUDIENCE_CHANGE_NOT_ALLOWED (narrowing is done by WAB)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{merchantToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/merchant/v1/salon/audience",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "merchant",
+                "v1",
+                "salon",
+                "audience"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"audience\": \"MALE\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

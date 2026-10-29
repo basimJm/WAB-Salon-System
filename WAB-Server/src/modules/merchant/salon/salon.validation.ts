@@ -48,6 +48,8 @@ export const applySchema = z.object({
       message: 'required for a SALON',
     }),
   documentKeys,
+  /** A CLINIC's medical license documents (§5.19; required for clinics, MEDICAL_LICENSE uploads). */
+  medicalLicenseKeys: documentKeys.optional(),
   installation,
 });
 
@@ -58,5 +60,6 @@ export const resubmitSchema = z
     audience: z.enum(AUDIENCES).optional(),
     description: description.optional(),
     documentKeys: documentKeys.optional(),
+    medicalLicenseKeys: documentKeys.optional(),
   })
   .default({});

@@ -245,6 +245,7 @@ describe('POST /merchant/v1/salon/applications', () => {
     const clinic = setup();
     const made = await apply(clinic, {
       salon: { name: 'Glow Clinic', businessType: 'CLINIC', audience: 'MALE' },
+      medicalLicenseKeys: ['medical-licenses/doc-1.pdf'],
     });
     expect(made.status).toBe(201);
     expect(clinic.salons.docs[0]).toMatchObject({ businessType: 'CLINIC', audience: 'BOTH' });
@@ -395,6 +396,35 @@ describe('license documents must be confirmed uploads', () => {
     expect((await apply(bad)).status).toBe(500);
     expect(bad.salons.docs).toHaveLength(0);
     expect(bad.members.docs).toHaveLength(0);
+  });
+
+  it('a clinic needs a confirmed guest MEDICAL_LICENSE upload; a salon ignores it (§5.19)', async () => {
+    const clinic = { name: 'Glow Clinic', businessType: 'CLINIC' };
+    const missing = setup(verifier(false));
+    const refused = await apply(missing, { salon: clinic });
+    expect(refused.status).toBe(400);
+    expect(bodyOf(refused).error.details.map((d) => d.field)).toEqual(['body.medicalLicenseKeys']);
+    expect(missing.salons.docs).toHaveLength(0);
+    const ok = verifier(false);
+    const rig = setup(ok);
+    const res = await apply(rig, { salon: clinic, medicalLicenseKeys: ['medical-licenses/m.pdf'] });
+    expect(res.status).toBe(201);
+    expect(ok.calls[1]).toMatchObject({
+      keys: ['medical-licenses/m.pdf'],
+      purpose: 'MEDICAL_LICENSE',
+      field: 'body.medicalLicenseKeys',
+    });
+    expect(ok.calls[1]?.accept?.({ ownerType: 'GUEST' } as never)).toBe(true);
+    expect(rig.salons.docs[0]?.['application']).toMatchObject({
+      medicalLicenseKeys: ['medical-licenses/m.pdf'],
+    });
+    const salon = setup(verifier(false));
+    expect((await apply(salon, { medicalLicenseKeys: ['medical-licenses/x.pdf'] })).status).toBe(
+      201,
+    );
+    expect(
+      (salon.salons.docs[0]?.['application'] as Record<string, unknown>)['medicalLicenseKeys'],
+    ).toBeUndefined();
   });
 
   it('resubmit keeps the keys already on the application and accepts new ones only from this salon', async () => {

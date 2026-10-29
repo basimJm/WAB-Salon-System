@@ -14,6 +14,8 @@ import { memberSchema } from '../auth/auth.openapi';
 import { changePhoneSchema, updateMeSchema } from './me.validation';
 import { deletionRequestSchema } from '../salon/deletion.routes';
 import { MERCHANT_SALON_ROUTES } from '../../../constants/salon';
+import { audienceWidenSchema } from '../salon/audience.routes';
+import { businessKindShape } from '../../../docs/schemas';
 
 const meSchema = memberSchema.extend({
   photoUrl: z.string().nullable(),
@@ -80,6 +82,24 @@ export const registerMerchantMeDocs = (registry: OpenAPIRegistry): void => {
       [HTTP_STATUS.ok]: jsonResponse(
         'Request recorded',
         successResponseSchema(z.object({ requestedAt: z.string() })),
+      ),
+      ...failures,
+    },
+  });
+  registry.registerPath({
+    method: 'patch',
+    path: `${API_PREFIXES.merchant}${MERCHANT_SALON_ROUTES.base}${MERCHANT_SALON_ROUTES.audience}`,
+    tags: ['My account'],
+    summary:
+      'Owner: widen a men’s or women’s salon to BOTH (§5.19), instantly; the owner is notified and WAB alerted. Narrowing, a clinic or the same audience: 422 AUDIENCE_CHANGE_NOT_ALLOWED (narrowing is done by WAB)',
+    request: {
+      headers,
+      body: { required: true, content: { [JSON_CONTENT_TYPE]: { schema: audienceWidenSchema } } },
+    },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Audience widened',
+        successResponseSchema(z.object({ ...businessKindShape })),
       ),
       ...failures,
     },

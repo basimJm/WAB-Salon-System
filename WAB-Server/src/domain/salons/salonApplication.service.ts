@@ -1,6 +1,20 @@
-import { ERROR_CODES } from '../../constants/errorCodes';
+import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { Audience, BusinessType, Language } from '../../constants/enums';
 import { AUDIENCE_ALL, audienceFor } from '../businessTypes/rules';
+
+const CLINIC: BusinessType = 'CLINIC';
+const MEDICAL_LICENSE_FIELD = 'body.medicalLicenseKeys';
+/** A clinic applies with its medical license (§5.19). */
+const medicalLicenseRequired = (): ValidationError =>
+  new ValidationError({
+    details: [
+      {
+        field: MEDICAL_LICENSE_FIELD,
+        code: ERROR_CODES.VALIDATION_ERROR,
+        messageKey: errorMessageKey(ERROR_CODES.VALIDATION_ERROR),
+      },
+    ],
+  });
 import type { SalonState } from '../../constants/salon';
 import type { OtpProvider } from '../../providers';
 import type {
@@ -23,6 +37,7 @@ import {
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
+  ValidationError,
 } from '../../utils/errors';
 import type { DeviceInput } from '../auth/customerAuth.service';
 import { toMemberProfile, type MemberProfile } from '../auth/merchantAuth.service';
@@ -52,6 +67,8 @@ export interface ApplyInput {
   readonly lastName: string;
   readonly salon: SalonDraft;
   readonly documentKeys: readonly string[];
+  /** Required for a CLINIC (§5.19), ignored for a SALON. */
+  readonly medicalLicenseKeys?: readonly string[] | undefined;
   readonly device: DeviceInput;
   readonly language: Language;
 }
@@ -63,6 +80,8 @@ export interface ResubmitInput {
   readonly audience?: Audience | undefined;
   readonly description?: string | undefined;
   readonly documentKeys?: readonly string[] | undefined;
+  /** A CLINIC may replace its medical license documents. */
+  readonly medicalLicenseKeys?: readonly string[] | undefined;
 }
 
 export interface ApplicationStatus {
@@ -164,6 +183,17 @@ export const createSalonApplicationService = (
         field: 'body.documentKeys',
         accept: (upload) => upload.ownerType === 'GUEST',
       });
+      const clinic = input.salon.businessType === CLINIC;
+      const medical = clinic ? [...(input.medicalLicenseKeys ?? [])] : [];
+      if (clinic) {
+        if (medical.length === 0) throw medicalLicenseRequired();
+        await deps.uploads?.assertConfirmed({
+          keys: medical,
+          purpose: 'MEDICAL_LICENSE',
+          field: MEDICAL_LICENSE_FIELD,
+          accept: (upload) => upload.ownerType === 'GUEST',
+        });
+      }
       await phones.verify(phone, input.otpToken, 'REGISTER');
       if ((await members.findByPhone(phone.e164)) !== null) throw phoneTaken();
 
@@ -181,6 +211,7 @@ export const createSalonApplicationService = (
           submittedAt: at,
           resubmissionCount: 0,
           documentKeys: [...input.documentKeys],
+          ...(clinic ? { medicalLicenseKeys: medical } : {}),
         },
       });
       let owner;
@@ -229,6 +260,20 @@ export const createSalonApplicationService = (
           accept: (upload) => upload.salonId === salonId,
         });
       }
+      const clinic = salon.businessType === CLINIC;
+      if (clinic && changes.medicalLicenseKeys !== undefined) {
+        await deps.uploads?.assertConfirmed({
+          keys: changes.medicalLicenseKeys,
+          purpose: 'MEDICAL_LICENSE',
+          field: MEDICAL_LICENSE_FIELD,
+          allow: salon.application.medicalLicenseKeys ?? [],
+          accept: (upload) => upload.salonId === salonId,
+        });
+      }
+      const medical = clinic
+        ? [...(changes.medicalLicenseKeys ?? salon.application.medicalLicenseKeys ?? [])]
+        : undefined;
+      if (medical?.length === 0) throw medicalLicenseRequired();
       const updated = await salons.updateById(salonId, {
         ...(changes.name === undefined ? {} : { name: changes.name, searchText: changes.name }),
         ...(changes.audience === undefined
@@ -240,6 +285,7 @@ export const createSalonApplicationService = (
           submittedAt: now(),
           resubmissionCount: salon.application.resubmissionCount + 1,
           documentKeys: [...(changes.documentKeys ?? salon.application.documentKeys)],
+          ...(medical === undefined ? {} : { medicalLicenseKeys: medical }),
         },
       });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
