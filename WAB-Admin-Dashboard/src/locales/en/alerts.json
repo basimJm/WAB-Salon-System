@@ -15,7 +15,8 @@
       "SALON_APPLICATION": "New salon application",
       "REVIEW_PENDING": "Review waiting",
       "CATALOG_REQUEST": "Catalog request",
-      "SALON_DELETION_REQUEST": "Salon deletion request"
+      "SALON_DELETION_REQUEST": "Salon deletion request",
+      "SALON_AUDIENCE_WIDENED": "Salon audience widened"
     }
   }
 }

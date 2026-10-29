@@ -15,6 +15,7 @@ import {
   type ApproveMode,
   type CatalogRequest,
 } from '@/domain/catalog/catalog';
+import { catalogFits } from '@/domain/shared/businessType';
 import { SegmentedControl } from '../components/form/SegmentedControl';
 import { TextField } from '../components/form/TextField';
 import { InlineAlert } from '../components/feedback/InlineAlert';
@@ -29,7 +30,7 @@ export interface ApproveDrawerProps {
   onClose: () => void;
 }
 
-/** Active catalog services of the salon's gender: the only ones the server accepts for a mapping (SRV-125). */
+/** Active catalog services that fit the salon (`catalogFits`): the only ones the server accepts for a mapping (SRV-125/178). */
 function useMapOptions(salonId: string, enabled: boolean) {
   const { repositories } = useContainer();
   const { language } = useLanguage();
@@ -38,17 +39,19 @@ function useMapOptions(salonId: string, enabled: boolean) {
     queryFn: () => repositories.salons.get(salonId),
     enabled,
   });
-  const gender = salon.data?.gender;
+  const business = salon.data;
+  const businessType = business?.businessType;
   const services = useQuery({
-    queryKey: ['getCatalogServices', 'options', gender],
-    queryFn: () => repositories.catalog.services.list({ page: 1, pageSize: MAX_PAGE_SIZE, gender }),
-    enabled: enabled && gender !== undefined,
+    queryKey: ['getCatalogServices', 'options', businessType],
+    queryFn: () =>
+      repositories.catalog.services.list({ page: 1, pageSize: MAX_PAGE_SIZE, businessType }),
+    enabled: enabled && businessType !== undefined,
   });
   const options = (services.data?.items ?? [])
-    .filter((s) => s.active)
+    .filter((s) => s.active && business !== undefined && catalogFits(s, business))
     .map((s) => ({ value: s.id, label: s.name[language] }));
   return {
-    gender,
+    business,
     options,
     loading: enabled && (salon.isPending || services.isPending),
     error: salon.error ?? services.error,
@@ -89,7 +92,9 @@ export function ApproveDrawer({ item, saving, error, onSubmit, onClose }: Approv
       onChange={(e) => setV({ ...v, [k]: e.target.value })}
     />
   );
-  const audience = map.gender ? t(`catalog.genders.${map.gender}`) : '';
+  const audience = map.business
+    ? `${t(`status.businessType.${map.business.businessType}`)} · ${t(`status.audience.${map.business.audience}`)}`
+    : '';
   return (
     <ResourceDrawer
       title={t('catalog.approveTitle')}

@@ -38,17 +38,19 @@ describe('placement rules', () => {
 });
 
 describe('PlacementsPage', () => {
-  it('shows the women list in order and switches to men', async () => {
+  it('shows the Recommended salons in order and switches to Recommended clinics (§5.13)', async () => {
     open();
-    await waitFor(() => expect(bodyRows()).toBe(2));
+    await waitFor(() => expect(bodyRows()).toBe(3));
     expect(screen.getByText('Noor Salon')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('radio', { name: 'Men' }));
-    await waitFor(() => expect(screen.getByText('Royal Barber')).toBeInTheDocument());
+    expect(screen.queryByText('Glow Clinic')).toBeNull();
+    await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
+    await waitFor(() => expect(screen.getByText('Glow Clinic')).toBeInTheDocument());
+    expect(screen.queryByText('Noor Salon')).toBeNull();
   });
 
   it('moves a salon down: the order numbers follow', async () => {
     open();
-    await waitFor(() => expect(bodyRows()).toBe(2));
+    await waitFor(() => expect(bodyRows()).toBe(3));
     await userEvent.click(screen.getByRole('button', { name: 'Move Noor Salon down' }));
     await waitFor(() =>
       expect(
@@ -59,7 +61,7 @@ describe('PlacementsPage', () => {
 
   it('ends a placement with a reason', async () => {
     open();
-    await waitFor(() => expect(bodyRows()).toBe(2));
+    await waitFor(() => expect(bodyRows()).toBe(3));
     await userEvent.click(screen.getAllByRole('button', { name: 'End now' })[0] as HTMLElement);
     const dialog = await screen.findByRole('dialog');
     await userEvent.type(within(dialog).getByRole('textbox'), 'Contract finished');

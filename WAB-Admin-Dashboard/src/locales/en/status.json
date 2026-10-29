@@ -91,6 +91,15 @@
       "ACTIVE": "Active",
       "OFFLINE": "Offline",
       "CLOSED": "Closed"
+    },
+    "businessType": {
+      "SALON": "Salon",
+      "CLINIC": "Clinic"
+    },
+    "audience": {
+      "FEMALE": "Women",
+      "MALE": "Men",
+      "BOTH": "Men & women"
     }
   }
 }

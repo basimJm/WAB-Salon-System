@@ -1,3 +1,4 @@
+import type { Audience, BusinessType } from '@/domain/shared/businessType';
 import type { Page, PageQuery } from '@/domain/shared/page';
 
 export const SALON_STATES = [
@@ -7,15 +8,14 @@ export const SALON_STATES = [
   'LIVE',
   'OFFLINE',
 ] as const;
-export const SALON_GENDERS = ['FEMALE', 'MALE'] as const;
 export type SalonState = (typeof SALON_STATES)[number];
-export type SalonGender = (typeof SALON_GENDERS)[number];
 export type SubscriptionStatus = 'TRIAL' | 'ACTIVE' | 'EXPIRED';
 
 export interface SalonSummary {
   readonly id: string;
   readonly name: string;
-  readonly gender: SalonGender;
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly state: SalonState;
   readonly cityId: string | null;
   readonly areaId: string | null;
@@ -81,7 +81,8 @@ export const isIban = (text: string): boolean => IBAN.test(normalizeIban(text));
 
 export interface SalonQuery extends PageQuery {
   state?: SalonState;
-  gender?: SalonGender;
+  businessType?: BusinessType;
+  audience?: Audience;
   cityId?: string;
   q?: string;
   subscription?: SubscriptionStatus;
@@ -139,8 +140,11 @@ export interface SalonsRepository {
   decideDeletion(id: string, decision: DeletionDecision, reason: string): Promise<void>;
   setOffline(id: string, reason: string): Promise<void>;
   setOnline(id: string, reason: string): Promise<void>;
-  /** Services of the salon are switched off by the server: the caller must warn first. */
-  changeGender(id: string, gender: SalonGender, reason: string): Promise<SalonDetails>;
+  /**
+   * SALON only (§5.19). Widening to BOTH keeps everything; narrowing switches off services that no longer fit
+   * and is refused with 409 SCHEDULE_CONFLICT (booking ids in the error details) while future bookings exist.
+   */
+  changeAudience(id: string, audience: Audience, reason: string): Promise<SalonDetails>;
   /** Reading the full IBAN is audited by the server; never cache the answer. */
   payoutDetails(id: string): Promise<PayoutDetails | null>;
   replacePayoutDetails(

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
+import { brideAllowed, type BusinessKind } from '@/domain/shared/businessType';
 import { PageHeader } from '../components/core/PageHeader';
 import { Tabs } from '../components/data/Tabs';
 import { AsyncView } from '../components/feedback/AsyncView';
@@ -15,6 +16,9 @@ import { PolicyTab } from './PolicyTab';
 import { ProfileTab } from './ProfileTab';
 import { ServicesTab } from './ServicesTab';
 import { StaffTab } from './StaffTab';
+
+/** Until the salon loads, tabs act as for a women's salon (the strictest bride rules still come from the server). */
+const FALLBACK_KIND: BusinessKind = { businessType: 'SALON', audience: 'FEMALE' };
 
 const TABS = ['profile', 'gallery', 'hours', 'services', 'staff', 'policy'] as const;
 /** Tabs whose data belongs to one branch (BUSINESS_DOMAIN §3.3a); the others are salon-wide. */
@@ -33,13 +37,13 @@ export default function SalonEditPage() {
   });
   const branch = useBranchSelection(id);
   const { scope } = branch;
-  const gender = salon.data?.gender ?? 'FEMALE';
+  const business = salon.data ?? FALLBACK_KIND;
   const content: Record<TabId, React.ReactNode> = {
     profile: <ProfileTab salonId={id} />,
     gallery: <GalleryTab salonId={id} />,
     hours: <HoursTab scope={scope} />,
-    services: <ServicesTab scope={scope} gender={gender} />,
-    staff: <StaffTab scope={scope} gender={gender} branches={branch.open} />,
+    services: <ServicesTab scope={scope} business={business} />,
+    staff: <StaffTab scope={scope} allowBride={brideAllowed(business)} branches={branch.open} />,
     policy: <PolicyTab salonId={id} />,
   };
   return (

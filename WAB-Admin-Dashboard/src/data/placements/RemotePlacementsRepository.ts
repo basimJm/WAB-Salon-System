@@ -32,7 +32,13 @@ export class RemotePlacementsRepository implements PlacementsRepository {
 
   list: PlacementsRepository['list'] = (q) =>
     this.api.executePage(list, {
-      query: defined({ page: q.page, pageSize: q.pageSize, gender: q.gender, status: q.status }),
+      query: defined({
+        page: q.page,
+        pageSize: q.pageSize,
+        businessType: q.businessType,
+        audience: q.audience,
+        status: q.status,
+      }),
     });
 
   create: PlacementsRepository['create'] = async (input, reason) =>
@@ -48,6 +54,6 @@ export class RemotePlacementsRepository implements PlacementsRepository {
   end: PlacementsRepository['end'] = async (id, reason) =>
     (await this.api.execute(end, { params: { id }, body: { reason } })).data;
 
-  reorder: PlacementsRepository['reorder'] = async (gender, ids, reason) =>
-    (await this.api.execute(reorder, { body: { gender, ids: [...ids], reason } })).data;
+  reorder: PlacementsRepository['reorder'] = async (businessType, ids, reason) =>
+    (await this.api.execute(reorder, { body: { businessType, ids: [...ids], reason } })).data;
 }

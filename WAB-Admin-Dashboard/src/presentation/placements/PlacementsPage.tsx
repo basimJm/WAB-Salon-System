@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import { moveId, type Placement } from '@/domain/placements/placements';
-import { SALON_GENDERS, type SalonGender } from '@/domain/salons/salons';
+import { BUSINESS_TYPES, type BusinessType } from '@/domain/shared/businessType';
 import { formatJodAmount } from '@/domain/shared/format';
 import { MAX_PAGE_SIZE } from '@/constants/ui';
 import { Button } from '../components/core/Button';
@@ -14,12 +14,15 @@ import { ReasonDialog } from '../components/overlay/ReasonDialog';
 import { useToast } from '../components/overlay/Toast';
 import { ListPage } from '../components/templates/ListPage';
 import { useListController } from '../controllers/useListController';
+import { BUSINESS_TYPE_FILTER_KEY, businessTypeFilterOf } from '../shared/businessFilter';
+import { BusinessBadges } from '../shared/BusinessBadges';
 import { PlacementDrawer } from './PlacementDrawer';
 import { instantDay } from './placementDays';
 
-const OPTIONS = { filterKeys: ['gender'] };
+const OPTIONS = { filterKeys: [BUSINESS_TYPE_FILTER_KEY] };
+const DEFAULT_TYPE: BusinessType = 'SALON';
 
-/** Admin PRD A20 · Recommended salons per audience: period, order, amount paid; end now, move up or down. */
+/** Admin PRD A20 · Recommended salons / clinics per business type (§5.13, ordered per type): period, order, amount paid; end now, move up or down. */
 export default function PlacementsPage() {
   const { t } = useTranslation();
   const toast = useToast();
@@ -27,13 +30,12 @@ export default function PlacementsPage() {
   const { repositories } = useContainer();
   const repo = repositories.placements;
   const list = useListController(OPTIONS);
-  const gender: SalonGender =
-    SALON_GENDERS.find((g) => g === list.state.filters['gender']?.[0]) ?? 'FEMALE';
+  const businessType = businessTypeFilterOf(list.state) ?? DEFAULT_TYPE;
   const [editing, setEditing] = useState<{ item: Placement | null } | null>(null);
   const [ending, setEnding] = useState<Placement | null>(null);
   const query = useQuery({
-    queryKey: ['getRecommended', gender],
-    queryFn: () => repo.list({ page: 1, pageSize: MAX_PAGE_SIZE, gender }),
+    queryKey: ['getRecommended', businessType],
+    queryFn: () => repo.list({ page: 1, pageSize: MAX_PAGE_SIZE, businessType }),
   });
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['getRecommended'] });
   const end = useMutation({
@@ -47,7 +49,7 @@ export default function PlacementsPage() {
   const move = useMutation({
     mutationFn: ({ id, direction }: { id: string; direction: -1 | 1 }) =>
       repo.reorder(
-        gender,
+        businessType,
         moveId(
           (query.data?.items ?? []).map((p) => p.id),
           id,
@@ -62,6 +64,11 @@ export default function PlacementsPage() {
   const columns: Column<Placement>[] = [
     { key: 'order', header: t('placements.order'), ltr: true, render: (r) => r.order },
     { key: 'salon', header: t('placements.salon'), render: (r) => r.salon.name },
+    {
+      key: 'type',
+      header: t('business.type'),
+      render: (r) => <BusinessBadges businessType={r.businessType} audience={r.audience} />,
+    },
     {
       key: 'period',
       header: t('placements.period'),
@@ -88,10 +95,10 @@ export default function PlacementsPage() {
         actions={
           <>
             <SegmentedControl
-              ariaLabel={t('placements.audience')}
-              value={gender}
-              options={SALON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) }))}
-              onChange={(g) => list.setFilter('gender', [g])}
+              ariaLabel={t('business.type')}
+              value={businessType}
+              options={BUSINESS_TYPES.map((b) => ({ value: b, label: t(`business.filter.${b}`) }))}
+              onChange={(b) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, [b])}
             />
             <Button onClick={() => setEditing({ item: null })}>{t('placements.add')}</Button>
           </>
@@ -141,7 +148,7 @@ export default function PlacementsPage() {
         <PlacementDrawer
           key={editing.item?.id ?? 'new'}
           item={editing.item}
-          gender={gender}
+          businessType={businessType}
           onClose={() => setEditing(null)}
         />
       ) : null}

@@ -16,6 +16,9 @@
     "rejectTitle": "Reject {{name}}",
     "rejectText": "The owner sees this reason and can fix and resubmit.",
     "approved": "Salon approved",
-    "rejected": "Application rejected"
+    "rejected": "Application rejected",
+    "medicalLicense": "Medical license",
+    "noMedicalLicense": "This clinic has not uploaded a medical license: it is required before approval.",
+    "medicalDocument": "Medical license document {{n}} of {{name}}"
   }
 }

@@ -1,0 +1,10 @@
+{
+  "salonAudience": {
+    "now": "Serves now",
+    "widen": "Widening to men & women keeps every service, staff member and booking; the owner is notified.",
+    "narrow": "Narrowing switches off the services that no longer fit (and bride options for a men's salon). It is refused while future bookings exist.",
+    "conflicts": "{{count}} future booking(s) block this change. Resolve them first (cancel or complete), then try again.",
+    "conflictBooking": "Booking {{n}}",
+    "conflictsMore": "and {{count}} more"
+  }
+}

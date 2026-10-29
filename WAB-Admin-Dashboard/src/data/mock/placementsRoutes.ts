@@ -5,10 +5,12 @@ import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 
 type Status = 'SCHEDULED' | 'ACTIVE' | 'ENDED';
-const placement = (n: number, name: string, gender: 'MALE' | 'FEMALE', status: Status) => ({
+type Kind = { businessType: 'SALON' | 'CLINIC'; audience: 'MALE' | 'FEMALE' | 'BOTH' };
+const WOMEN: Kind = { businessType: 'SALON', audience: 'FEMALE' };
+const placement = (n: number, name: string, kind: Kind, status: Status) => ({
   id: `64c7${String(n).padStart(20, '0')}`,
   salon: { id: `64f00000000000000000000${String(n)}`, name },
-  gender,
+  ...kind,
   startAt: '2026-10-01T21:00:00.000Z',
   endAt: '2026-12-01T21:00:00.000Z',
   order: n,
@@ -17,9 +19,10 @@ const placement = (n: number, name: string, gender: 'MALE' | 'FEMALE', status: S
   status,
 });
 export const MOCK_PLACEMENTS = [
-  placement(1, 'Noor Salon', 'FEMALE', 'ACTIVE'),
-  placement(2, 'Lama Beauty', 'FEMALE', 'SCHEDULED'),
-  placement(3, 'Royal Barber', 'MALE', 'ACTIVE'),
+  placement(1, 'Noor Salon', WOMEN, 'ACTIVE'),
+  placement(2, 'Lama Beauty', { businessType: 'SALON', audience: 'BOTH' }, 'SCHEDULED'),
+  placement(3, 'Royal Barber', { businessType: 'SALON', audience: 'MALE' }, 'ACTIVE'),
+  placement(4, 'Glow Clinic', { businessType: 'CLINIC', audience: 'BOTH' }, 'ACTIVE'),
 ];
 
 export function placementsRoutes(): readonly MockRoute[] {
@@ -40,7 +43,8 @@ export function placementsRoutes(): readonly MockRoute[] {
         const items = rows
           .filter(
             (r) =>
-              (!query.get('gender') || r.gender === query.get('gender')) &&
+              (!query.get('businessType') || r.businessType === query.get('businessType')) &&
+              (!query.get('audience') || r.audience === query.get('audience')) &&
               (!query.get('status') || r.status === query.get('status')),
           )
           .sort((a, b) => a.order - b.order);
@@ -59,7 +63,7 @@ export function placementsRoutes(): readonly MockRoute[] {
       ({ body }) => {
         const b = body as { salonId: string; amountPaid: string; order?: number; note?: string };
         const row = {
-          ...placement(rows.length + 1, 'New salon', 'FEMALE', 'SCHEDULED'),
+          ...placement(rows.length + 1, 'New salon', WOMEN, 'SCHEDULED'),
           salon: { id: b.salonId, name: 'New salon' },
           amountPaid: b.amountPaid,
           order: b.order ?? rows.length + 1,

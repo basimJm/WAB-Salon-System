@@ -26,7 +26,12 @@ export class RemoteApplicationsRepository implements ApplicationsRepository {
 
   list: ApplicationsRepository['list'] = (q) =>
     this.api.executePage(list, {
-      query: defined({ page: q.page, pageSize: q.pageSize, state: q.state }),
+      query: defined({
+        page: q.page,
+        pageSize: q.pageSize,
+        state: q.state,
+        businessType: q.businessType,
+      }),
     });
 
   get: ApplicationsRepository['get'] = async (id) =>

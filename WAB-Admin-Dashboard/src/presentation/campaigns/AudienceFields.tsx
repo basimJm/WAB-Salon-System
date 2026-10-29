@@ -8,7 +8,7 @@ import {
   type Audience,
   type AudienceKind,
 } from '@/domain/campaigns/campaigns';
-import { SALON_GENDERS } from '@/domain/salons/salons';
+import { PERSON_GENDERS } from '@/domain/shared/businessType';
 import { Select } from '../components/form/Select';
 import { TextField } from '../components/form/TextField';
 import { useLocationOptions } from '../hooks/useLocationOptions';
@@ -45,17 +45,17 @@ export function AudienceFields({
       />
       {value.kind === 'GENDER' ? (
         <Select
-          label={t('salons.gender')}
+          label={t('business.gender')}
           value={value.gender ?? ''}
           options={[
             { value: '', label: t('campaigns.choose') },
-            ...SALON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) })),
+            ...PERSON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) })),
           ]}
           onChange={(e) =>
             onChange({
               kind: 'GENDER',
-              ...(pick(SALON_GENDERS, e.target.value)
-                ? { gender: pick(SALON_GENDERS, e.target.value) }
+              ...(pick(PERSON_GENDERS, e.target.value)
+                ? { gender: pick(PERSON_GENDERS, e.target.value) }
                 : {}),
             })
           }

@@ -57,7 +57,7 @@ function Profile({ c }: { c: CustomerDetails }) {
         items={[
           { key: 'phone', label: t('salons.phone'), value: c.phone, ltr: true },
           { key: 'email', label: t('customers.email'), value: c.email, ltr: true },
-          { key: 'gender', label: t('salons.gender'), value: t(`catalog.genders.${c.gender}`) },
+          { key: 'gender', label: t('business.gender'), value: t(`catalog.genders.${c.gender}`) },
           {
             key: 'city',
             label: t('salons.city'),
