@@ -96,7 +96,7 @@ describe('code flow', () => {
     channel.failWith = new OtpDeliveryError();
     await expect(
       flow.sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'en' }, RULES),
-    ).rejects.toBeInstanceOf(OtpDeliveryError);
+    ).rejects.toMatchObject({ code: 'OTP_DELIVERY_FAILED', httpStatus: 422 });
     channel.failWith = new Error('vendor down');
     await expect(
       flow.sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'en' }, RULES),
