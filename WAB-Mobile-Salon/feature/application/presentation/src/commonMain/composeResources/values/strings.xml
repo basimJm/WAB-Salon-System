@@ -27,6 +27,7 @@
     <string name="reg_review_medical">Medical license:</string>
     <string name="reg_review_uploaded">Uploaded</string>
     <string name="reg_review_missing">Not chosen yet</string>
+    <string name="reg_review_not_uploaded">Not uploaded yet</string>
     <string name="reg_men">Men</string>
     <string name="reg_women">Women</string>
     <string name="reg_type_warning">The business type cannot be changed later. A men’s or women’s salon can later choose to serve both.</string>

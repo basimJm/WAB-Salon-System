@@ -27,6 +27,7 @@
     <string name="reg_review_medical">الترخيص الطبي:</string>
     <string name="reg_review_uploaded">مرفوع</string>
     <string name="reg_review_missing">لم يُحدَّد بعد</string>
+    <string name="reg_review_not_uploaded">لم يُرفع بعد</string>
     <string name="reg_men">رجالي</string>
     <string name="reg_women">نسائي</string>
     <string name="reg_type_warning">لا يمكن تغيير نوع النشاط لاحقاً، ويمكن للصالون الرجالي أو النسائي لاحقاً أن يختار خدمة الجنسين.</string>

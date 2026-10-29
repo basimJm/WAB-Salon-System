@@ -35,6 +35,7 @@ import com.fab.wab.merchant.feature.application.presentation.resources.reg_revie
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_review_audience
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_review_medical
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_review_missing
+import com.fab.wab.merchant.feature.application.presentation.resources.reg_review_not_uploaded
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_review_type
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_review_uploaded
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_salon
@@ -137,7 +138,7 @@ internal fun ReviewCard(state: UiState) {
                 val uploaded = state.input.medicalLicenseKeys.isNotEmpty()
                 ReviewRow(
                     Res.string.reg_review_medical,
-                    stringResource(if (uploaded) Res.string.reg_review_uploaded else Res.string.reg_review_missing),
+                    stringResource(if (uploaded) Res.string.reg_review_uploaded else Res.string.reg_review_not_uploaded),
                 )
             }
         }
