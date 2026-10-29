@@ -9,8 +9,7 @@ const known = new Set<string>(PERMISSIONS);
 export const effectivePermissions = (member: {
   role: MemberRole;
   permissions: readonly Permission[];
-}): readonly Permission[] =>
-  member.role === 'OWNER' ? PERMISSIONS : member.permissions;
+}): readonly Permission[] => (member.role === 'OWNER' ? PERMISSIONS : member.permissions);
 
 export const hasAllPermissions = (
   member: { role: MemberRole; permissions: readonly Permission[] },

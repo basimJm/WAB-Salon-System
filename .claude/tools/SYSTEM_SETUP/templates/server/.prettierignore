@@ -2,3 +2,5 @@ dist
 coverage
 node_modules
 docs/api
+# Markdown tables are aligned by hand (token substitution changes their widths).
+*.md
