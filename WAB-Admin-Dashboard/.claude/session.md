@@ -8,7 +8,6 @@
 - Remote dev switch (ADM-079) checked against the real server (local stack + hosted dev wiring): gap list `docs/REMOTE_DEV_GAPS.md`; Phase 4C (ADM-068…077) BLOCKED on SRV-117…127 + SRV-110; ADM-002/005/006/082/083 PENDING owner hosting/CI; ADM-080 e2e waived by the owner.
 - Gate: `sh scripts/gate.sh` + browser UI check before every commit; no GitHub CI.
 
-
 ## Current task
 
 ### ADM-109 — Business types: contract 1.12.0 re-sync + type filters + badges + medical license
