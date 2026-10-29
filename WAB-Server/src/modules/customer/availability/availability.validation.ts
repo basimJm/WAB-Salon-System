@@ -6,6 +6,7 @@ import {
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
 import { isLocalDate } from '../../../utils/time';
 import { instantInput } from '../../../utils/time/instantInput';
+import { GENDERS } from '../../../constants/enums';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 
@@ -18,6 +19,8 @@ export const availabilityBody = z.object({
   person: z.object({
     serviceIds: z.array(objectId).min(1).max(AVAILABILITY_MAX_SERVICES),
     isBride: z.boolean().default(false),
+    /** The person's gender (§5.19): any at a BOTH salon or a clinic; must match a men's/women's salon. */
+    gender: z.enum(GENDERS).optional(),
     /** Omit for "any available staff". */
     staffId: objectId.optional(),
   }),

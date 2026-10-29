@@ -9,11 +9,13 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { businessKindShape } from '../../../docs/schemas';
 import { homeQuerySchema } from './home.validation';
 
 const card = z.object({
   id: z.string(),
   name: z.string(),
+  ...businessKindShape,
   profileImageUrl: z.string().nullable(),
   rating: z.number(),
   reviewsCount: z.number(),
@@ -34,14 +36,32 @@ const card = z.object({
 const section = (item: z.ZodType): z.ZodType =>
   z.object({ items: z.array(item), hasMore: z.boolean() });
 
+const serviceSection = section(
+  z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    imageUrl: z.string(),
+    ...businessKindShape,
+  }),
+);
+const nearestSection = section(
+  card.extend({
+    title: z
+      .string()
+      .describe('"Salon - Branch" for a salon with several branches, else the salon name.'),
+  }),
+);
+
 export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
   registry.registerPath({
     method: 'get',
     path: `${API_PREFIXES.customer}${HOME_ROUTES.base}`,
     tags: ['Home'],
-    summary: 'Home (S03): banners, services, recommended and nearest salons in one request',
+    summary:
+      'Home (S03, §5.19): banners, salon + clinic services, Recommended salons + clinics, nearest salons + clinics in one request',
     description:
-      'Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. `nearest` is null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all.',
+      'Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. Only businesses the gender may see (own audience, BOTH, every clinic). `nearestSalons`/`nearestClinics` are null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all.',
     security: [],
     request: {
       headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
@@ -62,25 +82,15 @@ export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
                 actionValue: z.string().nullable().optional(),
               }),
             ),
-            services: section(
-              z.object({
-                id: z.string(),
-                name: z.string(),
-                description: z.string(),
-                imageUrl: z.string(),
-                gender: z.enum(['MALE', 'FEMALE']),
-              }),
-            ),
-            recommended: section(card),
-            nearest: section(
-              card.extend({
-                title: z
-                  .string()
-                  .describe(
-                    '"Salon - Branch" for a salon with several branches, else the salon name.',
-                  ),
-              }),
-            ).nullable(),
+            salonServices: serviceSection,
+            clinicServices: serviceSection,
+            recommendedSalons: section(card),
+            recommendedClinics: section(card),
+            nearestSalons: nearestSection.nullable(),
+            nearestClinics: nearestSection.nullable(),
+            services: serviceSection.describe('Deprecated: same as salonServices.'),
+            recommended: section(card).describe('Deprecated: same as recommendedSalons.'),
+            nearest: nearestSection.nullable().describe('Deprecated: same as nearestSalons.'),
           }),
         ),
       ),

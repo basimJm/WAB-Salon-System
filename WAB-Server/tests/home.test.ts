@@ -19,7 +19,7 @@ const search: Pick<SearchService, 'search'> = {
   search: ({ query, params, customerId: who }) => {
     calls.push({ query: { ...query }, customerId: who });
     return Promise.resolve({
-      items: [cardOf(query.general ?? 'nearest')] as never,
+      items: [cardOf(`${query.general ?? 'nearest'}:${query.businessType ?? ''}`)] as never,
       meta: { ...params, total: salonTotal },
     });
   },
@@ -31,8 +31,11 @@ const home = createHomeService({
     live: (gender, language) => Promise.resolve([{ id: `${gender}-${language}` }] as never),
   },
   catalog: {
-    list: ({ params }) =>
-      Promise.resolve({ items: [{ id: 's1' }] as never, meta: { ...params, total: serviceTotal } }),
+    list: ({ params, businessType }) =>
+      Promise.resolve({
+        items: [{ id: businessType ?? 'all' }] as never,
+        meta: { ...params, total: serviceTotal },
+      }),
   },
   search,
   customers: {
@@ -61,6 +64,12 @@ interface Body {
     services: { items: unknown[]; hasMore: boolean };
     recommended: { items: unknown[]; hasMore: boolean };
     nearest: { items: unknown[]; hasMore: boolean } | null;
+    salonServices: { items: { id: string }[] };
+    clinicServices: { items: { id: string }[] };
+    recommendedSalons: { items: { id: string }[] };
+    recommendedClinics: { items: { id: string }[] };
+    nearestSalons: { items: { id: string }[] } | null;
+    nearestClinics: { items: { id: string }[] } | null;
   };
 }
 const bodyOf = (res: { body: unknown }): Body => res.body as Body;
@@ -84,8 +93,10 @@ describe('GET /customer/v1/home', () => {
     expect(d.services.items).toHaveLength(1);
     expect(d.recommended.items).toHaveLength(1);
     expect(d.nearest).toBeNull();
-    expect(calls).toHaveLength(1);
-    expect(calls[0]?.query).toEqual({ gender: 'FEMALE', general: 'RECOMMENDED' });
+    expect(calls.map((c) => c.query)).toEqual([
+      { gender: 'FEMALE', businessType: 'SALON', general: 'RECOMMENDED' },
+      { gender: 'FEMALE', businessType: 'CLINIC', general: 'RECOMMENDED' },
+    ]);
   });
 
   it('adds name, unread count and favorites for a signed-in customer', async () => {
@@ -102,10 +113,31 @@ describe('GET /customer/v1/home', () => {
     expect(calls[0]?.customerId).toBe(customerId);
   });
 
+  it('answers salon and clinic sections per business type (§5.19), old keys = the salon ones', async () => {
+    const res = await request(app).get('/customer/v1/home?gender=MALE&lat=31.95&lng=35.93');
+    const d = bodyOf(res).data;
+    expect(d.salonServices.items[0]?.id).toBe('SALON');
+    expect(d.clinicServices.items[0]?.id).toBe('CLINIC');
+    expect(d.recommendedSalons.items[0]?.id).toBe('RECOMMENDED:SALON');
+    expect(d.recommendedClinics.items[0]?.id).toBe('RECOMMENDED:CLINIC');
+    expect(d.nearestSalons?.items[0]?.id).toBe('nearest:SALON');
+    expect(d.nearestClinics?.items[0]?.id).toBe('nearest:CLINIC');
+    expect(d.services).toEqual(d.salonServices);
+    expect(d.recommended).toEqual(d.recommendedSalons);
+    expect(d.nearest).toEqual(d.nearestSalons);
+    expect(calls.every((c) => c.query['gender'] === 'MALE')).toBe(true);
+    const guest = bodyOf(await request(app).get('/customer/v1/home?gender=MALE')).data;
+    expect([guest.nearestSalons, guest.nearestClinics]).toEqual([null, null]);
+  });
+
   it('adds the nearest section when a position is sent', async () => {
     const res = await request(app).get('/customer/v1/home?gender=FEMALE&lat=31.95&lng=35.93');
     expect(bodyOf(res).data.nearest?.items).toHaveLength(1);
-    expect(calls[1]?.query).toEqual({ gender: 'FEMALE', lat: 31.95, lng: 35.93, sort: 'NEAREST' });
+    const nearest = calls.filter((c) => c.query['sort'] === 'NEAREST').map((c) => c.query);
+    expect(nearest).toEqual([
+      { gender: 'FEMALE', businessType: 'SALON', lat: 31.95, lng: 35.93, sort: 'NEAREST' },
+      { gender: 'FEMALE', businessType: 'CLINIC', lat: 31.95, lng: 35.93, sort: 'NEAREST' },
+    ]);
   });
 
   it('flags See more only when a section holds more than its page', async () => {

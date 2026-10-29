@@ -149,7 +149,8 @@ const addSalon = (state: string, over: Record<string, unknown> = {}): string => 
   salons.docs.push({
     _id,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state,
     coverKey: 'c.jpg',
     profileKey: 'p.jpg',

@@ -105,7 +105,10 @@ const adminSalons = createAdminSalonsService({
   salons: new SalonsRepository(m.salons.model as never),
   members: new MembersRepository(m.members.model as never),
   subscriptions: new SubscriptionsRepository(m.subscriptions.model as never),
-  salonServices: { deactivateAll: () => Promise.resolve(0) },
+  salonServices: {
+    deactivateAll: () => Promise.resolve(0),
+    deactivateUnfitting: () => Promise.resolve(0),
+  },
   state: { recompute: () => Promise.resolve({}) } as never,
   audit,
   notifier,
@@ -158,7 +161,8 @@ beforeEach(() => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Hifa',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     branchCount: 0,
     rating: { avg: 0, count: 0 },

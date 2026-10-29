@@ -79,11 +79,11 @@ beforeEach(() => {
 });
 
 describe('upload policies', () => {
-  it('cover every purpose, keep license documents private and everything else public', () => {
+  it('cover every purpose, keep license documents (trade + medical) private and everything else public', () => {
     expect(Object.keys(UPLOAD_POLICIES).sort()).toEqual([...UPLOAD_PURPOSES].sort());
     for (const purpose of UPLOAD_PURPOSES) {
       expect(UPLOAD_POLICIES[purpose].visibility).toBe(
-        purpose === 'LICENSE_DOCUMENT' ? 'PRIVATE' : 'PUBLIC',
+        purpose === 'LICENSE_DOCUMENT' || purpose === 'MEDICAL_LICENSE' ? 'PRIVATE' : 'PUBLIC',
       );
     }
   });
@@ -325,6 +325,22 @@ describe('merchant uploads', () => {
       .set(bearer('MEMBER', manager))
       .send({ purpose: 'LICENSE_DOCUMENT', contentType: 'application/pdf', size: 10 });
     expect(viaMember.status).toBe(403);
+  });
+
+  it('a clinic applicant uploads its medical license the same way (MEDICAL_LICENSE, private, §5.19)', async () => {
+    const res = await request(app)
+      .post('/merchant/v1/uploads/license/presign')
+      .send({ purpose: 'MEDICAL_LICENSE', contentType: 'application/pdf', size: 5_000 });
+    expect(res.status).toBe(200);
+    expect(bodyOf(res).data.key).toMatch(/^medical-licenses\/guest\//);
+    expect(uploadsModel.docs[0]).toMatchObject({ ownerType: 'GUEST', purpose: 'MEDICAL_LICENSE' });
+    expect(
+      (
+        await request(app)
+          .post('/merchant/v1/uploads/license/presign')
+          .send({ purpose: 'GALLERY_IMAGE', contentType: 'image/jpeg', size: 5 })
+      ).status,
+    ).toBe(400);
   });
 });
 

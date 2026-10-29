@@ -24,14 +24,20 @@ const valid = {
   name: { ar: 'قص', en: 'Cut' },
   description: { ar: 'وصف', en: 'Description' },
   imageKey: 'demo/catalog/x.jpg',
-  gender: 'MALE',
+  businessType: 'SALON',
+  audience: 'MALE',
 };
 
 describe('demo catalog data', () => {
-  it('has services for women and for men', () => {
+  it('has salon services for women and for men, and clinic services for everyone', () => {
     for (const gender of GENDERS) {
-      expect(DEMO_SERVICES.filter((s) => s.gender === gender).length).toBeGreaterThanOrEqual(5);
+      expect(
+        DEMO_SERVICES.filter((s) => s.businessType === 'SALON' && s.audience === gender).length,
+      ).toBeGreaterThanOrEqual(5);
     }
+    const clinic = DEMO_SERVICES.filter((s) => s.businessType === 'CLINIC');
+    expect(clinic.length).toBeGreaterThanOrEqual(5);
+    expect(clinic.every((s) => s.audience === 'BOTH')).toBe(true);
   });
 
   it('names and describes everything in both languages, Arabic in Arabic script', () => {
@@ -45,7 +51,7 @@ describe('demo catalog data', () => {
   });
 
   it('has no duplicate service within an audience (the same name may serve both)', () => {
-    const keys = DEMO_SERVICES.map((s) => `${s.gender}/${s.name.en}`);
+    const keys = DEMO_SERVICES.map((s) => `${s.businessType}/${s.audience}/${s.name.en}`);
     expect(new Set(keys).size).toBe(keys.length);
   });
 
@@ -59,7 +65,7 @@ describe('catalog service model', () => {
   it('is registered and declares the §3.2 indexes', () => {
     expect(ALL_MODELS).toContain(CatalogServiceModel);
     expect(CatalogServiceModel.schema.indexes()).toEqual([
-      [{ gender: 1, active: 1, sortOrder: 1 }, expect.anything()],
+      [{ businessType: 1, audience: 1, active: 1, sortOrder: 1 }, expect.anything()],
       [
         { 'name.ar': 'text', 'name.en': 'text' },
         expect.objectContaining({ default_language: 'none' }),
@@ -73,16 +79,17 @@ describe('catalog service model', () => {
     expect([doc.active, doc.sortOrder]).toEqual([true, 0]);
   });
 
-  it('requires name, description, image and a known gender', async () => {
+  it('requires name, description, image and a known business type and audience', async () => {
     expect(await failingFields(CatalogServiceModel, {})).toEqual([
+      'audience',
+      'businessType',
       'description',
-      'gender',
       'imageKey',
       'name',
     ]);
-    expect(await failingFields(CatalogServiceModel, { ...valid, gender: 'OTHER' })).toEqual([
-      'gender',
-    ]);
+    expect(
+      await failingFields(CatalogServiceModel, { ...valid, businessType: 'SPA', audience: 'X' }),
+    ).toEqual(['audience', 'businessType']);
     expect(await failingFields(CatalogServiceModel, { ...valid, name: { ar: 'قص' } })).toEqual([
       'name.en',
     ]);
@@ -101,8 +108,10 @@ describe('seedDemoCatalog', () => {
   it('creates every demo service, numbering them per audience from 1', async () => {
     const { repo, docs } = makeRepo();
     expect(await seedDemoCatalog(repo)).toEqual({ created: DEMO_SERVICES.length, existing: 0 });
-    for (const gender of GENDERS) {
-      const orders = docs.filter((d) => d['gender'] === gender).map((d) => d['sortOrder']);
+    for (const group of new Set(DEMO_SERVICES.map((s) => `${s.businessType}:${s.audience}`))) {
+      const orders = docs
+        .filter((d) => `${String(d['businessType'])}:${String(d['audience'])}` === group)
+        .map((d) => d['sortOrder']);
       expect(orders).toEqual(Array.from({ length: orders.length }, (_, i) => i + 1));
     }
     expect(docs.every((d) => String(d['imageKey']).startsWith(DEMO_IMAGE_PREFIX))).toBe(true);

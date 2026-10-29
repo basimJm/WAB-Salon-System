@@ -173,6 +173,7 @@ export const createTableBuilders = (deps: {
       statuses: params['statuses'] as never,
       paymentStatus: params['paymentStatus'] as never,
       salonId: params['salonId'] as string | undefined,
+      businessType: params['businessType'] as never,
       branchId: params['branchId'] as string | undefined,
       customerId: params['customerId'] as string | undefined,
       from: typeof params['from'] === 'string' ? params['from'] : undefined,
@@ -254,7 +255,8 @@ export const createTableBuilders = (deps: {
   async SALONS(params) {
     const filter = {
       state: params['state'] as never,
-      gender: params['gender'] as never,
+      businessType: params['businessType'] as never,
+      audience: params['audience'] as never,
       cityId: params['cityId'] as string | undefined,
       subscription: params['subscription'] as never,
       q: params['q'] as string | undefined,
@@ -270,7 +272,8 @@ export const createTableBuilders = (deps: {
       title: 'Salons',
       columns: [
         'Name',
-        'Gender',
+        'Business type',
+        'Audience',
         'State',
         'City',
         'Rating',
@@ -282,7 +285,8 @@ export const createTableBuilders = (deps: {
       ],
       rows: items.map((s): Cell[] => [
         s.name,
-        s.gender,
+        s.businessType,
+        s.audience,
         s.state,
         s.cityId,
         s.rating.avg,

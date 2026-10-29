@@ -17,6 +17,8 @@ import { connectMongo, disconnectMongo } from '../utils/database/connection';
 import { createLogger, type Logger } from '../utils/logger';
 import { addDays, localDateOf } from '../utils/time';
 import { migrateSalonsToBranches } from '../domain/branches/migration';
+import { migrateBusinessTypes } from '../domain/businessTypes/migration';
+import { createMongoBusinessTypeMigrationStore } from '../domain/businessTypes/migrationStore';
 import { createMongoBranchMigrationStore } from '../domain/branches/migrationStore';
 import {
   buildDemoBranchPlans,
@@ -32,7 +34,13 @@ import {
   type DemoBranchPhotosResult,
 } from './demo/branchPhotos';
 import { buildDemoDatasetParts } from './demo/dataset';
-import { toDemoModel, writeDemoBaseOnce, type DemoWriteResult } from './demo/writer';
+import { buildDemoBusinesses } from './demo/businessTypes';
+import {
+  toDemoModel,
+  writeDemoBaseOnce,
+  writeDemoDataset,
+  type DemoWriteResult,
+} from './demo/writer';
 import { seedDemoCatalog } from './demoCatalog';
 import type { SeedCount, SeedResult } from './referenceData';
 import { seedIndexesAndReference } from './run';
@@ -91,6 +99,8 @@ export interface DemoDataReport {
   readonly branches: unknown;
   readonly extraBranches: DemoBranchWriteResult;
   readonly branchStaffPhotos: DemoBranchPhotosResult;
+  /** Clinics and the salon for men and women (§5.19), insert-only by id. */
+  readonly businesses: DemoWriteResult;
   /** The time zone the demo days were built in (the reports use the same days). */
   readonly timeZone: string;
   readonly now: Date;
@@ -104,6 +114,8 @@ export interface DemoDataReport {
  * reference data and an admin.
  */
 export const seedDemoData = async (now: Date = new Date()): Promise<DemoDataReport> => {
+  // Older demo rows carry a gender only: give them their business type first (§5.19).
+  await migrateBusinessTypes({ store: createMongoBusinessTypeMigrationStore() });
   const catalog = await seedDemoCatalog(new CatalogServicesRepository());
   const context = await loadDemoContext(now);
   const { data, customers } = buildDemoDatasetParts(context);
@@ -126,6 +138,8 @@ export const seedDemoData = async (now: Date = new Date()): Promise<DemoDataRepo
     models,
     createMongoDemoStaffPhotoStore(),
   );
+  // Clinics and a salon for everyone (§5.19); also reaches a database seeded before clinics.
+  const businesses = await writeDemoDataset(buildDemoBusinesses(context), models);
   await syncBranchCounts(sources);
   await syncDemoRatings(sources);
   return {
@@ -134,6 +148,7 @@ export const seedDemoData = async (now: Date = new Date()): Promise<DemoDataRepo
     branches,
     extraBranches,
     branchStaffPhotos,
+    businesses,
     timeZone: context.timeZone,
     now: context.now,
   };

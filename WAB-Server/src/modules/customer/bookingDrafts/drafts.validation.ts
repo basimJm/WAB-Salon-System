@@ -8,6 +8,7 @@ import { PAYMENT_OPTIONS } from '../../../constants/salon';
 import { AVAILABILITY_MAX_SERVICES } from '../../../constants/availability';
 import { instantInput } from '../../../utils/time/instantInput';
 import { otpTokenSchema } from '../../shared/auth/auth.schemas';
+import { GENDERS } from '../../../constants/enums';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 /** Main person + `booking.maxCompanions` is enforced by the service from settings; this is a sanity cap. */
@@ -29,6 +30,11 @@ export const createDraftBody = z.object({
           .min(BOOKING_PERSON_NAME_MIN_LENGTH)
           .max(BOOKING_PERSON_NAME_MAX_LENGTH),
         isBride: z.boolean().default(false),
+        /**
+         * The person's gender (§5.19): a BOTH salon or a clinic takes any gender in one booking; a
+         * men's/women's salon only its own (GENDER_MISMATCH). Omitted = the salon's audience.
+         */
+        gender: z.enum(GENDERS).optional(),
         /** Salon service ids. */
         serviceIds: z.array(objectId).min(1).max(AVAILABILITY_MAX_SERVICES),
         /** Omit for "any available staff". */

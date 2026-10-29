@@ -1,11 +1,6 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { ADMIN_SEARCH_ROUTES } from '../../../constants/adminSearch';
-import {
-  BOOKING_STATUSES,
-  CUSTOMER_STATUSES,
-  GENDERS,
-  MEMBER_ROLES,
-} from '../../../constants/enums';
+import { BOOKING_STATUSES, CUSTOMER_STATUSES, MEMBER_ROLES } from '../../../constants/enums';
 import { HTTP_STATUS } from '../../../constants/http';
 import { SALON_STATES } from '../../../constants/salon';
 import { API_PREFIXES } from '../../../constants/server';
@@ -16,6 +11,7 @@ import {
   successResponseSchema,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
+import { businessKindShape } from '../../../docs/schemas';
 import { searchQuery } from './search.validation';
 
 const group = <T extends z.ZodType>(
@@ -32,7 +28,7 @@ const customer = z.object({
 const salon = z.object({
   id: z.string(),
   name: z.string(),
-  gender: z.enum(GENDERS),
+  ...businessKindShape,
   state: z.enum(SALON_STATES),
 });
 const booking = z.object({

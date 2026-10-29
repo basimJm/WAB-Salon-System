@@ -30,8 +30,12 @@ export const createAdminCatalogRequestsRouter = (
     '/',
     validate({ query: requestsQuery }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { page, pageSize, status } = part<typeof requestsQuery>(req, 'query');
-      const result = await service.listForAdmin({ status, params: { page, pageSize } });
+      const { page, pageSize, status, businessType } = part<typeof requestsQuery>(req, 'query');
+      const result = await service.listForAdmin({
+        status,
+        businessType,
+        params: { page, pageSize },
+      });
       sendPaginated(req, res, result.items.map(data), { page, pageSize }, result.meta.total);
     }),
   );

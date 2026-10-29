@@ -23,6 +23,8 @@ import {
   customerBookingsQuery,
   merchantBookingsQuery,
 } from './bookingQuery.schemas';
+import { audienceSchema, businessTypeSchema } from '../../../docs/schemas';
+import { GENDERS } from '../../../constants/enums';
 
 const person = z.object({ id: z.string(), name: z.string() });
 const staffRef = person
@@ -42,6 +44,8 @@ const row = z.object({
   id: z.string(),
   referenceNumber: z.string(),
   status: z.string(),
+  businessType: businessTypeSchema,
+  salonAudience: audienceSchema,
   paymentMethod: z.string(),
   paymentStatus: z.string(),
   hasBride: z.boolean(),
@@ -74,6 +78,7 @@ const detail = row.extend({
     z.object({
       name: z.string(),
       isBride: z.boolean(),
+      gender: z.enum(GENDERS).nullable(),
       start: z.string(),
       end: z.string(),
       subtotal: z.string(),

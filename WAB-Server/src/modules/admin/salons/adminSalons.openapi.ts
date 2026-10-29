@@ -14,12 +14,13 @@ import { z } from '../../../docs/zod';
 import { salonParams } from './salonState.validation';
 import { membersQuery } from './adminSalons.validation';
 import { branchViewDoc } from '../../shared/branches/branch.openapi';
-import { genderBody, salonsQuery } from './adminSalons.validation';
+import { audienceBody, salonsQuery } from './adminSalons.validation';
+import { businessKindShape } from '../../../docs/schemas';
 
 const row = z.object({
   id: z.string(),
   name: z.string(),
-  gender: z.enum(['MALE', 'FEMALE']),
+  ...businessKindShape,
   state: z.enum(SALON_STATES),
   cityId: z.string().nullable(),
   areaId: z.string().nullable(),
@@ -69,7 +70,8 @@ export const registerAdminSalonsDocs = (registry: OpenAPIRegistry): void => {
     method: 'get',
     path: base,
     tags,
-    summary: 'Salons: filter by state, gender, city and name; newest first',
+    summary:
+      'Salons and clinics: filter by state, business type, audience, city and name; newest first',
     request: { headers, query: salonsQuery },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse(
@@ -124,14 +126,14 @@ export const registerAdminSalonsDocs = (registry: OpenAPIRegistry): void => {
   });
   registry.registerPath({
     method: 'patch',
-    path: `${base}/{id}/gender`,
+    path: `${base}/{id}/audience`,
     tags,
     summary:
-      'Change the salon’s gender (admin only, reason required, audited, owner notified). Its services are switched off (they belong to the old catalog) and bride flags are cleared for a men’s salon.',
+      'Change a SALON’s audience (admin only, reason required, audited, owner notified; §5.19). Widening to BOTH keeps everything. Narrowing (BOTH → MALE/FEMALE, MALE ↔ FEMALE) is refused with 409 SCHEDULE_CONFLICT (list) while future bookings exist; services whose catalog entry no longer fits are switched off and bride flags are cleared for a men’s salon. A CLINIC is always BOTH: 422 AUDIENCE_CHANGE_NOT_ALLOWED.',
     request: {
       headers,
       params: salonParams,
-      body: { required: true, content: { 'application/json': { schema: genderBody } } },
+      body: { required: true, content: { 'application/json': { schema: audienceBody } } },
     },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Salon', successResponseSchema(detail)),

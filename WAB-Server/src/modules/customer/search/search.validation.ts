@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
-import { GENDERS } from '../../../constants/enums';
+import { BUSINESS_TYPES, GENDERS } from '../../../constants/enums';
 import { APP_PAGE_SIZE } from '../../../constants/pagination';
 import {
   LATITUDE_LIMIT,
@@ -30,6 +30,8 @@ const jod = z
 export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
   .extend({
     gender: z.enum(GENDERS),
+    /** Only salons or only clinics (§5.19); omitted = both. */
+    businessType: z.enum(BUSINESS_TYPES).optional(),
     q: z.string().trim().max(SEARCH_TEXT_MAX_LENGTH).optional(),
     serviceIds: serviceIds.optional(),
     /** JOD decimal strings: the range of the SUM of the selected services' prices. */
@@ -64,5 +66,6 @@ export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
 
 export const filtersQuerySchema = z.object({
   gender: z.enum(GENDERS),
+  businessType: z.enum(BUSINESS_TYPES).optional(),
   serviceIds: serviceIds.pipe(z.array(z.string()).min(1)),
 });
