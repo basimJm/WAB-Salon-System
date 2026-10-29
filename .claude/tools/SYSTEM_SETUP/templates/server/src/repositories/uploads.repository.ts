@@ -24,7 +24,7 @@ export class UploadsRepository extends BaseRepository<UploadRaw> {
     to: UploadStatus,
   ): Promise<Entity<UploadRaw> | null> {
     const updated = await this.model
-      .findOneAndUpdate({ key, status: from }, { $set: { status: to } }, { new: true })
+      .findOneAndUpdate({ key, status: from }, { $set: { status: to } }, { returnDocument: 'after' })
       .lean()
       .exec();
     return updated === null ? null : toEntity<UploadRaw>(updated);

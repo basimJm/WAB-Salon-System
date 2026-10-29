@@ -31,7 +31,7 @@ export class SettingsRepository extends BaseRepository<SettingRaw> {
       .findOneAndUpdate(
         { key },
         { $set: { value } },
-        { upsert: true, new: true, runValidators: true },
+        { upsert: true, returnDocument: 'after', runValidators: true },
       )
       .lean()
       .exec();

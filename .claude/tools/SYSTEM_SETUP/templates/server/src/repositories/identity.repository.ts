@@ -30,7 +30,7 @@ export class CustomersRepository extends BaseRepository<CustomerRaw> {
           $set: change.set,
           ...(unset.length === 0 ? {} : { $unset: Object.fromEntries(unset.map((f) => [f, 1])) }),
         },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .lean()
       .exec();
@@ -87,7 +87,7 @@ export class MembersRepository extends BaseRepository<MemberRaw> {
       .findOneAndUpdate(
         { _id: id, tenantId, role: 'STAFF' },
         { $set: fields },
-        { new: true, runValidators: true },
+        { returnDocument: 'after', runValidators: true },
       )
       .lean()
       .exec()
@@ -116,7 +116,7 @@ export class RefreshTokensRepository extends BaseRepository<RefreshTokenRaw> {
       .findOneAndUpdate(
         { _id: id, revokedAt: { $exists: false } },
         { $set: { revokedAt: now, revokedReason: reason } },
-        { new: true },
+        { returnDocument: 'after' },
       )
       .lean()
       .exec();
@@ -179,7 +179,7 @@ export class AdminsRepository extends BaseRepository<AdminRaw> {
   ): Promise<Date | null> {
     if (!isValidId(id)) return null;
     const counted = await this.model
-      .findOneAndUpdate({ _id: id }, { $inc: { failedLoginCount: 1 } }, { new: true })
+      .findOneAndUpdate({ _id: id }, { $inc: { failedLoginCount: 1 } }, { returnDocument: 'after' })
       .lean()
       .exec();
     if (counted === null || counted.failedLoginCount < maxFailures) return null;
@@ -198,7 +198,7 @@ export class AdminsRepository extends BaseRepository<AdminRaw> {
           $set: { failedLoginCount: 0, lastLoginAt: now, lastLoginIp: ip },
           $unset: { lockedUntil: 1 },
         },
-        { new: true },
+        { returnDocument: 'after' },
       )
       .lean()
       .exec();

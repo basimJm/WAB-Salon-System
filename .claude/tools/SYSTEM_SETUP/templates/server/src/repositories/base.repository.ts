@@ -142,7 +142,7 @@ export abstract class BaseRepository<TRaw extends object> {
     );
     const updated = await this.model
       .findOneAndUpdate(this.scoped({ _id: id }), { $set: fields } as UpdateQuery<TRaw>, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true,
       })
       .lean()
