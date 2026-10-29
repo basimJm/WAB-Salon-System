@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.badge.countBadgeLabel
@@ -83,9 +84,12 @@ private fun HomeReady(state: UiState, onAction: (UiAction) -> Unit) {
             Modifier.padding(start = spacing.space20, end = spacing.space20, top = spacing.space16),
         )
         GenderTabs(state.gender, onAction, Modifier.padding(start = spacing.space20, end = spacing.space20, top = spacing.space14))
-        ServicesSection(state.services, onAction)
-        RecommendedSection(state.recommended, onAction)
-        NearestSection(state.nearest, onAction)
+        ServicesSection(state.salonServices, BusinessType.SALON, onAction)
+        ServicesSection(state.clinicServices, BusinessType.CLINIC, onAction)
+        RecommendedSection(state.recommendedSalons, BusinessType.SALON, onAction)
+        RecommendedSection(state.recommendedClinics, BusinessType.CLINIC, onAction)
+        NearestSection(state.nearestSalons, BusinessType.SALON, onAction)
+        NearestSection(state.nearestClinics, BusinessType.CLINIC, onAction)
     }
 }
 

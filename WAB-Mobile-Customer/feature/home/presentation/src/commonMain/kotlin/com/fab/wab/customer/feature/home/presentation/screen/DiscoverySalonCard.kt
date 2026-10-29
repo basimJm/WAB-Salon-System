@@ -21,6 +21,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.salon.SalonSummary
+import com.fab.wab.customer.designsystem.components.domain.businessText
 import com.fab.wab.customer.designsystem.components.domain.hoursLine
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.image.AppImage
@@ -42,7 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Salon card of the Home carousels (design S03 `recSalons` / `nearSalons`): 250 dp wide, 118 dp image with the
- * favorite heart and, when [showDistance], the "x km" pill; body = name + rating, location, description + "more",
+ * favorite heart and, when [showDistance], the "x km" pill; body = name + rating, type · audience, location, description + "more",
  * open/closed status line.
  */
 @Composable
@@ -88,6 +89,7 @@ fun DiscoverySalonCard(
                 SalonName(salon.displayName, Modifier.weight(1f))
                 DiscoveryRatingLine(salon.rating, salon.reviewsCount, DiscoveryDesign.TEXT_12_5)
             }
+            BusinessLine(salon)
             LocationLine(salon.placeText())
             DescriptionLine(salon.shortDescription.orEmpty())
             StatusLine(salon)
@@ -155,6 +157,18 @@ internal fun DistancePill(distanceKm: Double, modifier: Modifier = Modifier) {
                 RoundedCornerShape(DiscoveryDesign.DISTANCE_PILL_RADIUS),
             )
             .padding(horizontal = AppTheme.spacing.space10, vertical = AppTheme.spacing.space4),
+    )
+}
+
+/** "Salon · Women" / "Beauty clinic · Men & women" in the accent color (BUSINESS_DOMAIN §5.19). */
+@Composable
+internal fun BusinessLine(salon: SalonSummary, modifier: Modifier = Modifier) {
+    AppText(
+        text = businessText(salon.businessType, salon.audience),
+        style = discoveryBody(DiscoveryDesign.TEXT_11_5, FontWeight.SemiBold),
+        color = AppTheme.colors.accent,
+        maxLines = 1,
+        modifier = modifier,
     )
 }
 

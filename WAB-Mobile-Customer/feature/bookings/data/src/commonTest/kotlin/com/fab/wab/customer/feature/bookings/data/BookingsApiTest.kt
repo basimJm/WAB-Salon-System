@@ -53,6 +53,7 @@ class BookingsApiTest {
             hasBride = false, appointmentStart = "2026-10-18T10:00:00Z", appointmentEnd = "2026-10-18T11:00:00Z",
             respondBy = "2026-10-18T09:00:00Z", requestedAt = "2026-10-17T09:00:00Z",
             personsCount = 2.0, total = "30", salon = GetBookingsDataItemSalon("s1", "Glow"),
+            businessType = "SALON", salonAudience = "FEMALE",
             customer = null, staff = emptyList(),
         ).toDomain()
         assertEquals(BookingStatus.APPROVED, item.status)
@@ -69,6 +70,7 @@ class BookingsApiTest {
             hasBride = false, appointmentStart = "2026-10-18T10:00:00Z", appointmentEnd = "2026-10-18T11:00:00Z",
             respondBy = "2026-10-18T09:00:00Z", requestedAt = "2026-10-17T09:00:00Z",
             personsCount = 1.0, total = "8", salon = GetBookingsDataItemSalon("s1", "Hifa"),
+            businessType = "SALON", salonAudience = "FEMALE",
             customer = null, staff = emptyList(), branch = branch,
         ).toDomain()
         val withAddress = row(GetBookingsDataItemBranch("br1", "Mecca Street", "Amman, Mecca St."))

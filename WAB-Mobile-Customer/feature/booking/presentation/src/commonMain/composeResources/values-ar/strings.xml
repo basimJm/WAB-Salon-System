@@ -120,4 +120,10 @@
     <string name="booking_branch_hint">تختلف الخدمات والأسعار والموظفون والمواعيد حسب الفرع.</string>
     <string name="booking_summary_branch">الفرع: %1$s</string>
     <string name="booking_service_bride_only">للعروس فقط</string>
+    <string name="booking_gender_label">الجنس</string>
+    <string name="booking_gender_man">رجل</string>
+    <string name="booking_gender_woman">امرأة</string>
+    <string name="booking_gender_error">اختر جنس الشخص</string>
+    <string name="booking_who_companion_any">أدخل اسم المرافق وجنسه.</string>
+    <string name="booking_companions_subtitle_any">يمكنك إضافة حتى 5 مرافقين، رجالاً أو نساءً، ولكل مرافق خدماته وموعده.</string>
 </resources>
