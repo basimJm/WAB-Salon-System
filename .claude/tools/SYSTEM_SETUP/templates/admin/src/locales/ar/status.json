@@ -1,0 +1,24 @@
+{
+  "status": {
+    "item": {
+      "ACTIVE": "نشط",
+      "INACTIVE": "غير نشط",
+      "ARCHIVED": "مؤرشف"
+    },
+    "alert": {
+      "NEW": "جديد",
+      "ACKNOWLEDGED": "تم الاطلاع"
+    },
+    "alertSeverity": {
+      "INFO": "معلومة",
+      "WARNING": "تحذير",
+      "CRITICAL": "حرج"
+    },
+    "export": {
+      "QUEUED": "في الانتظار",
+      "RUNNING": "قيد التنفيذ",
+      "DONE": "جاهز",
+      "FAILED": "فشل"
+    }
+  }
+}

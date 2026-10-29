@@ -1,0 +1,24 @@
+{
+  "status": {
+    "item": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "ARCHIVED": "Archived"
+    },
+    "alert": {
+      "NEW": "New",
+      "ACKNOWLEDGED": "Acknowledged"
+    },
+    "alertSeverity": {
+      "INFO": "Info",
+      "WARNING": "Warning",
+      "CRITICAL": "Critical"
+    },
+    "export": {
+      "QUEUED": "Queued",
+      "RUNNING": "Running",
+      "DONE": "Ready",
+      "FAILED": "Failed"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "errors": {
+    "title": "Something went wrong",
+    "traceId": "Reference",
+    "network": "No internet connection. Check your network and try again.",
+    "timeout": "The request took too long. Please try again.",
+    "unauthorized": "Your session has expired or the credentials are wrong.",
+    "forbidden": "You do not have permission to do this.",
+    "notFound": "The requested item was not found.",
+    "validation": "Some of the data is invalid. Please review it.",
+    "conflict": "This action conflicts with the current state.",
+    "rateLimited": "Too many attempts. Please wait and try again.",
+    "server": "The server had a problem. Please try again shortly.",
+    "parse": "The server sent an unexpected response.",
+    "config": "The application is not configured correctly.",
+    "unknown": "An unexpected error occurred.",
+    "codes": {
+      "VALIDATION_ERROR": "Some of the data is invalid. Please review it.",
+      "UNAUTHORIZED": "Your session has expired or the credentials are wrong.",
+      "FORBIDDEN": "You do not have permission to do this.",
+      "PERMISSION_DENIED": "Your account does not have the permission required for this action.",
+      "NOT_FOUND": "The requested item was not found.",
+      "CONFLICT": "This action conflicts with the current state.",
+      "RATE_LIMITED": "Too many attempts. Please wait and try again.",
+      "INTERNAL": "The server had a problem. Please try again shortly.",
+      "OTP_BLOCKED": "Too many code attempts. Verification is blocked for a while.",
+      "OTP_INVALID": "The verification code is incorrect.",
+      "OTP_EXPIRED": "The verification code has expired. Request a new one.",
+      "OTP_DELIVERY_FAILED": "The verification code could not be delivered. Try again.",
+      "ACCOUNT_BLOCKED": "This account is blocked.",
+      "CURRENT_PASSWORD_INVALID": "The current password is not correct.",
+      "EMAIL_ALREADY_USED": "This email address is already used by another account.",
+      "INVALID_TRANSITION": "This status change is not allowed from the current status.",
+      "ALREADY_HANDLED": "This item was already handled.",
+      "ITEM_NAME_TAKEN": "An item with this name already exists.",
+      "MAINTENANCE": "The service is under maintenance. Please try again later.",
+      "UPDATE_REQUIRED": "An update is required to continue."
+    }
+  }
+}
