@@ -10,10 +10,10 @@ export const POSTMAN_SCHEMA_URL =
   'https://schema.getpostman.com/json/collection/v2.1.0/collection.json';
 
 export const DOC_TITLES: Readonly<Record<DocName, string>> = {
-  common: '__SYSTEM_NAME__ Common',
-  customer: '__SYSTEM_NAME__ Customer API',
-  merchant: '__SYSTEM_NAME__ Merchant API',
-  admin: '__SYSTEM_NAME__ Admin API',
+  common: 'Common',
+  customer: 'Customer API',
+  merchant: 'Merchant API',
+  admin: 'Admin API',
 };
 
 export const BEARER_SCHEME = 'bearerAuth';
