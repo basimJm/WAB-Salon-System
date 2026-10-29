@@ -3,12 +3,12 @@ import { defineEndpoint, optionalQuery } from '@/data/api/endpoint';
 import { defined } from '@/data/api/resource';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
+import type { Audience } from '@/domain/shared/businessType';
 import type { PageQuery } from '@/domain/shared/page';
 import {
   normalizeIban,
   type DeletionDecision,
   type PayoutDetailsInput,
-  type SalonGender,
   type SalonQuery,
   type SalonsRepository,
 } from '@/domain/salons/salons';
@@ -48,9 +48,9 @@ const online = defineEndpoint(OPERATIONS.postSalonsByIdOnline, {
   data: dto.postSalonsByIdOnlineDataSchema,
   body: dto.postSalonsByIdOnlineBodySchema,
 });
-const gender = defineEndpoint(OPERATIONS.patchSalonsByIdGender, {
-  data: dto.patchSalonsByIdGenderDataSchema,
-  body: dto.patchSalonsByIdGenderBodySchema,
+const audience = defineEndpoint(OPERATIONS.patchSalonsByIdAudience, {
+  data: dto.patchSalonsByIdAudienceDataSchema,
+  body: dto.patchSalonsByIdAudienceBodySchema,
 });
 const readPayout = defineEndpoint(OPERATIONS.getSalonsByIdPayoutDetails, {
   data: dto.getSalonsByIdPayoutDetailsDataSchema,
@@ -69,7 +69,8 @@ export class RemoteSalonsRepository implements SalonsRepository {
         page: q.page,
         pageSize: q.pageSize,
         state: q.state,
-        gender: q.gender,
+        businessType: q.businessType,
+        audience: q.audience,
         cityId: q.cityId,
         q: q.q,
         subscription: q.subscription,
@@ -97,8 +98,8 @@ export class RemoteSalonsRepository implements SalonsRepository {
     await this.api.execute(online, { params: { id }, body: { reason } });
   }
 
-  async changeGender(id: string, value: SalonGender, reason: string) {
-    return (await this.api.execute(gender, { params: { id }, body: { gender: value, reason } }))
+  async changeAudience(id: string, value: Audience, reason: string) {
+    return (await this.api.execute(audience, { params: { id }, body: { audience: value, reason } }))
       .data;
   }
 

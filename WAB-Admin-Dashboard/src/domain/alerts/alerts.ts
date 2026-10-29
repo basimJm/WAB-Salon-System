@@ -12,6 +12,8 @@ export const ALERT_KINDS = [
   'REVIEW_PENDING',
   'CATALOG_REQUEST',
   'SALON_DELETION_REQUEST',
+  // The owner widened a salon's audience to men & women (§5.19, `salon.audience_widened`).
+  'SALON_AUDIENCE_WIDENED',
 ] as const;
 export type AlertStatus = (typeof ALERT_STATUSES)[number];
 export type AlertKind = (typeof ALERT_KINDS)[number];

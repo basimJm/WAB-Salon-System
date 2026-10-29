@@ -1,16 +1,16 @@
 import type { LocalizedName } from '@/domain/locations/locations';
+import type { Audience, BusinessType } from '@/domain/shared/businessType';
 import type { Page, PageQuery } from '@/domain/shared/page';
 import type { AdminResource } from '@/domain/shared/resource';
-
-export const CATALOG_GENDERS = ['FEMALE', 'MALE'] as const;
-export type CatalogGender = (typeof CATALOG_GENDERS)[number];
 
 export interface CatalogService {
   readonly id: string;
   readonly name: LocalizedName;
   readonly description: LocalizedName;
   readonly imageKey: string;
-  readonly gender: CatalogGender;
+  /** §5.19: a SALON service serves MALE, FEMALE or BOTH; a CLINIC service is always BOTH. Fixed after creation. */
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly active: boolean;
   readonly sortOrder: number;
 }
@@ -18,11 +18,12 @@ export interface CatalogServiceInput {
   name: LocalizedName;
   description: LocalizedName;
   imageKey: string;
-  gender: CatalogGender;
+  businessType: BusinessType;
+  audience: Audience;
   active?: boolean;
   sortOrder?: number;
 }
-export type CatalogServicePatch = Partial<Omit<CatalogServiceInput, 'gender'>>;
+export type CatalogServicePatch = Partial<Omit<CatalogServiceInput, 'businessType' | 'audience'>>;
 
 export const REQUEST_STATUSES = ['PENDING', 'APPROVED', 'REJECTED'] as const;
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
@@ -47,7 +48,7 @@ export interface CreateServiceApproval {
   imageKey?: string;
   sortOrder?: number;
 }
-/** ...or maps the request to an existing active catalog service of the salon's gender (SRV-125). */
+/** ...or maps the request to an existing active catalog service that fits the salon (`catalogFits`, SRV-125/178). */
 export interface MapServiceApproval {
   catalogServiceId: string;
 }
@@ -90,9 +91,16 @@ export function approveInputOf(d: ApproveDraft, imageKey: string | null): Approv
 }
 
 export interface CatalogRequests {
-  list(query: PageQuery & { status?: RequestStatus }): Promise<Page<CatalogRequest>>;
+  list(
+    query: PageQuery & { status?: RequestStatus; businessType?: BusinessType },
+  ): Promise<Page<CatalogRequest>>;
   approve(id: string, input: ApproveInput, reason: string): Promise<CatalogRequest>;
   reject(id: string, reason: string): Promise<CatalogRequest>;
+}
+
+export interface CatalogServiceQuery {
+  businessType?: BusinessType;
+  audience?: Audience;
 }
 
 export interface CatalogRepository {
@@ -101,7 +109,7 @@ export interface CatalogRepository {
     CatalogService,
     CatalogServiceInput,
     CatalogServicePatch,
-    { gender?: CatalogGender }
+    CatalogServiceQuery
   >;
 }
 

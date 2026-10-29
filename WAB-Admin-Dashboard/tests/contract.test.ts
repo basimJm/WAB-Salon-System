@@ -111,7 +111,8 @@ describe('generated DTOs behave like the server contract', () => {
     const item = {
       id: '1',
       name: 'Salon',
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'BOTH',
       state: 'LIVE',
       cityId: null,
       areaId: null,

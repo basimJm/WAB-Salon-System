@@ -35,20 +35,6 @@ describe('salon actions', () => {
     expect(await screen.findByRole('button', { name: 'Put online' })).toBeInTheDocument();
   });
 
-  it('changing the audience warns, rejects the same audience, and saves a different one', async () => {
-    at(MOCK_SALONS[0]!.id);
-    await userEvent.click(await screen.findByRole('button', { name: 'Change audience' }));
-    const dialog = await screen.findByRole('dialog');
-    expect(within(dialog).getByRole('note')).toHaveTextContent('switched off');
-    await userEvent.type(within(dialog).getByLabelText('Reason'), 'Wrong audience');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
-    expect(await within(dialog).findByText('Choose a different audience')).toBeInTheDocument();
-    await userEvent.selectOptions(within(dialog).getByLabelText('Audience'), 'MALE');
-    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(await screen.findByText('Men')).toBeInTheDocument();
-  });
-
   it('bank details: hidden until asked, then replaced with a valid IBAN', async () => {
     at(MOCK_SALONS[0]!.id);
     await userEvent.click(await screen.findByRole('tab', { name: 'Payout details' }));

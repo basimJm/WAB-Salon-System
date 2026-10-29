@@ -13,11 +13,15 @@ import { reviewColumns } from './reviewColumns';
 import { ReviewReasonDialog, ReviewRowActions, type Ask } from './reviewParts';
 import { RATINGS, reviewFilters } from './reviewFilters';
 import { SalonBranchFilters } from '../shared/SalonBranchFilters';
+import { BUSINESS_TYPE_FILTER_KEY, businessTypeFilterOf } from '../shared/businessFilter';
+import { BusinessTypeFilter } from '../shared/BusinessTypeFilter';
 import { useReviewActions } from './useReviewActions';
 import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
 import { useLazyStrings } from '../hooks/useLazyStrings';
 
-const OPTIONS = { filterKeys: ['status', 'target', 'rating', 'salon', 'branch'] };
+const OPTIONS = {
+  filterKeys: ['status', 'target', 'rating', 'salon', 'branch', BUSINESS_TYPE_FILTER_KEY],
+};
 
 /** Admin PRD A22 · Reviews: the moderation queue (oldest first), published reviews, bulk decisions, removal. */
 export default function ReviewsPage() {
@@ -70,6 +74,10 @@ export default function ReviewsPage() {
           onClearAll: list.clearFilters,
           controls: (
             <>
+              <BusinessTypeFilter
+                value={businessTypeFilterOf(state)}
+                onChange={(type) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, type ? [type] : [])}
+              />
               <SalonBranchFilters
                 salon={state.filters['salon']?.[0] ?? ''}
                 branch={state.filters['branch']?.[0] ?? ''}

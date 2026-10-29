@@ -1,6 +1,6 @@
 {
   "catalog": {
-    "subtitle": "Services salons pick from when they set up their menu.",
+    "subtitle": "Services salons and clinics pick from when they set up their menu, managed per business type.",
     "add": "Add a service",
     "edit": "Edit service",
     "audience": "Audience",
@@ -32,7 +32,7 @@
       "map": "Use an existing service"
     },
     "mapService": "Catalog service",
-    "mapHint": "No new service is created. The request of \"{{name}}\" is linked to an active {{audience}} service already in the catalog.",
+    "mapHint": "No new service is created. The request of \"{{name}}\" is linked to an active catalog service that fits {{audience}}.",
     "noMatches": "There is no active service for this audience yet. Create a new one instead.",
     "requestsSubtitle": "Services salons asked to add to the catalog.",
     "noRequests": "No requests",

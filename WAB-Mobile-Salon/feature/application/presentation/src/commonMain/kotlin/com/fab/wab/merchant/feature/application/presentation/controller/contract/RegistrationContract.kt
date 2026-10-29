@@ -2,19 +2,24 @@ package com.fab.wab.merchant.feature.application.presentation.controller.contrac
 
 import com.fab.wab.merchant.core.domain.locations.Area
 import com.fab.wab.merchant.core.domain.locations.City
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.upload.UploadRejection
 import com.fab.wab.merchant.designsystem.components.upload.MediaPickAction
 import com.fab.wab.merchant.designsystem.components.upload.MediaPickUi
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationField
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationInput
-import com.fab.wab.merchant.feature.application.domain.model.SalonGender
 import com.fab.wab.merchant.feature.application.presentation.controller.vm.DocumentUpload
 
 /** New application (after the REGISTER OTP) or "Edit & resubmit" of a rejected one (PRD M05). */
 enum class RegistrationMode { NEW, RESUBMIT }
 
 sealed interface RegistrationContract {
-    /** PRD M04: submit stays off until valid; field errors show once the user tried to submit or edited the field. */
+    /**
+     * PRD M04 + BUSINESS_DOMAIN §5.19: the business type comes first (salon → audience; clinic → medical license); submit
+     * stays off until valid; field errors show once the user tried to submit. [typeLocked] = a resubmission, whose type
+     * is the salon's own and never changes.
+     */
     data class UiState(
         val mode: RegistrationMode = RegistrationMode.NEW,
         val input: RegistrationInput = RegistrationInput(),
@@ -22,6 +27,9 @@ sealed interface RegistrationContract {
         val areas: List<Area> = emptyList(),
         val documents: List<DocumentUpload> = emptyList(),
         val documentRejection: UploadRejection? = null,
+        val medicalDocuments: List<DocumentUpload> = emptyList(),
+        val medicalRejection: UploadRejection? = null,
+        val typeLocked: Boolean = false,
         val media: MediaPickUi = MediaPickUi(),
         val errors: Set<RegistrationField> = emptySet(),
         val showErrors: Boolean = false,
@@ -29,12 +37,14 @@ sealed interface RegistrationContract {
     ) {
         val isResubmission: Boolean get() = mode == RegistrationMode.RESUBMIT
         val canSubmit: Boolean get() = errors.isEmpty() && !submitting
+        val isClinic: Boolean get() = input.businessType == BusinessType.CLINIC
         fun errorOf(field: RegistrationField): Boolean = showErrors && field in errors
     }
 
     sealed interface UiAction {
         data class OnSalonNameChange(val value: String) : UiAction
-        data class OnGenderSelect(val gender: SalonGender) : UiAction
+        data class OnBusinessTypeSelect(val type: BusinessType) : UiAction
+        data class OnAudienceSelect(val audience: Audience) : UiAction
         data class OnFirstNameChange(val value: String) : UiAction
         data class OnLastNameChange(val value: String) : UiAction
         data class OnCitySelect(val index: Int) : UiAction
@@ -43,6 +53,9 @@ sealed interface RegistrationContract {
         data class OnMedia(val action: MediaPickAction) : UiAction
         data class OnRemoveDocument(val id: String) : UiAction
         data class OnRetryDocument(val id: String) : UiAction
+        data object OnAddMedicalLicense : UiAction
+        data class OnRemoveMedicalLicense(val id: String) : UiAction
+        data class OnRetryMedicalLicense(val id: String) : UiAction
         data object OnTermsToggle : UiAction
         data object OnTermsClick : UiAction
         data object OnSubmit : UiAction

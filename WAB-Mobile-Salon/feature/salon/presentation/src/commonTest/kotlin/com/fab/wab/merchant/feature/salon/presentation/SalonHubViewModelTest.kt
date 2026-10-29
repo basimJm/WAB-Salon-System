@@ -4,7 +4,6 @@ import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.salon.CompletenessItem
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.MemberProfile

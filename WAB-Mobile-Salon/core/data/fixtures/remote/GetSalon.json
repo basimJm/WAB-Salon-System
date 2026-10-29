@@ -4,7 +4,8 @@
   "data": {
     "id": "7fe703cdf5e7eec204bb193d",
     "name": "Lamar Beauty Lounge",
-    "gender": "FEMALE",
+    "businessType": "SALON",
+    "audience": "FEMALE",
     "state": "LIVE",
     "description": "صالون نسائي متكامل في عبدون: شعر، أظافر، مكياج وعناية بالبشرة بأيدي فريق محترف وأجواء هادئة.",
     "coverUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/cover.jpg",

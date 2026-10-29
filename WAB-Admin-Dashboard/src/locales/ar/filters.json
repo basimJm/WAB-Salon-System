@@ -42,5 +42,16 @@
     "viewData": "عرض البيانات",
     "hideData": "إخفاء البيانات",
     "exportCsv": "تصدير CSV"
+  },
+  "business": {
+    "type": "نوع النشاط",
+    "audience": "الفئة المخدومة",
+    "filter": {
+      "ALL": "الكل",
+      "SALON": "الصالونات",
+      "CLINIC": "العيادات"
+    },
+    "clinicAudience": "العيادات تخدم الجميع",
+    "gender": "الجنس"
   }
 }

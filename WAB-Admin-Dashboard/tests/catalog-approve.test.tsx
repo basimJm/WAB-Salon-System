@@ -61,7 +61,7 @@ describe('approve body schema (SRV-125, contract 1.5.0)', () => {
 });
 
 describe('RequestsPage approve: map to an existing service', () => {
-  it("lists only active services of the salon's gender and sends the picked id", async () => {
+  it('lists only active services that fit the salon (type + audience) and sends the picked id', async () => {
     const container = makeContainer();
     const approve = vi.spyOn(container.repositories.catalog.requests, 'approve');
     renderWithApp(
@@ -74,7 +74,7 @@ describe('RequestsPage approve: map to an existing service', () => {
     const dialog = await screen.findByRole('dialog');
     await userEvent.click(within(dialog).getByRole('radio', { name: 'Use an existing service' }));
     const select = await within(dialog).findByLabelText('Catalog service');
-    // Noor Salon is a women's salon: the men's "Shave" is not offered.
+    // Noor Salon is a women's salon: the men's "Shave" and the clinic "Botox" are not offered.
     expect(
       within(select)
         .getAllByRole('option')

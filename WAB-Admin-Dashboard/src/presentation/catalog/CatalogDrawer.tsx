@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useContainer } from '@/app/ContainerContext';
 import {
-  CATALOG_GENDERS,
   MAX_DESCRIPTION,
   MAX_NAME,
   validateCatalogForm,
-  type CatalogGender,
   type CatalogService,
   type CatalogServiceInput,
 } from '@/domain/catalog/catalog';
+import { type BusinessKind } from '@/domain/shared/businessType';
 import { TextField } from '../components/form/TextField';
 import { Toggle } from '../components/form/Toggle';
 import { ImageUploader, type UploadedImage } from '../components/media/ImageUploader';
-import { reasonError, ResourceDrawer, Select } from '../components/overlay/ResourceDrawer';
+import { reasonError, ResourceDrawer } from '../components/overlay/ResourceDrawer';
+import { BusinessKindFields } from './BusinessKindFields';
 
 const BLANK = {
   nameAr: '',
@@ -25,10 +25,11 @@ const BLANK = {
   reason: '',
 };
 
-function initial(item: CatalogService | null, gender: CatalogGender) {
-  if (!item) return { ...BLANK, gender, image: null as UploadedImage | null };
+function initial(item: CatalogService | null, kind: BusinessKind) {
+  if (!item) return { ...BLANK, ...kind, image: null as UploadedImage | null };
   return {
-    gender: item.gender,
+    businessType: item.businessType,
+    audience: item.audience,
     nameAr: item.name.ar,
     nameEn: item.name.en,
     descAr: item.description.ar,
@@ -42,7 +43,8 @@ function initial(item: CatalogService | null, gender: CatalogGender) {
 
 export interface CatalogDrawerProps {
   item: CatalogService | null;
-  gender: CatalogGender;
+  /** Type + audience a new service starts with (the list's current filter). */
+  kind: BusinessKind;
   saving: boolean;
   error: unknown;
   onSubmit: (value: CatalogServiceInput, reason: string) => void;
@@ -52,7 +54,7 @@ export interface CatalogDrawerProps {
 /** Create/edit panel of one catalog service: names and descriptions in both languages, artwork, order, active. */
 export function CatalogDrawer({
   item,
-  gender,
+  kind,
   saving,
   error,
   onSubmit,
@@ -60,7 +62,7 @@ export function CatalogDrawer({
 }: CatalogDrawerProps) {
   const { t } = useTranslation();
   const { repositories } = useContainer();
-  const [v, setV] = useState(() => initial(item, gender));
+  const [v, setV] = useState(() => initial(item, kind));
   const [bad, setBad] = useState<ReadonlySet<string>>(new Set());
   const submit = () => {
     const found = new Set<string>(validateCatalogForm({ ...v, imageKey: v.image?.key ?? '' }));
@@ -72,7 +74,8 @@ export function CatalogDrawer({
         name: { ar: v.nameAr.trim(), en: v.nameEn.trim() },
         description: { ar: v.descAr.trim(), en: v.descEn.trim() },
         imageKey: v.image?.key ?? '',
-        gender: v.gender,
+        businessType: v.businessType,
+        audience: v.audience,
         active: v.active,
         sortOrder: Number(v.sortOrder),
       },
@@ -105,14 +108,10 @@ export function CatalogDrawer({
       onSubmit={submit}
       onClose={onClose}
     >
-      <Select
-        label={t('catalog.audience')}
-        disabled={item !== null}
-        value={v.gender}
-        options={CATALOG_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) }))}
-        onChange={(ev) =>
-          setV({ ...v, gender: CATALOG_GENDERS.find((g) => g === ev.target.value) ?? v.gender })
-        }
+      <BusinessKindFields
+        value={{ businessType: v.businessType, audience: v.audience }}
+        locked={item !== null}
+        onChange={(next) => setV({ ...v, ...next })}
       />
       {text('nameAr', 'rtl', MAX_NAME)}
       {text('nameEn', 'ltr', MAX_NAME)}

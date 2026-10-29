@@ -131,7 +131,7 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
             )
         }
         AppText(text = stringResource(Res.string.service_price_hint), style = AppTheme.typography.labelSmall, color = AppTheme.colors.muted)
-        if (state.womenSalon) {
+        if (state.brideAllowed) {
             ToggleRow(
                 stringResource(Res.string.service_bride_only),
                 stringResource(Res.string.service_bride_only_sub),

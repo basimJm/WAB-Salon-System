@@ -7,7 +7,9 @@ import com.fab.wab.merchant.core.data.contract.generated.PostSalonServicesBody
 import com.fab.wab.merchant.core.data.contract.generated.PostSalonServicesData
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.mapSuccess
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.network.safeApiCall
 import com.fab.wab.merchant.feature.salon.domain.CatalogService
@@ -68,9 +70,11 @@ fun PostSalonServicesData.toDomain() =
 fun PatchSalonServicesByIdData.toDomain() =
     RawService(id, catalogServiceId, name, imageUrl, price, durationMinutes, brideOnly, extraDescription, mediaUrls, active).toDomain()
 
+/** Entries of an unknown type or audience are skipped (never offered to the wrong business). */
 fun GetCatalogServicesDataItem.toDomain(): CatalogService? {
-    val type = SalonGenderType.entries.firstOrNull { it.name == gender.uppercase() } ?: return null
-    return CatalogService(id, name, description, imageUrl, type)
+    val type = BusinessType.fromCode(businessType.uppercase()) ?: return null
+    val fits = Audience.fromCode(audience.uppercase()) ?: return null
+    return CatalogService(id, name, description, imageUrl, BusinessKind(type, fits))
 }
 
 fun ServiceDraft.toPatch(): JsonObject = buildJsonObject {
@@ -108,8 +112,8 @@ class ServicesRepositoryImpl(private val api: ServicesApi, private val salon: Sa
         return AppResult.Success(all)
     }
 
-    override suspend fun catalog(gender: SalonGenderType, page: Int): AppResult<List<CatalogService>> =
-        safeApiCall { api.catalog(gender.name, page, ServiceLimits.PAGE_SIZE) }.mapSuccess { response ->
+    override suspend fun catalog(kind: BusinessKind, page: Int): AppResult<List<CatalogService>> =
+        safeApiCall { api.catalog(kind.type.name, kind.catalogGender?.name, page, ServiceLimits.PAGE_SIZE) }.mapSuccess { response ->
             response.data.mapNotNull { it.toDomain() }.also { rows -> rows.forEach { catalog[it.id] = it } }
         }
 

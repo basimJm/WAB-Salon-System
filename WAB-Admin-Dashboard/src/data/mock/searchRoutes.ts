@@ -18,7 +18,13 @@ export function searchRoutes(): readonly MockRoute[] {
       ({ query }) => {
         const q = (query.get('q') ?? '').toLowerCase();
         const salons = MOCK_SALONS.filter((s) => has(s.name, q)).map(
-          ({ id, name, gender, state }) => ({ id, name, gender, state }),
+          ({ id, name, businessType, audience, state }) => ({
+            id,
+            name,
+            businessType,
+            audience,
+            state,
+          }),
         );
         const customers = has('Dana Customer', q) || has('+962790000001', q) ? [DANA] : [];
         const bookings = has('WAB-1001', q) ? [BOOKING] : [];

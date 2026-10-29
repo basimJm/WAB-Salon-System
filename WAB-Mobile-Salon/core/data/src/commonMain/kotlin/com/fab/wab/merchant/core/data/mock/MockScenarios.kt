@@ -1,5 +1,8 @@
 package com.fab.wab.merchant.core.data.mock
 
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +39,19 @@ object MockScenarios {
     private val salon = MutableStateFlow<MockSalonState?>(null)
     private val signedIn = MutableStateFlow<MockMember?>(null)
     private val pending = MutableStateFlow<Set<String>>(emptySet())
+    private val business = MutableStateFlow<BusinessKind?>(null)
+
+    /** Business type + audience every fixture answers with (BUSINESS_DOMAIN §5.19); null = the captured women's salon. */
+    val businessKind: StateFlow<BusinessKind?> = business.asStateFlow()
+
+    fun setBusinessKind(value: BusinessKind?) {
+        business.value = value
+    }
+
+    /** Mock `PATCH /salon/audience`: the salon serves both from now on. */
+    fun widenAudience() {
+        business.value = BusinessKind(BusinessType.SALON, Audience.BOTH)
+    }
 
     val current: StateFlow<MockScenario> = state.asStateFlow()
     val salonState: StateFlow<MockSalonState?> = salon.asStateFlow()
@@ -66,5 +82,6 @@ object MockScenarios {
         salon.value = null
         signedIn.value = null
         pending.value = emptySet()
+        business.value = null
     }
 }

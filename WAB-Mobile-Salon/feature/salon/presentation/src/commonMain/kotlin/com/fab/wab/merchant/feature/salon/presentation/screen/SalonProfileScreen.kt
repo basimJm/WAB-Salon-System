@@ -20,7 +20,6 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.fab.wab.merchant.core.analytics.compose.TrackScreen
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.designsystem.components.button.AppButton
 import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.card.AppCard
@@ -42,15 +41,12 @@ import com.fab.wab.merchant.feature.salon.presentation.controller.contract.Profi
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.UiAction
 import com.fab.wab.merchant.feature.salon.presentation.controller.contract.SalonProfileContract.UiState
 import com.fab.wab.merchant.feature.salon.presentation.resources.Res
-import com.fab.wab.merchant.feature.salon.presentation.resources.hub_men
-import com.fab.wab.merchant.feature.salon.presentation.resources.hub_women
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_area
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_city
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_count
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_cover_hint
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_description
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_discard
-import com.fab.wab.merchant.feature.salon.presentation.resources.profile_locked
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_logo_hint
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_name
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_phone
@@ -61,6 +57,7 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.profile_require
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_save
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_title
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_too_long
+import com.fab.wab.merchant.feature.salon.presentation.resources.profile_name_clinic
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_type
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_unsaved_body
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_unsaved_title
@@ -88,6 +85,7 @@ fun SalonProfileScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: M
         }
     }
     ProfileOverlays(state, onAction)
+    WidenAudienceDialog(state, onAction)
     if (state.unsavedDialog) {
         AppDialog(
             title = stringResource(Res.string.profile_unsaved_title),
@@ -114,7 +112,7 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
         AppTextField(
             value = form.name,
             onValueChange = { onAction(UiAction.OnName(it)) },
-            label = stringResource(Res.string.profile_name),
+            label = stringResource(byType(state.salon?.businessType, Res.string.profile_name, Res.string.profile_name_clinic)),
             error = if (ProfileField.NAME in errors) stringResource(Res.string.profile_required) else null,
         )
         AppTextField(
@@ -150,7 +148,7 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
             textDirection = TextDirection.Ltr,
             error = if (ProfileField.WHATSAPP in errors) stringResource(Res.string.profile_phone_error) else null,
         )
-        SalonType(state)
+        SalonType(state, onAction)
         AppButton(
             text = stringResource(Res.string.profile_preview),
             onClick = { onAction(UiAction.OnPreview) },
@@ -209,13 +207,14 @@ private fun CityArea(state: UiState, onAction: (UiAction) -> Unit) {
 }
 
 @Composable
-private fun SalonType(state: UiState) {
-    val female = state.salon?.gender == SalonGenderType.FEMALE
+private fun SalonType(state: UiState, onAction: (UiAction) -> Unit) {
+    val kind = state.salon?.kind ?: return
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space4)) {
             AppText(text = stringResource(Res.string.profile_type), style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
-            AppText(text = stringResource(if (female) Res.string.hub_women else Res.string.hub_men), style = AppTheme.typography.bodyMedium)
-            AppText(text = stringResource(Res.string.profile_locked), style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint)
+            AppText(text = stringResource(kindLabel(kind)), style = AppTheme.typography.bodyMedium)
+            AppText(text = stringResource(typeNote(kind)), style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint)
+            if (state.canWidenAudience) WidenAudienceButton(state, onAction)
         }
     }
 }

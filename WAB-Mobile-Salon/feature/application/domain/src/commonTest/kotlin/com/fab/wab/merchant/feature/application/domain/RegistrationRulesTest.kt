@@ -1,8 +1,9 @@
 package com.fab.wab.merchant.feature.application.domain
 
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationField
 import com.fab.wab.merchant.feature.application.domain.model.RegistrationInput
-import com.fab.wab.merchant.feature.application.domain.model.SalonGender
 import com.fab.wab.merchant.feature.application.domain.model.registrationErrors
 import com.fab.wab.merchant.feature.application.domain.model.toForm
 import kotlin.test.Test
@@ -13,13 +14,47 @@ import kotlin.test.assertTrue
 
 class RegistrationRulesTest {
     private val valid = RegistrationInput(
-        salonName = "  Lina Beauty ", gender = SalonGender.WOMEN, firstName = "Lina", lastName = "Haddad",
+        businessType = BusinessType.SALON, salonName = "  Lina Beauty ", audience = Audience.FEMALE,
+        firstName = "Lina", lastName = "Haddad",
         cityId = "c1", areaId = "a1", documentKeys = listOf("l/1.pdf"), termsAccepted = true,
     )
 
+    private val clinic = valid.copy(businessType = BusinessType.CLINIC, audience = null, medicalLicenseKeys = listOf("m/1.pdf"))
+
     @Test
-    fun emptyFormBreaksEveryRule() {
-        assertEquals(RegistrationField.entries.toSet(), registrationErrors(RegistrationInput()))
+    fun emptyFormBreaksEveryRuleExceptTheTypeSpecificOnes() {
+        val typeSpecific = setOf(RegistrationField.AUDIENCE, RegistrationField.MEDICAL_LICENSE)
+        assertEquals(RegistrationField.entries.toSet() - typeSpecific, registrationErrors(RegistrationInput()))
+    }
+
+    @Test
+    fun aSalonNeedsAnAudienceAndNoMedicalLicense() {
+        assertEquals(setOf(RegistrationField.AUDIENCE), registrationErrors(valid.copy(audience = null)))
+        val both = assertNotNull(valid.copy(audience = Audience.BOTH, medicalLicenseKeys = listOf("m/1.pdf")).toForm())
+        assertEquals(Audience.BOTH, both.kind.audience)
+        assertTrue(both.medicalLicenseKeys.isEmpty(), "a salon never sends a medical license")
+    }
+
+    @Test
+    fun aClinicIsUnisexAndNeedsOneToFiveFinishedMedicalLicenseFiles() {
+        val form = assertNotNull(clinic.toForm())
+        assertEquals(BusinessType.CLINIC, form.kind.type)
+        assertEquals(Audience.BOTH, form.kind.audience)
+        assertEquals(listOf("m/1.pdf"), form.medicalLicenseKeys)
+        assertEquals(setOf(RegistrationField.MEDICAL_LICENSE), registrationErrors(clinic.copy(medicalLicenseKeys = emptyList())))
+        assertEquals(setOf(RegistrationField.MEDICAL_LICENSE), registrationErrors(clinic.copy(medicalLicenseKeys = List(6) { "m$it" })))
+        assertEquals(setOf(RegistrationField.MEDICAL_LICENSE), registrationErrors(clinic.copy(medicalUploading = true)))
+    }
+
+    @Test
+    fun aClinicResubmissionKeepsTheMedicalLicenseOnFileUnlessReplaced() {
+        val resubmit = RegistrationInput(businessType = BusinessType.CLINIC, salonName = "Glow", documentKeys = listOf("l/1.pdf"))
+        assertTrue(registrationErrors(resubmit, resubmission = true).isEmpty())
+        assertTrue(assertNotNull(resubmit.toForm(resubmission = true)).medicalLicenseKeys.isEmpty())
+        assertEquals(
+            setOf(RegistrationField.MEDICAL_LICENSE),
+            registrationErrors(resubmit.copy(medicalUploading = true), resubmission = true),
+        )
     }
 
     @Test
@@ -27,7 +62,7 @@ class RegistrationRulesTest {
         assertTrue(registrationErrors(valid).isEmpty())
         val form = assertNotNull(valid.toForm())
         assertEquals("Lina Beauty", form.salonName)
-        assertEquals("FEMALE", form.gender.code)
+        assertEquals(Audience.FEMALE, form.kind.audience)
     }
 
     @Test
@@ -46,8 +81,13 @@ class RegistrationRulesTest {
     }
 
     @Test
-    fun resubmissionChecksOnlyNameTypeAndDocuments() {
-        val minimal = RegistrationInput(salonName = "Gents", gender = SalonGender.MEN, documentKeys = listOf("l/1.pdf"))
+    fun resubmissionChecksOnlyTypeNameAudienceAndDocuments() {
+        val minimal = RegistrationInput(
+            businessType = BusinessType.SALON,
+            salonName = "Gents",
+            audience = Audience.MALE,
+            documentKeys = listOf("l/1.pdf"),
+        )
         assertTrue(registrationErrors(minimal, resubmission = true).isEmpty())
         assertNotNull(minimal.toForm(resubmission = true))
         assertEquals(setOf(RegistrationField.DOCUMENTS), registrationErrors(minimal.copy(documentKeys = emptyList()), resubmission = true))

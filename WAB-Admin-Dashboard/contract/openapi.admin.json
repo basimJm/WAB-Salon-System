@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.7.0"
+    "version": "1.12.0"
   },
   "servers": [
     {
@@ -70,6 +70,9 @@
                   "BRANCH_SCOPE_DENIED",
                   "SALON_CLOSED",
                   "GENDER_MISMATCH",
+                  "BUSINESS_TYPE_MISMATCH",
+                  "AUDIENCE_CHANGE_NOT_ALLOWED",
+                  "BRIDE_NOT_ALLOWED",
                   "TOO_MANY_COMPANIONS",
                   "SERVICE_UNAVAILABLE",
                   "BRIDE_ONLY_SERVICE",
@@ -168,6 +171,21 @@
         "required": [
           "id",
           "email"
+        ]
+      },
+      "BusinessType": {
+        "type": "string",
+        "enum": [
+          "SALON",
+          "CLINIC"
+        ]
+      },
+      "Audience": {
+        "type": "string",
+        "enum": [
+          "MALE",
+          "FEMALE",
+          "BOTH"
         ]
       },
       "AdminProfile": {
@@ -8352,12 +8370,25 @@
             "schema": {
               "type": "string",
               "enum": [
-                "MALE",
-                "FEMALE"
+                "SALON",
+                "CLINIC"
               ]
             },
             "required": false,
-            "name": "gender",
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE",
+                "BOTH"
+              ]
+            },
+            "required": false,
+            "name": "audience",
             "in": "query"
           },
           {
@@ -8433,12 +8464,11 @@
                           "imageKey": {
                             "type": "string"
                           },
-                          "gender": {
-                            "type": "string",
-                            "enum": [
-                              "MALE",
-                              "FEMALE"
-                            ]
+                          "businessType": {
+                            "$ref": "#/components/schemas/BusinessType"
+                          },
+                          "audience": {
+                            "$ref": "#/components/schemas/Audience"
                           },
                           "active": {
                             "type": "boolean"
@@ -8452,7 +8482,8 @@
                           "name",
                           "description",
                           "imageKey",
-                          "gender",
+                          "businessType",
+                          "audience",
                           "active",
                           "sortOrder"
                         ]
@@ -8614,11 +8645,19 @@
                     "maxLength": 1024,
                     "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                   },
-                  "gender": {
+                  "businessType": {
+                    "type": "string",
+                    "enum": [
+                      "SALON",
+                      "CLINIC"
+                    ]
+                  },
+                  "audience": {
                     "type": "string",
                     "enum": [
                       "MALE",
-                      "FEMALE"
+                      "FEMALE",
+                      "BOTH"
                     ]
                   },
                   "active": {
@@ -8641,7 +8680,8 @@
                   "name",
                   "description",
                   "imageKey",
-                  "gender",
+                  "businessType",
+                  "audience",
                   "reason"
                 ]
               }
@@ -8704,12 +8744,11 @@
                         "imageKey": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "active": {
                           "type": "boolean"
@@ -8723,7 +8762,8 @@
                         "name",
                         "description",
                         "imageKey",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "active",
                         "sortOrder"
                       ]
@@ -8900,12 +8940,11 @@
                         "imageKey": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "active": {
                           "type": "boolean"
@@ -8919,7 +8958,8 @@
                         "name",
                         "description",
                         "imageKey",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "active",
                         "sortOrder"
                       ]
@@ -9165,12 +9205,11 @@
                         "imageKey": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "active": {
                           "type": "boolean"
@@ -9184,7 +9223,8 @@
                         "name",
                         "description",
                         "imageKey",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "active",
                         "sortOrder"
                       ]
@@ -9323,6 +9363,18 @@
             "schema": {
               "type": "string",
               "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
                 "ar",
                 "en"
               ],
@@ -9362,12 +9414,11 @@
                           "name": {
                             "type": "string"
                           },
-                          "gender": {
-                            "type": "string",
-                            "enum": [
-                              "MALE",
-                              "FEMALE"
-                            ]
+                          "businessType": {
+                            "$ref": "#/components/schemas/BusinessType"
+                          },
+                          "audience": {
+                            "$ref": "#/components/schemas/Audience"
                           },
                           "state": {
                             "type": "string",
@@ -9427,7 +9478,8 @@
                         "required": [
                           "id",
                           "name",
-                          "gender",
+                          "businessType",
+                          "audience",
                           "state",
                           "cityId",
                           "owner",
@@ -9581,12 +9633,11 @@
                         "name": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "state": {
                           "type": "string",
@@ -9660,12 +9711,20 @@
                             "type": "string"
                           },
                           "description": "Signed, short-lived URLs of the private documents."
+                        },
+                        "medicalLicenseUrls": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "A clinic’s medical license (§5.19): signed, short-lived URLs; empty for a salon."
                         }
                       },
                       "required": [
                         "id",
                         "name",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "state",
                         "cityId",
                         "owner",
@@ -9674,7 +9733,8 @@
                         "rejectionReason",
                         "description",
                         "areaId",
-                        "documentUrls"
+                        "documentUrls",
+                        "medicalLicenseUrls"
                       ]
                     },
                     "meta": {
@@ -9840,12 +9900,11 @@
                         "name": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "state": {
                           "type": "string",
@@ -9905,7 +9964,8 @@
                       "required": [
                         "id",
                         "name",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "state",
                         "cityId",
                         "owner",
@@ -10077,12 +10137,11 @@
                         "name": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "state": {
                           "type": "string",
@@ -10142,7 +10201,8 @@
                       "required": [
                         "id",
                         "name",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "state",
                         "cityId",
                         "owner",
@@ -10616,7 +10676,7 @@
         "tags": [
           "Admin salons"
         ],
-        "summary": "Salons: filter by state, gender, city and name; newest first",
+        "summary": "Salons and clinics: filter by state, business type, audience, city and name; newest first",
         "parameters": [
           {
             "schema": {
@@ -10659,12 +10719,25 @@
             "schema": {
               "type": "string",
               "enum": [
-                "MALE",
-                "FEMALE"
+                "SALON",
+                "CLINIC"
               ]
             },
             "required": false,
-            "name": "gender",
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE",
+                "BOTH"
+              ]
+            },
+            "required": false,
+            "name": "audience",
             "in": "query"
           },
           {
@@ -10764,12 +10837,11 @@
                           "name": {
                             "type": "string"
                           },
-                          "gender": {
-                            "type": "string",
-                            "enum": [
-                              "MALE",
-                              "FEMALE"
-                            ]
+                          "businessType": {
+                            "$ref": "#/components/schemas/BusinessType"
+                          },
+                          "audience": {
+                            "$ref": "#/components/schemas/Audience"
                           },
                           "state": {
                             "type": "string",
@@ -10842,7 +10914,8 @@
                         "required": [
                           "id",
                           "name",
-                          "gender",
+                          "businessType",
+                          "audience",
                           "state",
                           "cityId",
                           "areaId",
@@ -10999,12 +11072,11 @@
                         "name": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "state": {
                           "type": "string",
@@ -11359,7 +11431,8 @@
                       "required": [
                         "id",
                         "name",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "state",
                         "cityId",
                         "areaId",
@@ -11657,12 +11730,12 @@
         }
       }
     },
-    "/admin/v1/salons/{id}/gender": {
+    "/admin/v1/salons/{id}/audience": {
       "patch": {
         "tags": [
           "Admin salons"
         ],
-        "summary": "Change the salon’s gender (admin only, reason required, audited, owner notified). Its services are switched off (they belong to the old catalog) and bride flags are cleared for a men’s salon.",
+        "summary": "Change a SALON’s audience (admin only, reason required, audited, owner notified; §5.19). Widening to BOTH keeps everything. Narrowing (BOTH → MALE/FEMALE, MALE ↔ FEMALE) is refused with 409 SCHEDULE_CONFLICT (list) while future bookings exist; services whose catalog entry no longer fits are switched off and bride flags are cleared for a men’s salon. A CLINIC is always BOTH: 422 AUDIENCE_CHANGE_NOT_ALLOWED.",
         "parameters": [
           {
             "schema": {
@@ -11695,11 +11768,12 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "gender": {
+                  "audience": {
                     "type": "string",
                     "enum": [
                       "MALE",
-                      "FEMALE"
+                      "FEMALE",
+                      "BOTH"
                     ]
                   },
                   "reason": {
@@ -11709,7 +11783,7 @@
                   }
                 },
                 "required": [
-                  "gender",
+                  "audience",
                   "reason"
                 ]
               }
@@ -11742,12 +11816,11 @@
                         "name": {
                           "type": "string"
                         },
-                        "gender": {
-                          "type": "string",
-                          "enum": [
-                            "MALE",
-                            "FEMALE"
-                          ]
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "audience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "state": {
                           "type": "string",
@@ -12102,7 +12175,8 @@
                       "required": [
                         "id",
                         "name",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "state",
                         "cityId",
                         "areaId",
@@ -12248,6 +12322,7 @@
                       "GALLERY_VIDEO",
                       "SERVICE_MEDIA",
                       "LICENSE_DOCUMENT",
+                      "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
                       "BANNER_IMAGE"
                     ]
@@ -12611,6 +12686,18 @@
             "schema": {
               "type": "string",
               "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
                 "ar",
                 "en"
               ],
@@ -12798,7 +12885,7 @@
         "tags": [
           "Admin catalog requests"
         ],
-        "summary": "Approve: creates the catalog service (salon’s gender) and tells the salon (reason required, audited)",
+        "summary": "Approve: creates the catalog service (the salon’s business type and audience; an existing one must fit it, else 422 BUSINESS_TYPE_MISMATCH) and tells the salon (reason required, audited)",
         "parameters": [
           {
             "schema": {
@@ -13366,6 +13453,18 @@
             },
             "required": false,
             "name": "salonId",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
             "in": "query"
           },
           {
@@ -14833,12 +14932,25 @@
             "schema": {
               "type": "string",
               "enum": [
-                "MALE",
-                "FEMALE"
+                "SALON",
+                "CLINIC"
               ]
             },
             "required": false,
-            "name": "gender",
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE",
+                "BOTH"
+              ]
+            },
+            "required": false,
+            "name": "audience",
             "in": "query"
           },
           {
@@ -14918,11 +15030,19 @@
                               "name"
                             ]
                           },
-                          "gender": {
+                          "businessType": {
+                            "type": "string",
+                            "enum": [
+                              "SALON",
+                              "CLINIC"
+                            ]
+                          },
+                          "audience": {
                             "type": "string",
                             "enum": [
                               "MALE",
-                              "FEMALE"
+                              "FEMALE",
+                              "BOTH"
                             ]
                           },
                           "startAt": {
@@ -14956,7 +15076,8 @@
                         "required": [
                           "id",
                           "salon",
-                          "gender",
+                          "businessType",
+                          "audience",
                           "startAt",
                           "endAt",
                           "order",
@@ -15066,7 +15187,7 @@
         "tags": [
           "Admin recommended salons"
         ],
-        "summary": "Add a placement. The audience is the salon’s gender; a salon cannot have overlapping placements (409).",
+        "summary": "Add a placement. Business type and audience are copied from the salon (Recommended salons / Recommended clinics); a salon cannot have overlapping placements (409).",
         "parameters": [
           {
             "schema": {
@@ -15175,11 +15296,19 @@
                             "name"
                           ]
                         },
-                        "gender": {
+                        "businessType": {
+                          "type": "string",
+                          "enum": [
+                            "SALON",
+                            "CLINIC"
+                          ]
+                        },
+                        "audience": {
                           "type": "string",
                           "enum": [
                             "MALE",
-                            "FEMALE"
+                            "FEMALE",
+                            "BOTH"
                           ]
                         },
                         "startAt": {
@@ -15213,7 +15342,8 @@
                       "required": [
                         "id",
                         "salon",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "startAt",
                         "endAt",
                         "order",
@@ -15435,11 +15565,19 @@
                             "name"
                           ]
                         },
-                        "gender": {
+                        "businessType": {
+                          "type": "string",
+                          "enum": [
+                            "SALON",
+                            "CLINIC"
+                          ]
+                        },
+                        "audience": {
                           "type": "string",
                           "enum": [
                             "MALE",
-                            "FEMALE"
+                            "FEMALE",
+                            "BOTH"
                           ]
                         },
                         "startAt": {
@@ -15473,7 +15611,8 @@
                       "required": [
                         "id",
                         "salon",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "startAt",
                         "endAt",
                         "order",
@@ -15666,11 +15805,19 @@
                             "name"
                           ]
                         },
-                        "gender": {
+                        "businessType": {
+                          "type": "string",
+                          "enum": [
+                            "SALON",
+                            "CLINIC"
+                          ]
+                        },
+                        "audience": {
                           "type": "string",
                           "enum": [
                             "MALE",
-                            "FEMALE"
+                            "FEMALE",
+                            "BOTH"
                           ]
                         },
                         "startAt": {
@@ -15704,7 +15851,8 @@
                       "required": [
                         "id",
                         "salon",
-                        "gender",
+                        "businessType",
+                        "audience",
                         "startAt",
                         "endAt",
                         "order",
@@ -15837,11 +15985,11 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "gender": {
+                  "businessType": {
                     "type": "string",
                     "enum": [
-                      "MALE",
-                      "FEMALE"
+                      "SALON",
+                      "CLINIC"
                     ]
                   },
                   "ids": {
@@ -15860,7 +16008,7 @@
                   }
                 },
                 "required": [
-                  "gender",
+                  "businessType",
                   "ids",
                   "reason"
                 ]
@@ -15908,11 +16056,19 @@
                               "name"
                             ]
                           },
-                          "gender": {
+                          "businessType": {
+                            "type": "string",
+                            "enum": [
+                              "SALON",
+                              "CLINIC"
+                            ]
+                          },
+                          "audience": {
                             "type": "string",
                             "enum": [
                               "MALE",
-                              "FEMALE"
+                              "FEMALE",
+                              "BOTH"
                             ]
                           },
                           "startAt": {
@@ -15946,7 +16102,8 @@
                         "required": [
                           "id",
                           "salon",
-                          "gender",
+                          "businessType",
+                          "audience",
                           "startAt",
                           "endAt",
                           "order",
@@ -16203,6 +16360,18 @@
             "schema": {
               "type": "string",
               "enum": [
+                "SALON",
+                "CLINIC"
+              ]
+            },
+            "required": false,
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
                 "ar",
                 "en"
               ],
@@ -16244,6 +16413,12 @@
                           },
                           "status": {
                             "type": "string"
+                          },
+                          "businessType": {
+                            "$ref": "#/components/schemas/BusinessType"
+                          },
+                          "salonAudience": {
+                            "$ref": "#/components/schemas/Audience"
                           },
                           "paymentMethod": {
                             "type": "string"
@@ -16404,6 +16579,8 @@
                           "id",
                           "referenceNumber",
                           "status",
+                          "businessType",
+                          "salonAudience",
                           "paymentMethod",
                           "paymentStatus",
                           "hasBride",
@@ -16546,6 +16723,12 @@
                         },
                         "status": {
                           "type": "string"
+                        },
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "salonAudience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "paymentMethod": {
                           "type": "string"
@@ -16715,6 +16898,17 @@
                               "isBride": {
                                 "type": "boolean"
                               },
+                              "gender": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "enum": [
+                                  "MALE",
+                                  "FEMALE",
+                                  null
+                                ]
+                              },
                               "start": {
                                 "type": "string"
                               },
@@ -16780,6 +16974,7 @@
                             "required": [
                               "name",
                               "isBride",
+                              "gender",
                               "start",
                               "end",
                               "subtotal",
@@ -16903,6 +17098,8 @@
                         "id",
                         "referenceNumber",
                         "status",
+                        "businessType",
+                        "salonAudience",
                         "paymentMethod",
                         "paymentStatus",
                         "hasBride",
@@ -21274,7 +21471,8 @@
                 "SALON_APPLICATION",
                 "REVIEW_PENDING",
                 "CATALOG_REQUEST",
-                "SALON_DELETION_REQUEST"
+                "SALON_DELETION_REQUEST",
+                "SALON_AUDIENCE_WIDENED"
               ]
             },
             "required": false,
@@ -21332,7 +21530,8 @@
                               "SALON_APPLICATION",
                               "REVIEW_PENDING",
                               "CATALOG_REQUEST",
-                              "SALON_DELETION_REQUEST"
+                              "SALON_DELETION_REQUEST",
+                              "SALON_AUDIENCE_WIDENED"
                             ]
                           },
                           "severity": {
@@ -21670,7 +21869,8 @@
                             "SALON_APPLICATION",
                             "REVIEW_PENDING",
                             "CATALOG_REQUEST",
-                            "SALON_DELETION_REQUEST"
+                            "SALON_DELETION_REQUEST",
+                            "SALON_AUDIENCE_WIDENED"
                           ]
                         },
                         "severity": {
@@ -23064,6 +23264,13 @@
                             "type": "string",
                             "pattern": "^[a-fA-F0-9]{24}$"
                           },
+                          "businessType": {
+                            "type": "string",
+                            "enum": [
+                              "SALON",
+                              "CLINIC"
+                            ]
+                          },
                           "branchId": {
                             "type": "string",
                             "pattern": "^[a-fA-F0-9]{24}$"
@@ -23176,11 +23383,19 @@
                               "OFFLINE"
                             ]
                           },
-                          "gender": {
+                          "businessType": {
+                            "type": "string",
+                            "enum": [
+                              "SALON",
+                              "CLINIC"
+                            ]
+                          },
+                          "audience": {
                             "type": "string",
                             "enum": [
                               "MALE",
-                              "FEMALE"
+                              "FEMALE",
+                              "BOTH"
                             ]
                           },
                           "cityId": {
@@ -29643,12 +29858,11 @@
                                   "name": {
                                     "type": "string"
                                   },
-                                  "gender": {
-                                    "type": "string",
-                                    "enum": [
-                                      "MALE",
-                                      "FEMALE"
-                                    ]
+                                  "businessType": {
+                                    "$ref": "#/components/schemas/BusinessType"
+                                  },
+                                  "audience": {
+                                    "$ref": "#/components/schemas/Audience"
                                   },
                                   "state": {
                                     "type": "string",
@@ -29664,7 +29878,8 @@
                                 "required": [
                                   "id",
                                   "name",
-                                  "gender",
+                                  "businessType",
+                                  "audience",
                                   "state"
                                 ]
                               }
@@ -34947,7 +35162,7 @@
         "tags": [
           "Salon branches"
         ],
-        "summary": "Branches of the salon, main first (admin; reason + audit, the owner is notified)",
+        "summary": "Branches of the salon, main first (admin; reason + audit, the owner is notified); paged, `meta` = {page, pageSize, total}",
         "parameters": [
           {
             "schema": {
@@ -34957,6 +35172,28 @@
             "required": true,
             "name": "id",
             "in": "path"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000,
+              "default": 1
+            },
+            "required": false,
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 25
+            },
+            "required": false,
+            "name": "pageSize",
+            "in": "query"
           },
           {
             "schema": {

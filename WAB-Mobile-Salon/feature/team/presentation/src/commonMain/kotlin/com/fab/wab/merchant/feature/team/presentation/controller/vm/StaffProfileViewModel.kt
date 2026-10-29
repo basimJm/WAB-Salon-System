@@ -7,7 +7,6 @@ import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.booking.AffectedBookingsRepository
 import com.fab.wab.merchant.core.domain.booking.AffectedReasons
 import com.fab.wab.merchant.core.domain.booking.conflictBookingIds
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.mvi.BaseViewModel
 import com.fab.wab.merchant.designsystem.components.feedback.appErrorText
@@ -65,7 +64,7 @@ class StaffProfileViewModel(
                 copy(serviceIds = if (event.id in serviceIds) serviceIds - event.id else serviceIds + event.id)
             }
             is UiAction.OnBride -> {
-                if (uiState.value.womenSalon) edit { copy(brideQualified = event.value) }
+                if (uiState.value.brideAllowed) edit { copy(brideQualified = event.value) }
             }
             else -> return false
         }
@@ -150,14 +149,14 @@ class StaffProfileViewModel(
                 is AppResult.Success -> {
                     val draft = result.data.toDraft()
                     val salon = deps.salon.current.value ?: (deps.salon.refresh() as? AppResult.Success)?.data
-                    val women = salon?.gender == SalonGenderType.FEMALE
+                    val bride = salon?.kind?.brideAllowed == true
                     updateState {
                         copy(
                             loading = false,
                             profile = result.data,
                             original = draft,
                             draft = draft,
-                            womenSalon = women,
+                            brideAllowed = bride,
                             memberName = deps.team.cached(memberId)?.fullName.orEmpty(),
                         )
                     }
