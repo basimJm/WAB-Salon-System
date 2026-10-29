@@ -1,7 +1,15 @@
 /** Domain enums (BUSINESS_DOMAIN.md §1). Each task adds the ones it needs. */
 export const GENDERS = ['MALE', 'FEMALE'] as const;
-/** Also the salon audience: MALE = men's salon, FEMALE = women's salon. */
+/** A person's gender (customer, booking person). */
 export type Gender = (typeof GENDERS)[number];
+
+/** What a business is (BUSINESS_DOMAIN.md §2, §5.19); chosen in the application, never changes. */
+export const BUSINESS_TYPES = ['SALON', 'CLINIC'] as const;
+export type BusinessType = (typeof BUSINESS_TYPES)[number];
+
+/** Who a business (or a catalog service) serves (§5.19); a CLINIC is always BOTH. */
+export const AUDIENCES = ['MALE', 'FEMALE', 'BOTH'] as const;
+export type Audience = (typeof AUDIENCES)[number];
 
 /** Who performed an action (BUSINESS_DOMAIN.md §1 `ActorType`). */
 export const ACTOR_TYPES = ['CUSTOMER', 'MEMBER', 'ADMIN', 'SYSTEM'] as const;

@@ -1,5 +1,5 @@
 import { Schema, model, type Types } from 'mongoose';
-import { GENDERS, type Gender } from '../constants/enums';
+import { AUDIENCES, BUSINESS_TYPES, type Audience, type BusinessType } from '../constants/enums';
 import { PLACEMENTS_COLLECTION, PLACEMENT_NOTE_MAX_LENGTH } from '../constants/placements';
 
 /**
@@ -8,7 +8,9 @@ import { PLACEMENTS_COLLECTION, PLACEMENT_NOTE_MAX_LENGTH } from '../constants/p
  */
 export interface RecommendedPlacementRaw {
   salonId: Types.ObjectId;
-  gender: Gender;
+  /** Copied from the salon (§3.7). */
+  businessType: BusinessType;
+  audience: Audience;
   startAt: Date;
   endAt: Date;
   order: number;
@@ -22,7 +24,8 @@ export interface RecommendedPlacementRaw {
 const placementSchema = new Schema<RecommendedPlacementRaw>(
   {
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
-    gender: { type: String, enum: GENDERS, required: true },
+    businessType: { type: String, enum: BUSINESS_TYPES, required: true },
+    audience: { type: String, enum: AUDIENCES, required: true },
     startAt: { type: Date, required: true },
     endAt: { type: Date, required: true },
     order: { type: Number, required: true, min: 0, default: 0 },
@@ -31,7 +34,7 @@ const placementSchema = new Schema<RecommendedPlacementRaw>(
   },
   { timestamps: true, collection: PLACEMENTS_COLLECTION },
 );
-placementSchema.index({ gender: 1, startAt: 1, endAt: 1 });
+placementSchema.index({ businessType: 1, audience: 1, startAt: 1, endAt: 1 });
 placementSchema.index({ salonId: 1, endAt: 1 });
 
 export const RecommendedPlacementModel = model<RecommendedPlacementRaw>(

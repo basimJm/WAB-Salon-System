@@ -81,14 +81,16 @@ beforeEach(() => {
     {
       _id: salonId,
       name: 'Layla Beauty',
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       state: 'ACTIVE',
       createdAt: new Date(),
     },
     {
       _id: new Types.ObjectId(),
       name: 'Gents Cut',
-      gender: 'MALE',
+      businessType: 'SALON',
+      audience: 'MALE',
       state: 'ACTIVE',
       createdAt: new Date(),
     },

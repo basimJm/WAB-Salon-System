@@ -17,7 +17,8 @@ import type { SalonStateService } from './salonState.service';
 export interface SalonProfile {
   readonly id: string;
   readonly name: string;
-  readonly gender: SalonRaw['gender'];
+  readonly businessType: SalonRaw['businessType'];
+  readonly audience: SalonRaw['audience'];
   readonly state: SalonState;
   readonly description: string | null;
   readonly coverUrl: string | null;
@@ -115,7 +116,8 @@ export const createSalonProfileService = ({
   const toProfile = (s: Entity<SalonRaw>): SalonProfile => ({
     id: s.id,
     name: s.name,
-    gender: s.gender,
+    businessType: s.businessType,
+    audience: s.audience,
     state: s.state,
     description: s.description ?? null,
     coverUrl: s.coverKey === undefined ? null : storage.getPublicUrl(s.coverKey),

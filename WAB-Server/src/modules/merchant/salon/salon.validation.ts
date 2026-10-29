@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
-import { GENDERS } from '../../../constants/enums';
+import { AUDIENCES, BUSINESS_TYPES } from '../../../constants/enums';
 import { PERSON_NAME_MAX_LENGTH, PERSON_NAME_MIN_LENGTH } from '../../../constants/identity';
 import {
   LICENSE_DOCUMENTS_MAX,
@@ -32,22 +32,34 @@ export const applySchema = z.object({
   otpToken,
   firstName: person,
   lastName: person,
-  salon: z.object({
-    name: salonName,
-    gender: z.enum(GENDERS),
-    description: description.optional(),
-    cityId: objectId.optional(),
-    areaId: objectId.optional(),
-  }),
+  salon: z
+    .object({
+      name: salonName,
+      /** SALON or CLINIC (§5.19); never changes after the application. */
+      businessType: z.enum(BUSINESS_TYPES),
+      /** Who a SALON serves (MALE, FEMALE or BOTH; required for a SALON); a CLINIC is always BOTH. */
+      audience: z.enum(AUDIENCES).optional(),
+      description: description.optional(),
+      cityId: objectId.optional(),
+      areaId: objectId.optional(),
+    })
+    .refine((salon) => salon.businessType !== 'SALON' || salon.audience !== undefined, {
+      path: ['audience'],
+      message: 'required for a SALON',
+    }),
   documentKeys,
+  /** A CLINIC's medical license documents (§5.19; required for clinics, MEDICAL_LICENSE uploads). */
+  medicalLicenseKeys: documentKeys.optional(),
   installation,
 });
 
 export const resubmitSchema = z
   .object({
     name: salonName.optional(),
-    gender: z.enum(GENDERS).optional(),
+    /** A SALON's audience (ignored for a CLINIC, always BOTH). */
+    audience: z.enum(AUDIENCES).optional(),
     description: description.optional(),
     documentKeys: documentKeys.optional(),
+    medicalLicenseKeys: documentKeys.optional(),
   })
   .default({});

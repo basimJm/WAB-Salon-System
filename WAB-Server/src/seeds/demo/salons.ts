@@ -247,7 +247,10 @@ export const buildSalons = (
     const services: DemoService[] = staffed
       ? DEMO_SERVICE_SPECS[spec.gender].flatMap((service) => {
           const catalog = ctx.catalog.find(
-            (entry) => entry.gender === spec.gender && entry.name.en === service.catalog,
+            (entry) =>
+              entry.businessType === 'SALON' &&
+              entry.audience === spec.gender &&
+              entry.name.en === service.catalog,
           );
           if (catalog === undefined) return [];
           return [
@@ -361,7 +364,9 @@ export const buildSalons = (
     data.Salon.push({
       _id: id,
       name: spec.name,
-      gender: spec.gender,
+      // The original demo salons are single-gender salons (§5.19 migration shape).
+      businessType: 'SALON',
+      audience: spec.gender,
       state: spec.state,
       ...(spec.description === '' ? {} : { description: spec.description }),
       ...(coverKey === undefined ? {} : { coverKey }),
@@ -498,7 +503,8 @@ export const buildSalons = (
     data.RecommendedPlacement.push({
       _id: demoId(`placement:${salon.spec.key}`),
       salonId: salon.id,
-      gender: salon.gender,
+      businessType: 'SALON',
+      audience: salon.gender,
       startAt: daysAgo(ctx.now, REVIEW_DAYS * 2),
       endAt: new Date(ctx.now.getTime() + SUBSCRIPTION_MONTH_DAYS * MS_PER_DAY),
       order: 1,

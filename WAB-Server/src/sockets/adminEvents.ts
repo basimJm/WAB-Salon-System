@@ -37,7 +37,8 @@ export const createAdminEvents = (deps: {
       emit(ADMIN_SOCKET_EVENTS.applicationCreated, {
         salonId: salon.id,
         name: salon.name,
-        gender: salon.gender,
+        businessType: salon.businessType,
+        audience: salon.audience,
       });
     },
     reviewCreated: (review) => {

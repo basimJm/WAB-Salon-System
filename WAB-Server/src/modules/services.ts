@@ -26,6 +26,7 @@ import type { AdminBranchesService } from '../domain/branches/adminBranches.serv
 import type { BookingAdminExtrasService } from '../domain/bookings/bookingAdminExtras.service';
 import type { AdminCustomerExtrasService } from '../domain/customers/adminCustomerExtras.service';
 import type { SalonDeletionService } from '../domain/salons/salonDeletion.service';
+import type { SalonAudienceService } from '../domain/salons/salonAudience.service';
 import type { SalonInsightsService } from '../domain/salons/salonInsights.service';
 import type { CampaignsService } from '../domain/campaigns/campaigns.service';
 import type { PlacementsService } from '../domain/placements/placements.service';
@@ -130,6 +131,8 @@ export interface ApiServices {
   readonly memberSelf?: MemberSelfService;
   /** Owner deletion requests (merchant) and admin decisions share one service. */
   readonly salonDeletion?: SalonDeletionService;
+  /** Owner widens a salon's audience to BOTH (§5.19). */
+  readonly salonAudience?: SalonAudienceService;
   readonly adminSubscriptions?: SubscriptionsService;
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
@@ -380,7 +383,7 @@ export const unavailableAdminSalons: AdminSalonsService = {
   members: unavailable,
   list: unavailable,
   detail: unavailable,
-  changeGender: unavailable,
+  changeAudience: unavailable,
 };
 
 export const unavailableSalonDetails: SalonDetailsService = {
@@ -432,6 +435,8 @@ export const unavailableAdminCustomerExtras: AdminCustomerExtrasService = {
   push: unavailable,
   forceDelete: unavailable,
 };
+
+export const unavailableSalonAudience: SalonAudienceService = { widen: unavailable };
 
 export const unavailableAdminSalonInsights = {
   insights: {

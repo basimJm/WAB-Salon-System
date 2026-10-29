@@ -49,7 +49,8 @@ const svc = (en: string, over: Record<string, unknown> = {}): Record<string, unk
   name: { ar: `${en}-ar`, en },
   description: { ar: 'وصف', en: 'desc' },
   imageKey: `catalog/${en}.jpg`,
-  gender: 'FEMALE',
+  businessType: 'SALON',
+  audience: 'FEMALE',
   active: true,
   sortOrder: 0,
   ...over,
@@ -58,7 +59,8 @@ const NEW = {
   name: { ar: 'قص', en: 'Cut' },
   description: { ar: 'قص الشعر', en: 'Haircut' },
   imageKey: 'catalog/cut.jpg',
-  gender: 'MALE',
+  businessType: 'SALON',
+  audience: 'MALE',
   reason: 'new service',
 };
 
@@ -74,7 +76,8 @@ describe.each(['customer', 'merchant'])('GET /%s/v1/catalog/services', (ns) => {
       svc('A', { sortOrder: 1 }),
       svc('B', { sortOrder: 2 }),
       svc('Hidden', { active: false }),
-      svc('Men', { gender: 'MALE' }),
+      svc('Men', { audience: 'MALE' }),
+      svc('Botox', { businessType: 'CLINIC', audience: 'BOTH', sortOrder: 9 }),
     );
     const res = await request(app)
       .get(`/${ns}/v1/catalog/services?gender=FEMALE&pageSize=2`)
@@ -83,19 +86,44 @@ describe.each(['customer', 'merchant'])('GET /%s/v1/catalog/services', (ns) => {
     const items = bodyOf(res).data as unknown as Record<string, string>[];
     expect(items.map((s) => s['name'])).toEqual(['A', 'B']);
     expect(items[0]?.['imageUrl']).toContain('catalog/A.jpg');
-    expect(bodyOf(res).meta).toMatchObject({ total: 3, page: 1, pageSize: 2 });
-    const ar = await request(app).get(`/${ns}/v1/catalog/services?gender=FEMALE&page=2&pageSize=2`);
+    expect(bodyOf(res).meta).toMatchObject({ total: 4, page: 1, pageSize: 2 });
+    expect(items[0]).toMatchObject({ businessType: 'SALON', audience: 'FEMALE' });
+    const ar = await request(app).get(
+      `/${ns}/v1/catalog/services?gender=FEMALE&businessType=SALON&page=2&pageSize=2`,
+    );
     expect((bodyOf(ar).data as unknown as Record<string, string>[]).map((s) => s['name'])).toEqual([
       'C-ar',
     ]);
   });
 
-  it.each(['', '?gender=OTHER', '?gender=FEMALE&page=0', '?gender=FEMALE&pageSize=101'])(
-    'rejects %j',
-    async (query) => {
-      expect((await request(app).get(`/${ns}/v1/catalog/services${query}`)).status).toBe(400);
-    },
-  );
+  it('filters by business type; without a gender every audience is listed (§5.19)', async () => {
+    fake.docs.push(
+      svc('Cut'),
+      svc('Beard', { audience: 'MALE' }),
+      svc('Botox', { businessType: 'CLINIC', audience: 'BOTH' }),
+    );
+    const names = async (query: string): Promise<string[]> =>
+      (
+        bodyOf(
+          await request(app)
+            .get(`/${ns}/v1/catalog/services?${query}`)
+            .set('Accept-Language', 'en'),
+        ).data as unknown as Record<string, string>[]
+      ).map((s) => s['name'] ?? '');
+    expect(await names('businessType=CLINIC')).toEqual(['Botox']);
+    expect((await names('businessType=SALON')).sort()).toEqual(['Beard', 'Cut']);
+    expect((await names('gender=MALE')).sort()).toEqual(['Beard', 'Botox']);
+    expect(await names('')).toHaveLength(3);
+  });
+
+  it.each([
+    '?gender=OTHER',
+    '?businessType=SPA',
+    '?gender=FEMALE&page=0',
+    '?gender=FEMALE&pageSize=101',
+  ])('rejects %j', async (query) => {
+    expect((await request(app).get(`/${ns}/v1/catalog/services${query}`)).status).toBe(400);
+  });
 
   it('answers 503 when unconfigured', async () => {
     const res = await request(createApp({ logger })).get(`/${ns}/v1/catalog/services?gender=MALE`);
@@ -108,14 +136,21 @@ describe('/admin/v1/catalog/services', () => {
     expect((await request(app).post('/admin/v1/catalog/services').send(NEW)).status).toBe(401);
     const res = await request(app).post('/admin/v1/catalog/services').set(auth()).send(NEW);
     expect(res.status).toBe(201);
-    expect(bodyOf(res).data).toMatchObject({ active: true, sortOrder: 0, gender: 'MALE' });
+    expect(bodyOf(res).data).toMatchObject({
+      active: true,
+      sortOrder: 0,
+      businessType: 'SALON',
+      audience: 'MALE',
+    });
     expect(audits[0]).toMatchObject({ action: 'CATALOG_SERVICE_CREATE', reason: 'new service' });
   });
 
-  it('rejects missing reason, bad gender and empty text, storing nothing', async () => {
+  it('rejects missing reason, bad type/audience, a non-BOTH clinic service and empty text', async () => {
     for (const bad of [
       { ...NEW, reason: '' },
-      { ...NEW, gender: 'BOTH' },
+      { ...NEW, audience: 'KIDS' },
+      { ...NEW, businessType: 'SPA' },
+      { ...NEW, businessType: 'CLINIC', audience: 'FEMALE' },
       { ...NEW, name: { ar: '', en: 'x' } },
     ]) {
       expect(
@@ -125,7 +160,7 @@ describe('/admin/v1/catalog/services', () => {
     expect(fake.docs).toHaveLength(0);
   });
 
-  it('updates fields, switches off with active=false, and keeps the gender fixed', async () => {
+  it('updates fields, switches off with active=false, and keeps business type and audience fixed', async () => {
     const created = bodyOf(
       await request(app).post('/admin/v1/catalog/services').set(auth()).send(NEW),
     );
@@ -133,9 +168,9 @@ describe('/admin/v1/catalog/services', () => {
     const res = await request(app)
       .patch(`/admin/v1/catalog/services/${id}`)
       .set(auth())
-      .send({ active: false, gender: 'FEMALE', reason: 'retired' });
+      .send({ active: false, audience: 'FEMALE', businessType: 'CLINIC', reason: 'retired' });
     expect(res.status).toBe(200);
-    expect(fake.docs[0]).toMatchObject({ active: false, gender: 'MALE' });
+    expect(fake.docs[0]).toMatchObject({ active: false, businessType: 'SALON', audience: 'MALE' });
     const list = await request(app).get('/customer/v1/catalog/services?gender=MALE');
     expect(bodyOf(list).data).toHaveLength(0);
     expect(
@@ -148,10 +183,19 @@ describe('/admin/v1/catalog/services', () => {
     ).toBe(400);
   });
 
-  it('lists all (inactive too) filtered by gender with both languages', async () => {
-    fake.docs.push(svc('A'), svc('B', { active: false }), svc('M', { gender: 'MALE' }));
-    const res = await request(app).get('/admin/v1/catalog/services?gender=FEMALE').set(auth());
+  it('lists all (inactive too) filtered by business type and audience with both languages', async () => {
+    fake.docs.push(
+      svc('A'),
+      svc('B', { active: false }),
+      svc('M', { audience: 'MALE' }),
+      svc('Botox', { businessType: 'CLINIC', audience: 'BOTH' }),
+    );
+    const res = await request(app).get('/admin/v1/catalog/services?audience=FEMALE').set(auth());
     expect(bodyOf(res).data).toHaveLength(2);
+    const clinic = await request(app)
+      .get('/admin/v1/catalog/services?businessType=CLINIC')
+      .set(auth());
+    expect(bodyOf(clinic).data).toHaveLength(1);
     expect(bodyOf(res).data[0]?.['name']).toEqual({ ar: 'A-ar', en: 'A' });
   });
 });

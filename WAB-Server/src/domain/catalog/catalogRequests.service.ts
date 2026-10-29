@@ -17,6 +17,9 @@ import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import { catalogFits } from '../businessTypes/rules';
+import type { BusinessType } from '../../constants/enums';
+import { salonIdFilter } from '../businessTypes/salonFilter';
 
 export interface CatalogRequestView {
   readonly id: string;
@@ -60,11 +63,13 @@ export interface CatalogRequestsService {
   /** Admin queue (pending by default, oldest first). */
   listForAdmin(input: {
     status?: CatalogRequestStatus | undefined;
+    /** Requests of salons or of clinics only (§5.19). */
+    businessType?: BusinessType | undefined;
     params: PaginationParams;
   }): Promise<{ items: CatalogRequestView[]; meta: PaginationMeta }>;
   /**
    * Approve by creating a catalog service (`name` + `description`), or by mapping the request to
-   * an existing active catalog service of the salon's gender (`catalogServiceId`, SRV-125).
+   * an existing active catalog service that fits the salon's type and audience (`catalogServiceId`, SRV-125).
    */
   approve(
     input: {
@@ -203,8 +208,12 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
       return { items: page.items.map((r) => view(r)), meta: page.meta };
     },
 
-    async listForAdmin({ status = 'PENDING', params }) {
-      const page = await requests.findPage({ status }, params, { createdAt: 1 });
+    async listForAdmin({ status = 'PENDING', businessType, params }) {
+      const page = await requests.findPage(
+        { status, ...(await salonIdFilter(salons, { businessType })) },
+        params,
+        { createdAt: 1 },
+      );
       const byId = await names(page.items);
       return {
         items: page.items.map((r) => view(r, byId.get(r.salonId) ?? null)),
@@ -226,8 +235,8 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
         if (existing?.active !== true) {
           throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
         }
-        if (existing.gender !== salon.gender) {
-          throw new BusinessRuleError({ code: ERROR_CODES.GENDER_MISMATCH });
+        if (!catalogFits(existing, salon)) {
+          throw new BusinessRuleError({ code: ERROR_CODES.BUSINESS_TYPE_MISMATCH });
         }
       }
       const finalImage =
@@ -260,7 +269,9 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
             name: input.name,
             description: input.description,
             imageKey: finalImage,
-            gender: salon.gender,
+            // The new catalog entry belongs to the requesting business's type and audience (§3.2).
+            businessType: salon.businessType,
+            audience: salon.audience,
             active: true,
             sortOrder: input.sortOrder,
           });

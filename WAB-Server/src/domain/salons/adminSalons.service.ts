@@ -1,7 +1,9 @@
 import type { BranchesRepository } from '../../repositories/branches.repository';
 import { toBranchView, type BranchView } from '../branches/branches.service';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
-import type { Gender } from '../../constants/enums';
+import type { Audience, BusinessType } from '../../constants/enums';
+import type { CatalogServicesRepository } from '../../repositories/catalog.repository';
+import { audienceFor, brideAllowed, catalogAudiencesFor, isWidening } from '../businessTypes/rules';
 import type { SalonState } from '../../constants/salon';
 import type { SubscriptionStatus } from '../../constants/subscriptions';
 import { SALON_RECENT_DAYS } from '../../constants/adminSalonInsights';
@@ -27,7 +29,8 @@ import type { SalonStateNotifier, SalonStateService } from './salonState.service
 export interface AdminSalonRow {
   readonly id: string;
   readonly name: string;
-  readonly gender: Gender;
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly state: SalonState;
   readonly cityId: string | null;
   readonly areaId: string | null;
@@ -60,7 +63,8 @@ export interface AdminSalonDetail extends AdminSalonRow {
 
 export interface SalonListFilter {
   readonly state?: SalonState | undefined;
-  readonly gender?: Gender | undefined;
+  readonly businessType?: BusinessType | undefined;
+  readonly audience?: Audience | undefined;
   readonly cityId?: string | undefined;
   /** Part of the salon name. */
   readonly q?: string | undefined;
@@ -93,12 +97,14 @@ export interface AdminSalonsService {
   }): Promise<{ items: AdminSalonRow[]; meta: PaginationMeta }>;
   detail(salonId: string): Promise<AdminSalonDetail>;
   /**
-   * Admin only (the gender is fixed once approved). The salon's services belong to the old
-   * audience's catalog, so they are switched off; bride flags go with a women's salon.
+   * Admin audience change with a reason (§5.19): narrowing (BOTH → MALE/FEMALE, or MALE ↔ FEMALE)
+   * is refused while future bookings exist (§5.12 conflict list); services whose catalog entry no
+   * longer fits are switched off and bride flags go when brides are no longer allowed. A CLINIC's
+   * audience never changes (`AUDIENCE_CHANGE_NOT_ALLOWED`).
    */
-  changeGender(input: {
+  changeAudience(input: {
     salonId: string;
-    gender: Gender;
+    audience: Audience;
     reason: string;
     actor: AdminActor;
   }): Promise<AdminSalonDetail>;
@@ -108,12 +114,14 @@ export interface AdminSalonsDeps {
   readonly salons: SalonsRepository;
   readonly members: Pick<MembersRepository, 'findOne' | 'findMany' | 'clearBrideQualification'>;
   readonly subscriptions: Pick<SubscriptionsRepository, 'findMany' | 'findOne'>;
-  readonly salonServices: Pick<SalonServicesRepository, 'deactivateAll'>;
+  readonly salonServices: Pick<SalonServicesRepository, 'deactivateAll' | 'deactivateUnfitting'>;
+  /** Catalog entries that still fit after an audience change; without it every service is switched off. */
+  readonly catalog?: Pick<CatalogServicesRepository, 'findMany'>;
   readonly state: Pick<SalonStateService, 'recompute'>;
   readonly audit: AuditWriter;
   readonly notifier: SalonStateNotifier;
   readonly logger: Logger;
-  /** Upcoming bookings of the salon; the gender cannot change while any exist. */
+  /** Upcoming bookings of the salon; the audience cannot be narrowed while any exist. */
   readonly bookings?: { check(input: { salonId: string }): Promise<BookingConflict[]> };
   /** Without these the list shows no recommended flag and 0 recent bookings. */
   readonly placements?: Pick<PlacementsRepository, 'findMany'>;
@@ -163,7 +171,8 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
   ): AdminSalonRow => ({
     id: s.id,
     name: s.name,
-    gender: s.gender,
+    businessType: s.businessType,
+    audience: s.audience,
     state: s.state,
     cityId: s.cityId ?? null,
     areaId: s.areaId ?? null,
@@ -274,7 +283,8 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
       const page = await salons.findPage(
         {
           ...(filter.state === undefined ? {} : { state: filter.state }),
-          ...(filter.gender === undefined ? {} : { gender: filter.gender }),
+          ...(filter.businessType === undefined ? {} : { businessType: filter.businessType }),
+          ...(filter.audience === undefined ? {} : { audience: filter.audience }),
           ...(filter.cityId === undefined ? {} : { cityId: filter.cityId }),
           ...(filter.q === undefined || filter.q === ''
             ? {}
@@ -299,12 +309,16 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
 
     detail,
 
-    async changeGender({ salonId, gender, reason, actor }) {
+    async changeAudience({ salonId, audience, reason, actor }) {
       const before = await find(salonId);
-      if (before.gender === gender) {
+      if (audienceFor(before.businessType, audience) !== audience) {
+        throw new BusinessRuleError({ code: ERROR_CODES.AUDIENCE_CHANGE_NOT_ALLOWED });
+      }
+      if (before.audience === audience) {
         throw new BusinessRuleError({ code: ERROR_CODES.INVALID_TRANSITION });
       }
-      const open = (await bookings?.check({ salonId })) ?? [];
+      const widening = isWidening(before.audience, audience);
+      const open = widening ? [] : ((await bookings?.check({ salonId })) ?? []);
       if (open.length > 0) {
         throw new ConflictError({
           code: ERROR_CODES.SCHEDULE_CONFLICT,
@@ -315,26 +329,42 @@ export const createAdminSalonsService = (deps: AdminSalonsDeps): AdminSalonsServ
           })),
         });
       }
-      const updated = await salons.patch(salonId, { set: { gender } });
+      const updated = await salons.patch(salonId, { set: { audience } });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-      await salonServices.deactivateAll(salonId);
-      if (gender === 'MALE') await members.clearBrideQualification(salonId);
+      const after = { businessType: before.businessType, audience };
+      const bridesGone = !brideAllowed(after);
+      if (!widening) {
+        if (deps.catalog === undefined) {
+          await salonServices.deactivateAll(salonId);
+        } else {
+          const fitting = await deps.catalog.findMany({
+            businessType: before.businessType,
+            audience: { $in: catalogAudiencesFor(after) },
+          });
+          await salonServices.deactivateUnfitting(
+            salonId,
+            fitting.map((c) => c.id),
+            bridesGone,
+          );
+        }
+      }
+      if (bridesGone) await members.clearBrideQualification(salonId);
       await state.recompute(salonId);
       await audit.record({
         adminId: actor.adminId,
-        action: 'SALON_CHANGE_GENDER',
+        action: 'SALON_CHANGE_AUDIENCE',
         entityType: 'salon',
         entityId: salonId,
-        before: { gender: before.gender },
-        after: { gender },
+        before: { audience: before.audience },
+        after: { audience },
         reason,
         ip: actor.ip,
         userAgent: actor.userAgent,
       });
       try {
-        await notifier.changed({ salonId, event: 'salon.gender_changed', reason });
+        await notifier.changed({ salonId, event: 'salon.audience_changed', reason });
       } catch (error) {
-        logger.error({ err: error, salonId }, 'salon gender notification failed');
+        logger.error({ err: error, salonId }, 'salon audience notification failed');
       }
       return detail(salonId);
     },

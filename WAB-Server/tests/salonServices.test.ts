@@ -116,7 +116,8 @@ const catalogEntry = (gender: string, over: Record<string, unknown> = {}): strin
     name: { ar: 'قص', en: 'Cut' },
     description: { ar: 'و', en: 'd' },
     imageKey: 'catalog/cut.jpg',
-    gender,
+    businessType: 'SALON',
+    audience: gender,
     active: true,
     sortOrder: 0,
     ...over,
@@ -127,8 +128,8 @@ const catalogEntry = (gender: string, over: Record<string, unknown> = {}): strin
 beforeEach(() => {
   for (const f of [salonsM, catalogM, servicesM, requestsM, membersM]) f.docs.length = 0;
   salonsM.docs.push(
-    { _id: womenSalon, name: 'Glow', gender: 'FEMALE' },
-    { _id: menSalon, name: 'Barber', gender: 'MALE' },
+    { _id: womenSalon, name: 'Glow', businessType: 'SALON', audience: 'FEMALE' },
+    { _id: menSalon, name: 'Barber', businessType: 'SALON', audience: 'MALE' },
   );
   recomputes.length = 0;
   checks.length = 0;
@@ -204,11 +205,22 @@ describe('salon services', () => {
     expect(servicesM.docs).toHaveLength(0);
   });
 
-  it('only services of the salon’s gender, active, existing, once per salon', async () => {
+  it('only services of the salon’s type and audience, active, existing, once per salon', async () => {
     const owner = member('OWNER', []);
     const men = await add(owner, { catalogServiceId: catalogEntry('MALE'), ...BASE });
     expect(men.status).toBe(400);
-    expect(bodyOf(men).error.code).toBe('GENDER_MISMATCH');
+    expect(bodyOf(men).error.code).toBe('BUSINESS_TYPE_MISMATCH');
+    const clinic = await add(owner, {
+      catalogServiceId: catalogEntry('BOTH', { businessType: 'CLINIC' }),
+      ...BASE,
+    });
+    expect(clinic.status).toBe(400);
+    expect(bodyOf(clinic).error.code).toBe('BUSINESS_TYPE_MISMATCH');
+    // A BOTH catalog entry of the same type fits a women's salon.
+    expect((await add(owner, { catalogServiceId: catalogEntry('BOTH'), ...BASE })).status).toBe(
+      201,
+    );
+    servicesM.docs.length = 0;
     expect(
       (await add(owner, { catalogServiceId: catalogEntry('FEMALE', { active: false }), ...BASE }))
         .status,
@@ -236,6 +248,7 @@ describe('salon services', () => {
       brideOnly: true,
     });
     expect(men.status).toBe(400);
+    expect(bodyOf(men).error.code).toBe('BRIDE_NOT_ALLOWED');
     expect(bodyOf(men).error.details.map((d) => d.field)).toContain('body.brideOnly');
   });
 
@@ -386,9 +399,18 @@ describe('catalog requests', () => {
     expect(bodyOf(res).data.map((r) => r['name'])).toEqual(['Earlier', 'Later']);
     expect(bodyOf(res).data[0]?.['salonName']).toBe('Barber');
     expect((await request(app).get('/admin/v1/catalog/requests')).status).toBe(401);
+    // §5.19: requests of salons or of clinics only.
+    const clinics = await request(app)
+      .get('/admin/v1/catalog/requests?businessType=CLINIC')
+      .set(admin());
+    expect(bodyOf(clinics).data).toEqual([]);
+    const salons = await request(app)
+      .get('/admin/v1/catalog/requests?businessType=SALON')
+      .set(admin());
+    expect(bodyOf(salons).data.map((r) => r['name'])).toEqual(['Earlier', 'Later']);
   });
 
-  it('approve creates a catalog service of the salon’s gender, marks the request, audits and tells the salon', async () => {
+  it('approve creates a catalog service of the salon’s type and audience, marks the request, audits and tells the salon', async () => {
     const id = pending(womenSalon, { imageKey: 'catalog/k.jpg' });
     const res = await request(app)
       .post(`/admin/v1/catalog/requests/${id}/approve`)
@@ -396,7 +418,8 @@ describe('catalog requests', () => {
       .send(APPROVE);
     expect(res.status).toBe(200);
     expect(catalogM.docs[0]).toMatchObject({
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       imageKey: 'catalog/k.jpg',
       active: true,
       name: { en: 'Keratin' },
@@ -418,12 +441,24 @@ describe('catalog requests', () => {
     expect(bodyOf(res).data['status']).toBe('APPROVED');
   });
 
-  it('approve can map the request to an existing catalog service of the same gender (SRV-125)', async () => {
+  it('approve can map the request to an existing catalog service that fits the salon (SRV-125, §5.19)', async () => {
     const existing = new Types.ObjectId();
     const menOnly = new Types.ObjectId();
     catalogM.docs.push(
-      { _id: existing, gender: 'FEMALE', active: true, name: { ar: 'ك', en: 'Keratin care' } },
-      { _id: menOnly, gender: 'MALE', active: true, name: { ar: 'ح', en: 'Shave' } },
+      {
+        _id: existing,
+        businessType: 'SALON',
+        audience: 'FEMALE',
+        active: true,
+        name: { ar: 'ك', en: 'Keratin care' },
+      },
+      {
+        _id: menOnly,
+        businessType: 'SALON',
+        audience: 'MALE',
+        active: true,
+        name: { ar: 'ح', en: 'Shave' },
+      },
     );
     const before = catalogM.docs.length;
     const id = pending(womenSalon);

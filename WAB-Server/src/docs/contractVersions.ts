@@ -10,23 +10,23 @@ export const CONTRACT_VERSIONS: Readonly<
   Record<DocName, { readonly version: string; readonly sha256: string; readonly note: string }>
 > = {
   common: {
-    version: '1.1.0',
-    sha256: '7f3f181e90340aeb41ef1ababd6a3407d56eb639f4108c02b1a88b9b66a18d5e',
-    note: 'SRV-153: error code OTP_DELIVERY_FAILED added to the error enum only. Clients: none',
+    version: '1.2.0',
+    sha256: 'f69a4075d02f7f10f6b00ef1ead65a665c2547e739b959307667d7a763667e17',
+    note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.6.0',
-    sha256: '72384a511ae44eccbd9c6d4eb0a589315ce48ffcf856d467e3a32b009de82eda',
-    note: 'SRV-172: optional branchId query on salon details (that branch\'s staff/services/place; 404 BRANCH_NOT_FOUND); staff sheet = member branch services. Additive; customer app needs no change (it filters by branchId client-side), apiSync at the next customer task.',
+    version: '1.10.0',
+    sha256: '165d6924157ccd7178184be5775480626a5effae53d84aeddce50bd08c6fdbb7',
+    note: 'SRV-177: upload purpose enum gains MEDICAL_LICENSE (merchant-only purpose; no client change)',
   },
   merchant: {
-    version: '1.6.0',
-    sha256: '6c69d083bfdf698c9ce611460ec428e514ece5bacee98c420e42e30513e2d359',
-    note: 'SRV-170 (additive + semantic): booking rows/details add rejection, staff {firstName, photoUrl}, money.paidAtSalon; money.remaining is 0 once the booking is final (was the stored at-salon part). No merchant row needed: decoders tolerate new fields; ./gradlew apiSync at the next merchant task',
+    version: '1.9.0',
+    sha256: 'b616a55ad461714e21471fed7dc3aaedeb23c68be45a9e476f048269a21d181e',
+    note: 'SRV-177: application medicalLicenseKeys (required for CLINIC; guest license presign takes purpose MEDICAL_LICENSE), PATCH /salon/audience (owner widens MALE/FEMALE -> BOTH; else 422 AUDIENCE_CHANGE_NOT_ALLOWED), notification salon.audience_widened. Client: MER-080, MER-081',
   },
   admin: {
-    version: '1.8.0',
-    sha256: '182e94e9ba7796693505c5617f02fab203ce66ba7d7a92ac0b60be2a33930c9b',
-    note: 'SRV-171 (additive): GET /admin/v1/salons/{id}/branches takes page/pageSize (default 25) and answers meta {page, pageSize, total}; booking q also matches partial references. Admin panel already tolerates both; npm run api:sync at the next admin task',
+    version: '1.12.0',
+    sha256: '67581175ea2080f4ad2e9aaad72b5b36c3e9c1ef400151ecaed7af52e2620e94',
+    note: 'SRV-178: businessType filter on applications, bookings (+ BOOKINGS export), reviews, catalog requests (salons/catalog/placements since SRV-174); application detail medicalLicenseUrls (signed). Client: ADM-109, ADM-110',
   },
 };

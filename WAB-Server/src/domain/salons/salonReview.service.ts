@@ -16,6 +16,7 @@ import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
 import type { SettingsService } from '../settings';
 import type { SalonStateService } from './salonState.service';
+import type { BusinessType } from '../../constants/enums';
 
 const PENDING: SalonState = 'APPLICATION_PENDING';
 
@@ -33,7 +34,8 @@ export interface ApplicationNotifier {
 export interface ApplicationRow {
   readonly id: string;
   readonly name: string;
-  readonly gender: SalonRaw['gender'];
+  readonly businessType: SalonRaw['businessType'];
+  readonly audience: SalonRaw['audience'];
   readonly state: SalonState;
   readonly cityId: string | null;
   readonly owner: { id: string; firstName: string; lastName: string; phone: string } | null;
@@ -47,11 +49,15 @@ export interface ApplicationDetail extends ApplicationRow {
   readonly areaId: string | null;
   /** Short-lived signed URLs of the private license documents. */
   readonly documentUrls: readonly string[];
+  /** A clinic's medical license (§5.19), signed and short-lived; empty for a salon. */
+  readonly medicalLicenseUrls: readonly string[];
 }
 
 export interface SalonReviewService {
   list(input: {
     state?: SalonState | undefined;
+    /** Salon or clinic applications only (§5.19). */
+    businessType?: BusinessType | undefined;
     params: PaginationParams;
   }): Promise<{ items: ApplicationRow[]; total: number }>;
   detail(salonId: string): Promise<ApplicationDetail>;
@@ -83,7 +89,8 @@ export const createSalonReviewService = (deps: SalonReviewDeps): SalonReviewServ
   const row = (salon: Entity<SalonRaw>, owner: Owner | null): ApplicationRow => ({
     id: salon.id,
     name: salon.name,
-    gender: salon.gender,
+    businessType: salon.businessType,
+    audience: salon.audience,
     state: salon.state,
     cityId: salon.cityId ?? null,
     owner,
@@ -165,8 +172,12 @@ export const createSalonReviewService = (deps: SalonReviewDeps): SalonReviewServ
   };
 
   return {
-    async list({ state = PENDING, params }) {
-      const page = await salons.findPage({ state }, params, { 'application.submittedAt': 1 });
+    async list({ state = PENDING, businessType, params }) {
+      const page = await salons.findPage(
+        { state, ...(businessType === undefined ? {} : { businessType }) },
+        params,
+        { 'application.submittedAt': 1 },
+      );
       const owners =
         page.items.length === 0
           ? []
@@ -184,16 +195,20 @@ export const createSalonReviewService = (deps: SalonReviewDeps): SalonReviewServ
     async detail(salonId) {
       const salon = await find(salonId);
       const owner = await members.findOne({ salonId, role: 'OWNER' });
-      const documentUrls = await Promise.all(
-        salon.application.documentKeys.map((key) =>
-          storage.getSignedUrl({ key, expiresInSec: LICENSE_URL_TTL_SEC }),
-        ),
-      );
+      const signed = (keys: readonly string[]): Promise<string[]> =>
+        Promise.all(
+          keys.map((key) => storage.getSignedUrl({ key, expiresInSec: LICENSE_URL_TTL_SEC })),
+        );
+      const [documentUrls, medicalLicenseUrls] = await Promise.all([
+        signed(salon.application.documentKeys),
+        signed(salon.application.medicalLicenseKeys ?? []),
+      ]);
       return {
         ...row(salon, owner === null ? null : toOwner(owner)),
         description: salon.description ?? null,
         areaId: salon.areaId ?? null,
         documentUrls,
+        medicalLicenseUrls,
       };
     },
 

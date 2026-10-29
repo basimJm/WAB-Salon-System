@@ -73,11 +73,7 @@ export const createUploadsRouter = ({
       validate({ body: licensePresignSchema }),
       asyncHandler(async (req: Request, res: Response) => {
         const input = body<typeof licensePresignSchema>(req);
-        const result = await service.presign({
-          ...input,
-          purpose: 'LICENSE_DOCUMENT',
-          actor: GUEST,
-        });
+        const result = await service.presign({ ...input, actor: GUEST });
         sendSuccess(req, res, { data: presignData(result) });
       }),
     );

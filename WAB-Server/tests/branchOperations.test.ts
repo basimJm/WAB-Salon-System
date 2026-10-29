@@ -106,7 +106,8 @@ beforeEach(() => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Hifa',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     weeklySchedule: week('10:00'),
     mainBranchId: mainBranch,
@@ -142,7 +143,8 @@ beforeEach(() => {
   );
   m.catalog.docs.push({
     _id: catalogId,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     active: true,
     name: { ar: 'قص', en: 'Haircut' },
     description: { ar: 'و', en: 'd' },

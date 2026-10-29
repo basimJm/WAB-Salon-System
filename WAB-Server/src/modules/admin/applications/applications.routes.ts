@@ -32,8 +32,8 @@ export const createAdminApplicationsRouter = (
     '/',
     validate({ query: applicationsQuery }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { page, pageSize, state } = part<typeof applicationsQuery>(req, 'query');
-      const result = await service.list({ state, params: { page, pageSize } });
+      const { page, pageSize, state, businessType } = part<typeof applicationsQuery>(req, 'query');
+      const result = await service.list({ state, businessType, params: { page, pageSize } });
       sendPaginated(req, res, result.items.map(rowData), { page, pageSize }, result.total);
     }),
   );

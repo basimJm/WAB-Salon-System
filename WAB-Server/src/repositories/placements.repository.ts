@@ -1,5 +1,5 @@
 import type { Model } from 'mongoose';
-import type { Gender } from '../constants/enums';
+import type { Audience, BusinessType } from '../constants/enums';
 import {
   RecommendedPlacementModel,
   type RecommendedPlacementRaw,
@@ -12,10 +12,14 @@ export class PlacementsRepository extends BaseRepository<RecommendedPlacementRaw
     super(model);
   }
 
-  /** Placements showing at `at` for an audience, in display order. */
-  activeAt(gender: Gender, at: Date): Promise<Entity<RecommendedPlacementRaw>[]> {
+  /** Placements of one business type showing at `at` for these audiences, in display order. */
+  activeAt(
+    businessType: BusinessType,
+    audiences: readonly Audience[],
+    at: Date,
+  ): Promise<Entity<RecommendedPlacementRaw>[]> {
     return this.findMany(
-      { gender, startAt: { $lte: at }, endAt: { $gt: at } },
+      { businessType, audience: { $in: audiences }, startAt: { $lte: at }, endAt: { $gt: at } },
       { order: 1, startAt: 1 },
     );
   }

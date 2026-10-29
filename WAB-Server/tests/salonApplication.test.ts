@@ -39,7 +39,8 @@ const BODY = {
   lastName: 'Nasser',
   salon: {
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     cityId: cityId.toHexString(),
     areaId: areaId.toHexString(),
   },
@@ -128,7 +129,8 @@ describe('salon model', () => {
   it('starts with seven days off and default completeness', async () => {
     const doc = new SalonModel({
       name: 'X',
-      gender: 'MALE',
+      businessType: 'SALON',
+      audience: 'MALE',
       state: 'APPLICATION_PENDING',
       application: { submittedAt: NOW, documentKeys: ['k'] },
     });
@@ -141,7 +143,8 @@ describe('salon model', () => {
   it('rejects a policy without payment options and an unknown state', async () => {
     const doc = new SalonModel({
       name: 'X',
-      gender: 'MALE',
+      businessType: 'SALON',
+      audience: 'MALE',
       state: 'NOPE',
       application: { submittedAt: NOW },
       policy: {
@@ -172,7 +175,8 @@ describe('POST /merchant/v1/salon/applications', () => {
     expect(data.member).toMatchObject({ role: 'OWNER', phone: E164 });
     expect(rig.salons.docs[0]).toMatchObject({
       name: 'Glow',
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       state: 'APPLICATION_PENDING',
     });
     expect(rig.members.docs[0]).toMatchObject({ role: 'OWNER', active: true, phone: E164 });
@@ -207,8 +211,11 @@ describe('POST /merchant/v1/salon/applications', () => {
     ['six documents', { documentKeys: ['a', 'b', 'c', 'd', 'e', 'f'] }, 400],
     ['duplicate documents', { documentKeys: ['a/b', 'a/b'] }, 400],
     ['path traversal key', { documentKeys: ['../etc/passwd'] }, 400],
-    ['blank salon name', { salon: { name: ' ', gender: 'MALE' } }, 400],
-    ['unknown gender', { salon: { name: 'X', gender: 'BOTH' } }, 400],
+    ['blank salon name', { salon: { name: ' ', businessType: 'SALON', audience: 'MALE' } }, 400],
+    ['unknown business type', { salon: { name: 'X', businessType: 'SPA', audience: 'BOTH' } }, 400],
+    ['unknown audience', { salon: { name: 'X', businessType: 'SALON', audience: 'KIDS' } }, 400],
+    ['a salon without an audience', { salon: { name: 'X', businessType: 'SALON' } }, 400],
+    ['the old gender field only', { salon: { name: 'X', gender: 'MALE' } }, 400],
   ])('rejects %s and stores nothing', async (_name, over, status) => {
     const rig = setup();
     const res = await apply(rig, over);
@@ -228,9 +235,27 @@ describe('POST /merchant/v1/salon/applications', () => {
     expect(rig.salons.docs).toHaveLength(0);
   });
 
+  it('a SALON may serve BOTH; a CLINIC is always BOTH whatever is sent (§5.19)', async () => {
+    const both = setup();
+    const res = await apply(both, {
+      salon: { name: 'Unity', businessType: 'SALON', audience: 'BOTH' },
+    });
+    expect(res.status).toBe(201);
+    expect(both.salons.docs[0]).toMatchObject({ businessType: 'SALON', audience: 'BOTH' });
+    const clinic = setup();
+    const made = await apply(clinic, {
+      salon: { name: 'Glow Clinic', businessType: 'CLINIC', audience: 'MALE' },
+      medicalLicenseKeys: ['medical-licenses/doc-1.pdf'],
+    });
+    expect(made.status).toBe(201);
+    expect(clinic.salons.docs[0]).toMatchObject({ businessType: 'CLINIC', audience: 'BOTH' });
+  });
+
   it('works without city and area', async () => {
     const rig = setup();
-    const res = await apply(rig, { salon: { name: 'Glow', gender: 'MALE' } });
+    const res = await apply(rig, {
+      salon: { name: 'Glow', businessType: 'SALON', audience: 'MALE' },
+    });
     expect(res.status).toBe(201);
     expect(rig.salons.docs[0]?.['cityId']).toBeUndefined();
   });
@@ -371,6 +396,35 @@ describe('license documents must be confirmed uploads', () => {
     expect((await apply(bad)).status).toBe(500);
     expect(bad.salons.docs).toHaveLength(0);
     expect(bad.members.docs).toHaveLength(0);
+  });
+
+  it('a clinic needs a confirmed guest MEDICAL_LICENSE upload; a salon ignores it (§5.19)', async () => {
+    const clinic = { name: 'Glow Clinic', businessType: 'CLINIC' };
+    const missing = setup(verifier(false));
+    const refused = await apply(missing, { salon: clinic });
+    expect(refused.status).toBe(400);
+    expect(bodyOf(refused).error.details.map((d) => d.field)).toEqual(['body.medicalLicenseKeys']);
+    expect(missing.salons.docs).toHaveLength(0);
+    const ok = verifier(false);
+    const rig = setup(ok);
+    const res = await apply(rig, { salon: clinic, medicalLicenseKeys: ['medical-licenses/m.pdf'] });
+    expect(res.status).toBe(201);
+    expect(ok.calls[1]).toMatchObject({
+      keys: ['medical-licenses/m.pdf'],
+      purpose: 'MEDICAL_LICENSE',
+      field: 'body.medicalLicenseKeys',
+    });
+    expect(ok.calls[1]?.accept?.({ ownerType: 'GUEST' } as never)).toBe(true);
+    expect(rig.salons.docs[0]?.['application']).toMatchObject({
+      medicalLicenseKeys: ['medical-licenses/m.pdf'],
+    });
+    const salon = setup(verifier(false));
+    expect((await apply(salon, { medicalLicenseKeys: ['medical-licenses/x.pdf'] })).status).toBe(
+      201,
+    );
+    expect(
+      (salon.salons.docs[0]?.['application'] as Record<string, unknown>)['medicalLicenseKeys'],
+    ).toBeUndefined();
   });
 
   it('resubmit keeps the keys already on the application and accepts new ones only from this salon', async () => {

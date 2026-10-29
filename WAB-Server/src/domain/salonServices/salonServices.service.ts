@@ -23,6 +23,7 @@ import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { MainBranches } from '../branches/mainBranch';
 import type { SalonStateService } from '../salons/salonState.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import { brideAllowed, catalogFits, type BusinessKind } from '../businessTypes/rules';
 
 export interface SalonServiceView {
   readonly id: string;
@@ -105,7 +106,8 @@ const invalid = (
   field: string,
   code:
     | typeof ERROR_CODES.VALIDATION_ERROR
-    | typeof ERROR_CODES.GENDER_MISMATCH = ERROR_CODES.VALIDATION_ERROR,
+    | typeof ERROR_CODES.BUSINESS_TYPE_MISMATCH
+    | typeof ERROR_CODES.BRIDE_NOT_ALLOWED = ERROR_CODES.VALIDATION_ERROR,
 ): ValidationError =>
   new ValidationError({
     code,
@@ -148,7 +150,7 @@ export const createSalonServicesService = ({
     active: s.active,
   });
 
-  const loadSalon = async (salonId: string): Promise<{ gender: 'MALE' | 'FEMALE' }> => {
+  const loadSalon = async (salonId: string): Promise<BusinessKind> => {
     const salon = await salons.findById(salonId);
     if (salon === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
     return salon;
@@ -186,9 +188,10 @@ export const createSalonServicesService = ({
       const salon = await loadSalon(salonId);
       const entry = await catalog.findById(catalogServiceId);
       if (entry === null || !entry.active) throw invalid('body.catalogServiceId');
-      if (entry.gender !== salon.gender)
-        throw invalid('body.catalogServiceId', ERROR_CODES.GENDER_MISMATCH);
-      if (fields.brideOnly === true && salon.gender !== 'FEMALE') throw invalid('body.brideOnly');
+      if (!catalogFits(entry, salon))
+        throw invalid('body.catalogServiceId', ERROR_CODES.BUSINESS_TYPE_MISMATCH);
+      if (fields.brideOnly === true && !brideAllowed(salon))
+        throw invalid('body.brideOnly', ERROR_CODES.BRIDE_NOT_ALLOWED);
       const same = branchId === undefined ? { salonId } : { branchId };
       if (await services.exists({ ...same, catalogServiceId })) {
         throw new ConflictError({ code: ERROR_CODES.CONFLICT });
@@ -224,7 +227,8 @@ export const createSalonServicesService = ({
       if (scope !== undefined && current.branchId !== scope) {
         throw new ForbiddenError({ code: ERROR_CODES.BRANCH_SCOPE_DENIED });
       }
-      if (fields.brideOnly === true && salon.gender !== 'FEMALE') throw invalid('body.brideOnly');
+      if (fields.brideOnly === true && !brideAllowed(salon))
+        throw invalid('body.brideOnly', ERROR_CODES.BRIDE_NOT_ALLOWED);
       if (fields.mediaKeys !== undefined) {
         await verifyMedia(
           salonId,

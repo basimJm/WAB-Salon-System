@@ -96,7 +96,7 @@ export const registerAdminCatalogRequestDocs = (registry: OpenAPIRegistry): void
     path: `${path}/{id}/approve`,
     tags,
     summary:
-      'Approve: creates the catalog service (salon’s gender) and tells the salon (reason required, audited)',
+      'Approve: creates the catalog service (the salon’s business type and audience; an existing one must fit it, else 422 BUSINESS_TYPE_MISMATCH) and tells the salon (reason required, audited)',
     request: { headers, params: requestParams, body: body(approveSchema) },
     responses: {
       [HTTP_STATUS.ok]: jsonResponse('Approved', successResponseSchema(view)),

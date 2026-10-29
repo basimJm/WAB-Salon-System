@@ -88,7 +88,13 @@ const staffRating = (): unknown =>
 beforeEach(() => {
   for (const f of Object.values(m)) f.docs.length = 0;
   audits.length = 0;
-  m.salons.docs.push({ _id: salonId, name: 'Glow', rating: { avg: 0, count: 0 } });
+  m.salons.docs.push({
+    _id: salonId,
+    name: 'Glow',
+    businessType: 'SALON',
+    audience: 'FEMALE',
+    rating: { avg: 0, count: 0 },
+  });
   m.members.docs.push({
     _id: staffId,
     salonId,
@@ -123,6 +129,12 @@ describe('GET /admin/v1/reviews', () => {
     expect(await get('status=APPROVED&target=STAFF')).toBe(1);
     expect(await get('status=APPROVED&rating=2')).toBe(1);
     expect(await get(`status=APPROVED&salonId=${id().toHexString()}`)).toBe(0);
+    // §5.19: reviews of salons or of clinics.
+    expect(await get('status=APPROVED&businessType=SALON')).toBe(2);
+    expect(await get('status=APPROVED&businessType=CLINIC')).toBe(0);
+    expect(await get(`status=APPROVED&businessType=SALON&salonId=${salonId.toHexString()}`)).toBe(
+      2,
+    );
     expect((await request(app).get(`${base}?rating=9`).set('Authorization', token())).status).toBe(
       400,
     );

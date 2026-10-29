@@ -112,7 +112,8 @@ beforeEach(() => {
   state.asked = [];
   m.salons.docs.push({
     _id: salonId,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     weeklySchedule: week,
@@ -244,10 +245,19 @@ describe('POST /customer/v1/salons/:salonId/availability', () => {
   });
 
   it('a bride cannot book at a men’s salon', async () => {
-    for (const doc of m.salons.docs) doc['gender'] = 'MALE';
+    for (const doc of m.salons.docs) doc['audience'] = 'MALE';
     const res = await ask({ date: DATE, person: person([cut], { isBride: true }) });
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(422);
+    expect(bodyOf(res).error.code).toBe('BRIDE_NOT_ALLOWED');
     expect(bodyOf(res).error.details.map((d) => d.field)).toEqual(['body.person.isBride']);
+  });
+
+  it('a bride cannot book at a clinic (§5.19)', async () => {
+    for (const doc of m.salons.docs)
+      Object.assign(doc, { businessType: 'CLINIC', audience: 'BOTH' });
+    const res = await ask({ date: DATE, person: person([cut], { isBride: true }) });
+    expect(res.status).toBe(422);
+    expect(bodyOf(res).error.code).toBe('BRIDE_NOT_ALLOWED');
   });
 
   it('inactive services and hidden salons are refused', async () => {

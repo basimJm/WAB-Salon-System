@@ -125,6 +125,8 @@ export interface DevSeedSummary {
   readonly branchesWritten?: number;
   readonly branchesAlreadyThere?: number;
   readonly branchStaffPhotosSet?: number;
+  /** Clinics + the salon for everyone (§5.19): rows written / already there. */
+  readonly businessRows?: SeedCount;
   readonly images?: {
     readonly photos: number;
     readonly placeholders: number;
@@ -154,6 +156,7 @@ export const summarizeDevSeed = (report: DevSeedReport): DevSeedSummary => {
           branchesWritten: demo.extraBranches.written.length,
           branchesAlreadyThere: demo.extraBranches.skipped.length,
           branchStaffPhotosSet: demo.branchStaffPhotos.photoKeysSet,
+          businessRows: total(Object.values(demo.businesses)),
         }),
     ...(images === DEV_SEED_SKIPPED
       ? {}

@@ -28,7 +28,8 @@ const context: DemoContext = {
   areaIds: new Map(SEED_AREAS.map((area) => [area.name.en, new Types.ObjectId()])),
   catalog: DEMO_SERVICES.map((service) => ({
     id: new Types.ObjectId(),
-    gender: service.gender,
+    businessType: service.businessType,
+    audience: service.audience,
     name: service.name,
     imageKey: `${DEMO_IMAGE_PREFIX}${service.image}`,
   })),
@@ -123,8 +124,9 @@ describe('demo seed data set', () => {
     for (const booking of data.Booking) {
       const salon = salonById.get(str(booking['salonId'])) as DemoDoc;
       const persons = booking['persons'] as Person[];
-      expect(booking['salonGender']).toBe(salon['gender']);
-      expect(customerById.get(str(booking['customerId']))?.['gender']).toBe(salon['gender']);
+      expect(booking['businessType']).toBe('SALON');
+      expect(booking['salonAudience']).toBe(salon['audience']);
+      expect(customerById.get(str(booking['customerId']))?.['gender']).toBe(salon['audience']);
       expect(persons.length).toBeGreaterThanOrEqual(1);
       expect(persons.length).toBeLessThanOrEqual(6);
       for (const person of persons) {
