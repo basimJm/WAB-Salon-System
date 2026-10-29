@@ -5,6 +5,8 @@
     {
       "id": "79ea2a78d15934408a10b09f",
       "name": "Rose Bridal Studio",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/rose/profile.jpg",
       "rating": 4.2,
       "reviewsCount": 23,
@@ -26,6 +28,8 @@
     {
       "id": "7fe703cdf5e7eec204bb193d",
       "name": "Lamar Beauty Lounge",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/lamar/profile.jpg",
       "rating": 3.9,
       "reviewsCount": 28,
@@ -47,6 +51,8 @@
     {
       "id": "8dd71c4c0268487d2d240be2",
       "name": "Joury Ladies Salon",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/salons/joury/profile.jpg",
       "rating": 3.9,
       "reviewsCount": 8,
@@ -68,6 +74,8 @@
     {
       "id": "6adf0da8a2ab115e76fee5c6",
       "name": "Noor Salon",
+      "businessType": "SALON",
+      "audience": "FEMALE",
       "profileImageUrl": "https://d3a0ua5olhml0f.cloudfront.net/salons/profile/6adf0da8a2ab115e76fee5c6/c7c57ed7-d836-4f0b-b7bf-4a5efb3be529.png",
       "rating": 0,
       "reviewsCount": 0,

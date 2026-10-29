@@ -16,9 +16,9 @@ class RealHomeFixtureTest {
         val home = decodeFixture("GetHome", GetHomeData.serializer()).data.toDomain()
         assertEquals(0, home.unreadCount, "a guest has no unread count")
         assertTrue(home.banners.isNotEmpty() && home.banners.all { it.imageUrl.isNotBlank() })
-        assertTrue(home.services.items.isNotEmpty())
-        assertTrue(home.recommended.items.isNotEmpty())
-        val nearest = assertNotNull(home.nearest, "coordinates were sent").items
+        assertTrue(home.salonServices.items.isNotEmpty())
+        assertTrue(home.recommendedSalons.items.isNotEmpty())
+        val nearest = assertNotNull(home.nearestSalons, "coordinates were sent").items
         assertTrue(nearest.isNotEmpty())
         val complete = nearest.all { it.distanceKm != null && it.branch != null && it.displayName.isNotBlank() }
         assertTrue(complete, "one entry per branch: $nearest")

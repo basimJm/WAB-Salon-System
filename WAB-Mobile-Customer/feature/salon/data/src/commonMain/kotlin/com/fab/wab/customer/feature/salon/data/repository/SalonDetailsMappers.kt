@@ -11,7 +11,9 @@ import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdDataS
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdDataStaffItem
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdDataWeeklyScheduleItem
 import com.fab.wab.customer.core.domain.model.LocationData
+import com.fab.wab.customer.core.domain.salon.Audience
 import com.fab.wab.customer.core.domain.salon.BranchRef
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.Closure
 import com.fab.wab.customer.core.domain.salon.DaySchedule
 import com.fab.wab.customer.core.domain.salon.DayOfWeek
@@ -26,14 +28,14 @@ import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.SalonService
 import com.fab.wab.customer.core.domain.salon.StaffPreview
 import com.fab.wab.customer.core.domain.salon.StaffStatus
-import com.fab.wab.customer.core.domain.session.Gender
 
 private const val MEDIA_VIDEO = "VIDEO"
 
 fun GetSalonsBySalonIdData.toDomain(): SalonDetails = SalonDetails(
     id = id,
     name = name,
-    gender = Gender.fromCode(gender),
+    businessType = BusinessType.fromCode(businessType),
+    audience = Audience.fromCode(audience),
     coverUrl = coverUrl?.takeIf { it.isNotBlank() },
     profileImageUrl = profileImageUrl?.takeIf { it.isNotBlank() },
     description = description?.takeIf { it.isNotBlank() },

@@ -19,6 +19,8 @@
         "id": "08c23382575950264c482f48",
         "name": "Gentlemen's Corner"
       },
+      "businessType": "SALON",
+      "salonAudience": "FEMALE",
       "branch": {
         "id": "6adf513d4bd7099438793e86",
         "name": "Dabouq",
@@ -58,6 +60,8 @@
         "id": "8633ff17c56242378fea2b46",
         "name": "Al-Ostaz Barber Shop"
       },
+      "businessType": "SALON",
+      "salonAudience": "FEMALE",
       "branch": {
         "id": "c9765013556c5840bb2825aa",
         "name": "Tabarbour",
@@ -91,6 +95,8 @@
         "id": "8633ff17c56242378fea2b46",
         "name": "Al-Ostaz Barber Shop"
       },
+      "businessType": "SALON",
+      "salonAudience": "FEMALE",
       "branch": {
         "id": "c9765013556c5840bb2825aa",
         "name": "Tabarbour",
@@ -124,6 +130,8 @@
         "id": "08c23382575950264c482f48",
         "name": "Gentlemen's Corner"
       },
+      "businessType": "SALON",
+      "salonAudience": "FEMALE",
       "branch": {
         "id": "5313f805af719be56f0b6946",
         "name": "Sweifieh",
@@ -163,6 +171,8 @@
         "id": "8633ff17c56242378fea2b46",
         "name": "Al-Ostaz Barber Shop"
       },
+      "businessType": "SALON",
+      "salonAudience": "FEMALE",
       "branch": {
         "id": "6adf513d4bd7099438793e85",
         "name": "Shmeisani",

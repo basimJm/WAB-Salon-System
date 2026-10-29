@@ -13,9 +13,12 @@ object BookingsAnalytics {
     const val ACTION_TAB = "bookings_tab"
     const val ACTION_SEARCH = "bookings_search"
     const val ACTION_OPEN = "booking_open"
+    const val ACTION_BUSINESS_TYPE = "bookings_business_type"
     const val PARAM_TAB = "tab"
     const val PARAM_ID = "id"
     const val PARAM_HAS_TEXT = "has_text"
+    const val PARAM_VALUE = "value"
+    const val VALUE_ALL = "all"
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
     val DETAILS_SCREEN = AnalyticsScreen(DETAILS_SCREEN_NAME)

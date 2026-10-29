@@ -5,11 +5,15 @@
     <string name="home_search_hint">Search for a salon name, service, or category</string>
     <string name="home_tab_men">Men</string>
     <string name="home_tab_women">Women</string>
-    <string name="home_services">Services</string>
+    <string name="home_salon_services">Salon services</string>
+    <string name="home_clinic_services">Clinic services</string>
     <string name="home_see_more">See more</string>
     <string name="home_recommended">Recommended salons</string>
+    <string name="home_recommended_clinics">Recommended clinics</string>
     <string name="home_see_all">See all</string>
-    <string name="home_nearest">Nearest to you</string>
+    <string name="home_nearest">Nearest salons</string>
+    <string name="home_nearest_clinics">Nearest clinics</string>
+    <string name="home_nearest_clinics_empty">No beauty clinics within 10 km of your location right now.</string>
     <string name="home_nearest_empty">No salons within 10 km of your location right now.</string>
     <string name="home_nearest_location_off">Enable location services to see salons near you</string>
     <string name="home_enable_location">Enable location services</string>

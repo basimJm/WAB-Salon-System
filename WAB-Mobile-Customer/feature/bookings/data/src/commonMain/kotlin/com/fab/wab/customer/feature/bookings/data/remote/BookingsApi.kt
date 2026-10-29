@@ -15,12 +15,19 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
 class BookingsApi(private val client: HttpClient) {
-    suspend fun list(tab: String, query: String, page: Int, pageSize: Int): BaseResponse<List<GetBookingsDataItem>> =
+    suspend fun list(
+        tab: String,
+        query: String,
+        page: Int,
+        pageSize: Int,
+        businessType: String? = null,
+    ): BaseResponse<List<GetBookingsDataItem>> =
         client.get(CustomerOperations.getBookings.path) {
             parameter(QUERY_PAGE, page)
             parameter(QUERY_PAGE_SIZE, pageSize)
             parameter(QUERY_TAB, tab)
             query.takeIf { it.isNotBlank() }?.let { parameter(QUERY_TEXT, it) }
+            businessType?.let { parameter(QUERY_BUSINESS_TYPE, it) }
         }.body()
 
     suspend fun details(bookingId: String): BaseResponse<GetBookingsByIdData> {
@@ -38,5 +45,6 @@ class BookingsApi(private val client: HttpClient) {
         const val QUERY_PAGE_SIZE = "pageSize"
         const val QUERY_TAB = "tab"
         const val QUERY_TEXT = "q"
+        const val QUERY_BUSINESS_TYPE = "businessType"
     }
 }

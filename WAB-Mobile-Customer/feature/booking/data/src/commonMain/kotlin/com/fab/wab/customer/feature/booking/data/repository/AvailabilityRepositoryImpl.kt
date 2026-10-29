@@ -43,6 +43,7 @@ fun availabilityBodyOf(
     person = PostSalonsBySalonIdAvailabilityBodyPerson(
         serviceIds = person.serviceIds,
         isBride = person.isBride,
+        gender = person.gender?.code,
         staffId = (person.staff as? StaffChoice.Specific)?.staffId,
     ),
     others = others.mapNotNull(::otherPickOf).takeIf { it.isNotEmpty() },
