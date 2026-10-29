@@ -100,12 +100,16 @@ const book = (
     referenceNumber: refs[key],
     customerId: over.customer ?? c1,
     salonId: over.salon ?? salon1,
+    // b2 is a clinic booking (§5.19 bookings filter).
+    businessType: key === 'b2' ? 'CLINIC' : 'SALON',
+    salonAudience: key === 'b2' ? 'BOTH' : 'FEMALE',
     status: over.status,
     statusHistory: [{ status: 'PENDING', actorType: 'CUSTOMER', at: NOW }],
     persons: [
       {
         name: 'Rana',
         isBride: over.bride ?? false,
+        gender: 'FEMALE',
         staffId: over.staff ?? staffA,
         staffSelection: 'ANY',
         start,
@@ -193,6 +197,18 @@ describe('customer', () => {
     expect(refsOf(await customer('?tab=PAST'))).toEqual([refs.b3]);
     expect(refsOf(await customer('?pageSize=1&page=2'))).toEqual([refs.b2]);
   });
+  it('filters all / salons / clinics and shows the business type on every row (§5.19)', async () => {
+    expect(refsOf(await customer('?businessType=CLINIC'))).toEqual([refs.b2]);
+    expect(refsOf(await customer('?businessType=SALON'))).toEqual([refs.b1, refs.b5]);
+    expect((await customer('?businessType=SPA')).status).toBe(400);
+    const rows = bodyOf(await customer('')).data as {
+      businessType: string;
+      salonAudience: string;
+    }[];
+    expect(rows.map((r) => r.businessType)).toEqual(['SALON', 'CLINIC', 'SALON']);
+    expect(rows[1]?.salonAudience).toBe('BOTH');
+  });
+
   it('hides the customer, shows the salon and staff first names only, never other customers’ bookings', async () => {
     const res = await customer('');
     const row = (

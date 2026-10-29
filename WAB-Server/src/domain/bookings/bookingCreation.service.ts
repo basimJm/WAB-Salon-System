@@ -122,6 +122,7 @@ export const createBookingCreationService = (deps: BookingCreationDeps): Booking
         persons: draft.persons.map((p) => ({
           name: p.name,
           isBride: p.isBride,
+          gender: p.gender,
           serviceIds: p.services.map((s) => s.salonServiceId),
           // "Any staff" may be re-picked; a named staff member must still be free.
           staffId: p.staffSelection === 'SPECIFIC' ? p.staffId : undefined,

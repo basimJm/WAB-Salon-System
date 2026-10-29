@@ -15,18 +15,18 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.8.0',
-    sha256: 'da97b25ac02a3e89ede41ef683c8fb1a71ebe4bd370552f0bad755ff5df75a64',
-    note: 'SRV-175: businessType filter on search/filters (+ recommended per type, salons first), businessType + audience on every card, home salonServices/clinicServices/recommendedSalons/recommendedClinics/nearestSalons/nearestClinics (old keys kept as salon aliases), salon details ?gender= for guests (404 when hidden); favorites follow the audience rule. Client: CUS-098',
+    version: '1.9.0',
+    sha256: '96bae9f6fde6056b18303397858711b4f736663c7048ffdc28c7a0b928d31511',
+    note: 'SRV-176: booking person gender (optional; mixed persons at BOTH salons and clinics, GENDER_MISMATCH at men\'s/women\'s salons; bride sent as MALE = GENDER_MISMATCH), availability person gender, draft 404 for a business the customer may not see, bookings ?businessType= filter, rows businessType + salonAudience, detail persons gender. Client: CUS-099',
   },
   merchant: {
-    version: '1.7.0',
-    sha256: '8330b4d0d02d3402bcf7f2c8294eb627733c6e9da5b310a71dc23b469485ee94',
-    note: 'SRV-174 BREAKING: application salon {businessType, audience}; profile/catalog gender -> businessType + audience; BUSINESS_TYPE_MISMATCH / BRIDE_NOT_ALLOWED on services. Client: MER-080',
+    version: '1.8.0',
+    sha256: 'ee4f92324e6e8e08950df99660a336af892fecfc2f2ae4a6f54761ed78c484d4',
+    note: 'SRV-176: booking rows businessType + salonAudience, detail persons gender (additive, no client row)',
   },
   admin: {
-    version: '1.9.0',
-    sha256: '30e74ceb21378da1a6029d46a8b5b1b7c8bb71078264897713b754af1ba2ffba',
-    note: 'SRV-174 BREAKING: salons/applications/catalog/placements/search gender -> businessType + audience (filters too); PATCH /salons/{id}/gender -> /salons/{id}/audience; placements reorder by businessType; SALONS export businessType/audience. Client: ADM-109',
+    version: '1.10.0',
+    sha256: 'ad26beaad47e7dc388700172e38e6ac072bc2e92b198be21f62b4c31960071f0',
+    note: 'SRV-176: booking rows businessType + salonAudience, detail persons gender (additive; admin filter in SRV-178)',
   },
 };

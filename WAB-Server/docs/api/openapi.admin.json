@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.9.0"
+    "version": "1.10.0"
   },
   "servers": [
     {
@@ -16357,6 +16357,12 @@
                           "status": {
                             "type": "string"
                           },
+                          "businessType": {
+                            "$ref": "#/components/schemas/BusinessType"
+                          },
+                          "salonAudience": {
+                            "$ref": "#/components/schemas/Audience"
+                          },
                           "paymentMethod": {
                             "type": "string"
                           },
@@ -16516,6 +16522,8 @@
                           "id",
                           "referenceNumber",
                           "status",
+                          "businessType",
+                          "salonAudience",
                           "paymentMethod",
                           "paymentStatus",
                           "hasBride",
@@ -16658,6 +16666,12 @@
                         },
                         "status": {
                           "type": "string"
+                        },
+                        "businessType": {
+                          "$ref": "#/components/schemas/BusinessType"
+                        },
+                        "salonAudience": {
+                          "$ref": "#/components/schemas/Audience"
                         },
                         "paymentMethod": {
                           "type": "string"
@@ -16827,6 +16841,17 @@
                               "isBride": {
                                 "type": "boolean"
                               },
+                              "gender": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "enum": [
+                                  "MALE",
+                                  "FEMALE",
+                                  null
+                                ]
+                              },
                               "start": {
                                 "type": "string"
                               },
@@ -16892,6 +16917,7 @@
                             "required": [
                               "name",
                               "isBride",
+                              "gender",
                               "start",
                               "end",
                               "subtotal",
@@ -17015,6 +17041,8 @@
                         "id",
                         "referenceNumber",
                         "status",
+                        "businessType",
+                        "salonAudience",
                         "paymentMethod",
                         "paymentStatus",
                         "hasBride",

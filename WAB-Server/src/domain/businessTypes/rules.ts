@@ -60,3 +60,7 @@ export const personFits = (business: Pick<BusinessKind, 'audience'>, gender: Gen
  */
 export const isWidening = (from: Audience, to: Audience): boolean =>
   from !== AUDIENCE_ALL && to === AUDIENCE_ALL;
+
+/** The gender every person of a single-gender business has; `undefined` for BOTH (mixed). */
+export const impliedGender = (business: Pick<BusinessKind, 'audience'>): Gender | undefined =>
+  business.audience === 'MALE' || business.audience === 'FEMALE' ? business.audience : undefined;

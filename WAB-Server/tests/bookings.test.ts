@@ -269,7 +269,13 @@ beforeEach(async () => {
     },
   );
   for (const who of [me, other]) {
-    m.customers.docs.push({ _id: who, firstName: 'C', status: 'ACTIVE', phone: PHONE });
+    m.customers.docs.push({
+      _id: who,
+      firstName: 'C',
+      gender: 'FEMALE',
+      status: 'ACTIVE',
+      phone: PHONE,
+    });
   }
 });
 
@@ -691,7 +697,13 @@ describe('under load (no double booking)', () => {
     time: string,
   ): { draftId: Types.ObjectId; who: Types.ObjectId } => {
     const who = id();
-    m.customers.docs.push({ _id: who, firstName: 'C', status: 'ACTIVE', phone: PHONE });
+    m.customers.docs.push({
+      _id: who,
+      firstName: 'C',
+      gender: 'FEMALE',
+      status: 'ACTIVE',
+      phone: PHONE,
+    });
     const start = new Date(amman(D, time));
     const end = new Date(start.getTime() + 45 * 60_000);
     const person = { ...(base['persons'] as object[])[0], staffId: staff, start, end };

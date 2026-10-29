@@ -2,6 +2,7 @@ import { Schema, type Types } from 'mongoose';
 import { STAFF_SELECTIONS, type StaffSelection } from '../constants/enums';
 import type { LocalizedName } from '../constants/referenceData';
 import { localizedNameSchema } from './localizedName';
+import { GENDERS, type Gender } from '../constants/enums';
 
 /** A service as it was when the booking was made: later price or name changes do not touch it. */
 export interface BookingServiceSnapshot {
@@ -18,6 +19,11 @@ export interface BookingPersonRaw {
   name: string;
   isMain: boolean;
   isBride: boolean;
+  /**
+   * The person's gender (§5.19): sent for BOTH salons and clinics (mixed bookings); for a
+   * single-gender salon it is that salon's audience. Missing on bookings before business types.
+   */
+  gender?: Gender;
   services: BookingServiceSnapshot[];
   staffId: Types.ObjectId;
   staffSelection: StaffSelection;
@@ -44,6 +50,7 @@ export const bookingPersonSchema = new Schema<BookingPersonRaw>(
     name: { type: String, required: true, trim: true },
     isMain: { type: Boolean, required: true },
     isBride: { type: Boolean, required: true, default: false },
+    gender: { type: String, enum: GENDERS },
     services: { type: [serviceSnapshotSchema], required: true },
     staffId: { type: Schema.Types.ObjectId, ref: 'Member', required: true },
     staffSelection: { type: String, enum: STAFF_SELECTIONS, required: true },
