@@ -10,6 +10,7 @@ export const ALERT_KINDS = [
   'REVIEW_PENDING',
   'CATALOG_REQUEST',
   'SALON_DELETION_REQUEST',
+  'SALON_AUDIENCE_WIDENED',
 ] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
 export const ALERT_SEVERITIES = ['INFO', 'WARNING', 'CRITICAL'] as const;

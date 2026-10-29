@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import type { Gender } from '../../constants/enums';
+import type { Audience, BusinessType } from '../../constants/enums';
 import type { LocalizedName } from '../../constants/referenceData';
 
 /** What the demo data set is built from: read from the database, never invented. */
@@ -18,7 +18,8 @@ export interface DemoContext {
 
 export interface DemoCatalogEntry {
   readonly id: Types.ObjectId;
-  readonly gender: Gender;
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly name: LocalizedName;
   readonly imageKey?: string;
 }

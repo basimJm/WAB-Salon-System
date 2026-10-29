@@ -19,6 +19,7 @@ import { parseHHmm } from '../../utils/time';
 import type { SettingsService } from '../settings';
 import type { SalonStateService } from '../salons/salonState.service';
 import type { BookingConflict } from '../salons/hoursService';
+import { brideAllowed } from '../businessTypes/rules';
 
 export interface WorkingDayInput {
   readonly day: DayOfWeek;
@@ -153,7 +154,8 @@ export const createStaffService = (deps: StaffDeps): StaffService => {
       member.branchId === undefined ? null : await deps.branches?.findById(member.branchId);
     const schedule = branch?.weeklySchedule ?? salon.weeklySchedule;
     const bad: string[] = [];
-    if (profile.brideQualified && salon.gender !== 'FEMALE') bad.push('body.brideQualified');
+    // Bride-qualified staff only exist in FEMALE/BOTH salons (§5.19).
+    if (profile.brideQualified && !brideAllowed(salon)) bad.push('body.brideQualified');
     const wanted = [...new Set(profile.serviceIds)];
     if (wanted.length !== profile.serviceIds.length) bad.push('body.serviceIds');
     if (wanted.length > 0) {

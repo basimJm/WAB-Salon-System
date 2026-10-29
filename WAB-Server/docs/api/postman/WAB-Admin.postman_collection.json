@@ -2014,7 +2014,12 @@
                   "disabled": true
                 },
                 {
-                  "key": "gender",
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "audience",
                   "value": "",
                   "disabled": true
                 }
@@ -2063,7 +2068,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"description\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"imageKey\": \"string\",\n  \"gender\": \"MALE\",\n  \"active\": false,\n  \"sortOrder\": 0,\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"name\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"description\": {\n    \"ar\": \"string\",\n    \"en\": \"string\"\n  },\n  \"imageKey\": \"string\",\n  \"businessType\": \"SALON\",\n  \"audience\": \"MALE\",\n  \"active\": false,\n  \"sortOrder\": 0,\n  \"reason\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2218,6 +2223,11 @@
                 },
                 {
                   "key": "state",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "businessType",
                   "value": "",
                   "disabled": true
                 }
@@ -2496,7 +2506,7 @@
           }
         },
         {
-          "name": "Salons: filter by state, gender, city and name; newest first",
+          "name": "Salons and clinics: filter by state, business type, audience, city and name; newest first",
           "request": {
             "method": "GET",
             "header": [
@@ -2542,7 +2552,12 @@
                   "disabled": true
                 },
                 {
-                  "key": "gender",
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "audience",
                   "value": "",
                   "disabled": true
                 },
@@ -2666,7 +2681,7 @@
           }
         },
         {
-          "name": "Change the salon’s gender (admin only, reason required, audited, owner notified). Its services are switched off (they belong to the old catalog) and bride flags are cleared for a men’s salon.",
+          "name": "Change a SALON’s audience (admin only, reason required, audited, owner notified; §5.19). Widening to BOTH keeps everything. Narrowing (BOTH → MALE/FEMALE, MALE ↔ FEMALE) is refused with 409 SCHEDULE_CONFLICT (list) while future bookings exist; services whose catalog entry no longer fits are switched off and bride flags are cleared for a men’s salon. A CLINIC is always BOTH: 422 AUDIENCE_CHANGE_NOT_ALLOWED.",
           "request": {
             "method": "PATCH",
             "header": [
@@ -2690,7 +2705,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/admin/v1/salons/:id/gender",
+              "raw": "{{baseUrl}}/admin/v1/salons/:id/audience",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2699,7 +2714,7 @@
                 "v1",
                 "salons",
                 ":id",
-                "gender"
+                "audience"
               ],
               "query": [],
               "variable": [
@@ -2711,7 +2726,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"gender\": \"MALE\",\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"audience\": \"MALE\",\n  \"reason\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2874,6 +2889,11 @@
                   "key": "status",
                   "value": "",
                   "disabled": true
+                },
+                {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -2881,7 +2901,7 @@
           }
         },
         {
-          "name": "Approve: creates the catalog service (salon’s gender) and tells the salon (reason required, audited)",
+          "name": "Approve: creates the catalog service (the salon’s business type and audience; an existing one must fit it, else 422 BUSINESS_TYPE_MISMATCH) and tells the salon (reason required, audited)",
           "request": {
             "method": "POST",
             "header": [
@@ -3050,6 +3070,11 @@
                 },
                 {
                   "key": "salonId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "businessType",
                   "value": "",
                   "disabled": true
                 },
@@ -3337,7 +3362,12 @@
                   "disabled": true
                 },
                 {
-                  "key": "gender",
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "audience",
                   "value": "",
                   "disabled": true
                 },
@@ -3357,7 +3387,7 @@
           }
         },
         {
-          "name": "Add a placement. The audience is the salon’s gender; a salon cannot have overlapping placements (409).",
+          "name": "Add a placement. Business type and audience are copied from the salon (Recommended salons / Recommended clinics); a salon cannot have overlapping placements (409).",
           "request": {
             "method": "POST",
             "header": [
@@ -3553,7 +3583,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"gender\": \"MALE\",\n  \"ids\": [\n    \"string\"\n  ],\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"businessType\": \"SALON\",\n  \"ids\": [\n    \"string\"\n  ],\n  \"reason\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3655,6 +3685,11 @@
                 },
                 {
                   "key": "branchId",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "businessType",
                   "value": "",
                   "disabled": true
                 }

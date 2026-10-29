@@ -104,7 +104,8 @@ const addSalon = (over: Record<string, unknown> = {}): void => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     rating: { avg: 4.5, count: 8 },
@@ -238,6 +239,23 @@ describe('GET /customer/v1/salons/:salonId', () => {
     expect(bodyOf(sheet).data['services']).toEqual([
       expect.objectContaining({ id: serviceId.toHexString(), brideOnly: false }),
     ]);
+  });
+
+  it('a guest gender that may not see the business gets 404; BOTH and clinics show to all (§5.19)', async () => {
+    addSalon();
+    expect((await get(`${salonId.toHexString()}?gender=FEMALE`)).status).toBe(200);
+    const hidden = await get(`${salonId.toHexString()}?gender=MALE`);
+    expect(hidden.status).toBe(404);
+    expect((hidden.body as { error: { code: string } }).error.code).toBe('SALON_NOT_FOUND');
+    expect((await get(`${salonId.toHexString()}?gender=OTHER`)).status).toBe(400);
+    for (const doc of m.salons.docs)
+      Object.assign(doc, { businessType: 'CLINIC', audience: 'BOTH' });
+    const clinic = await get(`${salonId.toHexString()}?gender=MALE`);
+    expect(clinic.status).toBe(200);
+    expect((clinic.body as { data: object }).data).toMatchObject({
+      businessType: 'CLINIC',
+      audience: 'BOTH',
+    });
   });
 
   it('counts a profile view for merchant statistics (salon.viewed)', async () => {

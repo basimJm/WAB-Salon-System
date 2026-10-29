@@ -22,7 +22,8 @@ export const context: DemoContext = {
   areaIds: new Map(SEED_AREAS.map((area) => [area.name.en, new Types.ObjectId()])),
   catalog: DEMO_SERVICES.map((service) => ({
     id: new Types.ObjectId(),
-    gender: service.gender,
+    businessType: service.businessType,
+    audience: service.audience,
     name: service.name,
     imageKey: `${DEMO_IMAGE_PREFIX}${service.image}`,
   })),
@@ -43,7 +44,7 @@ export const sources = new Map<string, DemoBranchSource>(
       durationMinutes: row['durationMinutes'] as number,
       brideOnly: row['brideOnly'] === true,
     }));
-    return [[key, { salonId, gender: salon['gender'] as DemoBranchSource['gender'], services }]];
+    return [[key, { salonId, gender: salon['audience'] as DemoBranchSource['gender'], services }]];
   }),
 );
 const str = (value: unknown): string => String(value);

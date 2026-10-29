@@ -3,7 +3,8 @@ import { LOCALIZED_TEXT_MAX_LENGTH, SORT_ORDER_MAX } from '../../../constants/ad
 import { AUDIT_REASON_MAX_LENGTH } from '../../../constants/audit';
 import { OBJECT_KEY_MAX_LENGTH, OBJECT_KEY_PATTERN } from '../../../constants/providers';
 import { CATALOG_TEXT_MAX_LENGTH } from '../../../constants/catalog';
-import { GENDERS } from '../../../constants/enums';
+import { AUDIENCES, BUSINESS_TYPES } from '../../../constants/enums';
+import { audienceFor } from '../../../domain/businessTypes/rules';
 import { ADMIN_PAGE_SIZE } from '../../../constants/pagination';
 import { paginationQuery } from '../../../utils/pagination';
 
@@ -19,18 +20,26 @@ const imageKey = z.string().trim().max(OBJECT_KEY_MAX_LENGTH).regex(OBJECT_KEY_P
 const sortOrder = z.number().int().min(0).max(SORT_ORDER_MAX);
 
 export const catalogAdminQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
-  gender: z.enum(GENDERS).optional(),
+  businessType: z.enum(BUSINESS_TYPES).optional(),
+  audience: z.enum(AUDIENCES).optional(),
 });
-export const createCatalogSchema = z.object({
-  name,
-  description,
-  imageKey,
-  gender: z.enum(GENDERS),
-  active: z.boolean().default(true),
-  sortOrder: sortOrder.default(0),
-  reason,
-});
-/** The audience (gender) of a catalog service cannot change: salons already offer it. */
+/** A catalog service belongs to one business type; a CLINIC service is always BOTH (§3.2, §5.19). */
+export const createCatalogSchema = z
+  .object({
+    name,
+    description,
+    imageKey,
+    businessType: z.enum(BUSINESS_TYPES),
+    audience: z.enum(AUDIENCES),
+    active: z.boolean().default(true),
+    sortOrder: sortOrder.default(0),
+    reason,
+  })
+  .refine((v) => audienceFor(v.businessType, v.audience) === v.audience, {
+    path: ['audience'],
+    message: 'a CLINIC service is BOTH',
+  });
+/** Business type and audience of a catalog service cannot change: businesses already offer it. */
 export const updateCatalogSchema = z
   .object({
     name: name.optional(),

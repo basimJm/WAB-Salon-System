@@ -22,6 +22,10 @@ export const RETIRED_INDEXES: Readonly<Record<string, readonly string[]>> = {
   Customer: ['firstName_text_lastName_text_phone.e164_text'],
   // One service per catalog entry per salon: replaced by one per branch (salons have branches).
   SalonService: ['salonId_1_catalogServiceId_1'],
+  // Single-gender indexes replaced by business type + audience (§5.19).
+  Salon: ['state_1_gender_1'],
+  CatalogService: ['gender_1_active_1_sortOrder_1'],
+  RecommendedPlacement: ['gender_1_startAt_1_endAt_1'],
 };
 /** Server codes for "nothing to drop": the index or the whole collection does not exist yet. */
 export const MONGO_INDEX_NOT_FOUND_CODES: readonly number[] = [26, 27];

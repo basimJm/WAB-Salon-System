@@ -77,7 +77,8 @@ beforeEach(() => {
   salonsM.docs.push({
     _id: salonId,
     name: 'Hifa',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     branchCount: 0,
   });

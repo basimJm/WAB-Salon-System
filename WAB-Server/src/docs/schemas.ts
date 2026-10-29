@@ -1,4 +1,5 @@
 import type { ResponseConfig } from '@asteasolutions/zod-to-openapi';
+import { AUDIENCES, BUSINESS_TYPES } from '../constants/enums';
 import { ERROR_CODES, type ErrorCode } from '../constants/errorCodes';
 import { LANGUAGES } from '../constants/i18n';
 import { HTTP_STATUS } from '../constants/http';
@@ -74,3 +75,8 @@ export const errorResponses = (...statuses: number[]): Record<number, ResponseCo
       jsonResponse(ERROR_DESCRIPTIONS[status] ?? 'Error', errorResponseSchema),
     ]),
   );
+
+/** What a business is and who it serves (BUSINESS_DOMAIN.md §5.19); replaces the salon `gender`. */
+export const businessTypeSchema = z.enum(BUSINESS_TYPES).openapi('BusinessType');
+export const audienceSchema = z.enum(AUDIENCES).openapi('Audience');
+export const businessKindShape = { businessType: businessTypeSchema, audience: audienceSchema };

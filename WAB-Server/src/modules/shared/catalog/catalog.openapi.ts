@@ -4,6 +4,7 @@ import { HTTP_STATUS } from '../../../constants/http';
 import { API_PREFIXES, type ApiNamespace } from '../../../constants/server';
 import {
   acceptLanguageHeader,
+  businessKindShape,
   errorResponses,
   jsonResponse,
   paginationMetaSchema,
@@ -16,7 +17,7 @@ const item = z.object({
   name: z.string(),
   description: z.string(),
   imageUrl: z.string(),
-  gender: z.enum(['MALE', 'FEMALE']),
+  ...businessKindShape,
 });
 
 const registerDocs = (registry: OpenAPIRegistry, namespace: ApiNamespace): void => {
@@ -24,7 +25,8 @@ const registerDocs = (registry: OpenAPIRegistry, namespace: ApiNamespace): void 
     method: 'get',
     path: `${API_PREFIXES[namespace]}${CATALOG_ROUTES.base}${CATALOG_ROUTES.services}`,
     tags: ['Catalog'],
-    summary: 'Active catalog services of one gender (paginated, localized)',
+    summary:
+      'Active catalog services, optionally of one business type and the audiences a gender sees (own + BOTH) (paginated, localized)',
     security: [],
     request: {
       headers: z.object({ 'Accept-Language': acceptLanguageHeader }),

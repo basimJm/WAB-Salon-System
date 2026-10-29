@@ -23,10 +23,11 @@ const NOW = new Date('2026-10-12T08:00:00Z');
 const salonsM = createFakeModel();
 const servicesM = createFakeModel();
 const closuresM = createFakeModel();
-const recommended: { ids: string[] } & RecommendedLookup = {
+const recommended: { ids: string[]; clinicIds: string[] } & RecommendedLookup = {
   ids: [],
-  salonIds() {
-    return Promise.resolve(this.ids);
+  clinicIds: [],
+  salonIds({ businessType }) {
+    return Promise.resolve(businessType === 'CLINIC' ? this.clinicIds : this.ids);
   },
 };
 const saved: { ids: Set<string>; asked: string[] } = { ids: new Set(), asked: [] };
@@ -87,7 +88,8 @@ const addSalon = (name: string, over: Record<string, unknown> = {}): string => {
     _id,
     name,
     searchText: `${name} Amman`,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     rating: { avg: 4, count: 10 },
@@ -119,19 +121,24 @@ const c2 = new Types.ObjectId().toHexString();
 beforeEach(() => {
   for (const f of [salonsM, servicesM, closuresM]) f.docs.length = 0;
   recommended.ids = [];
+  recommended.clinicIds = [];
   saved.ids = new Set();
   saved.asked = [];
 });
 
 describe('GET /customer/v1/salons', () => {
-  it('shows only LIVE, complete salons of the requested gender; the gender is required', async () => {
+  it('shows only LIVE, complete businesses the gender may see (own + BOTH + clinics, §5.19); the gender is required', async () => {
     addSalon('Visible');
-    addSalon('Men', { gender: 'MALE' });
+    addSalon('Men', { audience: 'MALE' });
     addSalon('Pending', { state: 'APPLICATION_PENDING' });
     addSalon('Offline', { state: 'OFFLINE' });
     addSalon('Incomplete', { completeness: { missing: ['COVER'], isComplete: false } });
     expect(await names('gender=FEMALE')).toEqual(['Visible']);
     expect(await names('gender=MALE')).toEqual(['Men']);
+    addSalon('Unisex', { audience: 'BOTH', rating: { avg: 3, count: 1 } });
+    addSalon('Clinic', { businessType: 'CLINIC', audience: 'BOTH', rating: { avg: 2, count: 1 } });
+    expect(await names('gender=FEMALE')).toEqual(['Visible', 'Unisex', 'Clinic']);
+    expect(await names('gender=MALE')).toEqual(['Men', 'Unisex', 'Clinic']);
     expect((await request(app).get('/customer/v1/salons')).status).toBe(400);
     expect((await request(app).get('/customer/v1/salons?gender=BOTH')).status).toBe(400);
   });
@@ -232,6 +239,33 @@ describe('GET /customer/v1/salons', () => {
     expect(
       (await request(app).get('/customer/v1/salons?gender=FEMALE&general=NEAREST')).status,
     ).toBe(400);
+  });
+
+  it('filters by business type and recommends per type, salons first (§5.19, §5.13)', async () => {
+    const salon = addSalon('Salon', { rating: { avg: 5, count: 9 } });
+    const unisex = addSalon('Unisex', { audience: 'BOTH', rating: { avg: 4, count: 9 } });
+    const clinic = addSalon('Clinic', { businessType: 'CLINIC', audience: 'BOTH' });
+    addSalon('Men', { audience: 'MALE' });
+    expect(await names('gender=FEMALE&businessType=CLINIC')).toEqual(['Clinic']);
+    expect(await names('gender=FEMALE&businessType=SALON')).toEqual(['Salon', 'Unisex']);
+    expect((await names('gender=MALE&businessType=SALON')).sort()).toEqual(['Men', 'Unisex']);
+    expect(
+      (await request(app).get('/customer/v1/salons?gender=FEMALE&businessType=SPA')).status,
+    ).toBe(400);
+    recommended.ids = [unisex, salon];
+    recommended.clinicIds = [clinic];
+    expect(await names('gender=FEMALE&general=RECOMMENDED&businessType=CLINIC')).toEqual([
+      'Clinic',
+    ]);
+    expect(await names('gender=FEMALE&general=RECOMMENDED&businessType=SALON')).toEqual([
+      'Unisex',
+      'Salon',
+    ]);
+    expect(await names('gender=FEMALE&general=RECOMMENDED')).toEqual(['Unisex', 'Salon', 'Clinic']);
+    const cards = bodyOf(
+      await request(app).get('/customer/v1/salons?gender=FEMALE&businessType=CLINIC'),
+    ).data as unknown as Record<string, unknown>[];
+    expect(cards[0]).toMatchObject({ businessType: 'CLINIC', audience: 'BOTH' });
   });
 
   it('lists recommended salons in the order the admin set, not by rating', async () => {

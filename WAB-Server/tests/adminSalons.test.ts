@@ -4,6 +4,7 @@ import { createApp } from '../src/app';
 import { createAdminSalonsService } from '../src/domain/salons/adminSalons.service';
 import { createAuditWriter } from '../src/domain/audit/audit.service';
 import { requireAuth } from '../src/middlewares/auth';
+import { CatalogServicesRepository } from '../src/repositories/catalog.repository';
 import { MembersRepository } from '../src/repositories/identity.repository';
 import { SalonServicesRepository } from '../src/repositories/salonServices.repository';
 import { SalonsRepository } from '../src/repositories/salons.repository';
@@ -19,6 +20,7 @@ const salonsM = createFakeModel();
 const membersM = createFakeModel();
 const subsM = createFakeModel();
 const servicesM = createFakeModel();
+const catalogM = createFakeModel();
 const audits: Record<string, unknown>[] = [];
 const events: Record<string, unknown>[] = [];
 const recomputes: string[] = [];
@@ -33,6 +35,7 @@ const app = createApp({
       members: new MembersRepository(membersM.model as never),
       subscriptions: new SubscriptionsRepository(subsM.model as never),
       salonServices: new SalonServicesRepository(servicesM.model as never),
+      catalog: new CatalogServicesRepository(catalogM.model as never),
       state: {
         recompute: (id) => {
           recomputes.push(id);
@@ -72,7 +75,8 @@ const addSalon = (name: string, over: Record<string, unknown> = {}): string => {
   salonsM.docs.push({
     _id,
     name,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     cityId: city,
     rating: { avg: 4.5, count: 3 },
@@ -84,7 +88,7 @@ const addSalon = (name: string, over: Record<string, unknown> = {}): string => {
 };
 
 beforeEach(() => {
-  for (const f of [salonsM, membersM, subsM, servicesM]) f.docs.length = 0;
+  for (const f of [salonsM, membersM, subsM, servicesM, catalogM]) f.docs.length = 0;
   audits.length = 0;
   events.length = 0;
   recomputes.length = 0;
@@ -97,9 +101,9 @@ describe('GET /admin/v1/salons', () => {
     expect((await request(app).get('/admin/v1/salons')).status).toBe(401);
   });
 
-  it('lists newest first with subscription status and filters by state, gender, city and name', async () => {
+  it('lists newest first with subscription status and filters by state, business type, audience, city and name', async () => {
     const a = addSalon('Glow Beauty');
-    addSalon('Barber Shop', { gender: 'MALE', state: 'OFFLINE', cityId: new Types.ObjectId() });
+    addSalon('Barber Shop', { audience: 'MALE', state: 'OFFLINE', cityId: new Types.ObjectId() });
     addSalon('Glow Nails', { state: 'APPROVED_INCOMPLETE' });
     subsM.docs.push({
       _id: new Types.ObjectId(),
@@ -121,7 +125,9 @@ describe('GET /admin/v1/salons', () => {
         (s) => s['name'],
       );
     expect(await names('state=OFFLINE')).toEqual(['Barber Shop']);
-    expect(await names('gender=FEMALE')).toEqual(['Glow Nails', 'Glow Beauty']);
+    expect(await names('audience=FEMALE')).toEqual(['Glow Nails', 'Glow Beauty']);
+    expect(await names('businessType=SALON')).toHaveLength(3);
+    expect(await names('businessType=CLINIC')).toEqual([]);
     expect(await names(`cityId=${city.toHexString()}`)).toEqual(['Glow Nails', 'Glow Beauty']);
     expect(await names('q=glow')).toEqual(['Glow Nails', 'Glow Beauty']);
     expect(await names('q=a.b')).toEqual([]);
@@ -231,17 +237,50 @@ describe('GET /admin/v1/salons/:id/members', () => {
   });
 });
 
-describe('PATCH /admin/v1/salons/:id/gender', () => {
+describe('PATCH /admin/v1/salons/:id/audience (§5.19)', () => {
   const patch = async (id: string, body: object): Promise<{ status: number; body: unknown }> =>
-    await request(app).patch(`/admin/v1/salons/${id}/gender`).set(admin()).send(body);
+    await request(app).patch(`/admin/v1/salons/${id}/audience`).set(admin()).send(body);
+  const catalog = (audience: string, businessType = 'SALON'): Types.ObjectId => {
+    const _id = new Types.ObjectId();
+    catalogM.docs.push({ _id, businessType, audience, active: true });
+    return _id;
+  };
 
-  it('changes the gender, switches the services off, clears bride flags for a men’s salon, audits and notifies', async () => {
-    const id = addSalon('Glow');
+  it('narrowing BOTH → MALE switches off services that no longer fit, clears bride flags, audits and notifies', async () => {
+    const id = addSalon('Unity', { audience: 'BOTH' });
     const salonObj = new Types.ObjectId(id);
+    const men = catalog('MALE');
+    const women = catalog('FEMALE');
+    const everyone = catalog('BOTH');
     servicesM.docs.push(
-      { _id: new Types.ObjectId(), salonId: salonObj, active: true, brideOnly: true },
-      { _id: new Types.ObjectId(), salonId: salonObj, active: true, brideOnly: false },
-      { _id: new Types.ObjectId(), salonId: new Types.ObjectId(), active: true, brideOnly: true },
+      {
+        _id: new Types.ObjectId(),
+        salonId: salonObj,
+        catalogServiceId: men,
+        active: true,
+        brideOnly: false,
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: salonObj,
+        catalogServiceId: women,
+        active: true,
+        brideOnly: true,
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: salonObj,
+        catalogServiceId: everyone,
+        active: true,
+        brideOnly: true,
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: new Types.ObjectId(),
+        catalogServiceId: women,
+        active: true,
+        brideOnly: true,
+      },
     );
     membersM.docs.push(
       {
@@ -257,70 +296,91 @@ describe('PATCH /admin/v1/salons/:id/gender', () => {
         staff: { brideQualified: true, serviceIds: [] },
       },
     );
-    const res = await patch(id, { gender: 'MALE', reason: 'registered by mistake' });
+    const res = await patch(id, { audience: 'MALE', reason: 'registered by mistake' });
     expect(res.status).toBe(200);
-    expect(bodyOf(res).data['gender']).toBe('MALE');
-    expect(salonsM.docs[0]?.['gender']).toBe('MALE');
+    expect(bodyOf(res).data).toMatchObject({ businessType: 'SALON', audience: 'MALE' });
+    expect(salonsM.docs[0]?.['audience']).toBe('MALE');
     expect(servicesM.docs.map((s) => [s['active'], s['brideOnly']])).toEqual([
+      [true, false],
       [false, false],
-      [false, false],
+      [true, false],
       [true, true],
     ]);
     expect((membersM.docs[0]?.['staff'] as { brideQualified: boolean }).brideQualified).toBe(false);
     expect((membersM.docs[1]?.['staff'] as { brideQualified: boolean }).brideQualified).toBe(true);
     expect(recomputes).toEqual([id]);
     expect(audits[0]).toMatchObject({
-      action: 'SALON_CHANGE_GENDER',
+      action: 'SALON_CHANGE_AUDIENCE',
       reason: 'registered by mistake',
-      before: { gender: 'FEMALE' },
-      after: { gender: 'MALE' },
+      before: { audience: 'BOTH' },
+      after: { audience: 'MALE' },
       adminId,
     });
     expect(events).toEqual([
-      { salonId: id, event: 'salon.gender_changed', reason: 'registered by mistake' },
+      { salonId: id, event: 'salon.audience_changed', reason: 'registered by mistake' },
     ]);
   });
 
-  it('a women’s salon keeps staff bride qualifications when it becomes women’s', async () => {
-    const id = addSalon('Barber', { gender: 'MALE' });
+  it('widening FEMALE → BOTH keeps services and bride qualifications, even with upcoming bookings', async () => {
+    const id = addSalon('Glow');
+    const salonObj = new Types.ObjectId(id);
+    servicesM.docs.push({
+      _id: new Types.ObjectId(),
+      salonId: salonObj,
+      catalogServiceId: catalog('FEMALE'),
+      active: true,
+      brideOnly: true,
+    });
     membersM.docs.push({
       _id: new Types.ObjectId(),
-      salonId: new Types.ObjectId(id),
+      salonId: salonObj,
       role: 'EMPLOYEE',
       staff: { brideQualified: true, serviceIds: [] },
     });
-    expect((await patch(id, { gender: 'FEMALE', reason: 'fix' })).status).toBe(200);
+    upcoming.list = [{ bookingId: 'bk1', startsAt: new Date(), status: 'APPROVED' }];
+    expect((await patch(id, { audience: 'BOTH', reason: 'now for everyone' })).status).toBe(200);
+    expect(salonsM.docs[0]?.['audience']).toBe('BOTH');
+    expect(servicesM.docs[0]).toMatchObject({ active: true, brideOnly: true });
     expect((membersM.docs[0]?.['staff'] as { brideQualified: boolean }).brideQualified).toBe(true);
   });
 
-  it('refuses the same gender (422), a missing reason, a bad gender and an unknown salon; changes nothing', async () => {
-    const id = addSalon('Glow');
-    expect((await patch(id, { gender: 'FEMALE', reason: 'x' })).status).toBe(422);
-    expect((await patch(id, { gender: 'MALE' })).status).toBe(400);
-    expect((await patch(id, { gender: 'MALE', reason: ' ' })).status).toBe(400);
-    expect((await patch(id, { gender: 'BOTH', reason: 'x' })).status).toBe(400);
-    expect(
-      (await patch(new Types.ObjectId().toHexString(), { gender: 'MALE', reason: 'x' })).status,
-    ).toBe(404);
-    expect(salonsM.docs[0]?.['gender']).toBe('FEMALE');
+  it('a clinic’s audience never changes (AUDIENCE_CHANGE_NOT_ALLOWED)', async () => {
+    const id = addSalon('Glow Clinic', { businessType: 'CLINIC', audience: 'BOTH' });
+    const res = await patch(id, { audience: 'FEMALE', reason: 'x' });
+    expect(res.status).toBe(422);
+    expect(bodyOf(res).error.code).toBe('AUDIENCE_CHANGE_NOT_ALLOWED');
+    expect(salonsM.docs[0]?.['audience']).toBe('BOTH');
     expect(audits).toHaveLength(0);
   });
 
-  it('is refused with the bookings while the salon has upcoming ones, and changes nothing', async () => {
+  it('refuses the same audience (422), a missing reason, a bad audience and an unknown salon; changes nothing', async () => {
     const id = addSalon('Glow');
+    expect((await patch(id, { audience: 'FEMALE', reason: 'x' })).status).toBe(422);
+    expect((await patch(id, { audience: 'MALE' })).status).toBe(400);
+    expect((await patch(id, { audience: 'MALE', reason: ' ' })).status).toBe(400);
+    expect((await patch(id, { audience: 'KIDS', reason: 'x' })).status).toBe(400);
+    expect(
+      (await patch(new Types.ObjectId().toHexString(), { audience: 'MALE', reason: 'x' })).status,
+    ).toBe(404);
+    expect(salonsM.docs[0]?.['audience']).toBe('FEMALE');
+    expect(audits).toHaveLength(0);
+  });
+
+  it('narrowing is refused with the bookings while the salon has upcoming ones (§5.12), and changes nothing', async () => {
+    const id = addSalon('Unity', { audience: 'BOTH' });
     upcoming.list = [{ bookingId: 'bk1', startsAt: new Date(), status: 'APPROVED' }];
-    const res = await patch(id, { gender: 'MALE', reason: 'x' });
+    const res = await patch(id, { audience: 'FEMALE', reason: 'x' });
     expect(res.status).toBe(409);
     expect(bodyOf(res).error.code).toBe('SCHEDULE_CONFLICT');
     expect(bodyOf(res).error.details.map((d) => d.field)).toEqual(['bk1']);
-    expect(salonsM.docs[0]?.['gender']).toBe('FEMALE');
+    expect(salonsM.docs[0]?.['audience']).toBe('BOTH');
     expect(audits).toHaveLength(0);
   });
 
   it('succeeds when the notification fails', async () => {
     const id = addSalon('Glow');
     notifier.fail = true;
-    expect((await patch(id, { gender: 'MALE', reason: 'x' })).status).toBe(200);
+    expect((await patch(id, { audience: 'MALE', reason: 'x' })).status).toBe(200);
   });
 
   it('answers 503 when unconfigured', async () => {

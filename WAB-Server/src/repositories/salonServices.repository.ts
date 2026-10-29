@@ -36,7 +36,7 @@ export class SalonServicesRepository extends BaseRepository<SalonServiceRaw> {
   }
 
   /**
-   * Switches every service of a salon off and clears the bride-only flag (a gender change makes
+   * Switches every service of a salon off and clears the bride-only flag (an audience change makes
    * them belong to the wrong catalog). Returns how many services changed.
    */
   async deactivateAll(salonId: string): Promise<number> {
@@ -44,6 +44,28 @@ export class SalonServicesRepository extends BaseRepository<SalonServiceRaw> {
     const result = await this.model
       .updateMany({ salonId }, { $set: { active: false, brideOnly: false } })
       .exec();
+    return result.modifiedCount;
+  }
+
+  /**
+   * After an audience change (§5.19): switches off the salon's services whose catalog entry is
+   * not in `keepCatalogIds`, and clears every `brideOnly` flag when brides are no longer allowed.
+   */
+  async deactivateUnfitting(
+    salonId: string,
+    keepCatalogIds: readonly string[],
+    clearBrideOnly: boolean,
+  ): Promise<number> {
+    if (!isObjectIdString(salonId)) return 0;
+    const result = await this.model
+      .updateMany(
+        { salonId, catalogServiceId: { $nin: [...keepCatalogIds] } },
+        { $set: { active: false, brideOnly: false } },
+      )
+      .exec();
+    if (clearBrideOnly) {
+      await this.model.updateMany({ salonId }, { $set: { brideOnly: false } }).exec();
+    }
     return result.modifiedCount;
   }
 }

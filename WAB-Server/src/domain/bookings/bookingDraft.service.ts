@@ -2,7 +2,7 @@ import type { BranchesRepository } from '../../repositories/branches.repository'
 import type { MainBranches } from '../branches/mainBranch';
 import type { Redis } from 'ioredis';
 import { DRAFT_LOCK_SEGMENT, DRAFT_LOCK_TTL_MS } from '../../constants/bookingDrafts';
-import type { Language } from '../../constants/enums';
+import type { Gender, Language } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import { MS_PER_MINUTE } from '../../constants/time';
 import type { BookingDraftRaw, DraftHold } from '../../models/bookingDraft.model';
@@ -29,6 +29,7 @@ import type { AvailabilityService, PlanPersonInput } from '../availability/avail
 import type { HoldsStore } from '../availability/holds';
 import { calculateAmounts } from '../pricing/pricing';
 import type { SettingsService } from '../settings';
+import { isVisibleTo } from '../businessTypes/rules';
 
 type PaymentMethod = (typeof PAYMENT_OPTIONS)[number];
 
@@ -43,6 +44,8 @@ export interface DraftView {
     name: string;
     isMain: boolean;
     isBride: boolean;
+    /** §5.19; `null` when not known (BOTH business, not sent). */
+    gender: Gender | null;
     services: { salonServiceId: string; name: string; price: string; durationMinutes: number }[];
     staff: { id: string; firstName: string };
     staffSelection: 'SPECIFIC' | 'ANY';
@@ -158,6 +161,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
         name: p.name,
         isMain: p.isMain,
         isBride: p.isBride,
+        gender: p.gender ?? null,
         services: p.services.map((s) => ({
           salonServiceId: s.salonServiceId,
           name: s.name[language],
@@ -211,6 +215,10 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             persons,
             draftId: earlier?.id,
           });
+          // The customer books only where they may look (§5.19 visibility).
+          if (!isVisibleTo(plan.salon, customer.gender)) {
+            throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+          }
           const policy = plan.salon.policy;
           if (policy === undefined)
             throw new BusinessRuleError({ code: ERROR_CODES.SALON_NOT_BOOKABLE });
@@ -232,6 +240,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             name: p.name,
             isMain: index === 0,
             isBride: p.isBride,
+            ...(p.gender === undefined ? {} : { gender: p.gender }),
             services: p.services.map((s) => ({
               salonServiceId: toObjectId(s.id),
               catalogServiceId: toObjectId(s.catalogServiceId),

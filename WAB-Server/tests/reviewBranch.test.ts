@@ -50,7 +50,8 @@ beforeEach(() => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Hifa',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     rating: { avg: 0, count: 0 },
