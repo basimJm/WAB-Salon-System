@@ -178,11 +178,12 @@ function StaffForm({
 
 export interface StaffTabProps {
   scope: BranchScope;
-  gender: 'MALE' | 'FEMALE';
+  /** Bride-qualified staff exist only for FEMALE/BOTH salons (§5.19). */
+  allowBride: boolean;
   branches: readonly Branch[];
 }
 
-export function StaffTab({ scope, gender, branches }: StaffTabProps) {
+export function StaffTab({ scope, allowBride, branches }: StaffTabProps) {
   const { salonId } = scope;
   const { t } = useTranslation();
   const { repositories } = useContainer();
@@ -232,7 +233,7 @@ export function StaffTab({ scope, gender, branches }: StaffTabProps) {
               salonId={salonId}
               profile={staff.data}
               services={services.data}
-              allowBride={gender === 'FEMALE'}
+              allowBride={allowBride}
             />
           ) : null}
         </AsyncView>

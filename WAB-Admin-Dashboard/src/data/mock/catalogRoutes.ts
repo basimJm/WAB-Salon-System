@@ -6,6 +6,9 @@ import { mockRoute } from './mockRoute';
 import type { MockRoute } from './mockTransport';
 
 const ops = OPERATIONS;
+type BusinessType = 'SALON' | 'CLINIC';
+/** Business type of the salons that sent requests (Noor Salon is a salon). */
+const REQUEST_TYPE: BusinessType = 'SALON';
 
 export function catalogRoutes(): readonly MockRoute[] {
   let counter = 900;
@@ -17,7 +20,8 @@ export function catalogRoutes(): readonly MockRoute[] {
         name: { ar: 'قص شعر', en: 'Haircut' },
         description: { ar: 'قص وتصفيف', en: 'Cut and style' },
         imageKey: 'catalog/haircut.webp',
-        gender: 'FEMALE' as const,
+        businessType: 'SALON',
+        audience: 'FEMALE',
         active: true,
         sortOrder: 1,
       },
@@ -26,7 +30,18 @@ export function catalogRoutes(): readonly MockRoute[] {
         name: { ar: 'حلاقة', en: 'Shave' },
         description: { ar: 'حلاقة ذقن', en: 'Beard shave' },
         imageKey: 'catalog/shave.webp',
-        gender: 'MALE' as const,
+        businessType: 'SALON',
+        audience: 'MALE',
+        active: true,
+        sortOrder: 1,
+      },
+      {
+        id: '64e000000000000000000003',
+        name: { ar: 'بوتوكس', en: 'Botox' },
+        description: { ar: 'جلسة بوتوكس', en: 'Botox session' },
+        imageKey: 'catalog/botox.webp',
+        businessType: 'CLINIC',
+        audience: 'BOTH',
         active: true,
         sortOrder: 1,
       },
@@ -37,7 +52,7 @@ export function catalogRoutes(): readonly MockRoute[] {
   const requests = [
     {
       id: '64e000000000000000000031',
-      // Noor Salon (women's) from the salon fixtures, so the approve drawer can read its gender.
+      // Noor Salon (women's) from the salon fixtures, so the approve drawer can read its type + audience.
       salonId: '64f000000000000000000001',
       salonName: 'Noor Salon',
       name: 'Hair spa',
@@ -72,7 +87,10 @@ export function catalogRoutes(): readonly MockRoute[] {
       }),
       ({ query }) => {
         const status = query.get('status');
-        const rows = requests.filter((r) => !status || r.status === status);
+        const type = query.get('businessType');
+        const rows = requests.filter(
+          (r) => (!status || r.status === status) && (!type || type === REQUEST_TYPE),
+        );
         return {
           data: rows,
           meta: { page: 1, pageSize: 25, total: rows.length, totalPages: 1 },

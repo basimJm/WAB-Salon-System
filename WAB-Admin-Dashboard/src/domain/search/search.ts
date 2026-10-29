@@ -7,7 +7,8 @@ export interface SearchCustomer {
 export interface SearchSalon {
   readonly id: string;
   readonly name: string;
-  readonly gender: string;
+  readonly businessType: string;
+  readonly audience: string;
   readonly state: string;
 }
 export interface SearchBooking {

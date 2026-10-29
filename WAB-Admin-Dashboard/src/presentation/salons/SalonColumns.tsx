@@ -7,6 +7,7 @@ import type { Language } from '@/constants/i18n';
 import { Badge } from '../components/core/Badge';
 import { StatusBadge } from '../components/core/StatusBadge';
 import type { Column } from '../components/data/tableTypes';
+import { BusinessBadges } from '../shared/BusinessBadges';
 
 /** The columns of the salon list (Admin PRD A13). */
 export function salonColumns(
@@ -29,7 +30,11 @@ export function salonColumns(
         />
       ),
     },
-    { key: 'gender', header: t('salons.gender'), render: (r) => t(`catalog.genders.${r.gender}`) },
+    {
+      key: 'type',
+      header: t('business.type'),
+      render: (r) => <BusinessBadges businessType={r.businessType} audience={r.audience} />,
+    },
     { key: 'city', header: t('salons.city'), render: (r) => cityName(r.cityId) },
     {
       key: 'state',

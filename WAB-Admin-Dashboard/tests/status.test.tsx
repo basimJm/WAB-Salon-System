@@ -51,6 +51,8 @@ const EXPECTED: Record<StatusKind, string[]> = {
   alertSeverity: ['INFO', 'WARNING', 'CRITICAL'],
   export: ['QUEUED', 'RUNNING', 'DONE', 'FAILED'],
   branch: [...BRANCH_STATUSES],
+  businessType: queryEnum('/salons', 'businessType'),
+  audience: queryEnum('/salons', 'audience'),
 };
 
 const labels = (tree: unknown, kind: string): Record<string, string> =>

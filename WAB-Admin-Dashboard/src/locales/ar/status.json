@@ -91,6 +91,15 @@
       "ACTIVE": "نشط",
       "OFFLINE": "غير متاح",
       "CLOSED": "مغلق"
+    },
+    "businessType": {
+      "SALON": "صالون",
+      "CLINIC": "عيادة"
+    },
+    "audience": {
+      "FEMALE": "نساء",
+      "MALE": "رجال",
+      "BOTH": "رجال ونساء"
     }
   }
 }

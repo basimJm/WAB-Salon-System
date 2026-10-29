@@ -1,5 +1,5 @@
 import { CUSTOMER_STATUSES, type CustomerQuery } from '@/domain/customers/customers';
-import { SALON_GENDERS } from '@/domain/salons/salons';
+import { PERSON_GENDERS } from '@/domain/shared/businessType';
 import type { ListState } from '@/domain/shared/listState';
 
 export const CUSTOMER_FILTER_KEYS = ['status', 'gender', 'city'];
@@ -8,7 +8,7 @@ const first = (state: ListState, key: string): string | undefined => state.filte
 /** The URL list state -> the API query (values the server does not know are dropped). */
 export function customerQueryOf(state: ListState): CustomerQuery {
   const status = CUSTOMER_STATUSES.find((s) => s === first(state, 'status'));
-  const gender = SALON_GENDERS.find((g) => g === first(state, 'gender'));
+  const gender = PERSON_GENDERS.find((g) => g === first(state, 'gender'));
   const city = first(state, 'city');
   return {
     page: state.page,

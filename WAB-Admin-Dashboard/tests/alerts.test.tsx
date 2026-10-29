@@ -85,6 +85,6 @@ describe('AlertsPage', () => {
 describe('useShellCounters', () => {
   it('reads the bell count and the pending queues from the API', async () => {
     renderWithApp(<Counters />, makeContainer());
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('3|2|3'));
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('3|3|3'));
   });
 });

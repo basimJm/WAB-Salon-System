@@ -25,6 +25,9 @@ import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 import { SalonBranchFilters } from '../shared/SalonBranchFilters';
+import { BUSINESS_TYPE_FILTER_KEY, businessTypeFilterOf } from '../shared/businessFilter';
+import { BusinessBadges } from '../shared/BusinessBadges';
+import { BusinessTypeFilter } from '../shared/BusinessTypeFilter';
 import { reasonLabel } from './bookingReason';
 import { BOOKING_FILTER_KEYS, bookingExportParams, bookingQueryOf } from './bookingFilters';
 import { BOOKINGS_STRINGS } from '@/locales/lazy/bookings';
@@ -56,7 +59,16 @@ export default function BookingsPage() {
       header: t('bookings.customer'),
       render: (r) => (r.customer ? <EntityCell name={r.customer.name} /> : '—'),
     },
-    { key: 'salon', header: t('bookings.salon'), render: (r) => r.salon?.name ?? '—' },
+    {
+      key: 'salon',
+      header: t('bookings.salon'),
+      render: (r) => (
+        <EntityCell
+          name={r.salon?.name ?? '—'}
+          badge={<BusinessBadges businessType={r.businessType} audience={r.salonAudience} />}
+        />
+      ),
+    },
     { key: 'branch', header: t('branches.name'), render: (r) => r.branch?.name ?? '—' },
     {
       key: 'when',
@@ -162,6 +174,10 @@ export default function BookingsPage() {
         onClearAll: list.clearFilters,
         controls: (
           <>
+            <BusinessTypeFilter
+              value={businessTypeFilterOf(state)}
+              onChange={(type) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, type ? [type] : [])}
+            />
             <SalonBranchFilters
               salon={f('salon')}
               branch={f('branch')}

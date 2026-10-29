@@ -36,16 +36,17 @@ describe('list filters -> export params (SRV-126)', () => {
     expect(customerExportParams(odd)).toEqual({});
   });
 
-  it('salons: state, gender, city, subscription and search; the switches without an export parameter are left out', () => {
+  it('salons: state, type, audience, city, subscription and search; the switches without an export parameter are left out', () => {
     const q = salonQueryOf(
       stateOf(
-        `state=LIVE&gender=MALE&city=${CITY}&subscription=TRIAL&recommended=true&deletion=true&q=royal`,
-        ['state', 'gender', 'city', 'subscription', 'recommended', 'deletion'],
+        `state=LIVE&type=SALON&audience=MALE&city=${CITY}&subscription=TRIAL&recommended=true&deletion=true&q=royal`,
+        ['state', 'type', 'audience', 'city', 'subscription', 'recommended', 'deletion'],
       ),
     );
     expect(salonExportParams(q)).toEqual({
       state: 'LIVE',
-      gender: 'MALE',
+      businessType: 'SALON',
+      audience: 'MALE',
       cityId: CITY,
       subscription: 'TRIAL',
       q: 'royal',

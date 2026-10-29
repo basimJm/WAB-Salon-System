@@ -31,7 +31,24 @@ describe('applications', () => {
     app();
     expect(await screen.findByText('Glow Studio')).toBeInTheDocument();
     expect(screen.getByText('Rose Beauty')).toBeInTheDocument();
-    expect(screen.getAllByRole('row')).toHaveLength(3);
+    expect(screen.getByText('Skin Care Clinic')).toBeInTheDocument();
+    expect(screen.getAllByRole('row')).toHaveLength(4);
+  });
+
+  it('filters the queue by business type on the server (§5.19)', async () => {
+    app();
+    await screen.findByText('Glow Studio');
+    await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
+    await waitFor(() => expect(screen.queryByText('Glow Studio')).toBeNull());
+    expect(screen.getByText('Skin Care Clinic')).toBeInTheDocument();
+  });
+
+  it('a clinic application shows the medical license besides the trade license', async () => {
+    app();
+    await userEvent.click(await screen.findByText('Skin Care Clinic'));
+    expect(await screen.findByText('Medical license')).toBeInTheDocument();
+    expect(screen.getByText('License documents')).toBeInTheDocument();
+    expect(screen.getAllByText('Clinic').length).toBeGreaterThan(0);
   });
 
   it('opens a review with the documents, and approving needs a reason and empties the queue entry', async () => {

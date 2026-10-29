@@ -1,14 +1,15 @@
 import type { Page, PageQuery } from '@/domain/shared/page';
-import type { SalonGender } from '@/domain/salons/salons';
+import type { Audience, BusinessType } from '@/domain/shared/businessType';
 
 export const PLACEMENT_STATUSES = ['SCHEDULED', 'ACTIVE', 'ENDED'] as const;
 export type PlacementStatus = (typeof PLACEMENT_STATUSES)[number];
 
-/** A paid "Recommended" slot of one salon in the customer app. */
+/** A paid "Recommended" slot of one salon or clinic in the customer app (type + audience copied from it, §5.13). */
 export interface Placement {
   readonly id: string;
   readonly salon: { readonly id: string; readonly name: string };
-  readonly gender: SalonGender;
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly startAt: string;
   readonly endAt: string;
   readonly order: number;
@@ -31,15 +32,19 @@ export type PlacementPatch = Partial<Omit<PlacementInput, 'salonId' | 'note'>> &
 
 export interface PlacementsRepository {
   list(
-    query: PageQuery & { gender?: SalonGender; status?: PlacementStatus },
+    query: PageQuery & {
+      businessType?: BusinessType;
+      audience?: Audience;
+      status?: PlacementStatus;
+    },
   ): Promise<Page<Placement>>;
   create(input: PlacementInput, reason: string): Promise<Placement>;
   update(id: string, patch: PlacementPatch, reason: string): Promise<Placement>;
   /** Ends the placement now; it stays in the history as ENDED. */
   end(id: string, reason: string): Promise<Placement>;
-  /** New order of one audience's placements: the ids from first to last. */
+  /** New order of one business type's placements (Recommended salons / clinics): the ids from first to last. */
   reorder(
-    gender: SalonGender,
+    businessType: BusinessType,
     ids: readonly string[],
     reason: string,
   ): Promise<readonly Placement[]>;
