@@ -286,7 +286,13 @@ describe('wired into the services', () => {
     for (const f of [salonsM, closuresM, membersM, leavesM, servicesM]) f.docs.length = 0;
     lookup.list = [];
     lookup.asked.length = 0;
-    salonsM.docs.push({ _id: salonId, name: 'Glow', gender: 'FEMALE', weeklySchedule: week() });
+    salonsM.docs.push({
+      _id: salonId,
+      name: 'Glow',
+      businessType: 'SALON',
+      audience: 'FEMALE',
+      weeklySchedule: week(),
+    });
   });
 
   it('no bookings: nothing is blocked (and the lookup is asked for the right salon and time)', async () => {

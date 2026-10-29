@@ -48,6 +48,7 @@ const DEMO: DemoDataReport = {
   branches: {},
   extraBranches: { written: ['lamar:khalda'], skipped: [] },
   branchStaffPhotos: { uploads: { created: 3, existing: 0 }, photoKeysSet: 0 },
+  businesses: { Salon: { created: 3, existing: 0 } } as never,
   timeZone: 'Asia/Amman',
   now: new Date('2026-10-27T09:00:00.000Z'),
 };
@@ -283,7 +284,8 @@ describe('base data marker survives admin-made catalog services (found by the re
   it('only demo catalog pictures get upload records, so the last upload stays a demo key', () => {
     const adminService = {
       id: new Types.ObjectId(),
-      gender: 'FEMALE' as const,
+      businessType: 'SALON' as const,
+      audience: 'FEMALE' as const,
       name: { ar: 'admin-ar', en: 'Admin service' },
       imageKey: 'catalog/admin/picture.png',
     };

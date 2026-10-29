@@ -138,7 +138,8 @@ const addSalon = (name: string, over: Record<string, unknown> = {}): string => {
   m.salons.docs.push({
     _id,
     name,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     rating: { avg: 4.5, count: 10 },
     completeness: { missing: [], isComplete: true },
@@ -170,7 +171,8 @@ describe('admin salon list extras', () => {
     m.placements.docs.push({
       _id: new Types.ObjectId(),
       salonId: new Types.ObjectId(salonId),
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       startAt: new Date('2026-10-01T00:00:00Z'),
       endAt: new Date('2026-11-01T00:00:00Z'),
       order: 1,

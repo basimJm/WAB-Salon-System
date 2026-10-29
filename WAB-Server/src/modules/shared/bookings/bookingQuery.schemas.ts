@@ -6,7 +6,11 @@ import {
   CUSTOMER_BOOKING_TABS,
 } from '../../../constants/bookings';
 import { OBJECT_ID_PATTERN } from '../../../constants/database';
-import { BOOKING_PAYMENT_STATUSES, BOOKING_STATUSES } from '../../../constants/enums';
+import {
+  BOOKING_PAYMENT_STATUSES,
+  BOOKING_STATUSES,
+  BUSINESS_TYPES,
+} from '../../../constants/enums';
 import { ADMIN_PAGE_SIZE, APP_PAGE_SIZE } from '../../../constants/pagination';
 import { paginationQuery } from '../../../utils/pagination';
 import { isLocalDate } from '../../../utils/time';
@@ -28,6 +32,8 @@ export const bookingIdParams = z.object({ id: id });
 export const customerBookingsQuery = paginationQuery(APP_PAGE_SIZE).extend({
   tab: z.enum(CUSTOMER_BOOKING_TABS).default('UPCOMING'),
   q: text.optional(),
+  /** All / salons / clinics (§5.19). */
+  businessType: z.enum(BUSINESS_TYPES).optional(),
 });
 
 export const merchantBookingsQuery = paginationQuery(APP_PAGE_SIZE).extend({
@@ -60,6 +66,8 @@ export const adminBookingsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   salonId: id.optional(),
   customerId: id.optional(),
   branchId: id.optional(),
+  /** Salon or clinic bookings only (§5.19). */
+  businessType: z.enum(BUSINESS_TYPES).optional(),
 });
 
 export type MerchantBookingsQuery = z.infer<typeof merchantBookingsQuery>;

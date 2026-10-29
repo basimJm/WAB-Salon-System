@@ -4,6 +4,8 @@ import {
   BOOKING_PAYMENT_STATUSES,
   BOOKING_STATUSES,
   CUSTOMER_STATUSES,
+  AUDIENCES,
+  BUSINESS_TYPES,
   GENDERS,
   TRANSACTION_STATUSES,
   TRANSACTION_TYPES,
@@ -68,6 +70,7 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       statuses: z.array(z.enum(BOOKING_STATUSES)).min(1).max(BOOKING_STATUSES.length).optional(),
       paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
       salonId: objectId.optional(),
+      businessType: z.enum(BUSINESS_TYPES).optional(),
       branchId: objectId.optional(),
       customerId: objectId.optional(),
       /** Appointment days (Asia/Amman), both inclusive. */
@@ -91,7 +94,8 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
     format: z.enum(EXPORT_FORMATS),
     params: z.object({
       state: z.enum(SALON_STATES).optional(),
-      gender: z.enum(GENDERS).optional(),
+      businessType: z.enum(BUSINESS_TYPES).optional(),
+      audience: z.enum(AUDIENCES).optional(),
       cityId: objectId.optional(),
       subscription: z.enum(SUBSCRIPTION_STATUSES).optional(),
       q: z.string().trim().min(1).max(100).optional(),

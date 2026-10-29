@@ -137,7 +137,8 @@ beforeEach(() => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     weeklySchedule: [],
     completeness: { missing: [], isComplete: true },

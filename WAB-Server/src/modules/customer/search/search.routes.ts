@@ -48,8 +48,12 @@ export const createSearchRouter = ({
     limiter,
     validate({ query: filtersQuerySchema }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { gender, serviceIds } = query<typeof filtersQuerySchema>(req);
-      const bounds = await service.priceBounds({ gender, serviceIds });
+      const { gender, businessType, serviceIds } = query<typeof filtersQuerySchema>(req);
+      const bounds = await service.priceBounds({
+        gender,
+        serviceIds,
+        ...(businessType === undefined ? {} : { businessType }),
+      });
       sendSuccess(req, res, {
         data: {
           priceRange:

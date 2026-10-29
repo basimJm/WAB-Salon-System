@@ -8,6 +8,7 @@ import {
   jsonResponse,
   paginationMetaSchema,
   successResponseSchema,
+  businessKindShape,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
 import { favoriteParamsSchema, favoritesQuerySchema } from './favorites.validation';
@@ -15,6 +16,7 @@ import { favoriteParamsSchema, favoritesQuerySchema } from './favorites.validati
 const card = z.object({
   id: z.string(),
   name: z.string(),
+  ...businessKindShape,
   profileImageUrl: z.string().nullable(),
   rating: z.number(),
   reviewsCount: z.number(),

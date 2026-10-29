@@ -1,4 +1,5 @@
-import type { Gender } from '../../constants/enums';
+import type { Audience, BusinessType } from '../../constants/enums';
+import { visibleAudiences } from '../businessTypes/rules';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { PlacementStatus } from '../../constants/placements';
 import type { RecommendedPlacementRaw } from '../../models/recommendedPlacement.model';
@@ -22,7 +23,9 @@ import type { RecommendedLookup } from '../search/search.service';
 export interface PlacementRow {
   readonly id: string;
   readonly salon: { id: string; name: string };
-  readonly gender: Gender;
+  /** Copied from the business when the placement was made (§3.7). */
+  readonly businessType: BusinessType;
+  readonly audience: Audience;
   readonly startAt: Date;
   readonly endAt: Date;
   readonly order: number;
@@ -53,7 +56,8 @@ export interface PlacementPatch {
 
 export interface PlacementsService extends RecommendedLookup {
   list(input: {
-    gender?: Gender | undefined;
+    businessType?: BusinessType | undefined;
+    audience?: Audience | undefined;
     status?: PlacementStatus | undefined;
     salonId?: string | undefined;
     params: PaginationParams;
@@ -67,9 +71,9 @@ export interface PlacementsService extends RecommendedLookup {
   }): Promise<PlacementRow>;
   /** Stops a running or scheduled placement now (the remove action of A20). */
   end(input: { id: string; reason: string; actor: AdminActor }): Promise<PlacementRow>;
-  /** Display order of one audience: `ids` in the wanted order (drag to reorder). */
+  /** Display order of one business type's section: `ids` in the wanted order (drag to reorder). */
   reorder(input: {
-    gender: Gender;
+    businessType: BusinessType;
     ids: readonly string[];
     reason: string;
     actor: AdminActor;
@@ -112,7 +116,8 @@ export const createPlacementsService = (deps: PlacementsDeps): PlacementsService
     return items.map((p) => ({
       id: p.id,
       salon: { id: p.salonId, name: names.get(p.salonId) ?? '' },
-      gender: p.gender,
+      businessType: p.businessType,
+      audience: p.audience,
       startAt: p.startAt,
       endAt: p.endAt,
       order: p.order,
@@ -171,22 +176,25 @@ export const createPlacementsService = (deps: PlacementsDeps): PlacementsService
     });
 
   return {
-    async salonIds(gender, at) {
-      return (await placements.activeAt(gender, at)).map((p) => p.salonId);
+    async salonIds({ businessType, gender }, at) {
+      return (await placements.activeAt(businessType, visibleAudiences(gender), at)).map(
+        (p) => p.salonId,
+      );
     },
 
-    async list({ gender, status, salonId, params }) {
+    async list({ businessType, audience, status, salonId, params }) {
       const at = now();
       const page = await placements.findPage(
         {
-          ...(gender === undefined ? {} : { gender }),
+          ...(businessType === undefined ? {} : { businessType }),
+          ...(audience === undefined ? {} : { audience }),
           ...(salonId === undefined ? {} : { salonId }),
           ...(status === 'ACTIVE' ? { startAt: { $lte: at }, endAt: { $gt: at } } : {}),
           ...(status === 'SCHEDULED' ? { startAt: { $gt: at } } : {}),
           ...(status === 'ENDED' ? { endAt: { $lte: at } } : {}),
         },
         params,
-        { gender: 1, order: 1, startAt: 1 },
+        { businessType: 1, order: 1, startAt: 1 },
       );
       return { items: await rows(page.items), total: page.meta.total };
     },
@@ -198,7 +206,8 @@ export const createPlacementsService = (deps: PlacementsDeps): PlacementsService
       await assertNoOverlap(data.salonId, data.startAt, data.endAt);
       const created = await placements.create({
         salonId: toObjectId(data.salonId),
-        gender: salon.gender,
+        businessType: salon.businessType,
+        audience: salon.audience,
         startAt: data.startAt,
         endAt: data.endAt,
         order: data.order,
@@ -248,18 +257,18 @@ export const createPlacementsService = (deps: PlacementsDeps): PlacementsService
       return one(after);
     },
 
-    async reorder({ gender, ids, reason, actor }) {
+    async reorder({ businessType, ids, reason, actor }) {
       const unique = [...new Set(ids)];
       const found = await Promise.all(unique.map((id) => placements.findById(id)));
-      if (found.some((p) => p === null || p.gender !== gender)) {
+      if (found.some((p) => p === null || p.businessType !== businessType)) {
         throw invalid('body.ids');
       }
       const updated = await Promise.all(
         unique.map((id, order) => placements.updateById(id, { order })),
       );
       const done = updated.flatMap((p) => p ?? []);
-      await record('RECOMMENDED_REORDER', unique[0] ?? gender, reason, actor, undefined, {
-        gender,
+      await record('RECOMMENDED_REORDER', unique[0] ?? businessType, reason, actor, undefined, {
+        businessType,
         ids: unique,
       });
       return rows(done);

@@ -33,7 +33,7 @@ const app = createApp({
 
 interface Row {
   id: string;
-  gender: string;
+  businessType: string;
   status: string;
   order: number;
   amountPaid: string;
@@ -61,7 +61,8 @@ const add = (over: Record<string, unknown> = {}): string => {
   m.placements.docs.push({
     _id,
     salonId: women,
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     startAt: new Date(day(-1)),
     endAt: new Date(day(5)),
     order: 0,
@@ -75,8 +76,8 @@ beforeEach(() => {
   for (const f of Object.values(m)) f.docs.length = 0;
   audits.length = 0;
   m.salons.docs.push(
-    { _id: women, name: 'Glow', gender: 'FEMALE' },
-    { _id: men, name: 'Barber', gender: 'MALE' },
+    { _id: women, name: 'Glow', businessType: 'SALON', audience: 'FEMALE' },
+    { _id: men, name: 'Barber', businessType: 'SALON', audience: 'MALE' },
   );
 });
 
@@ -88,16 +89,26 @@ describe('lookup for customers', () => {
     add({ salonId: c, order: 1 });
     add({ salonId: id(), startAt: new Date(day(1)), endAt: new Date(day(3)) });
     add({ salonId: id(), startAt: new Date(day(-9)), endAt: new Date(day(-1)) });
-    add({ salonId: id(), gender: 'MALE' });
-    expect(await service.salonIds('FEMALE', NOW)).toEqual([c.toHexString(), b.toHexString()]);
-    expect(await service.salonIds('MALE', NOW)).toHaveLength(1);
+    add({ salonId: id(), audience: 'MALE' });
+    expect(await service.salonIds({ businessType: 'SALON', gender: 'FEMALE' }, NOW)).toEqual([
+      c.toHexString(),
+      b.toHexString(),
+    ]);
+    expect(await service.salonIds({ businessType: 'SALON', gender: 'MALE' }, NOW)).toHaveLength(1);
   });
 
   it('the start is inclusive and the end is exclusive', async () => {
     const s = id();
     add({ salonId: s, startAt: NOW, endAt: new Date(NOW.getTime() + 1000) });
-    expect(await service.salonIds('FEMALE', NOW)).toEqual([s.toHexString()]);
-    expect(await service.salonIds('FEMALE', new Date(NOW.getTime() + 1000))).toEqual([]);
+    expect(await service.salonIds({ businessType: 'SALON', gender: 'FEMALE' }, NOW)).toEqual([
+      s.toHexString(),
+    ]);
+    expect(
+      await service.salonIds(
+        { businessType: 'SALON', gender: 'FEMALE' },
+        new Date(NOW.getTime() + 1000),
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -111,11 +122,12 @@ describe('POST /admin/v1/recommended', () => {
     reason: 'Paid in cash',
   });
 
-  it('adds a scheduled placement; the audience is the salon’s gender; audited', async () => {
+  it('adds a scheduled placement; type and audience copied from the salon; audited', async () => {
     const res = await send('post', '', valid());
     expect(res.status).toBe(201);
     expect(bodyOf(res).data).toMatchObject({
-      gender: 'FEMALE',
+      businessType: 'SALON',
+      audience: 'FEMALE',
       status: 'SCHEDULED',
       amountPaid: '75.500',
       salon: { name: 'Glow' },
@@ -151,9 +163,9 @@ describe('POST /admin/v1/recommended', () => {
 });
 
 describe('GET /admin/v1/recommended', () => {
-  it('shows status per placement and filters by gender and status', async () => {
+  it('shows status per placement and filters by business type, audience and status', async () => {
     add();
-    add({ startAt: new Date(day(2)), endAt: new Date(day(9)), salonId: men, gender: 'MALE' });
+    add({ startAt: new Date(day(2)), endAt: new Date(day(9)), salonId: men, audience: 'MALE' });
     add({ startAt: new Date(day(-9)), endAt: new Date(day(-2)), salonId: id() });
     const get = async (q: string): Promise<string[]> =>
       bodyOf(await request(app).get(`${base}?${q}`).set('Authorization', token())).data.map(
@@ -163,7 +175,8 @@ describe('GET /admin/v1/recommended', () => {
     expect(await get('status=ACTIVE')).toEqual(['ACTIVE']);
     expect(await get('status=SCHEDULED')).toEqual(['SCHEDULED']);
     expect(await get('status=ENDED')).toEqual(['ENDED']);
-    expect(await get('gender=MALE')).toEqual(['SCHEDULED']);
+    expect(await get('audience=MALE')).toEqual(['SCHEDULED']);
+    expect(await get('businessType=CLINIC')).toEqual([]);
   });
 
   it('needs an admin token', async () => {
@@ -199,29 +212,39 @@ describe('PATCH, end and reorder', () => {
     expect(bodyOf(await send('post', `/${later}/end`, { reason: 'cancelled' })).data.status).toBe(
       'ENDED',
     );
-    expect(await service.salonIds('FEMALE', NOW)).toEqual([]);
+    expect(await service.salonIds({ businessType: 'SALON', gender: 'FEMALE' }, NOW)).toEqual([]);
     const again = await send('post', `/${running}/end`, { reason: 'x' });
     expect(again.status).toBe(422);
     expect(bodyOf(again).error.code).toBe('ALREADY_HANDLED');
     expect((await send('post', `/${id().toHexString()}/end`, { reason: 'x' })).status).toBe(404);
   });
 
-  it('reorders one audience and refuses ids of another audience or unknown ids', async () => {
+  it('reorders one business type and refuses ids of another type or unknown ids', async () => {
     const a = add({ salonId: id(), order: 0 });
     const b = add({ salonId: id(), order: 1 });
-    const other = add({ salonId: id(), gender: 'MALE' });
-    const res = await send('put', '/reorder', { gender: 'FEMALE', ids: [b, a], reason: 'drag' });
+    const other = add({ salonId: id(), businessType: 'CLINIC', audience: 'BOTH' });
+    const res = await send('put', '/reorder', {
+      businessType: 'SALON',
+      ids: [b, a],
+      reason: 'drag',
+    });
     expect(res.status).toBe(200);
     expect(m.placements.docs.map((d) => d['order'])).toEqual([1, 0, 0]);
     expect(
-      (await send('put', '/reorder', { gender: 'FEMALE', ids: [a, other], reason: 'x' })).status,
-    ).toBe(400);
-    expect(
-      (await send('put', '/reorder', { gender: 'FEMALE', ids: [id().toHexString()], reason: 'x' }))
+      (await send('put', '/reorder', { businessType: 'SALON', ids: [a, other], reason: 'x' }))
         .status,
     ).toBe(400);
-    expect((await send('put', '/reorder', { gender: 'FEMALE', ids: [], reason: 'x' })).status).toBe(
-      400,
-    );
+    expect(
+      (
+        await send('put', '/reorder', {
+          businessType: 'SALON',
+          ids: [id().toHexString()],
+          reason: 'x',
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (await send('put', '/reorder', { businessType: 'SALON', ids: [], reason: 'x' })).status,
+    ).toBe(400);
   });
 });

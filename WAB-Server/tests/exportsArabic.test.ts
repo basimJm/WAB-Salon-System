@@ -56,7 +56,8 @@ describe('Arabic PDF and new export kinds (SRV-126)', () => {
               {
                 id: 's1',
                 name: 'Hifa',
-                gender: 'FEMALE',
+                businessType: 'SALON',
+                audience: 'FEMALE',
                 state: 'LIVE',
                 cityId: 'amman',
                 areaId: null,
@@ -77,9 +78,11 @@ describe('Arabic PDF and new export kinds (SRV-126)', () => {
     expect(customers.rows).toEqual([
       ['رنا خالد', '+962790000001', 'FEMALE', 'amman', 'ACTIVE', NOW.toISOString(), null, 3],
     ]);
-    const salons = await builders.SALONS({ state: 'LIVE' });
+    const salons = await builders.SALONS({ state: 'LIVE', businessType: 'SALON' });
+    expect(salons.columns.slice(1, 3)).toEqual(['Business type', 'Audience']);
     expect(salons.rows[0]).toEqual([
       'Hifa',
+      'SALON',
       'FEMALE',
       'LIVE',
       'amman',
@@ -91,7 +94,7 @@ describe('Arabic PDF and new export kinds (SRV-126)', () => {
       NOW.toISOString(),
     ]);
     expect(asked[0]).toMatchObject({ status: 'ACTIVE', q: 'رنا' });
-    expect(asked[1]).toMatchObject({ state: 'LIVE' });
+    expect(asked[1]).toMatchObject({ state: 'LIVE', businessType: 'SALON' });
   });
 
   it('accepts the new kinds and validates their filters', () => {

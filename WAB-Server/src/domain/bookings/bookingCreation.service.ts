@@ -122,6 +122,7 @@ export const createBookingCreationService = (deps: BookingCreationDeps): Booking
         persons: draft.persons.map((p) => ({
           name: p.name,
           isBride: p.isBride,
+          gender: p.gender,
           serviceIds: p.services.map((s) => s.salonServiceId),
           // "Any staff" may be re-picked; a named staff member must still be free.
           staffId: p.staffSelection === 'SPECIFIC' ? p.staffId : undefined,
@@ -242,7 +243,8 @@ export const createBookingCreationService = (deps: BookingCreationDeps): Booking
                       ...(branch.phone === undefined ? {} : { phone: branch.phone }),
                     },
                   }),
-              salonGender: plan.salon.gender,
+              businessType: plan.salon.businessType,
+              salonAudience: plan.salon.audience,
               persons,
               appointmentStart,
               appointmentEnd: new Date(Math.max(...persons.map((p) => p.end.getTime()))),

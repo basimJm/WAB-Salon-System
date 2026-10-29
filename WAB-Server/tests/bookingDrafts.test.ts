@@ -174,7 +174,8 @@ beforeEach(async () => {
   m.salons.docs.push({
     _id: salonId,
     name: 'Glow',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     completeness: { missing: [], isComplete: true },
     weeklySchedule: week,
@@ -215,7 +216,13 @@ beforeEach(async () => {
     },
   );
   for (const who of [me, other]) {
-    m.customers.docs.push({ _id: who, firstName: 'C', status: 'ACTIVE', phone: PHONE });
+    m.customers.docs.push({
+      _id: who,
+      firstName: 'C',
+      gender: 'FEMALE',
+      status: 'ACTIVE',
+      phone: PHONE,
+    });
   }
 });
 
@@ -283,8 +290,67 @@ describe('creating a draft', () => {
     });
   });
 
+  describe('business types (§5.19)', () => {
+    const asBusiness = (businessType: string, audience: string): void => {
+      for (const doc of m.salons.docs) Object.assign(doc, { businessType, audience });
+    };
+    const mixed = (): object[] => [
+      person({ name: 'Noor', gender: 'FEMALE' }),
+      person({ name: 'Omar', gender: 'MALE', start: amman(D, '11:00') }),
+    ];
+
+    it('a BOTH salon takes a woman and a man in one booking; genders are kept', async () => {
+      asBusiness('SALON', 'BOTH');
+      const res = await draft(mixed());
+      expect(res.status).toBe(201);
+      expect(
+        bodyOf(res).data.persons.map((p) => (p as unknown as { gender: string }).gender),
+      ).toEqual(['FEMALE', 'MALE']);
+      const stored = m.drafts.docs[0]?.['persons'] as { gender?: string }[];
+      expect(stored.map((p) => p.gender)).toEqual(['FEMALE', 'MALE']);
+    });
+
+    it('a clinic takes mixed persons but never a bride', async () => {
+      asBusiness('CLINIC', 'BOTH');
+      expect((await draft(mixed())).status).toBe(201);
+      await redis.flushdb();
+      m.drafts.docs.length = 0;
+      const bride = await draft([person({ isBride: true, gender: 'FEMALE' })]);
+      expect(bride.status).toBe(422);
+      expect(bodyOf(bride).error.code).toBe('BRIDE_NOT_ALLOWED');
+    });
+
+    it('a women’s salon still refuses a man (GENDER_MISMATCH); a missing gender means the salon’s', async () => {
+      const res = await draft(mixed());
+      expect(res.status).toBe(422);
+      expect(bodyOf(res).error.code).toBe('GENDER_MISMATCH');
+      expect(bodyOf(res).error.details?.[0]?.field).toBe('persons.1.gender');
+      expect(m.drafts.docs).toHaveLength(0);
+      const plain = await draft([person()]);
+      expect(plain.status).toBe(201);
+      expect((bodyOf(plain).data.persons[0] as unknown as { gender: string }).gender).toBe(
+        'FEMALE',
+      );
+    });
+
+    it('a bride sent as a man is a gender mismatch, even at a BOTH salon', async () => {
+      asBusiness('SALON', 'BOTH');
+      const res = await draft([person({ isBride: true, gender: 'MALE' })]);
+      expect(res.status).toBe(422);
+      expect(bodyOf(res).error.code).toBe('GENDER_MISMATCH');
+    });
+
+    it('a customer cannot book a business they may not see (404)', async () => {
+      asBusiness('SALON', 'MALE');
+      const res = await draft([person({ gender: 'MALE' })]);
+      expect(res.status).toBe(404);
+      expect(bodyOf(res).error.code).toBe('SALON_NOT_FOUND');
+      expect(m.drafts.docs).toHaveLength(0);
+    });
+  });
+
   const menOnly = (): void => {
-    for (const doc of m.salons.docs) doc['gender'] = 'MALE';
+    for (const doc of m.salons.docs) doc['audience'] = 'MALE';
   };
   const noSetup = (): void => undefined;
   it.each<[string, () => object[], string, () => void]>([
@@ -294,7 +360,7 @@ describe('creating a draft', () => {
       'TOO_MANY_COMPANIONS',
       noSetup,
     ],
-    ['a bride at a men’s salon', () => [person({ isBride: true })], 'GENDER_MISMATCH', menOnly],
+    ['a bride at a men’s salon', () => [person({ isBride: true })], 'BRIDE_NOT_ALLOWED', menOnly],
     [
       'an unknown service',
       () => [person({ serviceIds: [id().toHexString()] })],

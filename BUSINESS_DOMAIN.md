@@ -167,7 +167,7 @@ coverKey?: String   profileKey?: String
 mainBranchId?: → branches        // the salon's main branch (always one once the first branch exists)
 branchCount: Int                 // non-CLOSED branches (denormalized for cards)
 policy?: SalonPolicy (current, see below; salon-wide, applies to every branch)
-application: { submittedAt, reviewedAt?, reviewedBy? → admins, rejectionReason?, resubmissionCount: Number, documentKeys: String[] (private, 1–5) }
+application: { submittedAt, reviewedAt?, reviewedBy? → admins, rejectionReason?, resubmissionCount: Number, documentKeys: String[] (private, 1–5), medicalLicenseKeys?: String[] (CLINIC only, private, 1–5, `MEDICAL_LICENSE` uploads) }
 offline?: { reason: String, at: Date, by → admins }
 completeness: { missing: String[], isComplete: Boolean }   // salon-level items only (§5.2); recomputed on every relevant write
 rating: { avg: Number (1 decimal), count: Number }          // APPROVED salon reviews of ALL branches together

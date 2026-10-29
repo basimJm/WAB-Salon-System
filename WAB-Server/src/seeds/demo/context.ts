@@ -36,7 +36,8 @@ export const loadDemoContext = async (now: Date = new Date()): Promise<DemoConte
     areaIds: new Map(areas.map((area) => [area.name.en, area._id])),
     catalog: catalog.map((entry) => ({
       id: entry._id,
-      gender: entry.gender,
+      businessType: entry.businessType,
+      audience: entry.audience,
       name: entry.name,
       imageKey: entry.imageKey,
     })),

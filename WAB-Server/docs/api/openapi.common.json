@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Common",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "servers": [
     {
@@ -58,6 +58,9 @@
                   "BRANCH_SCOPE_DENIED",
                   "SALON_CLOSED",
                   "GENDER_MISMATCH",
+                  "BUSINESS_TYPE_MISMATCH",
+                  "AUDIENCE_CHANGE_NOT_ALLOWED",
+                  "BRIDE_NOT_ALLOWED",
                   "TOO_MANY_COMPANIONS",
                   "SERVICE_UNAVAILABLE",
                   "BRIDE_ONLY_SERVICE",

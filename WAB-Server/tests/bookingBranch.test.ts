@@ -45,7 +45,8 @@ const setup = (): {
   salons.docs.push({
     _id: salonId,
     name: 'Hifa',
-    gender: 'FEMALE',
+    businessType: 'SALON',
+    audience: 'FEMALE',
     state: 'LIVE',
     weeklySchedule: week('09:00', '18:00'),
     completeness: { missing: [], isComplete: true },

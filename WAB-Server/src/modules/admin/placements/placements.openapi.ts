@@ -1,5 +1,5 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
-import { GENDERS } from '../../../constants/enums';
+import { AUDIENCES, BUSINESS_TYPES } from '../../../constants/enums';
 import { HTTP_STATUS } from '../../../constants/http';
 import { ADMIN_PLACEMENT_ROUTES, PLACEMENT_STATUSES } from '../../../constants/placements';
 import { API_PREFIXES } from '../../../constants/server';
@@ -23,7 +23,8 @@ import {
 const row = z.object({
   id: z.string(),
   salon: z.object({ id: z.string(), name: z.string() }),
-  gender: z.enum(GENDERS),
+  businessType: z.enum(BUSINESS_TYPES),
+  audience: z.enum(AUDIENCES),
   startAt: z.string(),
   endAt: z.string(),
   order: z.number(),
@@ -74,7 +75,7 @@ export const registerAdminPlacementDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags,
     summary:
-      'Add a placement. The audience is the salon’s gender; a salon cannot have overlapping placements (409).',
+      'Add a placement. Business type and audience are copied from the salon (Recommended salons / Recommended clinics); a salon cannot have overlapping placements (409).',
     request: { headers, body: json(createPlacementBody) },
     responses: {
       [HTTP_STATUS.created]: jsonResponse('Created', successResponseSchema(row)),

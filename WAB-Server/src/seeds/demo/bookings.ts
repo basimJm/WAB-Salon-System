@@ -417,7 +417,8 @@ export const buildBookings = (
       ...(salon.branch === undefined
         ? {}
         : { branchId: salon.branch.id, branchSnapshot: salon.branch.snapshot }),
-      salonGender: salon.gender,
+      businessType: 'SALON',
+      salonAudience: salon.gender,
       persons: persons.map((p, index) => ({
         name: p.name,
         isMain: p.isMain,
