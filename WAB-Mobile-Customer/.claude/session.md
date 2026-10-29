@@ -9,6 +9,22 @@
 
 ## Current task
 
+### CUS-098 — Business types in discovery: salons and beauty clinics
+- Branch: `feat/cus-098-clinics-discovery`
+- Status: IN PROGRESS
+- Acceptance criteria (BUSINESS_DOMAIN §2, §5.19, §12.10; INTEGRATION §5a; contract 1.10.0: `GET /home`, `GET /salons`, `GET /catalog/services`, `GET /favorites`, `GET /salons/{id}`):
+  - [x] Contract re-synced (`api_sync.py`, `--check` ok, `contract_gaps` 0); generator emits the shared string enums (`BusinessType`, `Audience`) as typealiases; mock samples rotate audiences and make the clinic home sections clinics; pre-1.10.0 captured fixtures migrated with the §5.19 rule (gender → SALON + audience), no clinics invented in captures
+  - [x] Domain `BusinessType`/`Audience`/`BusinessRules` (core/domain); `SalonSummary` + `SalonDetails` carry type + audience (unknown type = SALON, the migration default); new error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED (AR+EN)
+  - [x] Home order: banners, salon services, clinic services, Recommended salons, Recommended clinics, nearest salons, nearest clinics; clinic sections hidden when empty, nearest clinics never repeats the location prompt
+  - [x] "See more"/"See all" of clinic sections open the same S04/S06 screens filtered to CLINIC (`Screen.AllSalons/AllServices.businessType`); search opens S04 for every type
+  - [x] S04 All / Salons / Clinics tabs (`businessType` query, kept while paging, other filters kept); S06 per type
+  - [x] Cards (Home, S04 rows, favorites) and S07 header show "Salon · Women" / "Beauty clinic · Men & women"; AR+EN
+  - [x] Tests: `BusinessTypeTest`, `BusinessTypeTextsTest`, `HomeMappersTest`, `HomeStateUpdatesTest`, `HomeViewModelTest` (clinic see-more), `AllSalonsViewModelTest` (type tabs), `AllServicesViewModelTest` (clinic catalog), `SalonSearchApiTest`, `SalonCardMapperTest`, `RealSalonFixturesTest`
+- Tests: `./gradlew testAndroidHostTest` green (all modules); `policy_checks.py all` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: batch flow (rules §3.13) with CUS-099. The S05 filter sheet still lists the gender's catalog without a type filter (unchanged behaviour). Captured fixtures (`core/data/fixtures/remote`) were migrated by script, not re-captured from a 1.10.0 server: re-capture when the local stack runs SRV-174…178.
+
 ### CUS-097 — Measured performance pass with the Android skills + deferred device checks of CUS-094…096
 - Branch: `perf/cus-097-measured-performance`
 - Status: IN PROGRESS
@@ -36,17 +52,3 @@
 - Loops: 1/1 — batch verification (rules §3.13): all four iOS simulator configurations (Debug/Release × Dev/Prod) build with the new K/N and Xcode settings. DEFERRED: launch/scroll measurements; parallelRendering is experimental (switch PARALLEL_RENDERING off first if native views glitch)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
 - Notes: DEVIATIONS — time-boxed (25 min); startup work (Koin/Firebase on the main thread, push permission prompt at launch) left as is: both must run on the main thread before the first frame; no cold-launch / scroll measurement done; simulator builds NOT verified: Debug-Dev failed in the `Compile Kotlin Framework` phase on `Timeout waiting to lock journal cache (~/.gradle/caches/journal-1)` held by a parallel agent's Gradle, Release-Dev stalled > 8 min at the K/N compile tasks (same lock) and was stopped; iosApp-Prod Release and the framework link were not reached. Rerun `xcodebuild -scheme iosApp-Dev -configuration Release-Dev -destination 'generic/platform=iOS Simulator' build` (and Debug-Dev, iosApp-Prod Release-Prod) once no other Gradle runs; `gc=cms` and `parallelRendering` need a scroll check on device/simulator.
-
-### CUS-095 — Performance: R8, Compose, baseline profiles (Android + shared)
-- Branch: `perf/cus-095-android-performance`
-- Status: IN PROGRESS (partial: owner time limit 25 min on 2026-10-27)
-- Acceptance criteria (owner request 2026-10-27; skills r8-analyzer, jetpack-compose-performance, android-profiler, anr-audit-and-fix; no PRD/API change):
-  - [ ] Before/after numbers on an emulator (cold start TTID/TTFD, gfxinfo framestats on Home, search, salon details, bookings) — NOT DONE (time)
-  - [x] R8: release (dev + prod) minify + shrinkResources already on with `proguard-android-optimize.txt`, full mode default (AGP 9.1, no `fullMode=false`); broad keeps removed (`io.ktor.**`, `core.network.**`, `core.domain.**`, `feature.**.domain.model.**`); serializer/Companion keeps and generated DTO keeps stay; debug stays unminified
-  - [x] ANR/startup: `AndroidApp.onCreate` no longer resolves the DataStore-backed `AppSettings` + Firebase `PushTokenProvider` on the main thread (resolved inside the IO scope)
-  - [x] Compose: `AppImage` uses one Coil painter + overlays instead of `SubcomposeAsyncImage` (no subcomposition per image in lazy lists; same shimmer → image → fallback look); lazy lists checked: Home, salons paging, salon details already set `key` + `contentType`
-  - [ ] Baseline Profile + Startup Profile module (macrobenchmark), Compose compiler reports — NOT DONE (time)
-- Tests: `ImageOverlayTest` (new, overlay decision). `policy_checks.py all` ok; `tasks.py check` ok (only the known CUS-047 note). First `assembleProdRelease` failed on a Gradle cache lock held by another agent's daemon (`journal-1` / `modules-2`, not a code error); rerun `:core:design-system:testAndroidHostTest :androidApp:assembleProdRelease` still running at hand-off. Detekt, the full host test run, the other 3 variants and the iOS link were NOT run
-- Loops: 1/1 — batch verification (rules §3.13): gates above green incl. prodRelease with the narrowed R8 rules. DEFERRED: before/after measurements, baseline profile, a manual prodRelease journey on a device (owner smoke test before release)
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — batch code reading of the three branches together; deviations listed in Loops/Notes.
-- Notes: DEVIATIONS — owner cut the task to 25 minutes: no emulator measurement (no before/after table), no baseline profile, no Compose compiler reports, no R8 configuration-analyzer run (AGP 9.1 < 9.3; Path B needs a temporary R8 pin + protobuf); R8 keep-rule removal is verified only by a release build, not by a runtime pass on a device (verify sign-in, home, salon details, booking on `prodRelease` before merge). Not pushed / no PR.

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.salon.SalonDetails
+import com.fab.wab.customer.designsystem.components.domain.businessText
 import com.fab.wab.customer.designsystem.components.avatar.AppAvatar
 import com.fab.wab.customer.designsystem.components.domain.ratingValueText
 import com.fab.wab.customer.designsystem.components.image.AppImage
@@ -44,7 +45,7 @@ import com.fab.wab.customer.feature.salon.presentation.resources.salon_cover
 import com.fab.wab.customer.feature.salon.presentation.resources.salon_rating_count
 import org.jetbrains.compose.resources.stringResource
 
-/** Cover (180, radius 22) with the 96 px logo overlapping by 50 px, then name, status + rating and the location link. */
+/** Cover (180, radius 22) with the 96 px logo overlapping by 50 px, then name, type · audience (§5.19), status + rating and the location link. */
 @Composable
 internal fun SalonHeader(salon: SalonDetails, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     val spacing = AppTheme.spacing
@@ -57,6 +58,13 @@ internal fun SalonHeader(salon: SalonDetails, onAction: (UiAction) -> Unit, modi
             AppText(
                 text = salon.name,
                 style = AppTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(bottom = spacing.space4),
+            )
+            AppText(
+                text = businessText(salon.businessType, salon.audience),
+                style = AppTheme.typography.labelMedium,
+                color = AppTheme.colors.accent,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = spacing.space6),
             )

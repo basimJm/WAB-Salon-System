@@ -4,7 +4,7 @@ import com.fab.wab.customer.core.domain.salon.BranchRules
 import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.SalonService
-import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.core.domain.salon.Audience
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.feature.booking.domain.model.BookingDraft
 import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
@@ -64,7 +64,7 @@ sealed interface BookingFlowContract {
         val canAddCompanion: Boolean get() = companionsCount < BookingFlowDefaults.MAX_COMPANIONS
         val isCompanionFlow: Boolean get() = currentPerson > 0
         val person: DraftPerson get() = persons[currentPerson]
-        val isWomenSalon: Boolean get() = salon?.gender == Gender.FEMALE
+        val isWomenSalon: Boolean get() = salon?.audience == Audience.FEMALE
         val canContinuePerson: Boolean get() = person.name.isNotBlank()
         val canContinueServices: Boolean get() = person.serviceIds.isNotEmpty()
         val totals: SelectionTotals get() = selectionTotalsOf(salon?.services.orEmpty(), person.serviceIds)

@@ -1,5 +1,7 @@
 package com.fab.wab.customer.feature.salon.presentation
 
+import com.fab.wab.customer.core.domain.salon.Audience
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
@@ -45,7 +47,7 @@ import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
 private val SALON = SalonDetails(
-    id = "s1", name = "Glow", gender = Gender.FEMALE, coverUrl = null, profileImageUrl = null, description = null,
+    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.FEMALE, coverUrl = null, profileImageUrl = null, description = null,
     locationText = "Amman", location = LocationData(31.9, 35.9), phone = "+962791234567", whatsapp = "+962791234567",
     rating = RatingSummary(4.5f, 12), isOpenNow = false, todayHours = null, closedReason = null,
     weeklySchedule = emptyList(), upcomingClosures = emptyList(), staff = emptyList(), services = emptyList(),

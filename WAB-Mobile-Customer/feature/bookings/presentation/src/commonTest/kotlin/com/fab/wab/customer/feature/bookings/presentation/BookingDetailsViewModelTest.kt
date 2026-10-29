@@ -2,6 +2,8 @@
 
 package com.fab.wab.customer.feature.bookings.presentation
 
+import com.fab.wab.customer.core.domain.salon.Audience
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppResult
@@ -21,7 +23,6 @@ import com.fab.wab.customer.core.domain.salon.ReviewsPreview
 import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.StaffMember
-import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.notification.push.PushKeys
 import com.fab.wab.customer.core.notification.push.PushNotification
 import com.fab.wab.customer.core.notification.push.PushSignals
@@ -64,7 +65,7 @@ private fun detailsBooking(status: BookingStatus) = BookingDetails(
 )
 
 private val SALON = SalonDetails(
-    id = "s1", name = "Glow", gender = Gender.FEMALE, coverUrl = null, profileImageUrl = "img", description = null, locationText = null,
+    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.FEMALE, coverUrl = null, profileImageUrl = "img", description = null, locationText = null,
     location = null, phone = "+962791234567", whatsapp = null, rating = RatingSummary(4f, 1), isOpenNow = true, todayHours = null,
     closedReason = null, weeklySchedule = emptyList(), upcomingClosures = emptyList(), staff = emptyList(), services = emptyList(),
     gallery = emptyList(), isFavorite = false, reviews = ReviewsPreview(RatingSummary(4f, 1), emptyList()),

@@ -8,12 +8,14 @@ import com.fab.wab.customer.core.domain.auth.AuthTokens
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.provider.DeviceLocationProvider
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
+import com.fab.wab.customer.core.navigation.route.SalonListFilter
 import com.fab.wab.customer.core.notification.push.PushNotification
 import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
@@ -27,11 +29,13 @@ import com.fab.wab.customer.feature.home.domain.model.BannerAction
 import com.fab.wab.customer.feature.home.domain.model.HomeBanner
 import com.fab.wab.customer.feature.home.domain.model.HomeContent
 import com.fab.wab.customer.feature.home.domain.model.HomeSection
+import com.fab.wab.customer.feature.home.domain.model.HomeService
 import com.fab.wab.customer.feature.home.domain.repository.HomeRepository
 import com.fab.wab.customer.feature.home.domain.usecase.GetCurrentLocationUseCase
 import com.fab.wab.customer.feature.home.domain.usecase.LoadHomeUseCase
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.HomeDialog
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.NearestUi
+import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SalonSection
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SideEffect
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeDependencies
@@ -58,9 +62,12 @@ private fun salon(id: String, favorite: Boolean = false) = SalonSummary(
 private fun content(nearest: HomeSection<SalonSummary>? = null, unread: Int = 3) = HomeContent(
     unreadCount = unread,
     banners = listOf(HomeBanner("b1", "img", BannerAction.ExternalUrl("https://example.invalid"))),
-    services = HomeSection(emptyList(), hasMore = false),
-    recommended = HomeSection(listOf(salon("r1")), hasMore = true),
-    nearest = nearest,
+    salonServices = HomeSection(listOf(HomeService("sv1", "Hair", "d", null)), hasMore = true),
+    clinicServices = HomeSection(listOf(HomeService("cv1", "Botox", "d", null)), hasMore = true),
+    recommendedSalons = HomeSection(listOf(salon("r1")), hasMore = true),
+    recommendedClinics = HomeSection(listOf(salon("c1").copy(businessType = BusinessType.CLINIC)), hasMore = true),
+    nearestSalons = nearest,
+    nearestClinics = nearest,
 )
 
 private class HomeRepositoryFake : HomeRepository {
@@ -158,9 +165,9 @@ class HomeViewModelTest {
         assertEquals("Sara", state.welcomeName)
         assertEquals(false, state.signedIn)
         assertEquals(0, state.unreadCount)
-        assertEquals(NearestUi.LocationOff, state.nearest)
+        assertEquals(NearestUi.LocationOff, state.nearestSalons)
         assertTrue(state.hasContent)
-        assertEquals(true, state.recommended.hasMore)
+        assertEquals(true, state.recommendedSalons.hasMore)
     }
 
     @Test
@@ -191,7 +198,7 @@ class HomeViewModelTest {
         assertEquals(USER.user.firstName, vm.state.value.welcomeName)
         assertEquals(AMMAN, repository.calls.single().second)
         assertEquals(3, vm.state.value.unreadCount)
-        assertIs<NearestUi.Salons>(vm.state.value.nearest)
+        assertIs<NearestUi.Salons>(vm.state.value.nearestSalons)
         realtime.emit(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD, buildJsonObject { put("count", JsonPrimitive(120)) }))
         assertEquals(120, vm.state.value.unreadCount)
         PushSignals.publishReceived(PushNotification("Approved", "Your booking was approved"))
@@ -202,7 +209,7 @@ class HomeViewModelTest {
     fun locationGrantedButNoSalonsShowsTheEmptyMessage() = runTest(UnconfinedTestDispatcher()) {
         permissions.status = PermissionStatus.GRANTED
         repository.result = AppResult.Success(content(nearest = HomeSection(emptyList(), hasMore = false)))
-        assertEquals(NearestUi.Empty, viewModel().state.value.nearest)
+        assertEquals(NearestUi.Empty, viewModel().state.value.nearestSalons)
     }
 
     @Test
@@ -240,7 +247,7 @@ class HomeViewModelTest {
         val user = viewModel(USER)
         user.onEvent(UiAction.OnFavoriteClick("r1"))
         assertEquals(listOf("r1" to true), favorites.calls)
-        assertEquals(false, user.state.value.recommended.items.single().isFavorite)
+        assertEquals(false, user.state.value.recommendedSalons.items.single().isFavorite)
         assertIs<SideEffect.ShowError>(effects.last())
     }
 
@@ -264,6 +271,21 @@ class HomeViewModelTest {
         assertEquals(SideEffect.OpenSalon("s1", "b2"), effects.last())
         vm.onEvent(UiAction.OnSalonClick("s1"))
         assertEquals(SideEffect.OpenSalon("s1", null), effects.last())
+    }
+
+    @Test
+    fun clinicSectionsOpenTheSameScreensFilteredToClinics() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.onEvent(UiAction.OnSeeAll(SalonSection.Recommended, BusinessType.CLINIC))
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, filter = SalonListFilter.RECOMMENDED, businessType = BusinessType.CLINIC), effects.last())
+        vm.onEvent(UiAction.OnSeeAll(SalonSection.Nearest))
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, filter = SalonListFilter.NEAREST, businessType = BusinessType.SALON), effects.last())
+        vm.onEvent(UiAction.OnServicesSeeMore(BusinessType.CLINIC))
+        assertEquals(SideEffect.OpenAllServices(Gender.FEMALE, BusinessType.CLINIC), effects.last())
+        vm.onEvent(UiAction.OnServiceClick("cv1", BusinessType.CLINIC))
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, "cv1", "Botox", businessType = BusinessType.CLINIC), effects.last())
+        vm.onEvent(UiAction.OnSearchClick)
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE), effects.last(), "search lists every business type")
     }
 
     @Test

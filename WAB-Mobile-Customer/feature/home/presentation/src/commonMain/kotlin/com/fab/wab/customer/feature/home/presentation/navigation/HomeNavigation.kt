@@ -43,9 +43,10 @@ class HomeNavigation(
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is SideEffect.OpenSalon -> navigateTo(Screen.SalonDetails(effect.salonId, effect.branchId))
-                is SideEffect.OpenAllSalons ->
-                    navigateTo(Screen.AllSalons(effect.gender.code, effect.serviceId, effect.serviceName, effect.filter?.code))
-                is SideEffect.OpenAllServices -> navigateTo(Screen.AllServices(effect.gender.code))
+                is SideEffect.OpenAllSalons -> navigateTo(
+                    Screen.AllSalons(effect.gender.code, effect.serviceId, effect.serviceName, effect.filter?.code, effect.businessType?.code),
+                )
+                is SideEffect.OpenAllServices -> navigateTo(Screen.AllServices(effect.gender.code, effect.businessType.code))
                 SideEffect.OpenNotifications -> navigateTo(Screen.Notifications)
                 is SideEffect.OpenUrl -> openUrl(effect.url)
                 SideEffect.OpenLogin -> navigateTo(Graph.Auth)

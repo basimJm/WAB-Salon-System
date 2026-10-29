@@ -13,6 +13,19 @@ from pathlib import Path
 
 ENVELOPE_ORDER = ("success", "message", "meta", "data")
 NULL_DATA_TYPE = "JsonElement"
+ROTATING_ENUM_FIELDS = {"audience", "salonaudience"}
+# Home sections whose sample items are clinics (always audience BOTH, BUSINESS_DOMAIN §5.19).
+CLINIC_SECTIONS = {"clinicservices", "recommendedclinics", "nearestclinics"}
+CLINIC_FIELDS = {"businessType": "CLINIC", "audience": "BOTH"}
+
+
+def as_clinic(value):
+    """The sample value with every `businessType` / `audience` turned into a clinic's."""
+    if isinstance(value, dict):
+        return {k: CLINIC_FIELDS[k] if k in CLINIC_FIELDS else as_clinic(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [as_clinic(v) for v in value]
+    return value
 
 
 def load_captured(directory: Path | None) -> dict[str, dict]:

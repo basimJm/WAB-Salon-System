@@ -70,6 +70,9 @@
     <string name="error_code_salon_not_bookable">This salon is not accepting bookings right now.</string>
     <string name="error_code_salon_closed">The salon is closed at that time.</string>
     <string name="error_code_gender_mismatch">This salon does not serve the selected gender.</string>
+    <string name="error_code_business_type_mismatch">This service is not offered by this type of business.</string>
+    <string name="error_code_audience_change_not_allowed">Who this business serves cannot be changed this way.</string>
+    <string name="error_code_bride_not_allowed">Bride bookings are available only at women’s salons and salons for men and women.</string>
     <string name="error_code_too_many_companions">You can add up to 5 companions.</string>
     <string name="error_code_service_unavailable">One of the selected services is no longer available.</string>
     <string name="error_code_bride_only_service">This service is available for brides only.</string>
@@ -127,4 +130,13 @@
     <string name="photo_camera_denied">Allow camera access to take a photo</string>
     <string name="dialog_camera_denied_title">Camera access is turned off. Enable it from the device settings</string>
     <string name="dialog_notifications_denied_title">Notifications are turned off. Enable them from the device settings</string>
+    <string name="business_type_all">All</string>
+    <string name="business_type_salons">Salons</string>
+    <string name="business_type_clinics">Clinics</string>
+    <string name="business_salon">Salon</string>
+    <string name="business_clinic">Beauty clinic</string>
+    <string name="audience_men">Men</string>
+    <string name="audience_women">Women</string>
+    <string name="audience_both">Men &amp; women</string>
+    <string name="business_label">%1$s · %2$s</string>
 </resources>

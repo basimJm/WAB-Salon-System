@@ -20,6 +20,8 @@ import com.fab.wab.customer.feature.booking.domain.repository.AvailabilityReposi
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
 import kotlinx.datetime.LocalDate
 import com.fab.wab.customer.core.domain.auth.AuthTokens
+import com.fab.wab.customer.core.domain.salon.Audience
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.RatingSummary
 import com.fab.wab.customer.core.domain.salon.ReviewsPreview
 import com.fab.wab.customer.core.domain.salon.SalonDetails
@@ -54,7 +56,7 @@ import kotlin.test.assertTrue
 fun service(id: String, price: String, minutes: Int) = SalonService(id, "c$id", id, null, null, price, minutes, emptyList())
 
 fun salon(gender: Gender) = SalonDetails(
-    id = "s1", name = "Glow", gender = gender, coverUrl = null, profileImageUrl = null, description = null, locationText = null,
+    id = "s1", name = "Glow", businessType = BusinessType.SALON, audience = Audience.fromCode(gender.code), coverUrl = null, profileImageUrl = null, description = null, locationText = null,
     location = null, phone = null, whatsapp = null, rating = RatingSummary(4f, 1), isOpenNow = true, todayHours = null, closedReason = null,
     weeklySchedule = emptyList(), upcomingClosures = emptyList(),
     staff = listOf(StaffPreview("m1", "Omar", null, StaffStatus.ON_DUTY), StaffPreview("m2", "Ali", null, StaffStatus.ON_DUTY)),

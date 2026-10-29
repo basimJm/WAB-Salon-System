@@ -4,6 +4,8 @@ import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdData
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdReviewsData
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsBySalonIdStaffByMemberIdData
 import com.fab.wab.customer.core.data.mock.decodeFixture
+import com.fab.wab.customer.core.domain.salon.Audience
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.feature.salon.data.repository.toDomain
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -21,6 +23,9 @@ class RealSalonFixturesTest {
         assertTrue(salon.staff.isNotEmpty())
         assertEquals(DAYS_PER_WEEK, salon.weeklySchedule.size)
         assertTrue(salon.weeklySchedule.all { it.day != null }, "every weekly day code is known")
+        assertEquals(BusinessType.SALON, salon.businessType, "contract 1.10.0 migration: every legacy business is a salon")
+        assertEquals(Audience.FEMALE, salon.audience)
+        assertTrue(salon.allowsBride)
     }
 
     @Test
