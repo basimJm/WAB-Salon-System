@@ -1,5 +1,6 @@
 import { Router, type Request, type RequestHandler, type Response } from 'express';
 import type { z } from 'zod';
+import { AUDIT_UNKNOWN_USER_AGENT } from '../../../constants/audit';
 import { ADMIN_SETTINGS_ROUTES, SETTINGS_AUDIT } from '../../../constants/settings';
 import type { AuditWriter } from '../../../domain/audit';
 import {
@@ -54,7 +55,7 @@ export const createAdminSettingsRouter = (options: AdminSettingsRouterOptions): 
         after: { value },
         reason: body.reason,
         ip: req.ip ?? '',
-        userAgent: req.get('user-agent') ?? '',
+        userAgent: req.get('user-agent') ?? AUDIT_UNKNOWN_USER_AGENT,
       });
       sendSuccess(req, res, { data: { key, value } });
     }),

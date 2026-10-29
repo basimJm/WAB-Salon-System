@@ -61,7 +61,10 @@ const setup = (): Rig => {
   return { service, customers, tokens, gate, registered };
 };
 
-const registration = (phone = PHONE, kind: 'valid' | 'expired' | 'invalid' = 'valid') => ({
+const registration = (
+  phone = PHONE,
+  kind: 'valid' | 'expired' | 'invalid' = 'valid',
+): { name: string; phone: string; otpToken: string; language: 'en' } => ({
   name: 'Lina',
   phone,
   otpToken: proofFor(phone, 'REGISTER', kind),
@@ -114,7 +117,7 @@ describe('customer auth: login, refresh, logout, change phone', () => {
     await expect(
       rig.service.checkPhone({ phone: PHONE, purpose: 'REGISTER' }),
     ).rejects.toMatchObject({ code: 'PHONE_ALREADY_REGISTERED' });
-    rig.customers.docs[0]!['status'] = 'BLOCKED';
+    Object.assign(rig.customers.docs[0] ?? {}, { status: 'BLOCKED' });
     await expect(rig.service.checkPhone({ phone: PHONE, purpose: 'LOGIN' })).rejects.toMatchObject({
       code: 'ACCOUNT_BLOCKED',
     });
@@ -156,7 +159,7 @@ describe('customer auth: login, refresh, logout, change phone', () => {
       rig.service.login({ phone: PHONE, otpToken: proofFor(PHONE, 'LOGIN'), language: 'en' }),
     ).rejects.toMatchObject({ code: 'PHONE_NOT_REGISTERED' });
     const session = await rig.service.register(registration());
-    rig.customers.docs[0]!['status'] = 'BLOCKED';
+    Object.assign(rig.customers.docs[0] ?? {}, { status: 'BLOCKED' });
     await expect(
       rig.service.login({ phone: PHONE, otpToken: proofFor(PHONE, 'LOGIN'), language: 'en' }),
     ).rejects.toMatchObject({ code: 'ACCOUNT_BLOCKED' });

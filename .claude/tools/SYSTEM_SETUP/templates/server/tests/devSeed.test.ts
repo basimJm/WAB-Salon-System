@@ -11,9 +11,9 @@ import { createLogger } from '../src/utils/logger';
 import { createFakeModel } from './helpers/fakeModel';
 
 const logger = createLogger({ level: 'silent' });
-const hash = (plain: string): Promise<string> => Promise.resolve(`hashed:${plain.length}`);
+const hash = (plain: string): Promise<string> => Promise.resolve(`hashed:${String(plain.length)}`);
 
-const repositories = () => ({
+const repositories = (): NonNullable<Parameters<typeof seedDev>[0]['repositories']> => ({
   admins: new AdminsRepository(createFakeModel().model as never),
   customers: new CustomersRepository(createFakeModel().model as never),
   members: new MembersRepository(createFakeModel().model as never),

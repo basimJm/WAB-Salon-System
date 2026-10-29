@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { ConfigError, loadConfig, readEnvSources } from '../src/config';
@@ -155,10 +155,7 @@ describe('readEnvSources', () => {
 
 describe('.env.example', () => {
   it('lists every key the config reads, with empty values', () => {
-    const text = require('node:fs').readFileSync(
-      join(__dirname, '..', '.env.example'),
-      'utf8',
-    ) as string;
+    const text = readFileSync(join(__dirname, '..', '.env.example'), 'utf8');
     const listed = text
       .split('\n')
       .filter((line) => /^[A-Z_]+=/.test(line))

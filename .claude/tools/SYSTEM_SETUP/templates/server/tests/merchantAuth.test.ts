@@ -65,7 +65,7 @@ const setup = (): Rig => {
   return { auth, team, members, access, app };
 };
 
-const register = (rig: Rig) =>
+const register = (rig: Rig): ReturnType<Rig['auth']['register']> =>
   rig.auth.register({
     businessName: 'Acme',
     name: 'Omar',

@@ -72,7 +72,7 @@ describe('code flow', () => {
     const second = channel.lastCode(PHONE) ?? '';
     expect(await flow.verifyCode({ phone: PHONE, purpose: 'LOGIN', code: first }, RULES)).toEqual(
       first === second
-        ? { outcome: 'VERIFIED', otpToken: expect.any(String), expiresInSeconds: 600 }
+        ? { outcome: 'VERIFIED', otpToken: expect.any(String) as string, expiresInSeconds: 600 }
         : { outcome: 'INVALID_CODE' },
     );
     await flow.sendCode({ phone: PHONE, purpose: 'LOGIN', language: 'ar' }, RULES);
@@ -91,7 +91,7 @@ describe('code flow', () => {
     expect(channel.lastCode(PHONE)).toBe('001234');
   });
 
-  it('maps a refused recipient to OtpDeliveryError and an outage to a 503, dropping the stored code', async () => {
+  it('maps a refused recipient to 422 OTP_DELIVERY_FAILED and an outage to a 503, dropping the stored code', async () => {
     const { flow, channel, store } = build();
     channel.failWith = new OtpDeliveryError();
     await expect(

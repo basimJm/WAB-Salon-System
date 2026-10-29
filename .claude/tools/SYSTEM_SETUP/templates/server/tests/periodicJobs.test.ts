@@ -40,8 +40,11 @@ describe('periodic jobs', () => {
     );
     expect(registered.every((j) => j.timeZone === 'Asia/Amman')).toBe(true);
     expect(Object.keys(jobs.handlers).sort()).toEqual(registered.map((j) => j.name).sort());
-    const run = (name: string): Promise<void> =>
-      jobs.handlers[name]!({ id: name, name, data: {}, attempt: 1 });
+    const run = (name: string): Promise<void> => {
+      const handler = jobs.handlers[name];
+      if (handler === undefined) throw new Error(`no handler ${name}`);
+      return handler({ id: name, name, data: {}, attempt: 1 });
+    };
     await run(PERIODIC_JOBS.notificationsPurge.name);
     expect(deleted[0]).toEqual(new Date('2026-10-02T10:00:00.000Z'));
     await run(PERIODIC_JOBS.overviewTick.name);

@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { AUDIT_UNKNOWN_USER_AGENT } from '../../../constants/audit';
 import type { z } from 'zod';
 import type { AdminContext, ItemOwner, ItemsService } from '../../../domain/items/items.service';
 import { sendCreated, sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
@@ -49,7 +50,7 @@ export const createAdminItemsController = (
     adminId: req.auth?.subjectId ?? '',
     reason: (req.validated as { body: Body<typeof adminReasonSchema> }).body.reason,
     ip: req.ip ?? '',
-    userAgent: req.get('user-agent') ?? '',
+    userAgent: req.get('user-agent') ?? AUDIT_UNKNOWN_USER_AGENT,
   });
   return {
     async list(req, res) {

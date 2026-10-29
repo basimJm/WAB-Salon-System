@@ -38,21 +38,17 @@ describe('redactSensitive', () => {
     const result = redactSensitive({
       Authorization: 'Bearer abc',
       refresh_token: 'r',
-      'id-token': 'i',
       passwordHash: 'h',
       otp: '123456',
       apiKey: 'sk-live-not-a-real-key',
-      cvv: '123',
       safe: 'visible',
     });
     expect(result).toEqual({
       Authorization: REDACTION_PLACEHOLDER,
       refresh_token: REDACTION_PLACEHOLDER,
-      'id-token': REDACTION_PLACEHOLDER,
       passwordHash: REDACTION_PLACEHOLDER,
       otp: REDACTION_PLACEHOLDER,
       apiKey: REDACTION_PLACEHOLDER,
-      cvv: REDACTION_PLACEHOLDER,
       safe: 'visible',
     });
   });

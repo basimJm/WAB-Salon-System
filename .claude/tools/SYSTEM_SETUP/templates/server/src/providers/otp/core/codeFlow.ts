@@ -8,7 +8,8 @@ import {
 } from '../../../constants/otp';
 import { E164_PATTERN } from '../../../constants/providers';
 import { MS_PER_SECOND } from '../../../constants/time';
-import { ExternalServiceError } from '../../../utils/errors';
+import { ERROR_CODES } from '../../../constants/errorCodes';
+import { BusinessRuleError, ExternalServiceError } from '../../../utils/errors';
 import type { Logger } from '../../../utils/logger';
 import { redisKey } from '../../../utils/redis/keys';
 import type {
@@ -105,7 +106,9 @@ export const createCodeOtp = (options: CodeOtpOptions): OtpProvider => {
       } catch (error) {
         // No code went out, so the stored hash is useless.
         await store.delete(key);
-        if (error instanceof OtpDeliveryError) throw error;
+        if (error instanceof OtpDeliveryError) {
+          throw new BusinessRuleError({ code: ERROR_CODES.OTP_DELIVERY_FAILED, cause: error });
+        }
         logger?.error({ err: error, channel: channel.name }, 'otp channel failed');
         throw new ExternalServiceError({ cause: error, unavailable: true });
       }

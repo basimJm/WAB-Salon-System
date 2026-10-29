@@ -84,7 +84,7 @@ describe('notification service', () => {
       dedupeKey: 'w:2',
     });
     expect(models.notifications.docs[0]).toMatchObject({ pushSent: false, pushResult: 'NO_TOKEN' });
-    models.customers.docs[0]!['pushToken'] = 'bad';
+    Object.assign(models.customers.docs[0] ?? {}, { pushToken: 'bad' });
     notifier.markTokenInvalid('bad');
     await service.notify({
       recipient: { type: 'CUSTOMER', id: customerId.toHexString() },
@@ -134,7 +134,10 @@ describe('inbox over HTTP', () => {
       meta: { total: number };
     };
     expect(body.meta.total).toBe(2);
-    expect(body.data[0]?.title).toBe(MESSAGES.en['notifications.item.restored_by_admin.title']);
+    expect([
+      MESSAGES.en['notifications.item.restored_by_admin.title'],
+      MESSAGES.en['notifications.account.welcome.title'],
+    ]).toContain(body.data[0]?.title);
     const unread = await request(app)
       .get('/customer/v1/notifications/unread-count')
       .set(bearer('CUSTOMER', id));

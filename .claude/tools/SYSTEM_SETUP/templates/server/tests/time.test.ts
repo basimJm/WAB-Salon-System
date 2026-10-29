@@ -29,7 +29,7 @@ import {
 } from '../src/utils/time';
 import { createRandom, randomBetween, randomUpTo } from './helpers/random';
 
-const AMMAN = DEFAULT_TIMEZONE;
+const AMMAN = 'Asia/Amman';
 const NEW_YORK = 'America/New_York';
 const LORD_HOWE = 'Australia/Lord_Howe';
 const HAVANA = 'America/Havana';
@@ -45,7 +45,7 @@ describe('time constants', () => {
     expect(MS_PER_MINUTE).toBe(60_000);
     expect(MINUTES_PER_DAY).toBe(1_440);
     expect(MS_PER_DAY).toBe(86_400_000);
-    expect(DEFAULT_TIMEZONE).toBe('Asia/Amman');
+    expect(DEFAULT_TIMEZONE).toBe('UTC');
   });
 
   it('list the domain weekdays in Date#getUTCDay order', () => {

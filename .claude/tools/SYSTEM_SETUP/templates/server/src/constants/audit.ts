@@ -14,6 +14,8 @@ export const AUDIT_REASON_MAX_LENGTH = 1_000;
 export const AUDIT_REASON_MIN_LENGTH = 3;
 export const AUDIT_IP_MAX_LENGTH = 64;
 export const AUDIT_USER_AGENT_MAX_LENGTH = 512;
+/** Stored when a client sends no User-Agent (the schema wants a non-empty value). */
+export const AUDIT_UNKNOWN_USER_AGENT = 'unknown';
 export const AUDIT_ROUTES = { base: '/audit-logs' } as const;
 
 export const EVENT_NAME_MAX_LENGTH = 80;

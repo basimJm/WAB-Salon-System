@@ -117,7 +117,7 @@ describe('presign and confirm', () => {
 
   it('refuses purposes of other apps, wrong types, oversized files and wrong uploaded content', async () => {
     const auth = bearer('CUSTOMER', newId());
-    const post = (body: object) =>
+    const post = (body: object): request.Test =>
       request(app).post('/customer/v1/uploads/presign').set(auth).send(body);
     expect((await post({ purpose: 'PRIVATE_DOCUMENT', ...JPEG })).status).toBe(403);
     expect(
@@ -145,7 +145,7 @@ describe('presign and confirm', () => {
     const owner = addMember('OWNER', []);
     const staff = addMember('STAFF', ['ITEMS_VIEW']);
     const manager = addMember('STAFF', ['ITEMS_MANAGE']);
-    const post = (id: string, purpose: string) =>
+    const post = (id: string, purpose: string): request.Test =>
       request(app)
         .post('/merchant/v1/uploads/presign')
         .set(bearer('MEMBER', id))

@@ -126,8 +126,8 @@ describe('POST /auth/otp/request', () => {
       '203.0.113.9',
     );
     expect(seen[0]).toMatchObject({ phone: PHONE, purpose: 'LOGIN', ip: '203.0.113.9' });
-    // The fake provider is not configured to forward it: the channel never sees the IP.
-    expect(provider.channel.sent[0]).not.toHaveProperty('ip');
+    // The channel decides whether to use it (vendors with per-IP limits).
+    expect(provider.channel.sent[0]).toHaveProperty('ip', '203.0.113.9');
   });
 
   it('sends Arabic by default and reads otp.length / otp.codeTtlSec from settings', async () => {
