@@ -2,7 +2,9 @@ package com.fab.wab.merchant.feature.salon.data
 
 import com.fab.wab.merchant.core.data.contract.generated.GetCatalogServicesDataItem
 import com.fab.wab.merchant.core.data.contract.generated.GetSalonServicesDataItem
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.feature.salon.domain.ServiceDraft
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
@@ -13,12 +15,16 @@ import kotlin.test.assertNull
 class ServicesMappersTest {
 
     @Test
-    fun rowsMapAndUnknownGenderDrops() {
+    fun rowsMapAndUnknownTypeOrAudienceDrops() {
         val service = GetSalonServicesDataItem("s1", "c1", "Cut", "img", "12.500", 45.0, false, " ", emptyList(), true).toDomain()
         assertEquals(45, service.durationMinutes)
         assertNull(service.extraDescription)
-        assertEquals(SalonGenderType.FEMALE, GetCatalogServicesDataItem("c1", "Cut", "d", "img", "female").toDomain()?.gender)
-        assertNull(GetCatalogServicesDataItem("c1", "Cut", "d", "img", "OTHER").toDomain())
+        val item = GetCatalogServicesDataItem("c1", "Cut", "d", "img", "SALON", "female")
+        assertEquals(BusinessKind(BusinessType.SALON, Audience.FEMALE), item.toDomain()?.kind)
+        val clinic = item.copy(businessType = "CLINIC", audience = "BOTH")
+        assertEquals(BusinessKind(BusinessType.CLINIC, Audience.BOTH), clinic.toDomain()?.kind)
+        assertNull(item.copy(businessType = "SPA").toDomain(), "unknown types are never offered")
+        assertNull(item.copy(audience = "OTHER").toDomain())
     }
 
     @Test

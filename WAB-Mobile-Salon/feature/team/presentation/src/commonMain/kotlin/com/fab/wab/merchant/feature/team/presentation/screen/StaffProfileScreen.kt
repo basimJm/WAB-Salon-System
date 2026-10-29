@@ -100,7 +100,7 @@ fun StaffProfileScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () 
                     error = if (StaffField.YEARS in state.visibleErrors) stringResource(Res.string.staff_years_error) else null,
                 )
                 Services(state, onAction)
-                if (state.womenSalon) {
+                if (state.brideAllowed) {
                     SwitchRow(
                         stringResource(Res.string.staff_bride),
                         stringResource(Res.string.staff_bride_sub),

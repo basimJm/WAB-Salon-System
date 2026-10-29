@@ -30,6 +30,9 @@ import com.fab.wab.merchant.designsystem.resources.error_code_branch_limit_reach
 import com.fab.wab.merchant.designsystem.resources.error_code_branch_has_upcoming_bookings
 import com.fab.wab.merchant.designsystem.resources.error_code_last_branch
 import com.fab.wab.merchant.designsystem.resources.error_code_branch_scope_denied
+import com.fab.wab.merchant.designsystem.resources.error_code_audience_change_not_allowed
+import com.fab.wab.merchant.designsystem.resources.error_code_bride_not_allowed
+import com.fab.wab.merchant.designsystem.resources.error_code_business_type_mismatch
 import com.fab.wab.merchant.designsystem.resources.error_code_gender_mismatch
 import com.fab.wab.merchant.designsystem.resources.error_code_too_many_companions
 import com.fab.wab.merchant.designsystem.resources.error_code_service_unavailable
@@ -91,6 +94,9 @@ internal val ERROR_CODE_STRINGS: Map<ErrorCode, StringResource> = mapOf(
     ErrorCode.LAST_BRANCH to Res.string.error_code_last_branch,
     ErrorCode.BRANCH_SCOPE_DENIED to Res.string.error_code_branch_scope_denied,
     ErrorCode.GENDER_MISMATCH to Res.string.error_code_gender_mismatch,
+    ErrorCode.BUSINESS_TYPE_MISMATCH to Res.string.error_code_business_type_mismatch,
+    ErrorCode.AUDIENCE_CHANGE_NOT_ALLOWED to Res.string.error_code_audience_change_not_allowed,
+    ErrorCode.BRIDE_NOT_ALLOWED to Res.string.error_code_bride_not_allowed,
     ErrorCode.TOO_MANY_COMPANIONS to Res.string.error_code_too_many_companions,
     ErrorCode.SERVICE_UNAVAILABLE to Res.string.error_code_service_unavailable,
     ErrorCode.BRIDE_ONLY_SERVICE to Res.string.error_code_bride_only_service,

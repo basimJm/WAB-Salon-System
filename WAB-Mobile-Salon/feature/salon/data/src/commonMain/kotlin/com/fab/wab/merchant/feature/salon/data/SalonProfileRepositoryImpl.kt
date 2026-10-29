@@ -62,4 +62,12 @@ class SalonProfileRepositoryImpl(
             is AppResult.Error -> result
             AppResult.Loading -> AppResult.Loading
         }
+
+    /** The shared salon is reloaded afterwards so the hub, catalog and bride options follow the new audience. */
+    override suspend fun widenAudience(): AppResult<SalonProfile> =
+        when (val result = safeApiCall { api.widenAudience() }) {
+            is AppResult.Success -> salon.refresh()
+            is AppResult.Error -> result
+            AppResult.Loading -> AppResult.Loading
+        }
 }

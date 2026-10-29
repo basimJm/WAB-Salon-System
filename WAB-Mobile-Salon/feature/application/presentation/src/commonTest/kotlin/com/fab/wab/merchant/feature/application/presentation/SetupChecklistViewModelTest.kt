@@ -4,7 +4,8 @@ import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.salon.CompletenessItem
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.salon.SalonProfile
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SalonState
@@ -25,7 +26,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 internal fun salon(state: SalonState, missing: Set<CompletenessItem>) = SalonProfile(
-    id = "s1", name = "Lina", gender = SalonGenderType.FEMALE, state = state, description = null, coverUrl = null, profileUrl = null,
+    id = "s1", name = "Lina", businessType = BusinessType.SALON, audience = Audience.FEMALE,
+    state = state, description = null, coverUrl = null, profileUrl = null,
     location = null, locationText = null, cityId = null, areaId = null, phone = null, whatsapp = null, missing = missing,
     ratingAverage = 0.0, ratingCount = 0,
 )

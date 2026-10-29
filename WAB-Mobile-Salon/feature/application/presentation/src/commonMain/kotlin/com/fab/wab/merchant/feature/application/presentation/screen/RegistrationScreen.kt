@@ -37,7 +37,10 @@ import com.fab.wab.merchant.feature.application.presentation.resources.reg_subti
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_title
 import org.jetbrains.compose.resources.stringResource
 
-/** PRD M04 (design 01 `on.register`): salon, type, owner, city/area, license documents, terms, submit. */
+/**
+ * PRD M04 (design 01 `on.register`) + BUSINESS_DOMAIN §5.19: salon or clinic first, name + audience (salons), owner,
+ * city/area, license documents, a clinic's medical license, review of the choices, terms, submit.
+ */
 @Composable
 fun RegistrationScreen(
     state: UiState,
@@ -64,9 +67,12 @@ fun RegistrationScreen(
                     color = AppTheme.colors.muted,
                 )
             }
+            AppCard { BusinessTypeFields(state, onAction) }
             AppCard { SalonFields(state, onAction) }
             if (!state.isResubmission) AppCard { OwnerFields(state, onAction) }
             DocumentsSection(state, onAction)
+            if (state.isClinic) MedicalLicenseSection(state, onAction)
+            ReviewCard(state)
             if (!state.isResubmission) TermsRow(state, onAction)
             AppButton(
                 text = stringResource(if (state.isResubmission) Res.string.reg_resubmit else Res.string.reg_submit),

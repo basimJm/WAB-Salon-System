@@ -2,7 +2,9 @@ package com.fab.wab.merchant.feature.salon.presentation
 
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
-import com.fab.wab.merchant.core.domain.salon.SalonGenderType
+import com.fab.wab.merchant.core.domain.salon.Audience
+import com.fab.wab.merchant.core.domain.salon.BusinessKind
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.feature.salon.domain.CatalogService
 import com.fab.wab.merchant.feature.salon.domain.SalonService
 import com.fab.wab.merchant.feature.salon.domain.ServiceDraft
@@ -14,7 +16,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 internal fun salonService(id: String, catalogId: String = "c-$id", active: Boolean = true) =
     SalonService(id, catalogId, "Service $id", "img/$id", "12.500", 45, false, null, listOf("m/$id"), active)
 
-internal fun catalogItem(id: String) = CatalogService(id, "Catalog $id", "desc", "img/$id", SalonGenderType.FEMALE)
+internal fun catalogItem(id: String) =
+    CatalogService(id, "Catalog $id", "desc", "img/$id", BusinessKind(BusinessType.SALON, Audience.FEMALE))
 
 internal class FakeServices : ServicesRepository {
     var list = mutableListOf(salonService("s1", "c1"), salonService("s2", active = false))
@@ -24,7 +27,7 @@ internal class FakeServices : ServicesRepository {
     val created = mutableListOf<Pair<String, ServiceDraft>>()
     val updated = mutableListOf<Pair<String, ServiceDraft>>()
     val toggled = mutableListOf<Pair<String, Boolean>>()
-    val catalogGenders = mutableListOf<SalonGenderType>()
+    val catalogKinds = mutableListOf<BusinessKind>()
     private val catalogCache = mutableMapOf<String, CatalogService>()
     private val emitted = MutableSharedFlow<SalonService>(extraBufferCapacity = 8)
     override val changes: Flow<SalonService> = emitted
@@ -35,8 +38,8 @@ internal class FakeServices : ServicesRepository {
         branchIds += branchId
         return if (fail) error() else AppResult.Success(list.toList())
     }
-    override suspend fun catalog(gender: SalonGenderType, page: Int): AppResult<List<CatalogService>> {
-        catalogGenders += gender
+    override suspend fun catalog(kind: BusinessKind, page: Int): AppResult<List<CatalogService>> {
+        catalogKinds += kind
         return AppResult.Success(pages[page].orEmpty().also { rows -> rows.forEach { catalogCache[it.id] = it } })
     }
     override fun cachedService(id: String): SalonService? = list.firstOrNull { it.id == id }
