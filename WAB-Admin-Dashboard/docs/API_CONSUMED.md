@@ -118,6 +118,7 @@
 | `GET /salons/{id}` | `getSalonsById` | ADM-041 | `src/data/salons/RemoteSalonsRepository.ts` | Implemented |
 | `GET /salons/{id}/activity` | `getSalonsByIdActivity` | ADM-073 | `src/data/salons/RemoteSalonsRepository.ts` | Implemented |
 | `GET /salons/{id}/analytics` | `getSalonsByIdAnalytics` | ADM-073 | `src/data/salons/RemoteSalonsRepository.ts` | Implemented |
+| `PATCH /salons/{id}/audience` | `patchSalonsByIdAudience` |  | `src/data/salons/RemoteSalonsRepository.ts` | Implemented |
 | `GET /salons/{id}/branches` | `getSalonsByIdBranches` | ADM-089 |  | Planned |
 | `POST /salons/{id}/branches` | `postSalonsByIdBranches` | ADM-089 |  | Planned |
 | `GET /salons/{id}/branches/{branchId}` | `getSalonsByIdBranchesByBranchId` | ADM-089 |  | Planned |
@@ -135,7 +136,6 @@
 | `POST /salons/{id}/gallery` | `postSalonsByIdGallery` | ADM-070 |  | Planned |
 | `POST /salons/{id}/gallery/{itemId}/remove` | `postSalonsByIdGalleryByItemIdRemove` | ADM-070 |  | Planned |
 | `PUT /salons/{id}/gallery/order` | `putSalonsByIdGalleryOrder` | ADM-070 |  | Planned |
-| `PATCH /salons/{id}/gender` | `patchSalonsByIdGender` | ADM-042 | `src/data/salons/RemoteSalonsRepository.ts` | Implemented |
 | `GET /salons/{id}/hours` | `getSalonsByIdHours` | ADM-070 |  | Planned |
 | `PUT /salons/{id}/hours` | `putSalonsByIdHours` | ADM-070 |  | Planned |
 | `POST /salons/{id}/hours/preview` | `postSalonsByIdHoursPreview` | ADM-070 |  | Planned |

@@ -5,7 +5,7 @@
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
 | server | `server` | SRV-173 one-command dev seed (IN REVIEW, `feat/srv-173-dev-seed`) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
-| admin | `admin` | none (ADM-107 #516) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
+| admin | `admin` | ADM-109 + ADM-110 business types (IN REVIEW, `feat/adm-110-catalog-types` on `feat/adm-109-business-types`, not pushed) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
 | customer | `customer` | none (CUS-093 #519) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
 | merchant | `merchant` | MER-080 + MER-081 salons/clinics (IN REVIEW, `feat/mer-081-clinic-audience`, not pushed) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |

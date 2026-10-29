@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import com.fab.wab.customer.core.domain.session.Gender
+import com.fab.wab.customer.designsystem.components.card.AppChoiceCard
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.components.textfield.AppTextField
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -31,11 +33,16 @@ import com.fab.wab.customer.feature.booking.presentation.controller.contract.Boo
 import com.fab.wab.customer.feature.booking.presentation.resources.Res
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_bride_hint
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_bride_toggle
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_gender_error
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_gender_label
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_gender_man
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_gender_woman
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_error
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_label
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_name_placeholder
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_step_person_title
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_who_companion
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_who_companion_any
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_who_main
 import org.jetbrains.compose.resources.stringResource
 
@@ -55,7 +62,13 @@ internal fun PersonStep(state: UiState, onAction: (UiAction) -> Unit) {
     ) {
         StepTitle(text = stringResource(Res.string.booking_step_person_title), modifier = Modifier.padding(bottom = spacing.space6))
         AppText(
-            text = stringResource(if (state.isCompanionFlow) Res.string.booking_who_companion else Res.string.booking_who_main),
+            text = stringResource(
+                when {
+                    !state.isCompanionFlow -> Res.string.booking_who_main
+                    state.asksGender -> Res.string.booking_who_companion_any
+                    else -> Res.string.booking_who_companion
+                },
+            ),
             modifier = Modifier.padding(bottom = spacing.space20),
             style = AppTheme.typography.bodyMedium,
             color = colors.muted,
@@ -73,11 +86,52 @@ internal fun PersonStep(state: UiState, onAction: (UiAction) -> Unit) {
             placeholder = stringResource(Res.string.booking_name_placeholder),
             error = if (state.nameError) stringResource(Res.string.booking_name_error) else null,
         )
-        if (state.isWomenSalon) {
+        if (state.asksGender) {
+            PersonGenderCards(state, onAction, Modifier.padding(top = spacing.space16))
+        }
+        if (state.showsBride) {
             BrideToggleCard(
                 checked = state.person.isBride,
                 onCheckedChange = { onAction(UiAction.OnBrideChange(it)) },
                 modifier = Modifier.padding(top = spacing.space16),
+            )
+        }
+    }
+}
+
+/** BOTH salons and clinics (§5.19): the person's gender, as the onboarding cards; required before continuing. */
+@Composable
+private fun PersonGenderCards(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
+    val spacing = AppTheme.spacing
+    Column(modifier = modifier.fillMaxWidth()) {
+        AppText(
+            text = stringResource(Res.string.booking_gender_label),
+            modifier = Modifier.padding(bottom = spacing.space8),
+            style = AppTheme.typography.labelMedium,
+            color = AppTheme.colors.accent,
+        )
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(spacing.space12)) {
+            AppChoiceCard(
+                label = stringResource(Res.string.booking_gender_man),
+                selected = state.personGender == Gender.MALE,
+                onClick = { onAction(UiAction.OnGenderChange(Gender.MALE)) },
+                modifier = Modifier.weight(1f),
+                icon = AppIcons.Man,
+            )
+            AppChoiceCard(
+                label = stringResource(Res.string.booking_gender_woman),
+                selected = state.personGender == Gender.FEMALE,
+                onClick = { onAction(UiAction.OnGenderChange(Gender.FEMALE)) },
+                modifier = Modifier.weight(1f),
+                icon = AppIcons.Woman,
+            )
+        }
+        if (state.genderError) {
+            AppText(
+                text = stringResource(Res.string.booking_gender_error),
+                modifier = Modifier.padding(top = spacing.space6),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.colors.danger,
             )
         }
     }

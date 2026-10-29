@@ -22,6 +22,7 @@ import { DeletionDecision } from './DeletionDecision';
 import { SalonActions } from './SalonActions';
 import { SalonActivityTab } from './SalonActivityTab';
 import { SalonInsightsTab } from './SalonInsightsTab';
+import { BusinessBadges } from '../shared/BusinessBadges';
 import { BranchesTab } from './branches/BranchesTab';
 
 const TABS = ['overview', 'members', 'payout'] as const;
@@ -32,7 +33,11 @@ function Overview({ salon }: { salon: SalonDetails }) {
   const cities = useLocationOptions('cities');
   const placeholder = t('salons.none');
   const items = [
-    { key: 'gender', label: t('salons.gender'), value: t(`catalog.genders.${salon.gender}`) },
+    {
+      key: 'type',
+      label: t('business.type'),
+      value: <BusinessBadges businessType={salon.businessType} audience={salon.audience} />,
+    },
     {
       key: 'city',
       label: t('salons.city'),

@@ -8,6 +8,7 @@ import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.PriceRange
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.ServiceRef
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.salons.domain.repository.SalonFilterOptionsRepository
 import com.fab.wab.customer.feature.salons.domain.usecase.LoadFilterServicesUseCase
@@ -32,7 +33,7 @@ import kotlin.test.assertTrue
 private class SheetCatalogFake : CatalogRepository {
     val pages = mutableListOf<Int>()
     var perPage = 10
-    override suspend fun services(gender: Gender, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
+    override suspend fun services(gender: Gender, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
         pages += page
         return AppResult.Success(List(perPage) { CatalogService("s$page-$it", "Service $page-$it", "", null) })
     }

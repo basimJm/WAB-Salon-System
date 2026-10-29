@@ -16,6 +16,7 @@ class SalonSearchApi(private val client: HttpClient) {
             parameter(Q.PAGE, query.page)
             parameter(Q.PAGE_SIZE, query.pageSize)
             parameter(Q.GENDER, query.gender.code)
+            query.businessType?.let { parameter(Q.BUSINESS_TYPE, it.code) }
             query.text.takeIf { it.isNotBlank() }?.let { parameter(Q.TEXT, it) }
             query.filters.services.forEach { parameter(Q.SERVICE_IDS, it.id) }
             query.filters.priceRange?.let {
@@ -39,6 +40,7 @@ class SalonSearchApi(private val client: HttpClient) {
         const val PAGE = "page"
         const val PAGE_SIZE = "pageSize"
         const val GENDER = "gender"
+        const val BUSINESS_TYPE = "businessType"
         const val TEXT = "q"
         const val SERVICE_IDS = "serviceIds"
         const val MIN_PRICE = "minPrice"

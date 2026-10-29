@@ -55,7 +55,7 @@ internal object AuthDiscoveryActionEvents {
         is HomeContract.UiAction.OnServiceClick, is HomeContract.UiAction.OnSalonClick, is HomeContract.UiAction.OnFavoriteClick,
         HomeContract.UiAction.OnEnableLocationClick, -> ActionEvent.ByViewModel
         HomeContract.UiAction.OnNotificationsClick -> ActionEvent.Named(Events.NOTIFICATIONS_OPEN)
-        HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
+        is HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
         HomeContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         HomeContract.UiAction.OnRefresh, HomeContract.UiAction.OnRetry, HomeContract.UiAction.OnResume,
         HomeContract.UiAction.OnDialogDismiss,
@@ -64,7 +64,7 @@ internal object AuthDiscoveryActionEvents {
     fun allSalons(a: AllSalonsContract.UiAction): ActionEvent = when (a) {
         is AllSalonsContract.UiAction.OnTextChange, AllSalonsContract.UiAction.OnFilterClick, is AllSalonsContract.UiAction.OnChipRemove,
         is AllSalonsContract.UiAction.OnSalonClick, is AllSalonsContract.UiAction.OnFavoriteClick,
-        is AllSalonsContract.UiAction.OnFiltersApplied,
+        is AllSalonsContract.UiAction.OnFiltersApplied, is AllSalonsContract.UiAction.OnBusinessTypeSelect,
         -> ActionEvent.ByViewModel
         AllSalonsContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         AllSalonsContract.UiAction.OnLoadMore, AllSalonsContract.UiAction.OnRefresh, AllSalonsContract.UiAction.OnRetry,

@@ -8,7 +8,7 @@ import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
-import com.fab.wab.customer.core.domain.salon.SalonSummary
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
@@ -23,13 +23,11 @@ import com.fab.wab.customer.core.ui.permission.PermissionOutcome
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
 import com.fab.wab.customer.feature.home.domain.model.BannerAction
 import com.fab.wab.customer.feature.home.domain.model.HomeContent
-import com.fab.wab.customer.feature.home.domain.model.HomeSection
 import com.fab.wab.customer.feature.home.domain.usecase.GetCurrentLocationUseCase
 import com.fab.wab.customer.feature.home.domain.usecase.LoadHomeUseCase
 import com.fab.wab.customer.feature.home.presentation.analytics.HomeAnalytics
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.HomeDialog
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.NearestUi
-import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SalonSection
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SideEffect
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiState
@@ -112,23 +110,29 @@ class HomeViewModel(
             UiAction.OnNotificationsClick -> emitSideEffect(SideEffect.OpenNotifications)
             is UiAction.OnServiceClick -> {
                 track(HomeAnalytics.ACTION_SERVICE_CLICK, HomeAnalytics.PARAM_ID to event.serviceId)
-                val name = uiState.value.services.items.firstOrNull { it.id == event.serviceId }?.name
-                openSalons(serviceId = event.serviceId, serviceName = name)
+                val name = uiState.value.servicesOf(event.businessType).items.firstOrNull { it.id == event.serviceId }?.name
+                openSalons(serviceId = event.serviceId, serviceName = name, businessType = event.businessType)
             }
-            UiAction.OnServicesSeeMore -> uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it)) }
+            is UiAction.OnServicesSeeMore ->
+                uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it, event.businessType)) }
             is UiAction.OnSalonClick -> {
                 track(HomeAnalytics.ACTION_SALON_CLICK, HomeAnalytics.PARAM_ID to event.salonId)
                 emitSideEffect(SideEffect.OpenSalon(event.salonId, event.branchId))
             }
-            is UiAction.OnSeeAll -> openSalons(filter = event.section.filter())
+            is UiAction.OnSeeAll -> openSalons(filter = event.section.filter(), businessType = event.businessType)
             else -> Unit
         }
     }
 
-    /** S04 always opens for the gender of the selected tab (PRD S04 "selected gender"). */
-    private fun openSalons(serviceId: String? = null, serviceName: String? = null, filter: SalonListFilter? = null) {
+    /** S04 always opens for the gender of the selected tab (PRD S04 "selected gender"); clinic sections open it filtered to CLINIC. */
+    private fun openSalons(
+        serviceId: String? = null,
+        serviceName: String? = null,
+        filter: SalonListFilter? = null,
+        businessType: BusinessType? = null,
+    ) {
         val gender = uiState.value.gender ?: return
-        emitSideEffect(SideEffect.OpenAllSalons(gender, serviceId, serviceName, filter))
+        emitSideEffect(SideEffect.OpenAllSalons(gender, serviceId, serviceName, filter, businessType))
     }
 
     private fun applySession(session: SessionState) {
@@ -177,18 +181,7 @@ class HomeViewModel(
         }
     }
 
-    private fun apply(content: HomeContent, located: Boolean) = updateState {
-        copy(
-            loading = false,
-            refreshing = false,
-            hasContent = true,
-            banners = content.banners,
-            services = content.services,
-            recommended = content.recommended,
-            nearest = nearestOf(content.nearest, located),
-            unreadCount = if (signedIn) content.unreadCount else 0,
-        )
-    }
+    private fun apply(content: HomeContent, located: Boolean) = updateState { withContent(content, located) }
 
     private suspend fun currentLocationIfAllowed(): LocationData? =
         if (deps.permissions.isGranted(AppPermission.LOCATION) && deps.permissions.isLocationServiceEnabled()) {
@@ -199,7 +192,7 @@ class HomeViewModel(
 
     /** Back from the system settings (PRD S03 item 7 "after enabling → loads automatically"). */
     private fun resumeAfterSettings() {
-        if (uiState.value.nearest !is NearestUi.LocationOff || !uiState.value.hasContent) return
+        if (uiState.value.nearestSalons !is NearestUi.LocationOff || !uiState.value.hasContent) return
         scope.launch { if (currentLocationIfAllowed() != null) load(refresh = true) }
     }
 
@@ -260,13 +253,7 @@ class HomeViewModel(
         }
     }
 
-    private fun setFavorite(salonId: String, value: Boolean) = updateState {
-        copy(
-            recommended = recommended.mapSalon(salonId) { it.copy(isFavorite = value) },
-            nearest = (nearest as? NearestUi.Salons)?.let { it.copy(items = it.items.replace(salonId) { s -> s.copy(isFavorite = value) }) }
-                ?: nearest,
-        )
-    }
+    private fun setFavorite(salonId: String, value: Boolean) = updateState { withFavorite(salonId, value) }
 
     private fun track(action: String, vararg params: Pair<String, String>) {
         deps.analytics.trackAction(AnalyticsAction(action, analyticsParams { params.forEach { (k, v) -> text(k, v) } }))
@@ -277,23 +264,3 @@ class HomeViewModel(
         const val UNREAD_COUNT_KEY = "count"
     }
 }
-
-private fun nearestOf(section: HomeSection<SalonSummary>?, located: Boolean): NearestUi = when {
-    !located -> NearestUi.LocationOff
-    section == null || section.items.isEmpty() -> NearestUi.Empty
-    else -> NearestUi.Salons(section.items, section.hasMore)
-}
-
-private fun SalonSection.filter(): SalonListFilter = when (this) {
-    SalonSection.Recommended -> SalonListFilter.RECOMMENDED
-    SalonSection.Nearest -> SalonListFilter.NEAREST
-}
-
-private fun UiState.salon(id: String): SalonSummary? =
-    recommended.items.firstOrNull { it.id == id } ?: (nearest as? NearestUi.Salons)?.items?.firstOrNull { it.id == id }
-
-private fun HomeSection<SalonSummary>.mapSalon(id: String, transform: (SalonSummary) -> SalonSummary) =
-    copy(items = items.replace(id, transform))
-
-private fun List<SalonSummary>.replace(id: String, transform: (SalonSummary) -> SalonSummary) =
-    map { if (it.id == id) transform(it) else it }

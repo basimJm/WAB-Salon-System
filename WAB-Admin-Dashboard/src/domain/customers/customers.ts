@@ -1,5 +1,5 @@
 import type { Page, PageQuery } from '@/domain/shared/page';
-import type { SalonGender } from '@/domain/salons/salons';
+import type { PersonGender } from '@/domain/shared/businessType';
 
 export const CUSTOMER_STATUSES = ['ACTIVE', 'BLOCKED', 'DELETION_PENDING', 'DELETED'] as const;
 export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
@@ -8,7 +8,7 @@ export interface CustomerSummary {
   readonly id: string;
   readonly name: string;
   readonly phone: string;
-  readonly gender: SalonGender;
+  readonly gender: PersonGender;
   readonly cityId: string;
   readonly status: CustomerStatus;
   readonly registeredAt: string;
@@ -37,7 +37,7 @@ export interface CustomerDetails extends CustomerSummary {
 
 export interface CustomerQuery extends PageQuery {
   status?: CustomerStatus;
-  gender?: SalonGender;
+  gender?: PersonGender;
   cityId?: string;
   q?: string;
 }
@@ -83,7 +83,7 @@ export interface CustomerProfilePatch {
   firstName?: string;
   lastName?: string;
   email?: string;
-  gender?: SalonGender;
+  gender?: PersonGender;
   cityId?: string;
   areaId?: string;
   language?: 'ar' | 'en';

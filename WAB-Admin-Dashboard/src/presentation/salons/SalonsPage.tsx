@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
-import { SALON_GENDERS, SALON_STATES, SUBSCRIPTION_STATUSES } from '@/domain/salons/salons';
+import { SALON_STATES, SUBSCRIPTION_STATUSES } from '@/domain/salons/salons';
+import { AUDIENCES } from '@/domain/shared/businessType';
 import { ExportMenu } from '../components/data/ExportMenu';
 import { SearchField } from '../components/form/SearchField';
 import { Select } from '../components/form/Select';
@@ -12,12 +13,14 @@ import { useListController } from '../controllers/useListController';
 import { useExportRunner } from '../hooks/useExportRunner';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
+import { BUSINESS_TYPE_FILTER_KEY, businessTypeFilterOf } from '../shared/businessFilter';
+import { BusinessTypeFilter } from '../shared/BusinessTypeFilter';
 import { salonColumns } from './SalonColumns';
 import { SALON_FILTER_KEYS, salonExportParams, salonQueryOf } from './salonFilters';
 
 const OPTIONS = { filterKeys: SALON_FILTER_KEYS };
 
-/** Admin PRD A13 · All salons: state, gender, city, rating, subscription, recommended, bookings, created; filters and search. */
+/** Admin PRD A13 · All salons and clinics (§5.19): state, type + audience, city, rating, subscription, recommended, bookings, created; filters and search. */
 export default function SalonsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -49,9 +52,9 @@ export default function SalonsPage() {
       f('state') && t(`status.salon.${f('state')}`, { defaultValue: f('state') }),
     ),
     ...chip(
-      'gender',
-      t('salons.gender'),
-      f('gender') && t(`catalog.genders.${f('gender')}`, { defaultValue: f('gender') }),
+      'audience',
+      t('business.audience'),
+      f('audience') && t(`status.audience.${f('audience')}`, { defaultValue: f('audience') }),
     ),
     ...chip('city', t('salons.city'), f('city') && cityName(f('city'))),
     ...chip(
@@ -103,9 +106,13 @@ export default function SalonsPage() {
               all,
               ...SALON_STATES.map((s) => ({ value: s, label: t(`status.salon.${s}`) })),
             ])}
-            {select('gender', t('salons.gender'), [
+            <BusinessTypeFilter
+              value={businessTypeFilterOf(state)}
+              onChange={(type) => list.setFilter(BUSINESS_TYPE_FILTER_KEY, type ? [type] : [])}
+            />
+            {select('audience', t('business.audience'), [
               all,
-              ...SALON_GENDERS.map((g) => ({ value: g, label: t(`catalog.genders.${g}`) })),
+              ...AUDIENCES.map((a) => ({ value: a, label: t(`status.audience.${a}`) })),
             ])}
             {select('city', t('salons.city'), [all, ...cities])}
             {select('subscription', t('salons.subscription'), [

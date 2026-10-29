@@ -5,10 +5,16 @@ import { OPERATIONS } from '@/data/contract/generated/operations';
 import type { BranchScope, SalonEditRepository } from '@/domain/salonEdit/salonEdit';
 
 const O = OPERATIONS;
+/**
+ * Admin contract 1.12.0 still lists `gender` on the salon-edit profile while the server's profile service now
+ * answers `businessType` + `audience` (SRV-174): read it without `gender`, type and audience come from the salon.
+ */
+const profileData = () => dto.getSalonsByIdProfileDataSchema().omit({ gender: true });
+const patchedProfileData = () => dto.patchSalonsByIdProfileDataSchema().omit({ gender: true });
 const E = {
-  profile: defineEndpoint(O.getSalonsByIdProfile, { data: dto.getSalonsByIdProfileDataSchema }),
+  profile: defineEndpoint(O.getSalonsByIdProfile, { data: profileData }),
   patchProfile: defineEndpoint(O.patchSalonsByIdProfile, {
-    data: dto.patchSalonsByIdProfileDataSchema,
+    data: patchedProfileData,
     body: dto.patchSalonsByIdProfileBodySchema,
   }),
   gallery: defineEndpoint(O.getSalonsByIdGallery, { data: dto.getSalonsByIdGalleryDataSchema }),

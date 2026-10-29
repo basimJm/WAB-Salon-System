@@ -2,7 +2,9 @@ package com.fab.wab.customer.feature.salons.data
 
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsDataItem
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsDataItemBranch
+import com.fab.wab.customer.core.domain.salon.Audience
 import com.fab.wab.customer.core.domain.salon.BranchRef
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.feature.salons.data.repository.toDomain
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -11,10 +13,12 @@ import kotlin.test.assertNull
 /** One card per salon (BUSINESS_DOMAIN §5.17): place and distance of the nearest branch, branch count for the label. */
 class SalonCardMapperTest {
 
-    private fun item(branchCount: Double, branch: GetSalonsDataItemBranch?) = GetSalonsDataItem(
-        id = "s1", name = "Hifa Salon", rating = 4.5, reviewsCount = 12.0, locationText = "Mecca Street", isOpenNow = true,
-        isFavorite = false, distanceKm = 1.2, branchCount = branchCount, branch = branch,
-    )
+    private fun item(branchCount: Double, branch: GetSalonsDataItemBranch?, type: String = "SALON", audience: String = "FEMALE") =
+        GetSalonsDataItem(
+            id = "s1", name = "Hifa Salon", businessType = type, audience = audience, rating = 4.5, reviewsCount = 12.0,
+            locationText = "Mecca Street", isOpenNow = true,
+            isFavorite = false, distanceKm = 1.2, branchCount = branchCount, branch = branch,
+        )
 
     @Test
     fun cardCarriesTheNearestBranchAndTheBranchCount() {
@@ -24,6 +28,14 @@ class SalonCardMapperTest {
         assertEquals("Mecca Street", card.locationText)
         assertEquals(1.2, card.distanceKm)
         assertNull(card.title)
+    }
+
+    @Test
+    fun cardCarriesTheBusinessTypeAndAudience() {
+        val salon = item(1.0, null).toDomain()
+        assertEquals(BusinessType.SALON to Audience.FEMALE, salon.businessType to salon.audience)
+        val clinic = item(1.0, null, type = "CLINIC", audience = "BOTH").toDomain()
+        assertEquals(BusinessType.CLINIC to Audience.BOTH, clinic.businessType to clinic.audience)
     }
 
     @Test

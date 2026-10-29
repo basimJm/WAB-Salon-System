@@ -1,5 +1,6 @@
 import type { ApiClient } from '@/data/api/ApiClient';
-import { defineEndpoint } from '@/data/api/endpoint';
+import { defineEndpoint, optionalQuery } from '@/data/api/endpoint';
+import { MAX_PAGE_SIZE } from '@/constants/ui';
 import * as dto from '@/data/contract/generated/dto';
 import { OPERATIONS } from '@/data/contract/generated/operations';
 import type {
@@ -10,7 +11,10 @@ import type {
 } from '@/domain/shared/branches';
 
 const O = OPERATIONS;
-const list = defineEndpoint(O.getSalonsByIdBranches, { data: dto.getSalonsByIdBranchesDataSchema });
+const list = defineEndpoint(O.getSalonsByIdBranches, {
+  data: dto.getSalonsByIdBranchesDataSchema,
+  query: optionalQuery(dto.getSalonsByIdBranchesQuerySchema),
+});
 const create = defineEndpoint(O.postSalonsByIdBranches, {
   data: dto.postSalonsByIdBranchesDataSchema,
   body: dto.postSalonsByIdBranchesBodySchema,
@@ -46,7 +50,9 @@ export class RemoteBranchesRepository implements BranchesRepository {
    * server answers without it; see docs/E2E_RESULTS.md).
    */
   async list(salonId: string) {
-    return (await this.api.execute(list, { params: { id: salonId } })).data;
+    // One page of the largest size holds every branch (`salon.maxBranches` is far below it).
+    const query = { page: 1, pageSize: MAX_PAGE_SIZE };
+    return (await this.api.execute(list, { params: { id: salonId }, query })).data;
   }
 
   async create(salonId: string, input: BranchInput, reason: string) {

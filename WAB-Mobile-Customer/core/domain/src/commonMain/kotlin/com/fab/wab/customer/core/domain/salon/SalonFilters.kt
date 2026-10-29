@@ -23,9 +23,10 @@ data class SalonFilters(
     val isEmpty: Boolean get() = services.isEmpty() && priceRange == null && general == null && minRating == null
 }
 
-/** One `GET /salons` page; `location` only when the user allowed it (needed by [GeneralFilter.NEAREST]). */
+/** One `GET /salons` page; `location` only when the user allowed it (needed by [GeneralFilter.NEAREST]); `businessType` null = all. */
 data class SalonQuery(
     val gender: Gender,
+    val businessType: BusinessType? = null,
     val text: String = "",
     val filters: SalonFilters = SalonFilters(),
     val location: LocationData? = null,

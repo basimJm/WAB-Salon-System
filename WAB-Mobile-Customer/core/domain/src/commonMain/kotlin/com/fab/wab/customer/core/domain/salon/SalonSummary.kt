@@ -6,7 +6,8 @@ data class OpeningHours(val open: String, val close: String)
 /**
  * Salon card facts shared by Home, lists, search and favorites (PRD 8.0 shared card). Place, hours and distance are
  * those of [branch] (the nearest bookable one, else the main one); [branchCount] counts bookable branches (§5.17);
- * [title] is the Home nearest entry title ("Salon - Branch"), null elsewhere.
+ * [title] is the Home nearest entry title ("Salon - Branch"), null elsewhere; [businessType] + [audience] label the card
+ * (salon or clinic, Men / Women / Both, BUSINESS_DOMAIN §5.19).
  */
 data class SalonSummary(
     val id: String,
@@ -23,6 +24,8 @@ data class SalonSummary(
     val branchCount: Int = BranchRules.SINGLE_BRANCH,
     val branch: BranchRef? = null,
     val title: String? = null,
+    val businessType: BusinessType = BusinessType.SALON,
+    val audience: Audience? = null,
 ) {
     /** A Home nearest entry is one branch ("Salon - Branch"); every other card is the whole salon. */
     val isBranchEntry: Boolean get() = !title.isNullOrBlank()

@@ -1,14 +1,16 @@
-import {
-  SALON_GENDERS,
-  SALON_STATES,
-  SUBSCRIPTION_STATUSES,
-  type SalonQuery,
-} from '@/domain/salons/salons';
+import { SALON_STATES, SUBSCRIPTION_STATUSES, type SalonQuery } from '@/domain/salons/salons';
+import { AUDIENCES } from '@/domain/shared/businessType';
 import type { ListState } from '@/domain/shared/listState';
+import {
+  BUSINESS_TYPE_FILTER_KEY,
+  businessTypeFilterOf,
+  businessTypeParam,
+} from '../shared/businessFilter';
 
 export const SALON_FILTER_KEYS = [
   'state',
-  'gender',
+  BUSINESS_TYPE_FILTER_KEY,
+  'audience',
   'city',
   'subscription',
   'recommended',
@@ -19,7 +21,7 @@ const first = (state: ListState, key: string): string | undefined => state.filte
 /** The URL list state -> the API query (values the server does not know are dropped). */
 export function salonQueryOf(state: ListState): SalonQuery {
   const salonState = SALON_STATES.find((s) => s === first(state, 'state'));
-  const gender = SALON_GENDERS.find((g) => g === first(state, 'gender'));
+  const audience = AUDIENCES.find((a) => a === first(state, 'audience'));
   const subscription = SUBSCRIPTION_STATUSES.find((s) => s === first(state, 'subscription'));
   const recommended = first(state, 'recommended');
   const city = first(state, 'city');
@@ -27,7 +29,8 @@ export function salonQueryOf(state: ListState): SalonQuery {
     page: state.page,
     pageSize: state.pageSize,
     ...(salonState ? { state: salonState } : {}),
-    ...(gender ? { gender } : {}),
+    ...businessTypeParam(businessTypeFilterOf(state)),
+    ...(audience ? { audience } : {}),
     ...(city ? { cityId: city } : {}),
     ...(subscription ? { subscription } : {}),
     ...(recommended === 'true' || recommended === 'false'
@@ -39,13 +42,14 @@ export function salonQueryOf(state: ListState): SalonQuery {
 }
 
 /**
- * What a SALONS export accepts (SRV-126): state, gender, city, subscription and search. The recommended and
+ * What a SALONS export accepts (SRV-126, SRV-178): state, business type, audience, city, subscription and search. The recommended and
  * deletion-request switches have no export parameter, so the file holds every salon matching the other filters.
  */
 export function salonExportParams(q: SalonQuery): Record<string, unknown> {
   return {
     ...(q.state ? { state: q.state } : {}),
-    ...(q.gender ? { gender: q.gender } : {}),
+    ...businessTypeParam(q.businessType),
+    ...(q.audience ? { audience: q.audience } : {}),
     ...(q.cityId ? { cityId: q.cityId } : {}),
     ...(q.subscription ? { subscription: q.subscription } : {}),
     ...(q.q ? { q: q.q } : {}),

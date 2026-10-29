@@ -72,7 +72,8 @@ data class ReviewsPreview(val summary: RatingSummary, val latest: List<Review>)
 data class SalonDetails(
     val id: String,
     val name: String,
-    val gender: Gender?,
+    val businessType: BusinessType,
+    val audience: Audience?,
     val coverUrl: String?,
     val profileImageUrl: String?,
     val description: String?,
@@ -92,4 +93,10 @@ data class SalonDetails(
     val isFavorite: Boolean,
     val reviews: ReviewsPreview,
     val branches: List<SalonBranch> = emptyList(),
-)
+) {
+    /** The gender every booking person must have, or null for a BOTH salon or a clinic (§5.19). */
+    val lockedGender: Gender? get() = BusinessRules.lockedGender(businessType, audience)
+
+    /** Bride bookings only for FEMALE or BOTH salons (§5.19). */
+    val allowsBride: Boolean get() = BusinessRules.allowsBride(businessType, audience)
+}

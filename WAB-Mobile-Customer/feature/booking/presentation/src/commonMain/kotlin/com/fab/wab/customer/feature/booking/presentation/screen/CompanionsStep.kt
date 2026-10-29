@@ -37,6 +37,7 @@ import com.fab.wab.customer.feature.booking.presentation.resources.booking_compa
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_companion_remove
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_companions_counter
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_companions_subtitle
+import com.fab.wab.customer.feature.booking.presentation.resources.booking_companions_subtitle_any
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_companions_title
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_continue
 import com.fab.wab.customer.feature.booking.presentation.resources.booking_just_me
@@ -60,7 +61,9 @@ internal fun CompanionsStep(state: UiState, onAction: (UiAction) -> Unit) {
     ) {
         StepTitle(text = stringResource(Res.string.booking_companions_title), modifier = Modifier.padding(bottom = spacing.space6))
         AppText(
-            text = stringResource(Res.string.booking_companions_subtitle),
+            text = stringResource(
+                if (state.asksGender) Res.string.booking_companions_subtitle_any else Res.string.booking_companions_subtitle,
+            ),
             modifier = Modifier.padding(bottom = spacing.space16),
             style = AppTheme.typography.bodyMedium,
             color = colors.muted,

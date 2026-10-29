@@ -4,17 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
-import { documentKind, type ApplicationDetails } from '@/domain/applications/applications';
+import type { ApplicationDetails } from '@/domain/applications/applications';
 import { formatInstant } from '@/domain/shared/format';
 import { Button } from '../components/core/Button';
 import { KeyValue } from '../components/core/KeyValue';
 import { StatusBadge } from '../components/core/StatusBadge';
-import { DocumentViewer } from '../components/media/DocumentViewer';
 import { ReasonDialog } from '../components/overlay/ReasonDialog';
 import { useToast } from '../components/overlay/Toast';
 import { DetailPage } from '../components/templates/DetailPage';
 import { useLanguage } from '../hooks/useLanguage';
 import { useLocationOptions } from '../hooks/useLocationOptions';
+import { BusinessBadges } from '../shared/BusinessBadges';
+import { ApplicationDocuments } from './ApplicationDocuments';
 
 type Decision = 'approve' | 'reject' | null;
 
@@ -36,9 +37,14 @@ function Facts({ application }: { application: ApplicationDetails }) {
           },
           { key: 'phone', label: t('salons.phone'), value: application.owner?.phone, ltr: true },
           {
-            key: 'gender',
-            label: t('salons.gender'),
-            value: t(`catalog.genders.${application.gender}`),
+            key: 'type',
+            label: t('business.type'),
+            value: (
+              <BusinessBadges
+                businessType={application.businessType}
+                audience={application.audience}
+              />
+            ),
           },
           {
             key: 'city',
@@ -65,25 +71,12 @@ function Facts({ application }: { application: ApplicationDetails }) {
           },
         ]}
       />
-      <h2 className="wab-settings__title">{t('applications.documents')}</h2>
-      {application.documentUrls.length === 0 ? (
-        <p>{t('applications.noDocuments')}</p>
-      ) : (
-        application.documentUrls.map((url, i) => (
-          <DocumentViewer
-            key={url}
-            url={url}
-            kind={documentKind(url)}
-            label={t('applications.document', { n: i + 1, name: application.name })}
-            filename={`license-${String(i + 1)}`}
-          />
-        ))
-      )}
+      <ApplicationDocuments application={application} />
     </div>
   );
 }
 
-/** Admin PRD A14 · Review one application: submitted data, license documents (signed links), approve or reject. */
+/** Admin PRD A14 · Review one application: type + audience, license (and clinic medical license) documents, approve or reject. */
 export default function ApplicationReviewPage() {
   const { t } = useTranslation();
   const { id = '' } = useParams();
