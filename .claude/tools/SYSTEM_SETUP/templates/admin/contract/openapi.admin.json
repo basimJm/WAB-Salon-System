@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "__SYSTEM_NAME__ Admin API",
+    "title": "Admin API",
     "version": "1.0.0"
   },
   "servers": [
