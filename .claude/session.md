@@ -305,3 +305,17 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog status only, no product code written.
+
+### T-146 — SYSTEM_SETUP tool: create a new multi-project system from everything built in WAB (owner request 2026-10-28)
+- Project: repo root (`.claude/tools/SYSTEM_SETUP`)
+- Branch: `chore/system-setup-tool`
+- Status: IN REVIEW (PR into `customer`, like KMP_TEMPLATE)
+- Acceptance criteria:
+  - [x] `SYSTEM_SETUP` CLI (stdlib Python 3.9; interactive or flags + `--yes`): system name EN/AR, prefix, package root, npm scope, target, parts (server, admin, N KMP apps, SDK subset), URLs, Apple team, GitHub repo → generates every part + the workspace root, fills `projects.json`, runs `tasks.py check`, `git init` + `main` + one master per project
+  - [x] Templates proven by instantiation: server (`npm run verify`, 714 tests), admin (`gate.sh` GATE OK, browser login + items AR/EN), five SDK kinds (`npm run verify` each), KMP snapshot (re-stamped as a second identity: policy, detekt, host tests, assembleDevDebug, iOS link), workspace (hooks tests + tasks tests + `check` in a generated repo)
+  - [x] Server/admin/BUSINESS_DOMAIN §11 aligned (13 admin operations, 23 error codes); no source-system identities in templates
+  - [x] `knowledge/LESSONS.md` (145 lessons from the 12 session transcripts + memory) and `PLAYBOOKS.md` (10), copied into generated repos as `docs/knowledge/`
+  - [x] Full end-to-end generation of a 9-project sample system: server verify + admin gate green on the result
+- Tests: `python3 -m unittest discover -s .claude/tools/SYSTEM_SETUP/tests` (61 OK); KMP CI policy tests in the snapshot (93 OK)
+- Loops: 1/1 — regenerated the sample system after the alignment and re-ran server verify + admin gate; leak scan for template identities and WAB words
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — six parts built by separate agents on separate branches, merged without conflicts. DEVIATIONS: the KMP snapshot keeps its own `BUSINESS_DOMAIN.md` §11 (21 codes, diverging from the server's 23; its error-code policy reads the local file first — follow-up); not run on the generated system: KMP Gradle gate (proven on the snapshot re-instantiation only) and the SDK verifies (proven per kind by the SDK agent); `cli.py`/`prompts.py` exceed 300 lines.
