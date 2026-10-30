@@ -9,6 +9,17 @@
 
 ## Current task
 
+### MER-083 — Clinic regression + salon-or-clinic wording
+- Branch: `fix/mer-083-clinic-regression`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-30 "fix customer and merchant ... make loop test for customer merchant and admin test full flow regression"; BUSINESS_DOMAIN §5.19; operations `POST /merchant/v1/auth/*`, merchant bookings approve):
+  - [x] Regression on the local stack (server with SRV-179): clinic owner (Glow Aesthetic Clinic, demo `+962789020001`, fake OTP) signs in; the customer's clinic booking WAB-C5EC9K (CUS-101 journey) arrives as a new request sheet (person, Botox, Ahmad, 31/10 11:00, 120 JOD, pay on arrival) and Accept shows "booking accepted"
+  - [x] Texts seen before sign-in or by any member no longer say "salon" only: login welcome/subtitle, register entry, OTP register mode, not-registered dialog, inactive, access removed, notifications permission (AR + EN)
+- Tests: full gate (Terminal panel): policy_checks all ok, run_detekt.sh 0 findings, `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green; device (emulator-5554, dev debug against the local stack, AR): login screen shows the new texts
+- Loops: 1/1 — re-ran the device journey after the text change (login → OTP → home with the request); string-only change, no logic to unit-test (DEVIATION: no new unit test; policy I-checks cover AR/EN key parity)
+- Review: PASSED (SE ✔ (strings only), Mobile ✔ (AR natural wording, RTL unchanged), Architect ✔ (no contract change), QA ✔ (gate green; cross-app journey customer → merchant))
+- Notes: KNOWN (not fixed): on the first cold start right after install the splash took ~10 s and the logo slot stayed empty for several seconds (debug build, fresh install); later starts are normal. DEVICE SETUP (local only, never committed): `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000`, untracked `androidApp/src/devDebug/AndroidManifest.xml`.
+
 ### MER-082 — Animated brand logo on the launch/config screen
 - Branch: `feat/mer-082-animated-logo`
 - Status: IN PROGRESS
