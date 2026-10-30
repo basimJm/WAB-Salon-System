@@ -17,6 +17,7 @@
 - Acceptance criteria (BUSINESS_DOMAIN §5.19 demo businesses; operations `GET /customer/v1/salons/{salonId}` and every page that lists the business staff):
   - [x] Root cause: the demo business seed (SRV-174) built staff photo keys from labels like `abdoun:staff0`; ':' is not a valid object key, so `storage.getPublicUrl` threw `RangeError invalid object key` and the details of both clinics (and Unity Salon) answered 500 INTERNAL (reproduced on the hosted dev API and on a local stack)
   - [x] Seed key uses '-' (same rule as `salons.ts`); every stored file key of the demo businesses passes `assertObjectKey`
+  - [x] `docs/DEMO_ACCOUNTS.md` lists the clinic and BOTH-salon accounts (owners, managers, staff; `+962 78902 0xxx`)
   - [x] Databases seeded before the fix: `repairDemoBusinessPhotoKeys` sets the valid key only where the stored key fails `OBJECT_KEY_PATTERN` (a merchant-changed valid photo is never touched); runs in `seedDemoData` (so also on start with `SEED_DEMO_ON_START`)
 - Tests: `tests/businessTypes.test.ts` (+2: valid keys, repair rows + filter), `tests/devSeed.test.ts` (report field); local stack: both clinic details 500 → 200 after re-seeding the same database
 - API docs: no change

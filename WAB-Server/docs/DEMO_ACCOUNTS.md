@@ -69,6 +69,27 @@ Roles: the **owner** sees every branch and has every permission; a **branch mana
 | Gentlemen's Corner | Um Uthaina | EMPLOYEE | Fadi Fayez | +962789010023 |
 | Gentlemen's Corner | Um Uthaina | EMPLOYEE | Saif Haddad | +962789010024 |
 
+## Beauty clinics and the salon for men and women (§5.19, SRV-174)
+
+Every clinic serves men and women (`BOTH`); Unity Salon is a salon for both. Numbers use the `+962 78902 0xxx` block. Sign in to the merchant app with the number and the dev OTP code.
+
+| Business | Type / audience | Branch | Role | Name | Phone |
+|---|---|---|---|---|---|
+| Derma Plus Clinic | CLINIC / BOTH | — | OWNER | Majd Odeh | +962789020006 |
+| Derma Plus Clinic | CLINIC / BOTH | Gardens | MANAGER | Zaid Hijazi | +962789020007 |
+| Derma Plus Clinic | CLINIC / BOTH | Khalda | MANAGER | Laith Abbadi | +962789020009 |
+| Derma Plus Clinic | CLINIC / BOTH | Gardens | EMPLOYEE | Aya Zoubi | +962789020008 |
+| Derma Plus Clinic | CLINIC / BOTH | Khalda | EMPLOYEE | Tala Shami | +962789020010 |
+| Glow Aesthetic Clinic | CLINIC / BOTH | — | OWNER | Khaled Khoury | +962789020001 |
+| Glow Aesthetic Clinic | CLINIC / BOTH | Abdoun | MANAGER | Ahmad Nasser | +962789020002 |
+| Glow Aesthetic Clinic | CLINIC / BOTH | Sweifieh | MANAGER | Fadi Masri | +962789020004 |
+| Glow Aesthetic Clinic | CLINIC / BOTH | Abdoun | EMPLOYEE | Hala Saleh | +962789020003 |
+| Glow Aesthetic Clinic | CLINIC / BOTH | Sweifieh | EMPLOYEE | Maya Qasem | +962789020005 |
+| Unity Salon | SALON / BOTH | — | OWNER | Tareq Tamimi | +962789020011 |
+| Unity Salon | SALON / BOTH | Jubeiha | MANAGER | Mohammad Smadi | +962789020012 |
+| Unity Salon | SALON / BOTH | Jubeiha | EMPLOYEE | Yara Rawashdeh | +962789020013 |
+| Unity Salon | SALON / BOTH | Jubeiha | EMPLOYEE | Anas Majali | +962789020014 |
+
 ## What each extra branch has
 
 Its own address and map point in its Amman area, weekly hours (one day off), phone, the salon's services at its own prices, staff with skills and working days, one closure day and one staff leave (both after the booked period), about 45–55 bookings from 4 weeks ago to 10 days ahead (at least one per open day, so today or tomorrow always has appointments when the seed runs) in every status — PENDING, APPROVED, COMPLETED, NO_SHOW, REJECTED, CANCELLED_BY_CUSTOMER / SALON, AUTO_CANCELLED — with companions and brides (women's branches), their online payments, refunds and ledger lines, 15–30 reviews (approved, pending and rejected; salon and staff), and the notifications the owner, the branch manager and the customers would have received. Ratings and customer counts are recomputed from the stored reviews and bookings after each run.
