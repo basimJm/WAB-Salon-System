@@ -9,7 +9,9 @@ import { ConflictError, ExternalServiceError, UnauthorizedError } from '../../ut
 import { toMemberProfile, type MemberProfile } from '../auth/merchantAuth.service';
 import type { PhoneInput, PhoneVerifier } from '../auth/phoneVerifier';
 import type { OtpGate } from '../otp/otpGate.service';
-import type { UploadVerifier } from '../uploads/uploads.service';
+import type { FileSlots } from '../files/fileSlots.service';
+import { applySlotPatch } from '../files/slotPatch';
+import { SLOT_KEYS } from '../../constants/uploads';
 
 /** "My account" (M25): the session profile plus what the screen shows. */
 export interface MemberSelfView extends MemberProfile {
@@ -43,7 +45,8 @@ export interface MemberSelfService {
 export interface MemberSelfDeps {
   readonly members: Pick<MembersRepository, 'findById' | 'findByPhone' | 'patch'>;
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
-  readonly uploads: Pick<UploadVerifier, 'assertConfirmed'>;
+  /** The member photo is a file slot (SRV-181): replaced in place, removed through the outbox. */
+  readonly files: Pick<FileSlots, 'replace' | 'remove'>;
   readonly phones: PhoneVerifier;
   readonly otpGate: Pick<OtpGate, 'reset'>;
   readonly lifecycle?: Pick<AccountLifecycleService, 'deactivateMember'>;
@@ -57,7 +60,7 @@ const phoneTaken = (): ConflictError =>
  * branch stay with the owner (team management); a deactivated member is treated as signed out.
  */
 export const createMemberSelfService = (deps: MemberSelfDeps): MemberSelfService => {
-  const { members, storage, uploads, phones, otpGate } = deps;
+  const { members, storage, files, phones, otpGate } = deps;
 
   const view = (m: Entity<MemberRaw>): MemberSelfView => ({
     ...toMemberProfile(m),
@@ -81,22 +84,31 @@ export const createMemberSelfService = (deps: MemberSelfDeps): MemberSelfService
 
     async update({ memberId, patch }) {
       const member = await active(memberId);
-      if (typeof patch.photoKey === 'string') {
-        // Only a photo this member uploaded may become their photo.
-        await uploads.assertConfirmed({
-          keys: [patch.photoKey],
+      const salonId = String(member.salonId);
+      await applySlotPatch(files, {
+        target: {
           purpose: 'MEMBER_PHOTO',
-          field: 'body.photoKey',
-          accept: (upload) => upload.ownerType === 'MEMBER' && upload.ownerId === member.id,
-        });
-      }
+          key: SLOT_KEYS.memberPhoto(salonId, member.id),
+          ownerType: 'MEMBER',
+          ownerId: member.id,
+          salonId,
+        },
+        current: member.photoKey,
+        value: patch.photoKey,
+        field: 'body.photoKey',
+        // Only a photo this member uploaded may become their photo.
+        accept: (upload) => upload.ownerType === 'MEMBER' && upload.ownerId === member.id,
+        write: async (ref) => {
+          await members.patch(
+            member.id,
+            ref === null ? { set: {}, unset: ['photoKey'] } : { set: { photoKey: ref } },
+          );
+        },
+      });
       const set: Record<string, unknown> = {};
       if (patch.firstName !== undefined) set['firstName'] = patch.firstName;
       if (patch.lastName !== undefined) set['lastName'] = patch.lastName;
-      if (typeof patch.photoKey === 'string') set['photoKey'] = patch.photoKey;
-      return saved(
-        await members.patch(member.id, { set, unset: patch.photoKey === null ? ['photoKey'] : [] }),
-      );
+      return saved(await members.patch(member.id, { set }));
     },
 
     async changePhone({ memberId, phone: input, otpToken }) {

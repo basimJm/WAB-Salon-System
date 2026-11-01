@@ -20,6 +20,7 @@ import type {
   UploadUrlRequest,
   WriteObjectRequest,
 } from './types';
+import { objectKeyOf, parseFileRef, withVersion } from './fileRef';
 import { assertContentType, assertObjectKey, assertPositiveInteger, assertTtl } from './validation';
 
 interface PendingUpload {
@@ -111,15 +112,18 @@ export class FakeStorageProvider implements StorageProvider {
     });
   }
 
-  getPublicUrl(key: string): string {
+  getPublicUrl(ref: string): string {
+    const parsed = parseFileRef(ref);
+    const { key } = parsed;
     assertObjectKey(key);
     const known = this.objects.get(key) ?? this.pending.get(key);
     if (known?.visibility === 'PRIVATE') throw new RangeError('object is private');
-    return `${this.cdnBaseUrl}/${encodeKey(key)}`;
+    return withVersion(`${this.cdnBaseUrl}/${encodeKey(key)}`, parsed);
   }
 
-  getSignedUrl({ key, expiresInSec }: SignedUrlRequest): Promise<string> {
+  getSignedUrl({ key: ref, expiresInSec }: SignedUrlRequest): Promise<string> {
     return settle(() => {
+      const key = objectKeyOf(ref);
       assertObjectKey(key);
       assertTtl(expiresInSec);
       const expires = this.now().getTime() + expiresInSec * MS_PER_SECOND;
@@ -130,8 +134,9 @@ export class FakeStorageProvider implements StorageProvider {
     });
   }
 
-  read(key: string): Promise<Buffer | null> {
+  read(ref: string): Promise<Buffer | null> {
     return settle(() => {
+      const key = objectKeyOf(ref);
       assertObjectKey(key);
       return this.objects.get(key)?.body ?? null;
     });
@@ -145,8 +150,9 @@ export class FakeStorageProvider implements StorageProvider {
     });
   }
 
-  delete(keys: readonly string[]): Promise<void> {
+  delete(refs: readonly string[]): Promise<void> {
     return settle(() => {
+      const keys = refs.map(objectKeyOf);
       for (const key of keys) assertObjectKey(key);
       for (const key of keys) {
         this.pending.delete(key);
@@ -168,8 +174,9 @@ export class FakeStorageProvider implements StorageProvider {
     });
   }
 
-  stat(key: string): Promise<ObjectInfo | null> {
+  stat(ref: string): Promise<ObjectInfo | null> {
     return settle(() => {
+      const key = objectKeyOf(ref);
       assertObjectKey(key);
       const stored = this.objects.get(key);
       if (stored === undefined) return null;

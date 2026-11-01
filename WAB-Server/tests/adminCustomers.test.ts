@@ -40,7 +40,7 @@ const lifecycle = createAccountLifecycleService({
       return Promise.resolve(0);
     },
   } as never,
-  storage: {} as never,
+  files: { remove: () => Promise.resolve() },
   audit,
   access: { accessRevoked: () => Promise.resolve() },
   settings: { get: () => Promise.resolve(30) } as never,

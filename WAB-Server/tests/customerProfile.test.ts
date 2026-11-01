@@ -7,9 +7,9 @@ import { FakeStorageProvider } from '../src/providers/storage';
 import { CustomersRepository } from '../src/repositories/identity.repository';
 import { AreasRepository, CitiesRepository } from '../src/repositories/locations.repository';
 import { signAccessToken } from '../src/utils/auth/accessToken';
-import { ValidationError } from '../src/utils/errors';
 import { createLogger } from '../src/utils/logger';
 import { createFakeModel } from './helpers/fakeModel';
+import { fileSlotsKit } from './helpers/fileSlots';
 
 const logger = createLogger({ level: 'silent' });
 const SECRET = 'a'.repeat(48);
@@ -19,7 +19,7 @@ const m = {
   areas: createFakeModel(),
 };
 const storage = new FakeStorageProvider();
-const confirmed = new Set<string>();
+const kit = fileSlotsKit(storage);
 const deletions: string[] = [];
 const app = createApp({
   logger,
@@ -28,16 +28,7 @@ const app = createApp({
       customers: new CustomersRepository(m.customers.model as never),
       cities: new CitiesRepository(m.cities.model as never),
       areas: new AreasRepository(m.areas.model as never),
-      uploads: {
-        assertConfirmed: ({ keys, accept }) => {
-          const ok = keys.every((key) => confirmed.has(key));
-          const mine =
-            accept?.({ ownerType: 'CUSTOMER', ownerId: me.toHexString() } as never) ?? true;
-          return ok && mine
-            ? Promise.resolve()
-            : Promise.reject(new ValidationError({ details: [] }));
-        },
-      },
+      files: kit.slots,
       storage,
       lifecycle: {
         requestCustomerDeletion: ({ customerId }) => {
@@ -81,7 +72,8 @@ const setAvatar = (key: string): void => {
 
 beforeEach(() => {
   for (const f of Object.values(m)) f.docs.length = 0;
-  confirmed.clear();
+  kit.uploadsModel.docs.length = 0;
+  kit.cleanupsModel.docs.length = 0;
   deletions.length = 0;
   m.customers.docs.push({
     _id: me,
@@ -179,29 +171,43 @@ describe('PATCH /customer/v1/profile', () => {
 });
 
 describe('avatar', () => {
-  it('sets a confirmed upload and removes the previous file', async () => {
+  const mine = { purpose: 'CUSTOMER_AVATAR', ownerType: 'CUSTOMER', ownerId: me.toHexString() } as const;
+  const slotKey = (): string => `customers/${me.toHexString()}/profile/avatar`;
+
+  it('replaces the photo in its slot (same key, new version) and queues the old files', async () => {
     storage.simulateUpload('customers/a/old.jpg', { contentType: 'image/jpeg', size: 10 });
     setAvatar('customers/a/old.jpg');
-    confirmed.add('customers/a/new.jpg');
+    await kit.confirmed('customers/a/new.jpg', mine);
     const res = await call('put', '/avatar', { key: 'customers/a/new.jpg' });
     expect(res.status).toBe(200);
-    expect(bodyOf(res).data['avatarUrl']).toContain('customers/a/new.jpg');
+    expect(bodyOf(res).data['avatarUrl']).toContain(`${slotKey()}?v=1`);
+    expect(customer()?.['avatarKey']).toBe(`${slotKey()}?v=1`);
+    expect(kit.queued()).toEqual(expect.arrayContaining(['customers/a/new.jpg', 'customers/a/old.jpg']));
+    await kit.cleanup.drain();
     expect(storage.has('customers/a/old.jpg')).toBe(false);
+    expect(storage.has(slotKey())).toBe(true);
+    await kit.confirmed('customers/a/newer.jpg', mine);
+    const again = await call('put', '/avatar', { key: 'customers/a/newer.jpg' });
+    expect(bodyOf(again).data['avatarUrl']).toContain(`${slotKey()}?v=2`);
+    expect(kit.uploadsModel.docs.filter((d) => d['key'] === slotKey())).toHaveLength(1);
   });
 
   it('refuses a key that was never confirmed for this customer', async () => {
     const res = await call('put', '/avatar', { key: 'customers/a/none.jpg' });
     expect(res.status).toBe(400);
     expect(customer()?.['avatarKey']).toBeUndefined();
+    await kit.confirmed('customers/b/theirs.jpg', { ...mine, ownerId: id().toHexString() });
+    expect((await call('put', '/avatar', { key: 'customers/b/theirs.jpg' })).status).toBe(400);
   });
 
   it('deletes the photo and its file; deleting twice is fine', async () => {
-    storage.simulateUpload('customers/a/p.jpg', { contentType: 'image/jpeg', size: 10 });
-    setAvatar('customers/a/p.jpg');
+    await kit.confirmed('customers/a/p.jpg', mine);
+    await call('put', '/avatar', { key: 'customers/a/p.jpg' });
     const res = await call('delete', '/avatar');
     expect(bodyOf(res).data['avatarUrl']).toBeNull();
     expect(customer()?.['avatarKey']).toBeUndefined();
-    expect(storage.has('customers/a/p.jpg')).toBe(false);
+    await kit.cleanup.drain();
+    expect(storage.has(slotKey())).toBe(false);
     expect((await call('delete', '/avatar')).status).toBe(200);
   });
 });

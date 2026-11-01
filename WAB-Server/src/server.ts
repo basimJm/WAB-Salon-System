@@ -127,6 +127,12 @@ import { ClosuresRepository } from './repositories/closures.repository';
 import { createGalleryService } from './domain/gallery/gallery.service';
 import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
+import { createFileSlots } from './domain/files/fileSlots.service';
+import { createStorageCleanup } from './domain/files/storageCleanup.service';
+import { FILE_SLOT_LOCK, FILE_SLOT_LOCK_PREFIX } from './constants/uploads';
+import { lockKey } from './utils/redis/keys';
+import { withLock } from './utils/redis/lock';
+import { StorageCleanupsRepository } from './repositories/storageCleanups.repository';
 import { UploadsRepository } from './repositories/uploads.repository';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
 import { SubscriptionsRepository } from './repositories/subscriptions.repository';
@@ -387,8 +393,9 @@ const buildServices = (
   const pages = new ContentPagesRepository();
   const adminGuard = requireAuth('admin', config.auth.accessSecret);
   const variants = createImageVariants({ storage: providers.storage, logger });
+  const uploadsRepository = new UploadsRepository();
   const uploads = createUploadsService({
-    uploads: new UploadsRepository(),
+    uploads: uploadsRepository,
     storage: providers.storage,
     settings,
     afterConfirm: ({ key }) => {
@@ -397,6 +404,25 @@ const buildServices = (
         logger.error({ err: error, key }, 'image variants failed');
       });
     },
+  });
+  // File lifecycle (SRV-181): objects are deleted through the outbox after the database lets go of
+  // them; single-image fields are slots replaced in place under a per-slot Redis lock.
+  const storageCleanup = createStorageCleanup({
+    cleanups: new StorageCleanupsRepository(),
+    uploads: uploadsRepository,
+    storage: providers.storage,
+    logger,
+    drainOnEnqueue: true,
+  });
+  const fileSlots = createFileSlots({
+    uploads: uploadsRepository,
+    verifier: uploads,
+    storage: providers.storage,
+    cleanup: storageCleanup,
+    variants,
+    logger,
+    lock: (slotKey, task) =>
+      withLock(redis, lockKey(FILE_SLOT_LOCK_PREFIX, slotKey), () => task(), FILE_SLOT_LOCK),
   });
   const salonServices = new SalonServicesRepository();
   // Bookings come with the booking module (SRV-071); until then the checks find nothing.
@@ -459,7 +485,7 @@ const buildServices = (
     members: new MembersRepository(),
     installations: new InstallationsRepository(),
     refreshTokens: phoneServices.refreshTokens,
-    storage: providers.storage,
+    files: fileSlots,
     audit,
     settings,
     logger,
@@ -468,7 +494,7 @@ const buildServices = (
     customers: new CustomersRepository(),
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
-    uploads,
+    files: fileSlots,
     storage: providers.storage,
     lifecycle: accountLifecycle,
     logger,
@@ -747,6 +773,7 @@ const buildServices = (
       adminEvents.overviewTick();
     },
     onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
+    cleanupStorage: () => storageCleanup.drain(),
     logger,
   });
   Object.assign(jobs.handlers, periodic.handlers);
@@ -870,6 +897,7 @@ const buildServices = (
     phones: createPhoneVerifier(phoneServices),
     storage: providers.storage,
     uploads,
+    files: fileSlots,
     deactivationConflicts: conflictFinder.deactivation,
   });
   const salonDeletionService = createSalonDeletionService({
@@ -1025,7 +1053,7 @@ const buildServices = (
     memberSelf: createMemberSelfService({
       members: new MembersRepository(),
       storage: providers.storage,
-      uploads,
+      files: fileSlots,
       phones: createPhoneVerifier(phoneServices),
       otpGate,
       lifecycle: accountLifecycle,

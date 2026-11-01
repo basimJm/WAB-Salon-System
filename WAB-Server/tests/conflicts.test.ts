@@ -254,6 +254,7 @@ describe('wired into the services', () => {
         phones: { resolve: () => Promise.reject(new Error('x')) },
         storage: { getPublicUrl: (k: string) => k },
         uploads: { assertConfirmed: () => Promise.resolve() },
+        files: { replace: () => Promise.reject(new Error('unused')), remove: () => Promise.resolve() },
         deactivationConflicts: finder.deactivation,
       }),
       salonProfile: {
