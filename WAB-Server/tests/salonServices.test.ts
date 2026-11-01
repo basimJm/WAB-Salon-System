@@ -43,6 +43,7 @@ const decided: Record<string, unknown>[] = [];
 const salonsRepo = new SalonsRepository(salonsM.model as never);
 const catalogRepo = new CatalogServicesRepository(catalogM.model as never);
 const storage = new FakeStorageProvider();
+const queuedMedia: string[] = [];
 const app = createApp({
   logger,
   services: {
@@ -60,6 +61,12 @@ const app = createApp({
       services: new SalonServicesRepository(servicesM.model as never),
       storage,
       uploads: verifier,
+      cleanup: {
+        enqueue: (keys) => {
+          queuedMedia.push(...keys.filter((k): k is string => k !== undefined));
+          return Promise.resolve();
+        },
+      },
       state: {
         recompute: (id) => {
           recomputes.push(id);
@@ -270,6 +277,27 @@ describe('salon services', () => {
     expect(checks.at(-1)?.accept?.({ salonId: womenSalon.toHexString() } as never)).toBe(true);
     expect(checks.at(-1)?.accept?.({ salonId: 'x' } as never)).toBe(false);
     expect(String((bodyOf(ok).data['mediaUrls'] as string[])[0])).toContain('services/good.jpg');
+  });
+
+  it('media taken off a service are queued for deletion with their variants (SRV-182)', async () => {
+    const owner = member('OWNER', []);
+    queuedMedia.length = 0;
+    const created = await add(owner, {
+      catalogServiceId: catalogEntry('FEMALE'),
+      ...BASE,
+      mediaKeys: ['services/a.jpg', 'services/b.jpg'],
+    });
+    const id = String(bodyOf(created).data['id']);
+    const res = await request(app)
+      .patch(`/merchant/v1/salon/services/${id}`)
+      .set(owner)
+      .send({ mediaKeys: ['services/b.jpg'] });
+    expect(res.status).toBe(200);
+    expect(queuedMedia).toEqual([
+      'services/a.jpg',
+      'services/a_thumb.webp',
+      'services/a_medium.webp',
+    ]);
   });
 
   it('updates fields, clears the description with null, switches off with active=false', async () => {

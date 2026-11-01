@@ -40,6 +40,7 @@ const memoryLock = (): SlotLock => {
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- test rig, inferred shape
 const setup = (clock: { now: Date } = { now: AT }) => {
   const uploadsModel = createFakeModel();
   const cleanupsModel = createFakeModel();
@@ -109,7 +110,8 @@ const setup = (clock: { now: Date } = { now: AT }) => {
       accept: (upload) => upload.ownerType === 'CUSTOMER' && upload.ownerId === owner,
       commit,
     });
-  const slotRows = () => uploadsModel.docs.filter((doc) => doc['key'] === target.key);
+  const slotRows = (): Record<string, unknown>[] =>
+    uploadsModel.docs.filter((doc) => doc['key'] === target.key);
   return {
     uploadsModel,
     cleanupsModel,

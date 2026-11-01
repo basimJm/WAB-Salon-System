@@ -84,7 +84,7 @@ export const createMemberSelfService = (deps: MemberSelfDeps): MemberSelfService
 
     async update({ memberId, patch }) {
       const member = await active(memberId);
-      const salonId = String(member.salonId);
+      const { salonId } = member;
       await applySlotPatch(files, {
         target: {
           purpose: 'MEMBER_PHOTO',

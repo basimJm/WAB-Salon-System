@@ -28,6 +28,13 @@ export const LICENSE_DOCUMENTS_MAX = 5;
 export const STORAGE_KEY_MAX_LENGTH = 1_024;
 /** Server-generated storage keys: path segments of safe characters. */
 export const STORAGE_KEY_PATTERN = /^[A-Za-z0-9_-]+(\/[A-Za-z0-9._-]+)*$/;
+/**
+ * A single-image field (file slot, SRV-181) also accepts the reference the API returned for it
+ * (`<key>?v=<version>`), so an app can send back what it read without changing anything. Same key rule
+ * as the object store (`OBJECT_KEY_PATTERN`: no empty, `.` or `..` segment).
+ */
+export const FILE_REF_PATTERN =
+  /^[A-Za-z0-9_-][A-Za-z0-9._-]*(\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\?v=[1-9]\d{0,9})?$/;
 
 /** A new salon starts with every day off; the owner sets real hours while completing the profile. */
 export const SCHEDULE_DAY_ORDER: readonly DayOfWeek[] = [

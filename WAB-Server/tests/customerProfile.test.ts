@@ -171,7 +171,11 @@ describe('PATCH /customer/v1/profile', () => {
 });
 
 describe('avatar', () => {
-  const mine = { purpose: 'CUSTOMER_AVATAR', ownerType: 'CUSTOMER', ownerId: me.toHexString() } as const;
+  const mine = {
+    purpose: 'CUSTOMER_AVATAR',
+    ownerType: 'CUSTOMER',
+    ownerId: me.toHexString(),
+  } as const;
   const slotKey = (): string => `customers/${me.toHexString()}/profile/avatar`;
 
   it('replaces the photo in its slot (same key, new version) and queues the old files', async () => {
@@ -182,7 +186,9 @@ describe('avatar', () => {
     expect(res.status).toBe(200);
     expect(bodyOf(res).data['avatarUrl']).toContain(`${slotKey()}?v=1`);
     expect(customer()?.['avatarKey']).toBe(`${slotKey()}?v=1`);
-    expect(kit.queued()).toEqual(expect.arrayContaining(['customers/a/new.jpg', 'customers/a/old.jpg']));
+    expect(kit.queued()).toEqual(
+      expect.arrayContaining(['customers/a/new.jpg', 'customers/a/old.jpg']),
+    );
     await kit.cleanup.drain();
     expect(storage.has('customers/a/old.jpg')).toBe(false);
     expect(storage.has(slotKey())).toBe(true);

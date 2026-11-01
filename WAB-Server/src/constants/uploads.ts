@@ -171,7 +171,8 @@ export const SLOT_KEYS = {
   memberPhoto: (salonId: string, memberId: string): string =>
     `salons/${salonId}/staff/${memberId}/photo`,
   catalogImage: (catalogServiceId: string): string => `catalog/${catalogServiceId}/image`,
-  bannerImage: (bannerId: string): string => `banners/${bannerId}/image`,
+  bannerImage: (bannerId: string, language: string): string =>
+    `banners/${bannerId}/image-${language}`,
 } as const;
 /** Redis lock of one slot while its object and reference change (concurrent replacements queue). */
 export const FILE_SLOT_LOCK_PREFIX = 'file-slot';

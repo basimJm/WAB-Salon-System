@@ -1,6 +1,16 @@
-import { createFileSlots, type FileSlots, type SlotLock } from '../../src/domain/files/fileSlots.service';
-import { createStorageCleanup, type StorageCleanup } from '../../src/domain/files/storageCleanup.service';
-import { createUploadsService, type UploadVerifier } from '../../src/domain/uploads/uploads.service';
+import {
+  createFileSlots,
+  type FileSlots,
+  type SlotLock,
+} from '../../src/domain/files/fileSlots.service';
+import {
+  createStorageCleanup,
+  type StorageCleanup,
+} from '../../src/domain/files/storageCleanup.service';
+import {
+  createUploadsService,
+  type UploadVerifier,
+} from '../../src/domain/uploads/uploads.service';
 import type { UploadOwnerType, UploadPurpose } from '../../src/constants/uploads';
 import type { FakeStorageProvider } from '../../src/providers/storage';
 import { StorageCleanupsRepository } from '../../src/repositories/storageCleanups.repository';
@@ -31,7 +41,12 @@ export interface FileSlotsKit {
   /** A confirmed temporary upload (presign + PUT + confirm) with its object in storage. */
   confirmed(
     key: string,
-    owner: { purpose: UploadPurpose; ownerType: UploadOwnerType; ownerId: string; salonId?: string },
+    owner: {
+      purpose: UploadPurpose;
+      ownerType: UploadOwnerType;
+      ownerId: string;
+      salonId?: string;
+    },
     contentType?: string,
   ): Promise<string>;
   /** Object keys waiting in the cleanup outbox. */
@@ -86,7 +101,10 @@ export const fileSlotsKit = (storage: FakeStorageProvider): FileSlotsKit => {
         key,
         body: Buffer.from(`content of ${key}`),
         contentType,
-        visibility: owner.purpose === 'LICENSE_DOCUMENT' || owner.purpose === 'MEDICAL_LICENSE' ? 'PRIVATE' : 'PUBLIC',
+        visibility:
+          owner.purpose === 'LICENSE_DOCUMENT' || owner.purpose === 'MEDICAL_LICENSE'
+            ? 'PRIVATE'
+            : 'PUBLIC',
       });
       return key;
     },

@@ -34,11 +34,14 @@ import { optionalAuth, requireAuth } from './middlewares/auth';
 import { createContentService } from './domain/content';
 import { ContentPagesRepository, FaqsRepository } from './repositories/content.repository';
 import { createAdminBannerService } from './domain/adminCrud/banners';
+import { withAdminImageSlots } from './domain/adminCrud/imageSlots';
+import { BANNER_IMAGE_FIELDS, CATALOG_IMAGE_FIELDS } from './domain/adminCrud/imageFields';
 import { createBannersService } from './domain/banners';
 import { BannersRepository } from './repositories/banners.repository';
 import { createAdminCrud } from './domain/adminCrud/adminCrud.service';
 import { createCatalogService } from './domain/catalog';
 import type { CatalogServiceRaw } from './models/catalogService.model';
+import type { BannerRaw } from './models/banner.model';
 import { CatalogServicesRepository } from './repositories/catalog.repository';
 import { createSalonApplicationService } from './domain/salons/salonApplication.service';
 import { SalonsRepository } from './repositories/salons.repository';
@@ -414,6 +417,8 @@ const buildServices = (
     logger,
     drainOnEnqueue: true,
   });
+  const catalogStore = new CatalogServicesRepository();
+  const bannersStore = new BannersRepository();
   const fileSlots = createFileSlots({
     uploads: uploadsRepository,
     verifier: uploads,
@@ -845,6 +850,7 @@ const buildServices = (
     storage: providers.storage,
     uploads,
     settings,
+    cleanup: storageCleanup,
   });
   const salonProfileService = createSalonProfileService({
     branchEditor: branchesService,
@@ -855,6 +861,7 @@ const buildServices = (
     storage: providers.storage,
     state: salonState,
     uploads,
+    files: fileSlots,
   });
   const policyService = createPolicyService({ salons: new SalonsRepository(), state: salonState });
   const staffService = createStaffService({
@@ -878,6 +885,7 @@ const buildServices = (
     storage: providers.storage,
     uploads,
     state: salonState,
+    cleanup: storageCleanup,
   });
   const hoursService = createHoursService({
     branches: branchesRepository,
@@ -1115,6 +1123,8 @@ const buildServices = (
       salons: new SalonsRepository(),
       catalog: new CatalogServicesRepository(),
       uploads,
+      files: fileSlots,
+      cleanup: storageCleanup,
       audit,
       logger,
       notifier: producers.catalogRequestNotifier,
@@ -1174,6 +1184,7 @@ const buildServices = (
           adminEvents.applicationCreated(salon);
         },
         uploads,
+        cleanup: storageCleanup,
         salons: new SalonsRepository(),
         members: new MembersRepository(),
         installations: new InstallationsRepository(),
@@ -1183,11 +1194,17 @@ const buildServices = (
       guard: requireAuth('merchant', config.auth.accessSecret),
     },
     catalog: catalogService,
-    adminCatalog: createAdminCrud<CatalogServiceRaw>({
-      name: 'CATALOG_SERVICE',
-      entityType: 'catalogService',
-      store: new CatalogServicesRepository(),
-      audit,
+    adminCatalog: withAdminImageSlots<CatalogServiceRaw>({
+      crud: createAdminCrud<CatalogServiceRaw>({
+        name: 'CATALOG_SERVICE',
+        entityType: 'catalogService',
+        store: catalogStore,
+        audit,
+      }),
+      store: catalogStore,
+      files: fileSlots,
+      fields: CATALOG_IMAGE_FIELDS,
+      logger,
     }),
     banners: bannersService,
     home: createHomeService({
@@ -1197,7 +1214,13 @@ const buildServices = (
       customers: new CustomersRepository(),
       unread: { count: (customerId) => notificationService.unreadCount('CUSTOMER', customerId) },
     }),
-    adminBanners: createAdminBannerService(new BannersRepository(), audit),
+    adminBanners: withAdminImageSlots<BannerRaw>({
+      crud: createAdminBannerService(bannersStore, audit),
+      store: bannersStore,
+      files: fileSlots,
+      fields: BANNER_IMAGE_FIELDS,
+      logger,
+    }),
     adminContent: createAdminContentServices({
       pages: new ContentPagesRepository(),
       faqs,

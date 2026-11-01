@@ -34,7 +34,12 @@ const resets: string[] = [];
 const kitStorage = new FakeStorageProvider();
 const kit = fileSlotsKit(kitStorage);
 const memberUpload = (key: string, ownerId: string): Promise<string> =>
-  kit.confirmed(key, { purpose: 'MEMBER_PHOTO', ownerType: 'MEMBER', ownerId, salonId: salonId.toHexString() });
+  kit.confirmed(key, {
+    purpose: 'MEMBER_PHOTO',
+    ownerType: 'MEMBER',
+    ownerId,
+    salonId: salonId.toHexString(),
+  });
 
 const phones: PhoneVerifier = {
   resolve: (phone) =>
