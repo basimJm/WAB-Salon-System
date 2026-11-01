@@ -11,6 +11,9 @@ import { MS_PER_SECOND } from '../../constants/time';
 import type {
   ConfirmUploadRequest,
   ConfirmUploadResult,
+  CopyObjectRequest,
+  CopyObjectResult,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,
@@ -32,6 +35,7 @@ interface StoredObject {
   readonly contentType: string;
   readonly size: number;
   readonly body?: Buffer;
+  readonly updatedAt?: Date;
 }
 
 export interface FakeStorageOptions {
@@ -150,6 +154,36 @@ export class FakeStorageProvider implements StorageProvider {
       }
     });
   }
+
+  copy({ fromKey, toKey, visibility }: CopyObjectRequest): Promise<CopyObjectResult> {
+    return settle(() => {
+      assertObjectKey(fromKey);
+      assertObjectKey(toKey);
+      if (fromKey === toKey) throw new RangeError('fromKey and toKey must differ');
+      const source = this.objects.get(fromKey);
+      if (source?.visibility !== visibility) return 'SOURCE_MISSING';
+      this.objects.set(toKey, { ...source, updatedAt: this.now() });
+      this.copies += 1;
+      return 'COPIED';
+    });
+  }
+
+  stat(key: string): Promise<ObjectInfo | null> {
+    return settle(() => {
+      assertObjectKey(key);
+      const stored = this.objects.get(key);
+      if (stored === undefined) return null;
+      return {
+        visibility: stored.visibility,
+        size: stored.size,
+        contentType: stored.contentType,
+        updatedAt: stored.updatedAt ?? null,
+      };
+    });
+  }
+
+  /** Test helper: how many copies were made (replacements). */
+  copies = 0;
 
   /**
    * Test helper: the client uploads to the presigned URL. Returns false (nothing stored) when no

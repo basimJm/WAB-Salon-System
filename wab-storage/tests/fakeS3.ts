@@ -18,6 +18,10 @@ export class FakeS3 {
     [];
   /** Extra answer for DeleteObjects `Errors`. */
   deleteErrors: { Key?: string; Code?: string }[] = [];
+  /** CORS configuration set per bucket. */
+  readonly cors = new Map<string, unknown>();
+  /** What HEAD reports as LastModified. */
+  lastModified = new Date('2026-11-01T10:00:00.000Z');
   /** Overrides the size HEAD reports. */
   headSize: number | null | undefined;
 
@@ -59,6 +63,10 @@ export class FakeS3 {
       if (this.buckets.has(String(input['Bucket']))) return {};
       throw notFound();
     }
+    if (type === 'PutBucketCors') {
+      this.cors.set(String(input['Bucket']), input['CORSConfiguration']);
+      return {};
+    }
     if (type === 'CreateBucket') {
       this.bucket(String(input['Bucket']));
       return {};
@@ -67,6 +75,22 @@ export class FakeS3 {
     const key = String(input['Key']);
     if (type === 'Put') {
       bucket.set(key, { body: input['Body'] as Buffer, contentType: String(input['ContentType']) });
+      return {};
+    }
+    if (type === 'Copy') {
+      const [fromBucket, ...rest] = String(input['CopySource']).split('/');
+      const fromKey = rest.map((part) => decodeURIComponent(part)).join('/');
+      const source = this.bucket(fromBucket ?? '').get(fromKey);
+      if (!source)
+        throw Object.assign(new Error('nk'), {
+          name: 'NoSuchKey',
+          $metadata: { httpStatusCode: 404 },
+        });
+      bucket.set(key, {
+        body: source.body,
+        contentType:
+          typeof input['ContentType'] === 'string' ? input['ContentType'] : source.contentType,
+      });
       return {};
     }
     if (type === 'DeleteObjects') {
@@ -83,6 +107,7 @@ export class FakeS3 {
       return {
         ContentLength: this.headSize === undefined ? entry.body.length : (this.headSize as number),
         ContentType: entry.contentType,
+        LastModified: this.lastModified,
       };
     const range = input['Range'] as string | undefined;
     const end = range ? Number(range.split('-')[1]) + 1 : entry.body.length;
@@ -117,6 +142,8 @@ export class FakeS3 {
         DeleteObjects: this.command('DeleteObjects'),
         HeadBucket: this.command('HeadBucket'),
         CreateBucket: this.command('CreateBucket'),
+        Copy: this.command('Copy'),
+        PutBucketCors: this.command('PutBucketCors'),
       },
     };
   }

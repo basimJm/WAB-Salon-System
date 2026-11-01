@@ -7,6 +7,7 @@ export interface S3Command {
 export interface S3Output {
   readonly ContentLength?: number;
   readonly ContentType?: string;
+  readonly LastModified?: Date;
   readonly Body?: { transformToByteArray(): Promise<Uint8Array> };
   readonly Errors?: readonly { readonly Key?: string; readonly Code?: string }[];
 }
@@ -24,6 +25,8 @@ export interface S3Deps {
     readonly Get: CommandClass;
     readonly DeleteObjects: CommandClass;
     readonly HeadBucket: CommandClass;
+    readonly Copy: CommandClass;
+    readonly PutBucketCors: CommandClass;
     readonly CreateBucket: CommandClass;
   };
 }
@@ -40,6 +43,9 @@ export const createAwsDeps = async (config: S3Config, timeoutMs: number): Promis
     region: config.region,
     forcePathStyle: config.forcePathStyle,
     maxAttempts: 1,
+    ...(config.checksums === 'when-required'
+      ? { requestChecksumCalculation: 'WHEN_REQUIRED', responseChecksumValidation: 'WHEN_REQUIRED' }
+      : {}),
     requestHandler: { requestTimeout: timeoutMs, connectionTimeout: timeoutMs },
     ...(config.endpoint === undefined ? {} : { endpoint: config.endpoint }),
     ...(config.credentials === undefined
@@ -64,6 +70,8 @@ export const createAwsDeps = async (config: S3Config, timeoutMs: number): Promis
       Get: sdk.GetObjectCommand as unknown as CommandClass,
       DeleteObjects: sdk.DeleteObjectsCommand as unknown as CommandClass,
       HeadBucket: sdk.HeadBucketCommand as unknown as CommandClass,
+      Copy: sdk.CopyObjectCommand as unknown as CommandClass,
+      PutBucketCors: sdk.PutBucketCorsCommand as unknown as CommandClass,
       CreateBucket: sdk.CreateBucketCommand as unknown as CommandClass,
     },
   };

@@ -14,6 +14,9 @@ import { toSdkLogger } from '../notifier/real';
 import type {
   ConfirmUploadRequest,
   ConfirmUploadResult,
+  CopyObjectRequest,
+  CopyObjectResult,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,
@@ -55,6 +58,27 @@ const guarded = async <T>(work: () => Promise<T>): Promise<T> => {
 /** Maps the server's settings to the SDK options (the only place that knows both vocabularies). */
 export const toStorageOptions = (deps: RealStorageDeps): StorageOptions => {
   const { settings } = deps;
+  const common = {
+    environment: deps.isProduction ? ('prod' as const) : ('dev' as const),
+    cdn: { baseUrl: settings.cdnBaseUrl },
+    upload: { maxTtlSec: UPLOAD_URL_TTL_SEC },
+    logger: toSdkLogger(deps.logger),
+  };
+  // Cloudflare R2 (SRV-180): the SDK maps it onto the S3 API (account endpoint, region `auto`).
+  if (settings.provider === 'r2') {
+    return {
+      ...common,
+      provider: 'r2',
+      r2: {
+        accountId: settings.accountId,
+        publicBucket: settings.publicBucket,
+        privateBucket: settings.privateBucket,
+        ...(settings.endpoint === undefined ? {} : { endpoint: settings.endpoint }),
+        credentials: { ...settings.credentials },
+      },
+      signedUrl: { maxTtlSec: STORAGE_SIGNED_URL_MAX_TTL_SEC, mode: 's3' },
+    };
+  }
   return {
     environment: deps.isProduction ? 'prod' : 'dev',
     provider: 's3',
@@ -78,7 +102,7 @@ export const toStorageOptions = (deps: RealStorageDeps): StorageOptions => {
   };
 };
 
-/** Storage backed by the `wab-storage` SDK (S3 + CDN). */
+/** Storage backed by the `wab-storage` SDK (Cloudflare R2, or AWS S3 + CDN). */
 export const createRealStorage = (deps: RealStorageDeps): StorageProvider => {
   const sdk = (deps.build ?? createStorage)(toStorageOptions(deps));
   return {
@@ -106,5 +130,18 @@ export const createRealStorage = (deps: RealStorageDeps): StorageProvider => {
     read: (key: string): Promise<Buffer | null> => guarded(() => sdk.read(key)),
     write: (request: WriteObjectRequest): Promise<void> => guarded(() => sdk.write(request)),
     delete: (keys: readonly string[]): Promise<void> => guarded(() => sdk.delete(keys)),
+    copy: (request: CopyObjectRequest): Promise<CopyObjectResult> =>
+      guarded(async () => {
+        try {
+          await sdk.copy(request);
+          return 'COPIED';
+        } catch (error) {
+          // A missing source is an answer (nothing changed), not a provider failure.
+          if (isStorageError(error) && error.code === SDK_ERRORS.OBJECT_NOT_FOUND)
+            return 'SOURCE_MISSING';
+          throw error;
+        }
+      }),
+    stat: (key: string): Promise<ObjectInfo | null> => guarded(() => sdk.stat(key)),
   };
 };

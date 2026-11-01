@@ -10,6 +10,25 @@
 
 ## Current task
 
+### SRV-180 (+ STO-011) — Cloudflare R2 storage provider (owner 2026-11-01)
+
+- Branch: `feat/srv-180-r2-storage`
+- Branched: from `origin/server` (SRV-179 is on its own unmerged branch)
+- Status: IN PROGRESS (batch SRV-180…182, rules §3.13)
+- Owner decisions 2026-11-01: two R2 buckets (public + private), same-key replacement with a version in the URL (SRV-181), no S3→R2 migration tool
+- Acceptance criteria (BUSINESS_DOMAIN §3.7 uploads, §2 visibility; BRD storage NFRs; no API change):
+  - [x] Inspected first: storage already central (server `StorageProvider` → `@wab/storage` SDK S3 adapter; `uploads` collection = file metadata; presign → confirm → `assertConfirmed`); gaps recorded for SRV-181/182 (replacement leaves old objects for salon cover/profile, member photo, service media, catalog, banners, licenses)
+  - [x] SDK 0.2.0: provider `r2` on the S3 adapter (account endpoint, region `auto`, checksums only when required, public ≠ private bucket, prod https); `copy` (same bucket, atomic replace, `STORAGE_OBJECT_NOT_FOUND`) + `stat` on S3/R2, memory, local-fs; `configureBucketCors`
+  - [x] Server: `STORAGE_PROVIDER=fake|real|cloudflare-r2`; `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_BUCKET_NAME`, `R2_PRIVATE_BUCKET_NAME`, `R2_ENDPOINT` (optional), `R2_PUBLIC_URL`; required together; buckets must differ; production = `real` or `cloudflare-r2`, https only; `real` (AWS S3) kept as fallback
+  - [x] `StorageProvider.copy` (`COPIED` | `SOURCE_MISSING`) + `stat` on the SDK-backed and the fake provider
+  - [x] `npm run storage:cors` (both buckets, exact admin origins from `CORS_ALLOWED_ORIGINS`; prints counts / error codes only)
+  - [x] `.env.example`, `docker/env.{dev,prod}.example` (R2 active, S3 commented), `docs/DEPLOYMENT.md` R2 runbook (buckets, public domain only on the public bucket, scoped token, CORS, re-seed)
+- Tests: wab-storage `tests/r2.test.ts` (20: config, endpoint/region, prod rules, presign without checksum params, copy/stat per adapter, CORS) — `npm run verify` 216 tests + coverage + loop green; server `tests/storageR2.test.ts` (9), `tests/storageCors.test.ts` (3), `tests/config.test.ts` (+4 R2), `tests/checkEnv.test.ts` (templates with R2)
+- API docs: no change
+- Loops: 0/1 (batch gate after SRV-182)
+- Review: PENDING
+- Notes: no R2 credentials here: real R2 calls are not verified (presigned URLs are built locally by the real AWS SDK and checked for host, region `auto`, no checksum parameters). No S3→R2 copy (owner).
+
 ### SRV-178 — Admin business types (owner 2026-10-29)
 
 - Branch: `feat/srv-178-admin-types`

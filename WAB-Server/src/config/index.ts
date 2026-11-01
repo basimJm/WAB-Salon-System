@@ -16,9 +16,12 @@ import {
   DEFAULT_PAYMENT_PROVIDER_MODE,
   DEFAULT_PROVIDER_MODE,
   ARQAM_OTP_MODE,
+  R2_STORAGE_MODE,
+  REAL_PROVIDER_MODE,
   type OtpProviderMode,
   type PaymentProviderMode,
   type ProviderMode,
+  type StorageProviderMode,
 } from '../constants/providers';
 import { envSchema, type RawEnv } from './env.schema';
 
@@ -62,7 +65,9 @@ export interface OtpSettings {
   readonly arqam?: ArqamSettings;
 }
 
-export interface StorageSettings {
+/** AWS S3 (or an S3-compatible store) + CDN: `STORAGE_PROVIDER=real`. */
+export interface S3StorageSettings {
+  readonly provider?: 's3';
   readonly region: string;
   readonly publicBucket: string;
   readonly privateBucket: string;
@@ -76,6 +81,19 @@ export interface StorageSettings {
     readonly privateKey: string;
   };
 }
+
+/** Cloudflare R2 (SRV-180): `STORAGE_PROVIDER=cloudflare-r2`; `cdnBaseUrl` is `R2_PUBLIC_URL`. */
+export interface R2StorageSettings {
+  readonly provider: 'r2';
+  readonly accountId: string;
+  readonly publicBucket: string;
+  readonly privateBucket: string;
+  readonly endpoint?: string;
+  readonly credentials: { readonly accessKeyId: string; readonly secretAccessKey: string };
+  readonly cdnBaseUrl: string;
+}
+
+export type StorageSettings = S3StorageSettings | R2StorageSettings;
 
 /** Lists default to empty; a store URL is left out when unset (the page then hides its button). */
 const buildAppLinksSettings = (values: RawEnv): AppLinksSettings => {
@@ -107,7 +125,7 @@ export interface AppConfig {
   readonly secrets: { readonly payoutEncryptionKey?: string };
   /** Credentials of the real notifier (FCM + SMTP); present only when the notifier is `real`. */
   readonly notifier?: NotifierSettings;
-  /** S3 + CDN settings of the real storage; present only when the storage is `real`. */
+  /** Object store settings: S3 + CDN (`real`) or Cloudflare R2 (`cloudflare-r2`); absent for `fake`. */
   readonly storage?: StorageSettings;
   /** Phone OTP secrets and ARQAM project. */
   readonly otp: OtpSettings;
@@ -115,7 +133,7 @@ export interface AppConfig {
   readonly providers: {
     /** `arqam` in production; `fake` records codes instead of sending them. */
     readonly otp: OtpProviderMode;
-    readonly storage: ProviderMode;
+    readonly storage: StorageProviderMode;
     readonly notifier: ProviderMode;
     /** Payments are paused: `fake` in dev/test, `disabled` in production. */
     readonly payments: PaymentProviderMode;
@@ -236,8 +254,37 @@ const buildOtpSettings = (values: RawEnv): OtpSettings => {
   });
 };
 
+const buildR2Settings = (values: RawEnv): R2StorageSettings | undefined => {
+  const accountId = values[ENV_KEYS.r2AccountId];
+  const accessKeyId = values[ENV_KEYS.r2AccessKeyId];
+  const secretAccessKey = values[ENV_KEYS.r2SecretAccessKey];
+  const publicBucket = values[ENV_KEYS.r2PublicBucketName];
+  const privateBucket = values[ENV_KEYS.r2PrivateBucketName];
+  const cdnBaseUrl = values[ENV_KEYS.r2PublicUrl];
+  if (
+    accountId === undefined ||
+    accessKeyId === undefined ||
+    secretAccessKey === undefined ||
+    publicBucket === undefined ||
+    privateBucket === undefined ||
+    cdnBaseUrl === undefined
+  )
+    return undefined;
+  const endpoint = values[ENV_KEYS.r2Endpoint];
+  return Object.freeze({
+    provider: 'r2',
+    accountId,
+    publicBucket,
+    privateBucket,
+    ...(endpoint === undefined ? {} : { endpoint }),
+    credentials: Object.freeze({ accessKeyId, secretAccessKey }),
+    cdnBaseUrl,
+  });
+};
+
 const buildStorageSettings = (values: RawEnv): StorageSettings | undefined => {
-  if (values[ENV_KEYS.storageProvider] !== 'real') return undefined;
+  if (values[ENV_KEYS.storageProvider] === R2_STORAGE_MODE) return buildR2Settings(values);
+  if (values[ENV_KEYS.storageProvider] !== REAL_PROVIDER_MODE) return undefined;
   const region = values[ENV_KEYS.s3Region];
   const publicBucket = values[ENV_KEYS.s3PublicBucket];
   const privateBucket = values[ENV_KEYS.s3PrivateBucket];
