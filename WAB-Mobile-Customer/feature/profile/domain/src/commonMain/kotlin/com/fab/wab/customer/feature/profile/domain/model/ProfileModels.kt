@@ -24,19 +24,6 @@ data class CustomerAccount(
     }
 }
 
-/** `POST /uploads/presign` result: where and how the device PUTs the bytes (PRD §3.16). */
-data class PresignedUpload(
-    val key: String,
-    val url: String,
-    val method: String,
-    val headers: Map<String, String>,
-    val maxBytes: Long,
-)
-
-object UploadPurpose {
-    const val CUSTOMER_AVATAR = "CUSTOMER_AVATAR"
-}
-
 object ProfileDefaults {
     /** PRD S21: the account is deactivated for 30 days before permanent deletion. */
     const val DELETION_GRACE_DAYS = 30

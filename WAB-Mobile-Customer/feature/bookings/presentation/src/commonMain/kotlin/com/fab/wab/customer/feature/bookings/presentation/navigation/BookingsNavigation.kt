@@ -91,6 +91,8 @@ class BookingsNavigation(
                 SideEffect.OpenLogin -> navigateTo(Graph.Auth)
                 SideEffect.OpenHome -> openHome()
                 is SideEffect.OpenBooking -> navigateTo(Screen.BookingDetails(effect.bookingId))
+                is SideEffect.OpenRating -> navigateTo(Screen.RateBooking(effect.bookingId))
+                is SideEffect.OpenSalon -> navigateTo(Screen.SalonDetails(effect.salonId, effect.branchId))
                 is SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

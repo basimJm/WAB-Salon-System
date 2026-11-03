@@ -5,7 +5,9 @@ import com.fab.wab.customer.feature.salons.data.remote.SalonFiltersApi
 import com.fab.wab.customer.feature.salons.data.remote.SalonSearchApi
 import com.fab.wab.customer.feature.salons.data.repository.SalonFilterOptionsRepositoryImpl
 import com.fab.wab.customer.feature.salons.data.repository.SalonSearchRepositoryImpl
+import com.fab.wab.customer.feature.salons.data.repository.SalonSuggestionsRepositoryImpl
 import com.fab.wab.customer.feature.salons.domain.repository.SalonFilterOptionsRepository
+import com.fab.wab.customer.feature.salons.domain.repository.SalonSuggestionsRepository
 import org.koin.dsl.module
 
 val salonsDataModule = module {
@@ -13,4 +15,5 @@ val salonsDataModule = module {
     single<SalonSearchRepository> { SalonSearchRepositoryImpl(get()) }
     single { SalonFiltersApi(get()) }
     single<SalonFilterOptionsRepository> { SalonFilterOptionsRepositoryImpl(get()) }
+    single<SalonSuggestionsRepository> { SalonSuggestionsRepositoryImpl(get()) }
 }

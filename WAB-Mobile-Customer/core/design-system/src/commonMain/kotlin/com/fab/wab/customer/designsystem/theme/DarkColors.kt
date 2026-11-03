@@ -9,6 +9,8 @@ private val Green = Color(0xFF3FBF94)
 private val Amber = Color(0xFFF5A524)
 private val Pink = Color(0xFFF0689A)
 private val Gray = Color(0xFFB6BBCB)
+private val Teal = Color(0xFF2DD4BF)
+private val Sand = Color(0xFFF2B872)
 
 /** Dark theme tokens (design `tv()` with theme = dark). */
 val DarkColors = AppColors(
@@ -41,6 +43,12 @@ val DarkColors = AppColors(
     onDangerContainer = Color(0xFFF58AB1),
     onNeutralContainer = Gray,
     onAccentContainer = Lilac,
+    salonType = Lilac,
+    salonTypeContainer = Lilac.copy(alpha = 0.14f),
+    clinicType = Teal,
+    clinicTypeContainer = Teal.copy(alpha = 0.14f),
+    tattooType = Sand,
+    tattooTypeContainer = Sand.copy(alpha = 0.14f),
     heroStart = Color(0xFF14172B),
     heroMiddle = Color(0xFF1B1030),
     heroEnd = Color(0xFF2A1450),

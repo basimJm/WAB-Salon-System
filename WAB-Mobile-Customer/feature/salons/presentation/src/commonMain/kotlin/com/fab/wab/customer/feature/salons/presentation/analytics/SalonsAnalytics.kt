@@ -14,11 +14,14 @@ object SalonsAnalytics {
     const val ACTION_FILTER_OPEN = "filter_open"
     const val ACTION_SALON_CLICK = "salon_click"
     const val ACTION_BUSINESS_TYPE = "business_type_select"
+    const val ACTION_SUGGESTION = "search_suggestion_click"
+    const val ACTION_QUICK_CHIP = "search_quick_chip"
     const val PARAM_ID = "id"
     const val PARAM_FILTER = "filter"
     const val PARAM_HAS_TEXT = "has_text"
     const val PARAM_VALUE = "value"
     const val VALUE_ALL = "all"
+    const val LIST_SEPARATOR = ","
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
     val FILTER_SCREEN = AnalyticsScreen(FILTER_SCREEN_NAME)

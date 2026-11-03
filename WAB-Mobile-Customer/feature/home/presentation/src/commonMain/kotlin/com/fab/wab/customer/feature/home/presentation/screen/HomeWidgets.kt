@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,10 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontWeight
-import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.designsystem.components.image.AppImage
 import com.fab.wab.customer.designsystem.components.media.nextBannerIndex
 import com.fab.wab.customer.designsystem.components.text.AppText
@@ -36,15 +31,11 @@ import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.resources.Res as DsRes
 import com.fab.wab.customer.designsystem.resources.banner_description
 import com.fab.wab.customer.designsystem.theme.AppTheme
-import com.fab.wab.customer.designsystem.utils.brandBackground
-import com.fab.wab.customer.designsystem.utils.brandBrush
 import com.fab.wab.customer.designsystem.utils.softShadow
 import com.fab.wab.customer.feature.home.domain.model.HomeBanner
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.resources.Res
 import com.fab.wab.customer.feature.home.presentation.resources.home_search_hint
-import com.fab.wab.customer.feature.home.presentation.resources.home_tab_men
-import com.fab.wab.customer.feature.home.presentation.resources.home_tab_women
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 
@@ -139,52 +130,6 @@ internal fun HomeSearchButton(onClick: () -> Unit, modifier: Modifier = Modifier
             text = stringResource(Res.string.home_search_hint),
             style = discoveryBody(DiscoveryDesign.TEXT_13_5),
             color = colors.faint,
-            maxLines = 1,
-        )
-    }
-}
-
-/** Two-column surface pill (16 dp radius, 5 dp inset); the selected tab is a 40 dp gradient button with a violet glow. */
-@Composable
-internal fun GenderTabs(selected: Gender?, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth().background(AppTheme.colors.surface, AppTheme.shapes.large).padding(DiscoveryDesign.TABS_PADDING),
-        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
-    ) {
-        Gender.entries.forEach { gender ->
-            GenderTab(
-                label = stringResource(if (gender == Gender.MALE) Res.string.home_tab_men else Res.string.home_tab_women),
-                selected = gender == selected,
-                onClick = { onAction(UiAction.OnGenderSelect(gender)) },
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Composable
-private fun GenderTab(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = AppTheme.colors
-    val shape = RoundedCornerShape(DiscoveryDesign.TAB_RADIUS)
-    val background = if (selected) {
-        Modifier
-            .softShadow(DiscoveryDesign.TAB_SHADOW, colors.accent.copy(alpha = DiscoveryDesign.TAB_SHADOW_ALPHA), shape)
-            .brandBackground(brandBrush(), shape)
-    } else {
-        Modifier.clip(shape)
-    }
-    Box(
-        modifier = modifier
-            .height(DiscoveryDesign.TAB_HEIGHT)
-            .then(background)
-            .semantics { this.selected = selected }
-            .clickable(role = Role.Tab, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        AppText(
-            text = label,
-            style = discoveryBody(DiscoveryDesign.TEXT_14, FontWeight.SemiBold),
-            color = if (selected) colors.onGradient else colors.muted,
             maxLines = 1,
         )
     }

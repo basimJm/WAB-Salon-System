@@ -1,11 +1,12 @@
 <resources>
-    <string name="salons_title">الصالونات والعيادات</string>
+    <string name="salons_title">البحث</string>
     <string name="salons_title_salons">الصالونات</string>
     <string name="salons_title_clinics">عيادات التجميل</string>
-    <string name="salons_search_hint">ابحث عن صالون أو عيادة</string>
+    <string name="salons_title_tattoo">استوديوهات الوشم</string>
+    <string name="salons_search_hint">صالونات، عيادات، استوديوهات وشم أو خدمات</string>
     <string name="salons_filter">فلتر</string>
     <string name="salons_chip_remove">إزالة %1$s</string>
-    <string name="salons_empty">لا توجد صالونات مطابقة</string>
+    <string name="salons_empty">لا توجد أماكن تطابق بحثك</string>
     <string name="salons_empty_body">جرّب كلمات بحث أخرى أو عدّل الفلاتر.</string>
     <string name="salons_chip_recommended">الموصى بها</string>
     <string name="salons_chip_nearest">الأقرب</string>
@@ -25,4 +26,20 @@
     <string name="filter_rating">التقييم</string>
     <string name="services_title">جميع الخدمات</string>
     <string name="services_empty">لا توجد خدمات حالياً</string>
+    <string name="filter_gender">الجنس</string>
+    <string name="search_suggest_services">الخدمات</string>
+    <string name="search_suggest_places">الأماكن</string>
+    <string name="search_recent">عمليات البحث الأخيرة</string>
+    <string name="search_recent_clear">مسح</string>
+    <string name="search_quick_open_now">مفتوح الآن</string>
+    <string name="search_quick_top_rated">4★ فأعلى</string>
+    <string name="search_quick_price">السعر</string>
+    <string name="search_open_now_chip">مفتوح الآن</string>
+    <plurals name="search_places_count">
+        <item quantity="one">مكان واحد</item>
+        <item quantity="two">مكانان</item>
+        <item quantity="few">%1$d أماكن</item>
+        <item quantity="many">%1$d مكاناً</item>
+        <item quantity="other">%1$d مكان</item>
+    </plurals>
 </resources>

@@ -8,7 +8,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-/** CUS-060: `GET /home` captured from the dev API (guest, with coordinates) maps to every Home section. */
+/**
+ * CUS-060: `GET /home` captured from the dev API (guest, with coordinates) maps to every Home section; the merged keys of
+ * CUS-102 were added to the capture by script from its per-type sections (re-capture on a 1.13.0 stack).
+ */
 class RealHomeFixtureTest {
 
     @Test
@@ -16,9 +19,10 @@ class RealHomeFixtureTest {
         val home = decodeFixture("GetHome", GetHomeData.serializer()).data.toDomain()
         assertEquals(0, home.unreadCount, "a guest has no unread count")
         assertTrue(home.banners.isNotEmpty() && home.banners.all { it.imageUrl.isNotBlank() })
-        assertTrue(home.salonServices.items.isNotEmpty())
-        assertTrue(home.recommendedSalons.items.isNotEmpty())
-        val nearest = assertNotNull(home.nearestSalons, "coordinates were sent").items
+        assertTrue(home.explore.items.isNotEmpty())
+        assertTrue(home.recommended.items.isNotEmpty())
+        assertEquals(null, home.bookAgain, "a guest has no Book again")
+        val nearest = assertNotNull(home.nearYou, "coordinates were sent").items
         assertTrue(nearest.isNotEmpty())
         val complete = nearest.all { it.distanceKm != null && it.branch != null && it.displayName.isNotBlank() }
         assertTrue(complete, "one entry per branch: $nearest")
