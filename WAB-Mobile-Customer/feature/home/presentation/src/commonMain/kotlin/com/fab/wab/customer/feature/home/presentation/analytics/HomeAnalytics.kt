@@ -12,6 +12,7 @@ object HomeAnalytics {
     const val ACTION_SALON_CLICK = "home_salon_click"
     const val ACTION_SEARCH_CLICK = "home_search_click"
     const val ACTION_ENABLE_LOCATION = "enable_location_click"
+    const val ACTION_RETRY_LOCATION = "retry_location_click"
     const val ACTION_FAVORITE = "favorite_toggle"
     const val PARAM_TYPE = "type"
     const val VALUE_ALL = "all"

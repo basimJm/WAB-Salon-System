@@ -17,8 +17,10 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
 /**
- * Fused provider: one fresh fix (`getCurrentLocation`, cancelled with the caller), else the last known position,
- * else the platform `LocationManager` (devices without Google Play services). Context comes from Koin (the old
+ * Fused provider: the last known position first (answers at once, enough for "places near you"), else the platform
+ * `LocationManager` cache (devices without Google Play services), else one fresh high-accuracy fix (`getCurrentLocation`,
+ * cancelled with the caller). CUS-106: a balanced-power fresh fix came first and waited for a network position that
+ * never arrived (the 10 s Home timeout), so Home showed "enable location" with GPS on. Context comes from Koin (the old
  * code read a Koin property with `!!`), and a missing permission answers null instead of throwing.
  */
 class DeviceLocationProviderAndroid(private val context: Context) : DeviceLocationProvider {
@@ -27,7 +29,7 @@ class DeviceLocationProviderAndroid(private val context: Context) : DeviceLocati
 
     override suspend fun currentLocation(): LocationData? {
         if (!hasPermission()) return null
-        val location = freshFix() ?: lastFusedFix() ?: platformLastKnown()
+        val location = lastFusedFix() ?: platformLastKnown() ?: freshFix()
         return location?.let { LocationData(latitude = it.latitude, longitude = it.longitude) }
     }
 
@@ -40,7 +42,7 @@ class DeviceLocationProviderAndroid(private val context: Context) : DeviceLocati
     private suspend fun freshFix(): Location? {
         val cancellation = CancellationTokenSource()
         val request = CurrentLocationRequest.Builder()
-            .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
             .setMaxUpdateAgeMillis(MAX_FIX_AGE_MS)
             .build()
         val task = guarded { fused.getCurrentLocation(request, cancellation.token) } ?: return null

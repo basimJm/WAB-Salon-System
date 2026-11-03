@@ -380,3 +380,15 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog statuses only, no product code written.
+
+### T-152 — Round 19: CUS-105/106 merged; masters synced through main (owner request 2026-11-03)
+- Project: repo root
+- Branch: `chore/sync-masters-into-main-19` (PR into `main`), then `main` → each master
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Open PRs into masters: CUS-106 (#647) merged; #330 (`fix/srv-country-flag-key`, 2026-10-21) NOT merged — conflicts with `server` and overlaps the SRV-180 file-slot code (owner to decide)
+  - [x] `server`, `admin`, `customer`, `merchant` merged into one branch from `main`; backlog/board conflicts resolved (more advanced status, board regenerated); CUS-106 DONE; server memory: shared dev DB facts
+  - [x] `main` → every master
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog statuses and a memory note only; no product code written.
