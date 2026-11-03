@@ -9,7 +9,7 @@
 
 ### STO-011 — Cloudflare R2 provider + copy/stat + bucket CORS (owner 2026-11-01)
 - Branch: `feat/srv-180-r2-storage` (with SRV-180…182)
-- Status: IN PROGRESS (committed, not pushed)
+- Status: DONE (PR #605)
 - Acceptance criteria: `provider: 'r2'` on the S3 adapter (account endpoint, region `auto`, checksums when required, two different buckets, prod https, CloudFront refused); `copy` + `stat` on S3/R2, memory, local-fs; `configureBucketCors`; 0.2.0; Integration.md + CHANGELOG
 - Tests: `tests/r2.test.ts`; `npm run verify` 216 tests + coverage gate + `npm run test:loop` green (Terminal panel)
 - Loops: 1/1 — re-checked the R2 S3-compatibility points (region auto, endpoint, unsupported checksums, per-bucket public access)

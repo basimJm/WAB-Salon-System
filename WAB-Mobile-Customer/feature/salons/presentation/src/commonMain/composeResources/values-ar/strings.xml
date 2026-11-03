@@ -1,6 +1,8 @@
 <resources>
-    <string name="salons_title">جميع الصالونات</string>
-    <string name="salons_search_hint">ابحث باسم الصالون</string>
+    <string name="salons_title">الصالونات والعيادات</string>
+    <string name="salons_title_salons">الصالونات</string>
+    <string name="salons_title_clinics">عيادات التجميل</string>
+    <string name="salons_search_hint">ابحث عن صالون أو عيادة</string>
     <string name="salons_filter">فلتر</string>
     <string name="salons_chip_remove">إزالة %1$s</string>
     <string name="salons_empty">لا توجد صالونات مطابقة</string>
@@ -15,6 +17,7 @@
     <string name="filter_reset">إعادة تعيين</string>
     <string name="filter_apply">تطبيق الفلتر</string>
     <string name="filter_retry">إعادة المحاولة</string>
+    <string name="filter_business_type">اعرض</string>
     <string name="filter_services">الخدمات</string>
     <string name="filter_see_more">عرض المزيد</string>
     <string name="filter_price">نطاق السعر</string>

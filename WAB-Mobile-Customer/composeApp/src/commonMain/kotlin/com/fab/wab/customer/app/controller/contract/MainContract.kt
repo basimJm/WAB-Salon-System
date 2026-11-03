@@ -15,8 +15,10 @@ sealed interface MainContract {
         val appVersion: String? = null,
         /** PRD §4.2 router after the gate: onboarding → S02 → Home; null until the gate is known. */
         val launch: LaunchDestination? = null,
+        /** CUS-100: the splash stays until the brand logo animation has played once, even when config is faster. */
+        val logoShown: Boolean = false,
     ) {
-        val showSplash: Boolean get() = gate == null
+        val showSplash: Boolean get() = gate == null || !logoShown
         val showOnboarding: Boolean get() = launch == LaunchDestination.Onboarding
         val showGuestProfile: Boolean get() = launch == LaunchDestination.GuestProfile
     }
@@ -25,6 +27,7 @@ sealed interface MainContract {
         data object OnUpdateClicked : UiAction
         data object OnOptionalUpdateDismissed : UiAction
         data object OnRetryClicked : UiAction
+        data object OnLogoAnimationFinished : UiAction
         data object OnOnboardingFinished : UiAction
         data object OnGuestProfileSaved : UiAction
         data object OnSessionTimeOut : UiAction
