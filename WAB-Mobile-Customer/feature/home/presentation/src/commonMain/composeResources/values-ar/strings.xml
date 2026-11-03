@@ -8,6 +8,8 @@
     <string name="home_see_all">عرض الكل</string>
     <string name="home_nearest_location_off">فعّل خدمات الموقع لعرض الأماكن القريبة منك</string>
     <string name="home_enable_location">تفعيل خدمات الموقع</string>
+    <string name="home_location_unavailable">تعذّر تحديد موقعك الآن. حاول مرة أخرى لعرض الأماكن القريبة منك.</string>
+    <string name="home_location_retry">حاول مرة أخرى</string>
     <string name="home_explore">استكشف</string>
     <string name="home_near_you">بالقرب منك</string>
     <string name="home_near_you_empty">لا توجد أماكن ضمن نطاق 10 كم من موقعك حالياً.</string>

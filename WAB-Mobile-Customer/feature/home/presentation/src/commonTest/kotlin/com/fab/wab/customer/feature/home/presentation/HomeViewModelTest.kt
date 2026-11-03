@@ -136,7 +136,7 @@ class HomeViewModelTest {
         repository.result = AppResult.Success(content(bookAgain = listOf(entry)))
         val user = viewModel(USER).state.value
         assertEquals(
-            listOf(HomeBlock.Banners, HomeBlock.Explore, HomeBlock.NearYou, HomeBlock.Recommended, HomeBlock.BookAgain),
+            listOf(HomeBlock.Banners, HomeBlock.Explore, HomeBlock.Recommended, HomeBlock.BookAgain, HomeBlock.NearYou),
             user.blocks,
         )
         assertEquals(listOf(entry), user.bookAgain)
@@ -164,14 +164,16 @@ class HomeViewModelTest {
         repository.result = AppResult.Success(content(nearest = HomeSection(listOf(salon("n1")), hasMore = false)))
         val vm = viewModel(USER)
         assertEquals(USER.user.firstName, vm.state.value.welcomeName)
-        assertEquals(AMMAN, repository.calls.single().location)
-        assertEquals(Gender.MALE, repository.calls.single().gender, "the account's gender picks the banners")
+        // Home loads at once without waiting for GPS, then again with the first fix (Near you).
+        assertEquals(listOf(null, AMMAN), repository.calls.map { it.location })
+        assertEquals(Gender.MALE, repository.calls.last().gender, "the account's gender picks the banners")
         assertEquals(3, vm.state.value.unreadCount)
         assertIs<NearestUi.Salons>(vm.state.value.nearYou)
         realtime.emit(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD, buildJsonObject { put("count", JsonPrimitive(120)) }))
         assertEquals(120, vm.state.value.unreadCount)
         PushSignals.publishReceived(PushNotification("Approved", "Your booking was approved"))
-        assertEquals(2, repository.calls.size, "a foreground push refreshes Home (badge)")
+        assertEquals(3, repository.calls.size, "a foreground push refreshes Home (badge)")
+        assertEquals(AMMAN, repository.calls.last().location, "a refresh sends the last fix at once")
     }
 
     @Test

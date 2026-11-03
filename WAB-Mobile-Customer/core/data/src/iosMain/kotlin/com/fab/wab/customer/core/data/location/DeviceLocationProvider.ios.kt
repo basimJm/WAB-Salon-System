@@ -14,13 +14,12 @@ import platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
 import platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse
 import platform.CoreLocation.kCLLocationAccuracyHundredMeters
 import platform.Foundation.NSError
-import platform.Foundation.timeIntervalSinceNow
 import platform.darwin.NSObject
 import kotlin.coroutines.resume
 
 /**
  * `CLLocationManager.requestLocation()` on the main thread (CoreLocation calls back on the creating thread's run
- * loop). A recent cached fix answers at once. The old code only read `manager.location` on a fresh manager, which
+ * loop). A cached fix answers at once. The old code only read `manager.location` on a fresh manager, which
  * is nil until a request ran, so "nearest" never got coordinates on iOS.
  */
 @OptIn(ExperimentalForeignApi::class)
@@ -35,7 +34,8 @@ class DeviceLocationProviderIOS : DeviceLocationProvider {
         if (status != kCLAuthorizationStatusAuthorizedWhenInUse && status != kCLAuthorizationStatusAuthorizedAlways) {
             return@withContext null
         }
-        manager.location?.takeIf { it.isRecent() }?.let { return@withContext it.toData() }
+        // CUS-106: any cached position answers at once (enough for "places near you"); only no cache waits for a fix.
+        manager.location?.let { return@withContext it.toData() }
         suspendCancellableCoroutine { continuation ->
             val fixDelegate = FixDelegate { location ->
                 clear()
@@ -53,8 +53,6 @@ class DeviceLocationProviderIOS : DeviceLocationProvider {
         delegate = null
     }
 
-    private fun CLLocation.isRecent(): Boolean = -timestamp.timeIntervalSinceNow <= MAX_FIX_AGE_SECONDS
-
     private fun CLLocation.toData(): LocationData =
         coordinate.useContents { LocationData(latitude = latitude, longitude = longitude) }
 
@@ -66,10 +64,5 @@ class DeviceLocationProviderIOS : DeviceLocationProvider {
         override fun locationManager(manager: CLLocationManager, didFailWithError: NSError) {
             onFix(null)
         }
-    }
-
-    private companion object {
-        /** A cached fix up to this age is good enough for "salons near you". */
-        const val MAX_FIX_AGE_SECONDS = 120.0
     }
 }
