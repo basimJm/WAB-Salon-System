@@ -22,8 +22,8 @@
   - [x] A tapped close push opens the booking details (`bookings/<id>` on the web base; the server's relative `deepLink` is not accepted by the link store)
   - [x] Assigned staff: the details screen shows COMPLETE / NO_SHOW whenever the server sends them (test)
 - Tests: `CloseBookingUseCaseTest` (5), `BookingClosePushTest` (5: parse, non-close, identifiers, tap link, outcome texts), `BookingsViewModelTest` (TO_CLOSE query), `BookingDetailsViewModelTest` (+1 own staff COMPLETE / NO_SHOW); `./gradlew testAndroidHostTest` green (all modules); `:androidApp:assembleDevDebug` and `:composeApp:compileKotlinIosSimulatorArm64` green; `policy_checks.py all` ok
-- Loops: 0/1 (batch rule §3.13: loop + review after the batch)
-- Review: PENDING
+- Loops: 1/1 — batch loop (MER-084…086): re-read §5.21 against the tab, push parsing/routing and the details actions; `testAndroidHostTest` all modules green (691 tests), `:androidApp:assembleDevDebug` + iOS compile green. Found: close pushes have no iOS category / are not data-only on Android → server follow-up SRV-187
+- Review: PASSED (SE ✔ (close use case checks the server actions first, no blind retry), Mobile ✔ (Android notification actions + iOS category; deep-link fallback), Architect ✔ (needs SRV-187 for the push shape), QA ✔ (payload/routing + tab tests)) — DEVIATIONS: no device run (rules §3.13, end of backlog); no Home "To close (n)" shortcut; 5 tabs not checked at 200% font
 - Notes: DEVIATIONS — the server sends close reminders as VISIBLE pushes without an iOS `actionCategory`: on iOS the actions appear only once the server sets `aps.category = BOOKING_CLOSE` (server follow-up), and on Android a visible push in the background is drawn by the system without actions (the actionable notification shows only when the message reaches the app: data-only delivery); in the foreground the usual in-app banner shows. Android 12+ blocks opening an activity from a notification action, so the "open details" fallback is the replaced notification's tap. No "To close (n)" shortcut on Home. A fifth tab in `AppSegmentedTabs` (designed for 2–4) not measured at 200 % font scale. Detekt and the device run deferred to the batch / end of backlog.
 
 ### MER-085 — New booking for a customer (owner 2026-11-03)
@@ -41,8 +41,8 @@
   - [x] Lists: "Created by the business" on MERCHANT cards; details: "Created by the business · <member>" and "No WAB account" for `customer.id == null` (call/WhatsApp kept, the phone is always there); `source`/`createdBy`/nullable customer id mapped
   - [x] Mock mode: generated fixtures answer lookup + create; `patchCustomerLookup` makes `791234567` a registered customer (Rana), every other number unknown; create returns `id-1` (the details fixture answers any id)
 - Tests: `NewBookingViewModelTest` (10: load, registered / unregistered / invalid phone / lookup error, services totals, 90-day dates, submit success → OpenBooking, submit error → error text, tattoo design upload + key), `BookingsViewModelTest` (+1 permission entry), `NewBookingMappersTest` (3: body with customer/persons/UTC start/staff null, registered body, lookup/services/created), `BookingMappersTest` (+1 source/createdBy/no account), `NewBookingRulesTest` (3), `MockLookupTest` (2); `PermissionsTest`/`MockWorldTest` counts 16/13; `RealApplicationFixturesTest` excludes BOOKINGS_CREATE (captured before 1.13.0). `./gradlew testAndroidHostTest` green (all modules); `policy_checks.py all` ok
-- Loops: 0/1 (batch rule §3.13: loop + review after the batch)
-- Review: PENDING
+- Loops: 1/1 — batch loop: re-read §5.20 against lookup, required name/gender, body building (Amman → UTC, any staff = no id), branch rule, errors, source labels; unit tests green (see MER-086)
+- Review: PASSED (SE ✔ (domain/data/presentation slices, mapper tested), Mobile ✔ (AR/EN strings, permission-gated entry), Architect ✔ (contract 1.13.0 ops only), QA ✔ (VM + mapper + rules tests)) — DEVIATIONS: main person only (no companions/bride), times every 15 min without an availability endpoint (server refuses busy slots), salon-level services list, no device run yet
 - Notes: DEVIATIONS — companions not supported (one main person only; the contract allows up to `maxCompanions`); no bride toggle; start times are every 15-minute slot of the day (no merchant availability endpoint, the server refuses closed/busy slots with SLOT_UNAVAILABLE / SLOT_TAKEN); services from `GET /salon/services` (salon level, not per branch); entry only on the bookings screen (not home); no previews (feature screens have none); detekt, device run (AR/EN, light/dark) deferred to the batch / end of backlog.
 
 ### MER-084 — Tattoo studios in the merchant app (owner 2026-11-03)
@@ -57,8 +57,8 @@
   - [x] Booking details: per person "Design image" (signed URL, `AppImage` fitted, card image height, medium shape)
   - [x] Mock fixtures (`core/data/fixtures/remote` + dashboard mock) carry `source`/`createdBy`/`referenceImageUrl` (the contract marks them required)
 - Tests: `BusinessKindTest` (+1 tattoo), `RegistrationRulesTest` (+1 tattoo), `BookingMappersTest` (design URL mapped; DTO fixtures updated); `./gradlew testAndroidHostTest` green (all modules)
-- Loops: 0/1 (batch rule §3.13: loop + review after the batch)
-- Review: PENDING
+- Loops: 1/1 — batch loop: re-read §5.23 against type rules, registration, wording, design image; unit tests green (see MER-086)
+- Review: PASSED (SE ✔, Mobile ✔ (AR/EN wording, RTL-safe), Architect ✔, QA ✔) — DEVIATION: no device run yet (end of backlog)
 - Notes: detekt, device run deferred to the batch / end of backlog (rules §3.13).
 
 ## Last blocks
