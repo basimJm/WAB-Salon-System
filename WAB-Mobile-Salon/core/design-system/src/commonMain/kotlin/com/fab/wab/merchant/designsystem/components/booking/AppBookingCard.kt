@@ -56,6 +56,8 @@ data class BookingCardUi(
     val autoCancelIn: Duration? = null,
     /** Branch name, shown when the owner sees several branches at once (MER-063). */
     val branch: String? = null,
+    /** "Created by the business" (BUSINESS_DOMAIN §5.20), pre-localized; null for app bookings. */
+    val sourceLabel: String? = null,
 ) {
     val isPending: Boolean get() = status == BookingStatus.PENDING
     val showsAutoCancel: Boolean get() = isPending && autoCancelIn != null
@@ -157,6 +159,7 @@ private fun BadgeLine(booking: BookingCardUi) {
         ) {
             if (payment != null) AppPaymentBadge(payment)
             AppRefundBadge(booking.refund)
+            booking.sourceLabel?.let { MetaItem(AppIcons.Store, it) }
         }
         if (booking.isPending && age != null) {
             AppText(text = pendingAgeText(age), style = AppTheme.typography.labelSmall, color = AppTheme.colors.faint, maxLines = 1)

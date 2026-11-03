@@ -15,7 +15,7 @@ private fun row(id: String, ref: String, status: String, bride: Boolean, start: 
         """"requestedAt":"2026-10-25T08:30:00Z","personsCount":$persons,"total":"45.000","branch":$BRANCH,""" +
         """"customer":{"id":"c-$id","name":"__TEXT__","phone":"+962790000000"},""" +
         """"staff":[{"id":"s1","name":"__TEXT__","firstName":"__TEXT__","photoUrl":null}],""" +
-        """"rejection":null}"""
+        """"rejection":null,"source":"CUSTOMER_APP","createdBy":null}"""
 
 /**
  * A live salon with two pending requests (one bride), three bookings today and this week's stats, so Home shows

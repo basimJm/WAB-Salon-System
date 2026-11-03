@@ -3,13 +3,14 @@ package com.fab.wab.merchant.core.domain.permission
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SessionState
 
-/** The 15 grantable keys of PRD §6.2 (`MemberProfile.permissions`). */
+/** The 16 grantable keys of PRD §6.2 (`MemberProfile.permissions`); BOOKINGS_CREATE = BUSINESS_DOMAIN §5.20. */
 enum class Permission {
     DASHBOARD_VIEW,
     BOOKINGS_VIEW_ALL,
     BOOKINGS_VIEW_OWN,
     BOOKINGS_RESPOND,
     BOOKINGS_OPERATE,
+    BOOKINGS_CREATE,
     SALON_PROFILE_MANAGE,
     GALLERY_MANAGE,
     WORKING_HOURS_MANAGE,

@@ -13,6 +13,8 @@ import { MOCK_SETTING_DEFAULTS } from '@/data/mock/settingsFixture';
 import { SETTING_DEFINITIONS } from '@/domain/settings/registry';
 import { parseSetting } from '@/domain/settings/validate';
 import ar from '@/locales/ar';
+import { SETTINGS_STRINGS } from '@/locales/lazy/settings';
+
 import en from '@/locales/en';
 
 const BRANCH_CODES = [
@@ -43,8 +45,8 @@ describe('branches contract (ADM-088)', () => {
     expect(def?.group).toBe('branches');
     expect(SETTING_TABS.find((t) => t.groups.includes('branches'))?.id).toBe('security');
     expect(MOCK_SETTING_DEFAULTS['salon.maxBranches']).toBe(20);
-    expect(en.settings.key.salon_maxBranches).toBeTruthy();
-    expect(ar.settings.key.salon_maxBranches).toBeTruthy();
+    expect(SETTINGS_STRINGS.en.settings.key.salon_maxBranches).toBeTruthy();
+    expect(SETTINGS_STRINGS.ar.settings.key.salon_maxBranches).toBeTruthy();
     expect(parseSetting('0', def!).ok).toBe(false);
     expect(parseSetting('20', def!).ok).toBe(true);
   });

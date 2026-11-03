@@ -1,9 +1,11 @@
 import {
+  BOOKING_SOURCES,
   BOOKING_STATUSES,
   BOOKING_TABS,
   PAYMENT_STATUSES,
   isBookingStatus,
   type BookingQuery,
+  type BookingSource,
   type BookingTab,
   type PaymentStatus,
 } from '@/domain/bookings/bookings';
@@ -25,6 +27,7 @@ export const BOOKING_FILTER_KEYS = [
   'salon',
   'branch',
   'customer',
+  'source',
   BUSINESS_TYPE_FILTER_KEY,
 ];
 const first = (state: ListState, key: string): string | undefined => state.filters[key]?.[0];
@@ -41,6 +44,9 @@ export function bookingQueryOf(state: ListState): BookingQuery {
   const salon = first(state, 'salon');
   const branch = first(state, 'branch');
   const customer = first(state, 'customer');
+  const source: BookingSource | undefined = BOOKING_SOURCES.find(
+    (s) => s === first(state, 'source'),
+  );
   return {
     page: state.page,
     pageSize: state.pageSize,
@@ -53,6 +59,7 @@ export function bookingQueryOf(state: ListState): BookingQuery {
     ...(salon ? { salonId: salon } : {}),
     ...(salon && branch ? { branchId: branch } : {}),
     ...(customer ? { customerId: customer } : {}),
+    ...(source ? { source } : {}),
     ...businessTypeParam(businessTypeFilterOf(state)),
     ...(state.search ? { q: state.search } : {}),
   };
@@ -69,6 +76,7 @@ export function bookingExportParams(q: BookingQuery): Record<string, unknown> {
     ...(q.salonId ? { salonId: q.salonId } : {}),
     ...(q.branchId ? { branchId: q.branchId } : {}),
     ...(q.customerId ? { customerId: q.customerId } : {}),
+    ...(q.source ? { source: q.source } : {}),
     ...businessTypeParam(q.businessType),
     ...(q.from ? { from: q.from } : {}),
     ...(q.to ? { to: q.to } : {}),

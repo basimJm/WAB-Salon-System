@@ -58,6 +58,9 @@ export const SETTING_DEFINITIONS: readonly SettingDefinition[] = [
   row('booking.paymentHoldMinutes', 'booking', [1, 60], 'minutes'),
   row('booking.autoCancelAfterStartMinutes', 'booking', [1, 1440], 'minutes'),
   row('booking.pendingAlertBeforeMinutes', 'booking', [1, 1440], 'minutes'),
+  // §5.21: "Did it finish?" reminders after the end, and the overdue alert.
+  row('booking.closeReminderIntervalMinutes', 'booking', [1, 1440], 'minutes'),
+  row('booking.closeOverdueAlertHours', 'booking', [1, 720], 'hours'),
   {
     key: 'booking.reminderMinutes',
     group: 'booking',

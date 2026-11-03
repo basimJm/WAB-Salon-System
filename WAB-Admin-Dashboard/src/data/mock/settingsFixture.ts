@@ -8,6 +8,8 @@ export const MOCK_SETTING_DEFAULTS: Readonly<Record<string, unknown>> = {
   'booking.paymentHoldMinutes': 10,
   'booking.autoCancelAfterStartMinutes': 60,
   'booking.pendingAlertBeforeMinutes': 30,
+  'booking.closeReminderIntervalMinutes': 60,
+  'booking.closeOverdueAlertHours': 24,
   'booking.reminderMinutes': [60, 15],
   'otp.length': 6,
   'otp.resendAfterSec': 60,

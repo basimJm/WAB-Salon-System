@@ -94,7 +94,8 @@
     },
     "businessType": {
       "SALON": "صالون",
-      "CLINIC": "عيادة"
+      "CLINIC": "عيادة",
+      "TATTOO": "استوديو وشم"
     },
     "audience": {
       "FEMALE": "نساء",

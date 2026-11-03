@@ -69,7 +69,7 @@ class MockWorldTest {
 
     @Test
     fun ownerPresetHasEveryGrantableKey() {
-        assertEquals(15, MockPresets.ALL_PERMISSIONS.size)
+        assertEquals(16, MockPresets.ALL_PERMISSIONS.size)
         assertEquals(MockPresets.ALL_PERMISSIONS, MockPresets.owner.permissions)
     }
 

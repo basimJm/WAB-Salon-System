@@ -55,4 +55,19 @@ class BusinessKindTest {
         assertTrue(UploadPurpose.MEDICAL_LICENSE.isLicense)
         assertFalse(UploadPurpose.SALON_COVER.isLicense)
     }
+
+    /** §5.23: a tattoo studio is always unisex, never takes brides and never changes its audience. */
+    @Test
+    fun aTattooStudioIsAlwaysUnisexWithoutBrides() {
+        val tattoo = assertNotNullKind(BusinessKind.of(BusinessType.TATTOO, Audience.MALE))
+        assertEquals(Audience.BOTH, tattoo.audience)
+        assertTrue(tattoo.isTattoo)
+        assertFalse(tattoo.isClinic)
+        assertFalse(tattoo.brideAllowed)
+        assertFalse(tattoo.canWidenAudience)
+        assertNull(tattoo.catalogGender)
+        assertEquals(BusinessType.TATTOO, BusinessType.fromCode("TATTOO"))
+    }
+
+    private fun assertNotNullKind(kind: BusinessKind?): BusinessKind = kind ?: error("expected a business kind")
 }

@@ -56,6 +56,7 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.actor_custom
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_call
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_cancel_reason
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_copy
+import com.fab.wab.merchant.feature.bookings.presentation.resources.customer_no_account
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_customer
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_branch
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_history
@@ -67,6 +68,8 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.details_reje
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_title
 import com.fab.wab.merchant.feature.bookings.presentation.resources.details_whatsapp
 import com.fab.wab.merchant.feature.bookings.presentation.resources.history_line
+import com.fab.wab.merchant.feature.bookings.presentation.resources.source_business
+import com.fab.wab.merchant.feature.bookings.presentation.resources.source_business_by
 import org.jetbrains.compose.resources.stringResource
 
 /** PRD M09 (design 03 `on.details`). */
@@ -149,6 +152,11 @@ private fun Header(details: BookingDetails, nowMs: Long, onAction: (UiAction) ->
             }
             val text = dateTimeText(summary.start)
             AppText(text = stringResource(Res.string.history_line, text.date, text.time), style = AppTheme.typography.bodyMedium)
+            if (summary.isCreatedByBusiness) {
+                val label = summary.createdByName?.let { stringResource(Res.string.source_business_by, it) }
+                    ?: stringResource(Res.string.source_business)
+                AppText(text = label, style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+            }
             val respondBy = summary.respondBy
             if (summary.status == BookingStatus.PENDING && respondBy != null && nowMs > 0) {
                 AutoCancelStrip(autoCancelText(BookingTimers.autoCancelRemaining(respondBy.toEpochMilliseconds(), nowMs)))
@@ -172,6 +180,9 @@ private fun CustomerCard(details: BookingDetails, onAction: (UiAction) -> Unit) 
     val spacing = AppTheme.spacing
     SectionCard(stringResource(Res.string.details_customer)) {
         AppText(text = details.summary.customerName, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
+        if (!details.summary.customerHasAccount) {
+            AppText(text = stringResource(Res.string.customer_no_account), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
+        }
         details.summary.customerPhone?.let { phone ->
             AppText(text = ltrIsolate(phone), style = AppTheme.typography.bodySmall, color = AppTheme.colors.muted)
             // Side by side when both labels fit, stacked otherwise (narrow phones, large font scales).

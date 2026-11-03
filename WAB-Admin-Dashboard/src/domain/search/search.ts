@@ -17,7 +17,8 @@ export interface SearchBooking {
   readonly status: string;
   readonly appointmentStart: string;
   readonly salonId: string;
-  readonly customerId: string;
+  /** Null for a business-made booking of someone without the app (§5.20). */
+  readonly customerId: string | null;
 }
 export interface SearchMember {
   readonly id: string;

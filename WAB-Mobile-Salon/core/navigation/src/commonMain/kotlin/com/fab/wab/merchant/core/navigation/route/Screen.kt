@@ -37,6 +37,9 @@ sealed interface Screen {
     // Bookings (M09)
     @Serializable data class BookingDetails(val bookingId: String) : Screen
 
+    /** A booking a member creates for a customer (BUSINESS_DOMAIN §5.20, `BOOKINGS_CREATE`). */
+    @Serializable data object NewBooking : Screen
+
     // Salon management (M13–M19)
     @Serializable data object SalonProfile : Screen
 
