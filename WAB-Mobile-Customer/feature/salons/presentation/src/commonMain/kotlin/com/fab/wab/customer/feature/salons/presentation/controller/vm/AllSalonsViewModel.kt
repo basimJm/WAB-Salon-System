@@ -58,7 +58,7 @@ class AllSalonsViewModel(
     private val deps: AllSalonsDependencies,
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(
-    initialState = UiState(filters = entry.toFilters(), businessType = entry.businessType),
+    initialState = UiState(filters = entry.toFilters()),
     testScope,
 ) {
 
@@ -95,8 +95,8 @@ class AllSalonsViewModel(
                 emitSideEffect(SideEffect.OpenFilters(uiState.value.filters))
             }
             is UiAction.OnChipRemove -> removeChip(event.chip)
-            is UiAction.OnBusinessTypeSelect -> selectBusinessType(event.businessType)
             is UiAction.OnFiltersApplied -> {
+                trackBusinessType(event.filters.businessType)
                 updateState { copy(filters = event.filters) }
                 load()
             }
@@ -113,11 +113,9 @@ class AllSalonsViewModel(
         }
     }
 
-    private fun selectBusinessType(type: BusinessType?) {
+    private fun trackBusinessType(type: BusinessType?) {
         if (type == uiState.value.businessType) return
         track(SalonsAnalytics.ACTION_BUSINESS_TYPE, SalonsAnalytics.PARAM_VALUE to (type?.code ?: SalonsAnalytics.VALUE_ALL))
-        updateState { copy(businessType = type) }
-        load()
     }
 
     private fun removeChip(chip: FilterChipId) {
@@ -130,6 +128,7 @@ class AllSalonsViewModel(
                     FilterChipId.Price -> f.copy(priceRange = null)
                     FilterChipId.General -> f.copy(general = null)
                     FilterChipId.Rating -> f.copy(minRating = null)
+                    FilterChipId.Type -> f.copy(businessType = null)
                 },
             )
         }
@@ -271,4 +270,5 @@ fun AllSalonsEntry.toFilters(): SalonFilters = SalonFilters(
         SalonListFilter.NEAREST -> GeneralFilter.NEAREST
         null -> null
     },
+    businessType = businessType,
 )

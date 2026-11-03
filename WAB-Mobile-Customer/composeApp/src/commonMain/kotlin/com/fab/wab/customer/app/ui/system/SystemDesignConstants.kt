@@ -27,6 +27,6 @@ internal object SystemDesign {
     val bodyBottom = 34.dp
 
     // Splash (no design frame): brand header 86 like S11, loader below, version at the bottom
-    val splashLogo = 86.dp
+    val splashLogo = 120.dp
     val splashGap = 32.dp
 }

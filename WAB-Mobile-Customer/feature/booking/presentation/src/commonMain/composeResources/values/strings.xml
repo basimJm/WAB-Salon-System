@@ -56,7 +56,7 @@
     <string name="booking_staff_title">Choose staff</string>
     <string name="booking_staff_title_bride">Choose a bride-qualified expert</string>
     <string name="booking_staff_any">Any available staff</string>
-    <string name="booking_staff_any_hint">The salon will assign someone available</string>
+    <string name="booking_staff_any_hint">Someone available will be assigned to you</string>
     <string name="booking_staff_unavailable">Not available at this time</string>
     <string name="booking_staff_on_leave">On leave</string>
     <string name="booking_staff_available">Available</string>
@@ -73,7 +73,7 @@
     <string name="booking_companion_limit">Maximum 5 companions</string>
     <string name="booking_summary_title">Booking summary</string>
     <string name="booking_grand_total">Total</string>
-    <string name="booking_rules_title">Salon rules</string>
+    <string name="booking_rules_title">Booking rules</string>
     <plurals name="booking_rules_window">
         <item quantity="one">Cancel up to %1$d hour before the appointment</item>
         <item quantity="many">Cancel up to %1$d hours before the appointment</item>
@@ -82,16 +82,16 @@
     <string name="booking_rules_deposit">Deposit is %1$d% of the total</string>
     <string name="booking_rules_deposit_refundable">Deposit is refunded if you cancel in time</string>
     <string name="booking_rules_deposit_non_refundable">Deposit is not refunded if you cancel</string>
-    <string name="booking_rules_approval">The booking needs salon approval</string>
+    <string name="booking_rules_approval">The booking needs to be approved first</string>
     <string name="booking_payment_title">Payment method</string>
     <string name="booking_pay_on_arrival">Pay on arrival</string>
-    <string name="booking_pay_on_arrival_sub">Pay the full amount at the salon</string>
+    <string name="booking_pay_on_arrival_sub">Pay the full amount on arrival</string>
     <string name="booking_pay_deposit">%1$d% deposit = %2$s JOD</string>
     <string name="booking_pay_deposit_sub">Pay now, the rest on arrival</string>
     <string name="booking_pay_full">Pay in full</string>
     <string name="booking_pay_full_sub">Pay the full amount online</string>
     <string name="success_title">Booking request sent</string>
-    <string name="success_message">Your booking request was sent and is waiting for the salon’s approval. We’ll notify you once it’s approved.</string>
+    <string name="success_message">Your booking request was sent and is waiting for approval. We’ll notify you once it’s approved.</string>
     <string name="success_reference">Reference number</string>
     <string name="success_copy">Copy</string>
     <string name="success_copied_label">Copied</string>
@@ -101,7 +101,7 @@
     <string name="booking_pay_online_soon">Online payment coming soon</string>
     <string name="verify_title">Confirm booking</string>
     <string name="verify_heading">Review and verify</string>
-    <string name="verify_salon">Salon</string>
+    <string name="verify_salon">Place</string>
     <string name="verify_when">Date &amp; time</string>
     <string name="verify_people">People</string>
     <string name="verify_payment">Payment</string>
