@@ -32,10 +32,13 @@ import kotlin.test.assertTrue
 
 private class SheetCatalogFake : CatalogRepository {
     val pages = mutableListOf<Int>()
+    val types = mutableListOf<BusinessType?>()
     var perPage = 10
     override suspend fun services(gender: Gender, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
         pages += page
-        return AppResult.Success(List(perPage) { CatalogService("s$page-$it", "Service $page-$it", "", null) })
+        types += businessType
+        val prefix = businessType?.code ?: "all"
+        return AppResult.Success(List(perPage) { CatalogService("$prefix-s$page-$it", "Service $page-$it", "", null) })
     }
 }
 
@@ -60,6 +63,36 @@ class FilterSheetViewModelTest {
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm
+    }
+
+    @Test
+    fun theTypeIsChosenFirstAndTheServiceCategoriesFollowIt() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(SalonFilters(businessType = BusinessType.CLINIC))
+        assertEquals(BusinessType.CLINIC, vm.state.value.businessType)
+        assertEquals(listOf<BusinessType?>(BusinessType.CLINIC), catalog.types, "the clinic catalog is loaded")
+        vm.onEvent(UiAction.OnServiceToggle(ServiceRef("CLINIC-s1-0", "Botox")))
+        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
+        val state = vm.state.value
+        assertEquals(BusinessType.SALON, catalog.types.last(), "switching the type reloads its categories")
+        assertEquals(listOf(1, 1), catalog.pages)
+        assertTrue(state.services.all { it.id.startsWith("SALON-") }, "only the new type's services are listed")
+        assertTrue(state.selectedServices.isEmpty(), "picks of the other type are dropped")
+        assertNull(state.priceBounds)
+        val count = catalog.types.size
+        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
+        assertEquals(count, catalog.types.size, "the selected type does not reload")
+        vm.onEvent(UiAction.OnApply)
+        assertEquals(BusinessType.SALON, (effects.single() as SideEffect.Applied).filters.businessType)
+    }
+
+    @Test
+    fun resetClearsTheTypeAndReloadsEveryCategory() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(SalonFilters(businessType = BusinessType.CLINIC))
+        assertTrue(vm.state.value.canReset, "a chosen type can be reset")
+        vm.onEvent(UiAction.OnReset)
+        assertNull(vm.state.value.businessType)
+        assertEquals(null, catalog.types.last())
+        assertTrue(vm.state.value.services.all { it.id.startsWith("all-") })
     }
 
     @Test

@@ -64,7 +64,7 @@ internal object AuthDiscoveryActionEvents {
     fun allSalons(a: AllSalonsContract.UiAction): ActionEvent = when (a) {
         is AllSalonsContract.UiAction.OnTextChange, AllSalonsContract.UiAction.OnFilterClick, is AllSalonsContract.UiAction.OnChipRemove,
         is AllSalonsContract.UiAction.OnSalonClick, is AllSalonsContract.UiAction.OnFavoriteClick,
-        is AllSalonsContract.UiAction.OnFiltersApplied, is AllSalonsContract.UiAction.OnBusinessTypeSelect,
+        is AllSalonsContract.UiAction.OnFiltersApplied,
         -> ActionEvent.ByViewModel
         AllSalonsContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         AllSalonsContract.UiAction.OnLoadMore, AllSalonsContract.UiAction.OnRefresh, AllSalonsContract.UiAction.OnRetry,

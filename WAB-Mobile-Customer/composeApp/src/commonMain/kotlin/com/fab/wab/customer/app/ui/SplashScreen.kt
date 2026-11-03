@@ -49,7 +49,10 @@ fun SplashScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(SystemDesign.splashGap),
             ) {
-                AppBrandHeader(size = SystemDesign.splashLogo)
+                AppBrandHeader(
+                    size = SystemDesign.splashLogo,
+                    onLogoAnimationFinish = { onEvent(MainContract.UiAction.OnLogoAnimationFinished) },
+                )
                 if (state.error == null) AppLoadingIndicator()
             }
             state.appVersion?.let { version ->
