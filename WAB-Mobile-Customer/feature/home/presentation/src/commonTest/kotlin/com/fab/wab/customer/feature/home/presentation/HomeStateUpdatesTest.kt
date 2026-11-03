@@ -46,7 +46,7 @@ class HomeStateUpdatesTest {
         assertEquals("s3", state.bookAgain.single().salon.id)
         assertEquals(4, state.unreadCount)
         assertTrue(state.hasContent)
-        assertEquals(listOf(HomeBlock.Explore, HomeBlock.NearYou, HomeBlock.Recommended, HomeBlock.BookAgain), state.blocks)
+        assertEquals(listOf(HomeBlock.Explore, HomeBlock.Recommended, HomeBlock.BookAgain, HomeBlock.NearYou), state.blocks)
     }
 
     @Test
@@ -55,7 +55,7 @@ class HomeStateUpdatesTest {
         assertEquals(NearestUi.LocationOff, state.nearYou)
         assertEquals(0, state.unreadCount)
         assertEquals(emptyList(), state.bookAgain)
-        assertEquals(listOf(HomeBlock.Explore, HomeBlock.NearYou, HomeBlock.Recommended), state.blocks)
+        assertEquals(listOf(HomeBlock.Explore, HomeBlock.Recommended, HomeBlock.NearYou), state.blocks)
     }
 
     @Test

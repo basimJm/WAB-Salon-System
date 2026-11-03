@@ -57,13 +57,14 @@ class HomeDependencies(
 )
 
 /** S03: one request per type lens (§5.22), Near you by permission state, live unread badge, auth-gated favorites. */
-class HomeViewModel(
-    private val deps: HomeDependencies,
-    testScope: CoroutineScope? = null,
-) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
+class HomeViewModel(private val deps: HomeDependencies, testScope: CoroutineScope? = null) :
+    BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var started = false
     private var loadJob: Job? = null
+
+    /** The last fix of this screen: later loads (lens, refresh) send it at once instead of waiting for a new one. */
+    private var lastFix: LocationData? = null
 
     override fun onStart() {
         if (started) return
@@ -93,6 +94,7 @@ class HomeViewModel(
                 track(HomeAnalytics.ACTION_ENABLE_LOCATION)
                 updateState { copy(dialog = HomeDialog.LocationExplanation) }
             }
+            UiAction.OnRetryLocationClick -> retryLocation()
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
             else -> onNavigation(event)
@@ -174,9 +176,15 @@ class HomeViewModel(
         loadJob?.cancel()
         loadJob = scope.launch {
             updateState { copy(loading = !refresh, refreshing = refresh, error = null, offline = false) }
-            val location = currentLocationIfAllowed()
-            when (val result = deps.loadHome(gender, lens, location)) {
-                is AppResult.Success -> apply(result.data, located = location != null)
+            // Home never waits for a GPS fix (it may take the whole timeout): the sections load at once with the last
+            // fix of this screen, and Near you fills in when a first fix arrives.
+            val allowed = locationAllowed()
+            val known = lastFix.takeIf { allowed }
+            when (val result = deps.loadHome(gender, lens, known)) {
+                is AppResult.Success -> {
+                    apply(result.data, located = known != null)
+                    if (allowed && known == null) locateThenFillNearYou(gender, lens)
+                }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)
                     val keepContent = uiState.value.hasContent
@@ -192,16 +200,32 @@ class HomeViewModel(
 
     private fun apply(content: HomeContent, located: Boolean) = updateState { withContent(content, located) }
 
+    private suspend fun locationAllowed(): Boolean =
+        deps.permissions.isGranted(AppPermission.LOCATION) && deps.permissions.isLocationServiceEnabled()
+
     private suspend fun currentLocationIfAllowed(): LocationData? =
-        if (deps.permissions.isGranted(AppPermission.LOCATION) && deps.permissions.isLocationServiceEnabled()) {
-            deps.currentLocation()
-        } else {
-            null
+        if (locationAllowed()) deps.currentLocation()?.also { lastFix = it } else null
+
+    /** Placeholder until the first fix, which reloads Home; no fix = Unavailable (retry), or LocationOff if turned off. */
+    private suspend fun locateThenFillNearYou(gender: Gender, lens: BusinessType?) {
+        updateState { copy(nearYou = NearestUi.Locating) }
+        val fix = currentLocationIfAllowed()
+        if (fix == null) {
+            val near = if (locationAllowed()) NearestUi.Unavailable else NearestUi.LocationOff
+            return updateState { copy(nearYou = near) }
         }
+        (deps.loadHome(gender, lens, fix) as? AppResult.Success)?.let { apply(it.data, located = true) }
+    }
+
+    private fun retryLocation() {
+        track(HomeAnalytics.ACTION_RETRY_LOCATION)
+        uiState.value.gender?.let { gender -> scope.launch { locateThenFillNearYou(gender, uiState.value.lens) } }
+    }
 
     /** Back from the system settings (PRD S03 item 7 "after enabling → loads automatically"). */
     private fun resumeAfterSettings() {
-        if (uiState.value.nearYou !is NearestUi.LocationOff || !uiState.value.hasContent) return
+        val near = uiState.value.nearYou
+        if ((near !is NearestUi.LocationOff && near !is NearestUi.Unavailable) || !uiState.value.hasContent) return
         scope.launch { if (currentLocationIfAllowed() != null) load(refresh = true) }
     }
 
