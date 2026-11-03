@@ -48,6 +48,14 @@ export const SETTING_DEFINITIONS = {
     positiveInt,
     SETTING_DEFAULTS['booking.pendingAlertBeforeMinutes'],
   ),
+  'booking.closeReminderIntervalMinutes': define(
+    positiveInt,
+    SETTING_DEFAULTS['booking.closeReminderIntervalMinutes'],
+  ),
+  'booking.closeOverdueAlertHours': define(
+    positiveInt,
+    SETTING_DEFAULTS['booking.closeOverdueAlertHours'],
+  ),
   // Each offset schedules one reminder job with a deterministic id, so offsets must be unique.
   'booking.reminderMinutes': define(
     z

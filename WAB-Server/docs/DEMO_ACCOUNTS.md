@@ -69,9 +69,9 @@ Roles: the **owner** sees every branch and has every permission; a **branch mana
 | Gentlemen's Corner | Um Uthaina | EMPLOYEE | Fadi Fayez | +962789010023 |
 | Gentlemen's Corner | Um Uthaina | EMPLOYEE | Saif Haddad | +962789010024 |
 
-## Beauty clinics and the salon for men and women (§5.19, SRV-174)
+## Beauty clinics, the salon for men and women and the tattoo studio (§5.19, §5.23, SRV-174, SRV-183)
 
-Every clinic serves men and women (`BOTH`); Unity Salon is a salon for both. Numbers use the `+962 78902 0xxx` block. Sign in to the merchant app with the number and the dev OTP code.
+Every clinic and the tattoo studio serve men and women (`BOTH`); Unity Salon is a salon for both. Numbers use the `+962 78902 0xxx` block. Sign in to the merchant app with the number and the dev OTP code.
 
 | Business | Type / audience | Branch | Role | Name | Phone |
 |---|---|---|---|---|---|
@@ -88,6 +88,9 @@ Every clinic serves men and women (`BOTH`); Unity Salon is a salon for both. Num
 | Unity Salon | SALON / BOTH | — | OWNER | Tareq Tamimi | +962789020011 |
 | Unity Salon | SALON / BOTH | Jubeiha | MANAGER | Mohammad Smadi | +962789020012 |
 | Unity Salon | SALON / BOTH | Jubeiha | EMPLOYEE | Yara Rawashdeh | +962789020013 |
+| Black Needle Studio | TATTOO / BOTH | — | OWNER | Basel Fayez | +962789020015 |
+| Black Needle Studio | TATTOO / BOTH | Jabal Amman | MANAGER | Hasan Bataineh | +962789020016 |
+| Black Needle Studio | TATTOO / BOTH | Jabal Amman | EMPLOYEE | Shahd Obeidat | +962789020017 |
 | Unity Salon | SALON / BOTH | Jubeiha | EMPLOYEE | Anas Majali | +962789020014 |
 
 ## What each extra branch has

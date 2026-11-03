@@ -7,6 +7,8 @@ import {
   BOOKING_STATUSES,
   AUDIENCES,
   BUSINESS_TYPES,
+  GENDERS,
+  type Gender,
   type ActorType,
   type BookingPaymentStatus,
   type BookingRefundStatus,
@@ -54,9 +56,38 @@ export interface BranchSnapshot {
   phone?: string;
 }
 
+/** Who made the booking (§5.20). */
+export const BOOKING_SOURCES = ['CUSTOMER_APP', 'MERCHANT'] as const;
+export type BookingSource = (typeof BOOKING_SOURCES)[number];
+
+/** The customer as the member entered them (MERCHANT bookings, §5.20). */
+export interface CustomerContact {
+  name: string;
+  phone: { dialCode: string; number: string; e164: string };
+  gender: Gender;
+}
+
+/** Close reminders of a finished booking (§5.21). */
+export interface CloseReminders {
+  count: number;
+  lastAt?: Date;
+  overdueAlertedAt?: Date;
+}
+
 export interface BookingRaw {
   referenceNumber: string;
-  customerId: Types.ObjectId;
+  /**
+   * The customer account. Always set for CUSTOMER_APP; for MERCHANT set when the phone belongs to
+   * a registered customer, or later when that number registers (claim, §5.20).
+   */
+  customerId?: Types.ObjectId;
+  /** Default CUSTOMER_APP (bookings before §5.20 have none). */
+  source?: BookingSource;
+  /** The member who made a MERCHANT booking (name as it was). */
+  createdBy?: { memberId: Types.ObjectId; name: string };
+  /** MERCHANT bookings: the customer as entered (also kept when the customer is registered). */
+  customerContact?: CustomerContact;
+  closeReminders?: CloseReminders;
   salonId: Types.ObjectId;
   /** Branch of the appointment (§3.5); set on every new booking, backfilled by the migration. */
   branchId?: Types.ObjectId;
@@ -124,7 +155,47 @@ const decisionSchema = new Schema<BookingDecision>(
 const bookingSchema = new Schema<BookingRaw>(
   {
     referenceNumber: { type: String, required: true },
-    customerId: { type: Schema.Types.ObjectId, ref: 'Customer', required: true },
+    customerId: { type: Schema.Types.ObjectId, ref: 'Customer' },
+    source: { type: String, enum: BOOKING_SOURCES },
+    createdBy: {
+      type: new Schema(
+        {
+          memberId: { type: Schema.Types.ObjectId, ref: 'Member', required: true },
+          name: { type: String, required: true },
+        },
+        { _id: false },
+      ),
+    },
+    customerContact: {
+      type: new Schema<CustomerContact>(
+        {
+          name: { type: String, required: true, trim: true },
+          phone: {
+            type: new Schema(
+              {
+                dialCode: { type: String, required: true },
+                number: { type: String, required: true },
+                e164: { type: String, required: true },
+              },
+              { _id: false },
+            ),
+            required: true,
+          },
+          gender: { type: String, enum: GENDERS, required: true },
+        },
+        { _id: false },
+      ),
+    },
+    closeReminders: {
+      type: new Schema<CloseReminders>(
+        {
+          count: { type: Number, required: true, default: 0 },
+          lastAt: { type: Date },
+          overdueAlertedAt: { type: Date },
+        },
+        { _id: false },
+      ),
+    },
     salonId: { type: Schema.Types.ObjectId, ref: 'Salon', required: true },
     branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
     branchSnapshot: {
@@ -168,5 +239,11 @@ bookingSchema.index({ branchId: 1, status: 1 });
 // Overlap checks: "does this staff member have a live booking in this window?"
 bookingSchema.index({ 'persons.staffId': 1, 'persons.start': 1, status: 1 });
 bookingSchema.index({ status: 1, respondBy: 1 });
+// To close (§5.21) and the claim of business-made bookings by phone (§5.20).
+bookingSchema.index({ status: 1, appointmentEnd: 1 });
+bookingSchema.index(
+  { 'customerContact.phone.e164': 1 },
+  { partialFilterExpression: { 'customerContact.phone.e164': { $exists: true } } },
+);
 
 export const BookingModel = model<BookingRaw>('Booking', bookingSchema);

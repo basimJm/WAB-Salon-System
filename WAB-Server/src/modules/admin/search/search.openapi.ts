@@ -37,7 +37,7 @@ const booking = z.object({
   status: z.enum(BOOKING_STATUSES),
   appointmentStart: z.iso.datetime(),
   salonId: z.string(),
-  customerId: z.string(),
+  customerId: z.string().nullable(),
 });
 const member = z.object({
   id: z.string(),

@@ -79,11 +79,12 @@ beforeEach(() => {
 });
 
 describe('upload policies', () => {
-  it('cover every purpose, keep license documents (trade + medical) private and everything else public', () => {
+  it('cover every purpose, keep license documents (trade + medical) and tattoo designs private, everything else public', () => {
+    const PRIVATE = ['LICENSE_DOCUMENT', 'MEDICAL_LICENSE', 'BOOKING_REFERENCE'];
     expect(Object.keys(UPLOAD_POLICIES).sort()).toEqual([...UPLOAD_PURPOSES].sort());
     for (const purpose of UPLOAD_PURPOSES) {
       expect(UPLOAD_POLICIES[purpose].visibility).toBe(
-        purpose === 'LICENSE_DOCUMENT' || purpose === 'MEDICAL_LICENSE' ? 'PRIVATE' : 'PUBLIC',
+        PRIVATE.includes(purpose) ? 'PRIVATE' : 'PUBLIC',
       );
     }
   });

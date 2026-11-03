@@ -24,7 +24,7 @@ export const catalogAdminQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   businessType: z.enum(BUSINESS_TYPES).optional(),
   audience: z.enum(AUDIENCES).optional(),
 });
-/** A catalog service belongs to one business type; a CLINIC service is always BOTH (§3.2, §5.19). */
+/** A catalog service belongs to one business type; CLINIC and TATTOO services are always BOTH (§3.2, §5.19, §5.23). */
 export const createCatalogSchema = z
   .object({
     name,
@@ -38,7 +38,7 @@ export const createCatalogSchema = z
   })
   .refine((v) => audienceFor(v.businessType, v.audience) === v.audience, {
     path: ['audience'],
-    message: 'a CLINIC service is BOTH',
+    message: 'a CLINIC or TATTOO service is BOTH',
   });
 /** Business type and audience of a catalog service cannot change: businesses already offer it. */
 export const updateCatalogSchema = z

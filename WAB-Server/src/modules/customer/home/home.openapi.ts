@@ -59,9 +59,9 @@ export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
     path: `${API_PREFIXES.customer}${HOME_ROUTES.base}`,
     tags: ['Home'],
     summary:
-      'Home (S03, §5.19): banners, salon + clinic services, Recommended salons + clinics, nearest salons + clinics in one request',
+      'Home (S03, §5.22): banners, Explore, Near you, Recommended, Book again across the type lens (`businessType`), in one request',
     description:
-      'Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. Only businesses the gender may see (own audience, BOTH, every clinic). `nearestSalons`/`nearestClinics` are null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all.',
+      "Public; a valid customer token adds `firstName`, `unreadCount`, `isFavorite` and `bookAgain`. Businesses are never filtered by gender (§5.22; `gender` selects banners only). `explore` = most-booked catalog services of the lens types; `nearYou` = one list of bookable branches by distance (null without `lat`/`lng`); `recommendedAll` = one rail of the lens types' active placements; `bookAgain` = businesses of the customer's completed bookings with that booking's services (null for guests). The per-type keys stay for app versions before CUS-102. Each section holds 10 items; `hasMore` shows See more / See all.",
     security: [],
     request: {
       headers: z.object({ 'Accept-Language': acceptLanguageHeader }),
@@ -82,6 +82,14 @@ export const registerCustomerHomeDocs = (registry: OpenAPIRegistry): void => {
                 actionValue: z.string().nullable().optional(),
               }),
             ),
+            explore: serviceSection,
+            nearYou: nearestSection.nullable(),
+            recommendedAll: section(card),
+            bookAgain: section(
+              card.extend({
+                lastBooking: z.object({ id: z.string(), salonServiceIds: z.array(z.string()) }),
+              }),
+            ).nullable(),
             salonServices: serviceSection,
             clinicServices: serviceSection,
             recommendedSalons: section(card),

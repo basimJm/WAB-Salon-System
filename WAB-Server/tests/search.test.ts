@@ -9,6 +9,7 @@ import {
 } from '../src/domain/search/search.service';
 import { optionalAuth } from '../src/middlewares/auth';
 import { FakeStorageProvider } from '../src/providers/storage';
+import { CatalogServicesRepository } from '../src/repositories/catalog.repository';
 import { ClosuresRepository } from '../src/repositories/closures.repository';
 import { SalonServicesRepository } from '../src/repositories/salonServices.repository';
 import { SalonsRepository } from '../src/repositories/salons.repository';
@@ -27,7 +28,9 @@ const recommended: { ids: string[]; clinicIds: string[] } & RecommendedLookup = 
   ids: [],
   clinicIds: [],
   salonIds({ businessType }) {
-    return Promise.resolve(businessType === 'CLINIC' ? this.clinicIds : this.ids);
+    return Promise.resolve(
+      businessType === 'CLINIC' ? this.clinicIds : businessType === 'SALON' ? this.ids : [],
+    );
   },
 };
 const saved: { ids: Set<string>; asked: string[] } = { ids: new Set(), asked: [] };
@@ -37,12 +40,14 @@ const favorites: FavoriteLookup = {
     return Promise.resolve(new Set(ids.filter((id) => saved.ids.has(id))));
   },
 };
+const catalogM = createFakeModel();
 const app = createApp({
   logger,
   services: {
     search: createSearchService({
       salons: new SalonsRepository(salonsM.model as never),
       salonServices: new SalonServicesRepository(servicesM.model as never),
+      catalog: new CatalogServicesRepository(catalogM.model as never),
       closures: new ClosuresRepository(closuresM.model as never),
       storage: new FakeStorageProvider(),
       settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
@@ -119,7 +124,7 @@ const c1 = new Types.ObjectId().toHexString();
 const c2 = new Types.ObjectId().toHexString();
 
 beforeEach(() => {
-  for (const f of [salonsM, servicesM, closuresM]) f.docs.length = 0;
+  for (const f of [salonsM, servicesM, closuresM, catalogM]) f.docs.length = 0;
   recommended.ids = [];
   recommended.clinicIds = [];
   saved.ids = new Set();
@@ -127,7 +132,7 @@ beforeEach(() => {
 });
 
 describe('GET /customer/v1/salons', () => {
-  it('shows only LIVE, complete businesses the gender may see (own + BOTH + clinics, §5.19); the gender is required', async () => {
+  it('shows LIVE, complete businesses of every audience; gender is an optional filter (§5.22)', async () => {
     addSalon('Visible');
     addSalon('Men', { audience: 'MALE' });
     addSalon('Pending', { state: 'APPLICATION_PENDING' });
@@ -137,10 +142,18 @@ describe('GET /customer/v1/salons', () => {
     expect(await names('gender=MALE')).toEqual(['Men']);
     addSalon('Unisex', { audience: 'BOTH', rating: { avg: 3, count: 1 } });
     addSalon('Clinic', { businessType: 'CLINIC', audience: 'BOTH', rating: { avg: 2, count: 1 } });
-    expect(await names('gender=FEMALE')).toEqual(['Visible', 'Unisex', 'Clinic']);
-    expect(await names('gender=MALE')).toEqual(['Men', 'Unisex', 'Clinic']);
-    expect((await request(app).get('/customer/v1/salons')).status).toBe(400);
+    addSalon('Ink', { businessType: 'TATTOO', audience: 'BOTH', rating: { avg: 1, count: 1 } });
+    expect(await names('gender=FEMALE')).toEqual(['Visible', 'Unisex', 'Clinic', 'Ink']);
+    expect(await names('gender=MALE')).toEqual(['Men', 'Unisex', 'Clinic', 'Ink']);
+    expect((await names('')).sort()).toEqual(['Clinic', 'Ink', 'Men', 'Unisex', 'Visible']);
+    expect(await names('businessType=TATTOO,CLINIC')).toEqual(['Clinic', 'Ink']);
+    expect(await names('businessType=SALON&businessType=TATTOO&gender=MALE')).toEqual([
+      'Men',
+      'Unisex',
+      'Ink',
+    ]);
     expect((await request(app).get('/customer/v1/salons?gender=BOTH')).status).toBe(400);
+    expect((await request(app).get('/customer/v1/salons?businessType=SPA')).status).toBe(400);
   });
 
   it('cards carry rating, image URL, short description and today’s hours', async () => {
@@ -289,7 +302,6 @@ describe('GET /customer/v1/salons', () => {
   });
 
   it.each([
-    ['a price without services', 'minPrice=5.000'],
     ['an inverted range', `serviceIds=${c1}&minPrice=9.000&maxPrice=1.000`],
     ['a non-JOD price', `serviceIds=${c1}&minPrice=5.0001`],
     ['a malformed service id', 'serviceIds=nope'],
@@ -354,16 +366,105 @@ describe('GET /customer/v1/salons/filters', () => {
     expect(bodyOf(res).data).toEqual({ priceRange: { min: '13.000', max: '25.000' } });
   });
 
-  it('is null when no salon offers all of them, and needs gender and services', async () => {
+  it('is null when no salon offers all of them; gender and services are optional (§5.22)', async () => {
     addSalon('A');
     const res = await request(app).get(
       `/customer/v1/salons/filters?gender=FEMALE&serviceIds=${c1}`,
     );
     expect(bodyOf(res).data).toEqual({ priceRange: null });
-    expect((await request(app).get('/customer/v1/salons/filters?gender=FEMALE')).status).toBe(400);
-    expect((await request(app).get(`/customer/v1/salons/filters?serviceIds=${c1}`)).status).toBe(
-      400,
-    );
+    expect((await request(app).get('/customer/v1/salons/filters?gender=OTHER')).status).toBe(400);
+  });
+
+  it('without services: bounds of every active service price of the lens’ businesses', async () => {
+    const salon = addSalon('A');
+    const studio = addSalon('Ink', { businessType: 'TATTOO', audience: 'BOTH' });
+    offer(salon, c1, 5_000);
+    offer(salon, c2, 9_000);
+    offer(studio, c1, 40_000);
+    offer(studio, c2, 1_000, false);
+    const all = await request(app).get('/customer/v1/salons/filters');
+    expect(bodyOf(all).data).toEqual({ priceRange: { min: '5.000', max: '40.000' } });
+    const ink = await request(app).get('/customer/v1/salons/filters?businessType=TATTOO');
+    expect(bodyOf(ink).data).toEqual({ priceRange: { min: '40.000', max: '40.000' } });
+  });
+});
+
+describe('price range without services (§5.22)', () => {
+  it('keeps businesses with at least one active service inside the range', async () => {
+    const cheap = addSalon('Cheap');
+    const dear = addSalon('Dear');
+    addSalon('None');
+    offer(cheap, c1, 5_000);
+    offer(dear, c1, 50_000);
+    offer(dear, c2, 7_000, false);
+    expect(await names('minPrice=4.000&maxPrice=10.000')).toEqual(['Cheap']);
+    expect(await names('minPrice=20.000')).toEqual(['Dear']);
+  });
+});
+
+describe('GET /customer/v1/salons/suggestions (§5.22)', () => {
+  const entry = (name: string, businessType: string, over: object = {}): string => {
+    const _id = new Types.ObjectId();
+    catalogM.docs.push({
+      _id,
+      name: { ar: name, en: name },
+      description: { ar: 'd', en: 'd' },
+      businessType,
+      audience: 'BOTH',
+      active: true,
+      sortOrder: 0,
+      ...over,
+    });
+    return _id.toHexString();
+  };
+  const suggest = async (query: string): Promise<{ services: unknown[]; places: unknown[] }> => {
+    const res = await request(app).get(`/customer/v1/salons/suggestions?${query}`);
+    expect(res.status).toBe(200);
+    return (res.body as { data: { services: unknown[]; places: unknown[] } }).data;
+  };
+
+  it('lists services with the number of places offering them (most first), then places', async () => {
+    const laser = entry('Laser hair removal', 'CLINIC');
+    const removal = entry('Laser tattoo removal', 'TATTOO');
+    entry('Laser nobody offers', 'CLINIC');
+    entry('Laser off', 'CLINIC', { active: false });
+    const clinicA = addSalon('Derma', {
+      businessType: 'CLINIC',
+      audience: 'BOTH',
+      searchText: 'derma',
+    });
+    const clinicB = addSalon('Glow', {
+      businessType: 'CLINIC',
+      audience: 'BOTH',
+      searchText: 'glow',
+    });
+    const studio = addSalon('Laser Ink', {
+      businessType: 'TATTOO',
+      audience: 'BOTH',
+      searchText: 'laser ink',
+    });
+    offer(clinicA, laser, 30_000);
+    offer(clinicB, laser, 35_000);
+    offer(studio, removal, 50_000);
+    const all = await suggest('q=laser');
+    expect(all.services).toEqual([
+      { id: laser, name: 'Laser hair removal', businessType: 'CLINIC', placesCount: 2 },
+      { id: removal, name: 'Laser tattoo removal', businessType: 'TATTOO', placesCount: 1 },
+    ]);
+    expect(all.places).toEqual([
+      { id: studio, name: 'Laser Ink', businessType: 'TATTOO', audience: 'BOTH' },
+    ]);
+    const tattoo = await suggest('q=LASER&businessType=TATTOO');
+    expect(tattoo.services).toHaveLength(1);
+    expect(tattoo.places).toHaveLength(1);
+    expect((await suggest('q=laser&businessType=SALON')).services).toEqual([]);
+  });
+
+  it('needs a text and a known type', async () => {
+    expect((await request(app).get('/customer/v1/salons/suggestions')).status).toBe(400);
+    expect(
+      (await request(app).get('/customer/v1/salons/suggestions?q=a&businessType=SPA')).status,
+    ).toBe(400);
   });
 });
 

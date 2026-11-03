@@ -39,6 +39,18 @@ export const createBrowseRouteLimiter = (
 ): RequestHandler =>
   createRouteLimiter(services, namespace, ROUTE_LIMIT_FAMILIES.browse, SEARCH_ROUTE_RATE_LIMIT);
 
+/** Customer phone lookups by a business (§5.20): the strict per-minute budget, own counter. */
+export const createCustomerLookupLimiter = (
+  services: ApiServices,
+  namespace: RouteLimitNamespace,
+): RequestHandler =>
+  createRouteLimiter(
+    services,
+    namespace,
+    ROUTE_LIMIT_FAMILIES.customerLookup,
+    UPLOAD_ROUTE_RATE_LIMIT,
+  );
+
 /** Presign / confirm uploads: kept on the strict per-minute budget, in its own counter. */
 export const createUploadRouteLimiter = (
   services: ApiServices,

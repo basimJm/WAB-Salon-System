@@ -21,6 +21,7 @@ export const UPLOAD_PURPOSES = [
   'MEDICAL_LICENSE',
   'CATALOG_IMAGE',
   'BANNER_IMAGE',
+  'BOOKING_REFERENCE',
 ] as const;
 export type UploadPurpose = (typeof UPLOAD_PURPOSES)[number];
 
@@ -123,6 +124,15 @@ export const UPLOAD_POLICIES: Readonly<Record<UploadPurpose, UploadPolicy>> = {
     permission: 'SERVICES_MANAGE',
   },
   BANNER_IMAGE: { kind: 'image', visibility: 'PUBLIC', prefix: 'banners', scopes: ['admin'] },
+  // A tattoo design the customer attaches to a booking person (§5.23): private, signed URLs only.
+  BOOKING_REFERENCE: {
+    kind: 'image',
+    visibility: 'PRIVATE',
+    prefix: 'bookings/reference',
+    // The customer in the app; a member booking for a customer (§5.20).
+    scopes: ['customer', 'merchant'],
+    permission: 'BOOKINGS_CREATE',
+  },
 };
 
 export const BYTES_PER_MB = 1_048_576;
@@ -161,6 +171,7 @@ export const SLOT_PURPOSES = [
   'MEMBER_PHOTO',
   'CATALOG_IMAGE',
   'BANNER_IMAGE',
+  'BOOKING_REFERENCE',
 ] as const;
 export type SlotPurpose = (typeof SLOT_PURPOSES)[number];
 /** Object key of each slot; ids are server ids (ObjectId strings), never client text. */
@@ -173,6 +184,8 @@ export const SLOT_KEYS = {
   catalogImage: (catalogServiceId: string): string => `catalog/${catalogServiceId}/image`,
   bannerImage: (bannerId: string, language: string): string =>
     `banners/${bannerId}/image-${language}`,
+  bookingReference: (bookingId: string, personIndex: number): string =>
+    `bookings/${bookingId}/persons/${String(personIndex)}/reference`,
 } as const;
 /** Redis lock of one slot while its object and reference change (concurrent replacements queue). */
 export const FILE_SLOT_LOCK_PREFIX = 'file-slot';

@@ -74,7 +74,9 @@ export const createBookingEvents = (deps: {
     const hub = relay.current;
     if (hub === undefined) return;
     const payload = summaryOf(b);
-    hub.emit('customer', SOCKET_ROOMS.customer(b.customerId), event, payload);
+    // A business-made booking of someone without the app has no customer room (§5.20).
+    if (b.customerId !== undefined)
+      hub.emit('customer', SOCKET_ROOMS.customer(b.customerId), event, payload);
     hub.emit('merchant', SOCKET_ROOMS.salonAll(b.salonId), event, payload);
     if (b.branchId !== undefined)
       hub.emit('merchant', SOCKET_ROOMS.branchAll(b.branchId), event, payload);
@@ -89,7 +91,7 @@ export const createBookingEvents = (deps: {
       safely('created', async () => {
         const hub = relay.current;
         if (hub === undefined) return;
-        const customer = await customers.findById(b.customerId);
+        const customer = b.customerId === undefined ? null : await customers.findById(b.customerId);
         // The request card of M10; members answering requests see it, everyone else the update.
         const card = {
           ...summaryOf(b),

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.13.0"
+    "version": "1.16.0"
   },
   "servers": [
     {
@@ -177,7 +177,8 @@
         "type": "string",
         "enum": [
           "SALON",
-          "CLINIC"
+          "CLINIC",
+          "TATTOO"
         ]
       },
       "Audience": {
@@ -8371,7 +8372,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -8649,7 +8651,8 @@
                     "type": "string",
                     "enum": [
                       "SALON",
-                      "CLINIC"
+                      "CLINIC",
+                      "TATTOO"
                     ]
                   },
                   "audience": {
@@ -9364,7 +9367,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -10720,7 +10724,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -12324,7 +12329,8 @@
                       "LICENSE_DOCUMENT",
                       "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
-                      "BANNER_IMAGE"
+                      "BANNER_IMAGE",
+                      "BOOKING_REFERENCE"
                     ]
                   },
                   "contentType": {
@@ -12687,7 +12693,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -13460,7 +13467,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -14933,7 +14941,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -15034,7 +15043,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "audience": {
@@ -15300,7 +15310,8 @@
                           "type": "string",
                           "enum": [
                             "SALON",
-                            "CLINIC"
+                            "CLINIC",
+                            "TATTOO"
                           ]
                         },
                         "audience": {
@@ -15569,7 +15580,8 @@
                           "type": "string",
                           "enum": [
                             "SALON",
-                            "CLINIC"
+                            "CLINIC",
+                            "TATTOO"
                           ]
                         },
                         "audience": {
@@ -15809,7 +15821,8 @@
                           "type": "string",
                           "enum": [
                             "SALON",
-                            "CLINIC"
+                            "CLINIC",
+                            "TATTOO"
                           ]
                         },
                         "audience": {
@@ -15989,7 +16002,8 @@
                     "type": "string",
                     "enum": [
                       "SALON",
-                      "CLINIC"
+                      "CLINIC",
+                      "TATTOO"
                     ]
                   },
                   "ids": {
@@ -16060,7 +16074,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "audience": {
@@ -16245,7 +16260,8 @@
                 "PENDING",
                 "UPCOMING",
                 "TODAY",
-                "PAST"
+                "PAST",
+                "TO_CLOSE"
               ]
             },
             "required": false,
@@ -16361,11 +16377,24 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
             "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "CUSTOMER_APP",
+                "MERCHANT"
+              ]
+            },
+            "required": false,
+            "name": "source",
             "in": "query"
           },
           {
@@ -16501,7 +16530,10 @@
                             ],
                             "properties": {
                               "id": {
-                                "type": "string"
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "name": {
                                 "type": "string"
@@ -16515,7 +16547,34 @@
                               "name",
                               "phone"
                             ],
-                            "description": "Merchant and admin views only."
+                            "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "CUSTOMER_APP",
+                              "MERCHANT"
+                            ],
+                            "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                          },
+                          "createdBy": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                           },
                           "staff": {
                             "type": "array",
@@ -16593,6 +16652,8 @@
                           "salon",
                           "branch",
                           "customer",
+                          "source",
+                          "createdBy",
                           "staff",
                           "rejection"
                         ]
@@ -16811,7 +16872,10 @@
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": [
+                                "string",
+                                "null"
+                              ]
                             },
                             "name": {
                               "type": "string"
@@ -16825,7 +16889,34 @@
                             "name",
                             "phone"
                           ],
-                          "description": "Merchant and admin views only."
+                          "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "CUSTOMER_APP",
+                            "MERCHANT"
+                          ],
+                          "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                        },
+                        "createdBy": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                         },
                         "staff": {
                           "type": "array",
@@ -16909,6 +17000,13 @@
                                   null
                                 ]
                               },
+                              "referenceImageUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "Tattoo design image (§5.23): short-lived signed URL; null when none."
+                              },
                               "start": {
                                 "type": "string"
                               },
@@ -16975,6 +17073,7 @@
                               "name",
                               "isBride",
                               "gender",
+                              "referenceImageUrl",
                               "start",
                               "end",
                               "subtotal",
@@ -17112,6 +17211,8 @@
                         "salon",
                         "branch",
                         "customer",
+                        "source",
+                        "createdBy",
                         "staff",
                         "rejection",
                         "refundStatus",
@@ -21472,7 +21573,8 @@
                 "REVIEW_PENDING",
                 "CATALOG_REQUEST",
                 "SALON_DELETION_REQUEST",
-                "SALON_AUDIENCE_WIDENED"
+                "SALON_AUDIENCE_WIDENED",
+                "BOOKING_CLOSE_OVERDUE"
               ]
             },
             "required": false,
@@ -21531,7 +21633,8 @@
                               "REVIEW_PENDING",
                               "CATALOG_REQUEST",
                               "SALON_DELETION_REQUEST",
-                              "SALON_AUDIENCE_WIDENED"
+                              "SALON_AUDIENCE_WIDENED",
+                              "BOOKING_CLOSE_OVERDUE"
                             ]
                           },
                           "severity": {
@@ -21570,6 +21673,7 @@
                               "REFUND",
                               "REVIEW",
                               "CATALOG_REQUEST",
+                              "BOOKING",
                               null
                             ]
                           },
@@ -21870,7 +21974,8 @@
                             "REVIEW_PENDING",
                             "CATALOG_REQUEST",
                             "SALON_DELETION_REQUEST",
-                            "SALON_AUDIENCE_WIDENED"
+                            "SALON_AUDIENCE_WIDENED",
+                            "BOOKING_CLOSE_OVERDUE"
                           ]
                         },
                         "severity": {
@@ -21909,6 +22014,7 @@
                             "REFUND",
                             "REVIEW",
                             "CATALOG_REQUEST",
+                            "BOOKING",
                             null
                           ]
                         },
@@ -23268,7 +23374,15 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
+                            ]
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "CUSTOMER_APP",
+                              "MERCHANT"
                             ]
                           },
                           "branchId": {
@@ -23387,7 +23501,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "audience": {
@@ -29928,7 +30043,10 @@
                                     "type": "string"
                                   },
                                   "customerId": {
-                                    "type": "string"
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -34549,7 +34667,8 @@
                               "REVIEWS_VIEW",
                               "STATISTICS_VIEW",
                               "FINANCE_VIEW",
-                              "SUBSCRIPTION_VIEW"
+                              "SUBSCRIPTION_VIEW",
+                              "BOOKINGS_CREATE"
                             ]
                           },
                           "description": "The OWNER always has all."
