@@ -1,28 +1,28 @@
 <resources>
-    <string name="login_welcome">Grow your salon with WAB</string>
-    <string name="login_register_subtitle">Enter your mobile number to register your salon. We will send you a verification code.</string>
-    <string name="login_subtitle">Log in with the mobile number linked to your salon.</string>
+    <string name="login_welcome">Grow your salon or clinic with WAB</string>
+    <string name="login_register_subtitle">Enter your mobile number to register your salon or clinic. We will send you a verification code.</string>
+    <string name="login_subtitle">Log in with the mobile number linked to your salon or clinic.</string>
     <string name="login_phone_label">Mobile number</string>
     <string name="login_phone_error">Invalid mobile number</string>
     <string name="login_button">Continue</string>
-    <string name="login_no_account">New salon?</string>
-    <string name="login_register_now">Register your salon</string>
+    <string name="login_no_account">New salon or clinic?</string>
+    <string name="login_register_now">Register your business</string>
     <string name="login_privacy">Privacy</string>
     <string name="login_terms">Terms</string>
     <string name="login_contact">Contact us</string>
     <string name="login_language">Change language</string>
     <string name="login_theme">Change theme</string>
     <string name="login_back">Back</string>
-    <string name="login_not_registered_title">This number is not linked to any salon</string>
-    <string name="login_not_registered_body">You can register a new salon with this number. If you work at a salon, ask the owner to add your number.</string>
-    <string name="login_not_registered_register">Register a new salon</string>
+    <string name="login_not_registered_title">This number is not linked to any salon or clinic</string>
+    <string name="login_not_registered_body">You can register a new salon or clinic with this number. If you work at one, ask the owner to add your number.</string>
+    <string name="login_not_registered_register">Register a new business</string>
     <string name="login_dialog_cancel">Cancel</string>
     <string name="login_blocked_title">This number is blocked</string>
     <string name="login_blocked_body">This number is temporarily blocked. Please contact WAB for more information.</string>
     <string name="login_blocked_contact">Contact WAB</string>
     <string name="otp_title">Enter verification code</string>
     <string name="otp_mode_login">Log in</string>
-    <string name="otp_mode_register">Register salon</string>
+    <string name="otp_mode_register">Register business</string>
     <string name="otp_mode_change_phone">Change number</string>
     <string name="otp_mode_bank_details">Confirm bank details</string>
     <string name="otp_bank_note">To protect your money, confirm the bank details change with the code sent to the owner’s phone.</string>
@@ -45,6 +45,6 @@
     <string name="auth_dialog_glyph_blocked">⛔</string>
     <string name="auth_dialog_glyph_expired">⏱</string>
     <string name="login_inactive_title">Your access was removed</string>
-    <string name="login_inactive_body">The salon owner removed your access to the app. Contact them for more information.</string>
+    <string name="login_inactive_body">The owner removed your access to the app. Contact them for more information.</string>
     <string name="login_inactive_ok">OK</string>
 </resources>

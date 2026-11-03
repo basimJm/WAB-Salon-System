@@ -9,14 +9,18 @@ import com.fab.wab.merchant.core.domain.config.LaunchGate
 import com.fab.wab.merchant.designsystem.components.dialog.AppGlobalDialog
 import com.fab.wab.merchant.designsystem.components.dialog.GlobalDialogKind
 
-/** PRD M01 / M26: splash until the config answers, then maintenance / force update block, an optional update asks once. */
+/**
+ * PRD M01 / M26: splash until the config answers and the logo animation has played (MER-082), then maintenance /
+ * force update block, an optional update asks once.
+ */
 @Composable
 internal fun LaunchGateContent(state: UiState, onEvent: (UiAction) -> Unit, content: @Composable () -> Unit) {
-    when (val gate = state.gate) {
-        null -> SplashScreen(state, onEvent)
-        is LaunchGate.Maintenance -> MaintenanceScreen(gate.message, onRetry = { onEvent(UiAction.OnRetryClicked) })
-        is LaunchGate.ForceUpdate -> ForceUpdateScreen(onUpdate = { onEvent(UiAction.OnUpdateClicked) })
-        is LaunchGate.OptionalUpdate, LaunchGate.Ready -> {
+    val gate = state.gate
+    when {
+        state.showSplash || gate == null -> SplashScreen(state, onEvent)
+        gate is LaunchGate.Maintenance -> MaintenanceScreen(gate.message, onRetry = { onEvent(UiAction.OnRetryClicked) })
+        gate is LaunchGate.ForceUpdate -> ForceUpdateScreen(onUpdate = { onEvent(UiAction.OnUpdateClicked) })
+        else -> {
             content()
             if (gate is LaunchGate.OptionalUpdate) {
                 AppGlobalDialog(

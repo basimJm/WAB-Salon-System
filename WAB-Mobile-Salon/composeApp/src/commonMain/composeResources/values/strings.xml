@@ -4,7 +4,7 @@
     <!-- Update Dialogs -->
     <!-- Maintenance Dialog -->
     <!-- Session -->
-    <string name="access_removed_message">Your access was removed by the salon owner.</string>
+    <string name="access_removed_message">Your access was removed by the owner.</string>
     <string name="unauthorized_logout_message">You are unauthorized and will be logged out.</string>
     <string name="splash_version">v%1$s</string>
     <string name="force_update_title">Update required</string>
@@ -37,7 +37,7 @@
     <string name="request_handled">Already handled by another team member</string>
     <string name="request_failed">Could not accept the booking. Open the app to try again.</string>
     <string name="alerts_notifications_title">Get booking requests on time</string>
-    <string name="alerts_notifications_message">Allow notifications so new booking requests, reminders and salon alerts reach you even when the app is closed.</string>
+    <string name="alerts_notifications_message">Allow notifications so new booking requests, reminders and business alerts reach you even when the app is closed.</string>
     <string name="alerts_notifications_allow">Allow notifications</string>
     <string name="alerts_overlay_title">Show requests over other apps</string>
     <string name="alerts_overlay_message">Turn on “Display over other apps” so a new booking request appears on top of whatever you are using. You can change it later in More → Settings.</string>

@@ -70,6 +70,7 @@ class MainViewModel(
             UiAction.OnUpdateClicked -> emitSideEffect(SideEffect.OpenStore(storeUrl))
             UiAction.OnOptionalUpdateDismissed -> updateState { copy(gate = LaunchGate.Ready) }
             UiAction.OnRetryClicked -> loadConfig()
+            UiAction.OnLogoAnimationFinished -> updateState { copy(logoShown = true) }
             UiAction.OnSessionTimeOut -> scope.launch { handleSessionTimeOut() }
         }
     }
