@@ -10,6 +10,22 @@
 
 ## Current task
 
+### SRV-179 — Fix: clinic and BOTH-salon details answered 500 (owner 2026-10-30)
+
+- Branch: `fix/srv-179-demo-photo-keys`
+- Status: IN PROGRESS (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.19 demo businesses; operations `GET /customer/v1/salons/{salonId}` and every page that lists the business staff):
+  - [x] Root cause: the demo business seed (SRV-174) built staff photo keys from labels like `abdoun:staff0`; ':' is not a valid object key, so `storage.getPublicUrl` threw `RangeError invalid object key` and the details of both clinics (and Unity Salon) answered 500 INTERNAL (reproduced on the hosted dev API and on a local stack)
+  - [x] Seed key uses '-' (same rule as `salons.ts`); every stored file key of the demo businesses passes `assertObjectKey`
+  - [x] `docs/DEMO_ACCOUNTS.md` lists the clinic and BOTH-salon accounts (owners, managers, staff; `+962 78902 0xxx`)
+  - [x] Databases seeded before the fix: `repairDemoBusinessPhotoKeys` sets the valid key only where the stored key fails `OBJECT_KEY_PATTERN` (a merchant-changed valid photo is never touched); runs in `seedDemoData` (so also on start with `SEED_DEMO_ON_START`)
+- Tests: `tests/businessTypes.test.ts` (+2: valid keys, repair rows + filter), `tests/devSeed.test.ts` (report field); local stack: both clinic details 500 → 200 after re-seeding the same database
+- API docs: no change
+- Gate (Terminal panel): prettier --check ., eslint ., `tsc --noEmit`, build, `npm run docs` (no diff), full jest 171 suites / 3012 tests green
+- Loops: 1/1 — reproduced the 500 locally, fixed, re-seeded the already-broken database and re-requested both clinics (200); grepped every `demoFileKey` caller for ':' labels (only this one)
+- Review: PASSED (SE ✔ (repair filter only touches invalid keys; insert-only seed unchanged), Mobile N/A, Architect ✔ (no contract change; hosted dev heals on its next seed-on-start deploy), QA ✔ (key validity + repair tests; full suite green))
+- Notes: the hosted dev API keeps answering 500 until this is merged and deployed (its seed-on-start then repairs the rows). Old upload records with the bad key stay (unused).
+
 ### SRV-178 — Admin business types (owner 2026-10-29)
 
 - Branch: `feat/srv-178-admin-types`
