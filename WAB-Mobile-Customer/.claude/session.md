@@ -20,8 +20,8 @@
   - [x] Tattoo booking flow (TATTOO only, `BusinessRules.allowsReferenceImage`): step 0 per person "Design image (optional)" — gallery pick (the existing picker compresses to JPEG ≤ 1024 px), upload BOOKING_REFERENCE, preview (`AppLocalImage`, bytes), remove; the key goes in `persons[].referenceImageKey` of the draft
   - [x] Booking details show each person's design image from the signed URL
 - Tests: `BookingFlowTattooTest` (upload purpose + key in the draft, remove, cancelled pick, failed pick/upload, other types never offer it), `ReferenceImageBodiesTest`, `BusinessMadeBookingMappersTest` (source, type, image URL), `BookingCardRulesTest` (Rate/Book again rules, Booked by), `BookingsViewModelTest` (+ rate / book again effects, tattoo lens), profile upload tests on the moved core types; `./gradlew testAndroidHostTest` green (560 tests in the XML reports, 0 failures); `:androidApp:assembleDevDebug` green (dev debug APK built); `policy_checks.py all` ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch loop (CUS-102…104): re-read §5.20/§5.22/§5.23 against the bookings lens + Upcoming/Past, "Booked by", Rate/Book again, tattoo design image (pick/compress/preview/remove/upload `BOOKING_REFERENCE`, draft key, details URL); `testAndroidHostTest` green (561), detekt clean (found and fixed in the loop: 9 detekt issues + the Home lens-switch skeleton flash), `assembleDevDebug` built
+- Review: PASSED (SE ✔ (upload code moved to core instead of a cross-feature import; coordinators keep VMs under limits), Mobile ✔ (AR/EN, RTL chips, light/dark tokens with contrast test), Architect ✔ (customer 1.13.0; no contract change), QA ✔) — DEVIATIONS: Book again opens the business without preselected services; "Open now" filtered on the device; no camera for the design image; no device run yet (rules §3.13, end of backlog); mock fixtures migrated by script, not re-captured
 - Notes: DEVIATIONS: design image from the gallery only (no camera option); Book again does not preselect services (no preselection in the booking flow); notifications already carry "Booked by" in their text, nothing changed there; no MERCHANT/tattoo sample in the mock fixtures (captured data only); no device run, no detekt, no iOS build (batch rule §3.13).
 
 ### CUS-103 — Search redesign: suggestions, recent searches, quick chips, multi-type + gender filters
@@ -35,8 +35,8 @@
   - [x] S05: business type multi-select (All clears), gender Men/Women, services of the one chosen type (else every type), price range from `/salons/filters` without services, minimum rating; Reset clears types + gender
   - [x] Results rows keep the type label (CUS-102 `BusinessLine`); empty / error / loading states unchanged
 - Tests: `SalonSearchApiTest` (filter → query: multi type comma list, gender only when chosen, price without services, rating, sort/general, bounds/suggestion scopes), `SuggestionsMapperTest` (mapping + grouping), `RecentSearchRulesTest` + `DataStoreRecentSearchesStoreTest` (dedupe, max, clear, encoding), `SearchAssistViewModelTest` (suggestions, recent, quick chips, lens), `AllSalonsViewModelTest`, `FilterSheetViewModelTest` (multi type, gender, price without services), `AllServicesViewModelTest`; `./gradlew testAndroidHostTest` green; `policy_checks.py all` ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch loop: suggestions grouped, recent searches (DataStore, dedupe, max 8), quick chips, filter sheet multi-type/gender/price/rating; tests green (see CUS-104)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — see CUS-104 deviations
 - Notes: DEVIATIONS: "Open now" filters the loaded pages on the device (the contract has no open-now filter; a page can look short); the Price quick chip opens the filter sheet (no price sort in the contract); S04 has no screen previews added; the route still carries the gender string (ignored by S04/S06; the home still passes it); no device run, no detekt, no assemble (batch rule §3.13).
 
 ### CUS-102 — Merged home: type lens, Explore / Near you / Recommended / Book again, tattoo type
@@ -49,8 +49,8 @@
   - [x] Home: no gender toggle (stored gender follows the session and only picks the banners); lens All · Salons · Clinics · Tattoo (default All) sends `businessType` and reloads every section; order banners → Explore → Near you → Recommended → Book again (`UiState.blocks`); Book again only for signed-in customers
   - [x] "See all"/"See more" keep the lens (S04 / S06 with the lens type; S06 with lens All lists every type's catalog); an Explore tile opens S04 with that service and its type
 - Tests: `HomeMappersTest` (explore types incl. tattoo, recommended rail, nearYou null/branch entries, bookAgain), `RealHomeFixtureTest`, `HomeViewModelTest` (lens reload with the param, refresh keeps the lens, sections order, book-again null for guests, see-all keeps the lens), `HomeStateUpdatesTest`, `BusinessTypeTextsTest` + `ColorTokensTest` (type labels/colors), `BusinessTypeTest`; `./gradlew testAndroidHostTest` green (Terminal panel); `policy_checks.py all` ok; `api_sync.py --check` ok
-- Loops: 0/1
-- Review: PENDING
+- Loops: 1/1 — batch loop: lens chips reload `/home` with `businessType`, five sections in the §5.22 order, type tokens light/dark, no gender toggle; server checked live on the local stack (home 15–75 ms); tests green (see CUS-104)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — DEVIATION: no location line in the header (no reverse geocoding); see CUS-104
 - Notes: DEVIATIONS: Book again opens the business only (the booking flow has no service preselection yet; `salonServiceIds` are mapped but unused); no "location" line in the Home header (no reverse geocoding exists); S04/S06 routes still carry the stored gender (made optional in CUS-103); captured fixtures were migrated by script, not re-captured on a 1.13.0 stack; no tattoo sample in the captures; no device/simulator run, no detekt, no assemble in this task (batch rule §3.13).
 
 ### CUS-101 — Search + filter by business type; clinic details/booking regression
