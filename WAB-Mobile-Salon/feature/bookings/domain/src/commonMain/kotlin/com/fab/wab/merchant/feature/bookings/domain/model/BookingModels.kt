@@ -35,7 +35,26 @@ data class BookingSummary(
     val customerPhone: String?,
     val staff: List<StaffRef>,
     val branch: BranchRef? = null,
-)
+    /** Who created it (BUSINESS_DOMAIN §5.20): the customer in the app, or a member for the customer. */
+    val source: BookingSource = BookingSource.CUSTOMER_APP,
+    /** The member who created a MERCHANT booking (`createdBy.name`); null for app bookings. */
+    val createdByName: String? = null,
+    /** False when the customer has no WAB account (`customer.id` null, §5.20). */
+    val customerHasAccount: Boolean = true,
+) {
+    val isCreatedByBusiness: Boolean get() = source == BookingSource.MERCHANT
+}
+
+/** `source` of a booking (contract 1.13.0). */
+enum class BookingSource {
+    CUSTOMER_APP,
+    MERCHANT,
+    ;
+
+    companion object {
+        fun fromCode(code: String?): BookingSource = entries.firstOrNull { it.name == code } ?: CUSTOMER_APP
+    }
+}
 
 /** PRD M08 filter sheet: date range, staff (multi), status (multi), bride only, payment status. */
 data class BookingFilter(

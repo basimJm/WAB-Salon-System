@@ -9,6 +9,25 @@
 
 ## Current task
 
+### MER-085 — New booking for a customer (owner 2026-11-03)
+
+- Branch: `feat/mer-085-new-booking` (from `feat/mer-084-tattoo`; batch MER-084…086)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.20; SRV-185; merchant contract 1.13.0 `getCustomersLookup`, `postBookings`, `getSalonServices`, `getTeamMembers`):
+  - [x] `Permission.BOOKINGS_CREATE` (16 keys; MANAGER template = 13); team editor group + AR/EN copy; mock presets (owner, manager)
+  - [x] "New booking" button on the bookings screen only with `BOOKINGS_CREATE` (live from the session; hidden, not disabled)
+  - [x] Form: phone (`AppPhoneField` + country picker, trunk zero dropped) → Check → lookup; registered: first name shown, nothing asked; not registered (or blocked without name): name (≤ 50) + gender Men/Women required; a changed number needs a new check
+  - [x] One person: active salon services multi-select (every page) with total duration + JOD total (integer fils), staff "Any available" (no `staffId`) or a provider, date today..+90 days, start every 15 min (today only future slots), Asia/Amman → UTC ISO `start`
+  - [x] Tattoo studio: optional design image per person (picker → `BOOKING_REFERENCE` upload → `referenceImageKey`); `UploadPurpose.BOOKING_REFERENCE` added
+  - [x] Branch: owner sends the branch chosen in the bookings switcher (`BranchScope.filter`), branch members send none; server errors (BRANCH_REQUIRED, SLOT_TAKEN, SLOT_UNAVAILABLE, STAFF_NOT_ELIGIBLE, GENDER_MISMATCH, ACCOUNT_BLOCKED, VALIDATION_ERROR …) shown through `appErrorText`
+  - [x] Success: form closes, the new booking's details open, "Booking created" banner
+  - [x] Lists: "Created by the business" on MERCHANT cards; details: "Created by the business · <member>" and "No WAB account" for `customer.id == null` (call/WhatsApp kept, the phone is always there); `source`/`createdBy`/nullable customer id mapped
+  - [x] Mock mode: generated fixtures answer lookup + create; `patchCustomerLookup` makes `791234567` a registered customer (Rana), every other number unknown; create returns `id-1` (the details fixture answers any id)
+- Tests: `NewBookingViewModelTest` (10: load, registered / unregistered / invalid phone / lookup error, services totals, 90-day dates, submit success → OpenBooking, submit error → error text, tattoo design upload + key), `BookingsViewModelTest` (+1 permission entry), `NewBookingMappersTest` (3: body with customer/persons/UTC start/staff null, registered body, lookup/services/created), `BookingMappersTest` (+1 source/createdBy/no account), `NewBookingRulesTest` (3), `MockLookupTest` (2); `PermissionsTest`/`MockWorldTest` counts 16/13; `RealApplicationFixturesTest` excludes BOOKINGS_CREATE (captured before 1.13.0). `./gradlew testAndroidHostTest` green (all modules); `policy_checks.py all` ok
+- Loops: 0/1 (batch rule §3.13: loop + review after the batch)
+- Review: PENDING
+- Notes: DEVIATIONS — companions not supported (one main person only; the contract allows up to `maxCompanions`); no bride toggle; start times are every 15-minute slot of the day (no merchant availability endpoint, the server refuses closed/busy slots with SLOT_UNAVAILABLE / SLOT_TAKEN); services from `GET /salon/services` (salon level, not per branch); entry only on the bookings screen (not home); no previews (feature screens have none); detekt, device run (AR/EN, light/dark) deferred to the batch / end of backlog.
+
 ### MER-084 — Tattoo studios in the merchant app (owner 2026-11-03)
 
 - Branch: `feat/mer-084-tattoo` (batch MER-084…086; commit per task, next branches from this one)

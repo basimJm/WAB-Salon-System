@@ -154,6 +154,24 @@ class BookingsViewModelTest {
         assertNull(repository.queries.last().first.branchId)
     }
 
+    @Test
+    fun newBookingEntryFollowsBookingsCreatePermission() = runTest(UnconfinedTestDispatcher()) {
+        val allowed = MutableStateFlow(false)
+        val viewModel = BookingsViewModel(
+            BookingsDependencies(repository, changes, clock, NoOpAnalyticsTracker, errorText = { "failed" }, canCreate = allowed),
+            testScope = backgroundScope,
+        )
+        assertFalse(viewModel.state.first { !it.loading }.canCreate, "hidden without BOOKINGS_CREATE")
+        val effects = mutableListOf<SideEffect>()
+        backgroundScope.launch { viewModel.sideEffect.collect { effects += it } }
+        viewModel.onEvent(UiAction.OnNewBooking)
+        assertTrue(effects.isEmpty())
+        allowed.value = true
+        assertTrue(viewModel.state.first().canCreate)
+        viewModel.onEvent(UiAction.OnNewBooking)
+        assertEquals(listOf<SideEffect>(SideEffect.OpenNewBooking), effects)
+    }
+
     private companion object {
         const val NOW = 42L
     }
