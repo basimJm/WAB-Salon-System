@@ -12,6 +12,8 @@ import androidx.compose.ui.unit.sp
 internal object BookingsDesign {
     // Radii (14 / 16 / 22 come from ShapeTokens)
     val cardRadius = 18.dp
+    /** Tattoo design image in a person card (BUSINESS_DOMAIN §5.23). */
+    val referenceImageHeight = 160.dp
     val statusBlockRadius = 20.dp
     val dialogRadius = 24.dp
     val copyButtonRadius = 10.dp

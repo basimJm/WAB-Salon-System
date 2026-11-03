@@ -26,6 +26,8 @@ import com.fab.wab.customer.core.domain.booking.BookingSummary
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.designsystem.components.badge.AppStatusBadge
 import com.fab.wab.customer.designsystem.components.badge.StatusTone
+import com.fab.wab.customer.designsystem.components.button.AppOutlinedButton
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeBadge
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
@@ -33,7 +35,14 @@ import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.time_am
 import com.fab.wab.customer.designsystem.resources.time_pm
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookedBy
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.CardAction
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.bookedByOf
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
+import com.fab.wab.customer.feature.bookings.presentation.resources.booked_by
+import com.fab.wab.customer.feature.bookings.presentation.resources.booked_by_branch
+import com.fab.wab.customer.feature.bookings.presentation.resources.card_book_again
+import com.fab.wab.customer.feature.bookings.presentation.resources.card_rate
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_approved
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_auto_cancelled
 import com.fab.wab.customer.feature.bookings.presentation.resources.booking_status_cancelled_customer
@@ -58,7 +67,13 @@ import org.jetbrains.compose.resources.stringResource
  * calendar + clock row (12.5 px muted); status + payment badges.
  */
 @Composable
-fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun BookingCard(
+    booking: BookingSummary,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    actions: List<CardAction> = emptyList(),
+    onCardAction: (CardAction) -> Unit = {},
+) {
     val colors = AppTheme.colors
     val spacing = AppTheme.spacing
     val shape = bookingCardShape
@@ -84,6 +99,7 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
                     maxLines = 1,
                 )
                 BookedBranchLines(booking.branch, withAddress = false)
+                BookedByLine(bookedByOf(booking.source, booking.salonName, booking.branch))
                 AppText(
                     text = BookingsDesign.REFERENCE_PREFIX + booking.referenceNumber,
                     style = AppTheme.typography.bodySmall.copy(textDirection = TextDirection.Ltr),
@@ -102,7 +118,8 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
             IconLine(AppIcons.Bookings, start?.date ?: booking.appointmentStart)
             IconLine(Icons.Rounded.Schedule, start?.time.orEmpty())
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(spacing.space6)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(spacing.space6), verticalAlignment = Alignment.CenterVertically) {
+            BusinessTypeBadge(booking.businessType)
             val (statusRes, tone) = booking.status.label()
             AppStatusBadge(text = stringResource(statusRes), tone = tone)
             AppStatusBadge(text = stringResource(booking.paymentStatus.label()), tone = StatusTone.Accent)
@@ -116,7 +133,38 @@ fun BookingCard(booking: BookingSummary, onClick: () -> Unit, modifier: Modifier
                 modifier = Modifier.padding(top = spacing.space8),
             )
         }
+        CardActions(actions, onCardAction)
     }
+}
+
+/** Completed cards: Rate and Book again side by side (BUSINESS_DOMAIN §5.22). */
+@Composable
+private fun CardActions(actions: List<CardAction>, onCardAction: (CardAction) -> Unit) {
+    if (actions.isEmpty()) return
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = AppTheme.spacing.space12),
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8),
+    ) {
+        actions.forEach { action ->
+            val text = stringResource(if (action == CardAction.RATE) Res.string.card_rate else Res.string.card_book_again)
+            AppOutlinedButton(text = text, onClick = { onCardAction(action) }, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
+/** "Booked by <place>" on a booking the business made for the customer (§5.20). */
+@Composable
+internal fun BookedByLine(bookedBy: BookedBy?, modifier: Modifier = Modifier) {
+    bookedBy ?: return
+    val text = bookedBy.branch?.let { stringResource(Res.string.booked_by_branch, bookedBy.place, it) }
+        ?: stringResource(Res.string.booked_by, bookedBy.place)
+    AppText(
+        text = text,
+        style = AppTheme.typography.bodySmall.copy(fontSize = BookingsDesign.fontCaption, fontWeight = FontWeight.SemiBold),
+        color = AppTheme.colors.accent,
+        maxLines = BookingsDesign.CARD_REASON_MAX_LINES,
+        modifier = modifier,
+    )
 }
 
 @Composable

@@ -8,7 +8,10 @@ import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.mvi.BaseViewModel
+import com.fab.wab.customer.core.ui.media.ImagePicker
+import com.fab.wab.customer.core.ui.media.PickResult
 import com.fab.wab.customer.designsystem.components.feedback.appErrorText
+import com.fab.wab.customer.designsystem.components.feedback.pickProblemText
 import com.fab.wab.customer.feature.booking.domain.model.BookingFlowDefaults
 import com.fab.wab.customer.core.common.BusinessTime
 import com.fab.wab.customer.feature.booking.domain.model.DraftPerson
@@ -20,6 +23,7 @@ import com.fab.wab.customer.feature.booking.domain.model.withGender
 import com.fab.wab.customer.feature.booking.domain.usecase.CreateBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.DeleteBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
+import com.fab.wab.customer.feature.booking.domain.usecase.UploadReferenceImageUseCase
 import com.fab.wab.customer.feature.booking.presentation.analytics.BookingAnalytics
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.SideEffect
 import com.fab.wab.customer.feature.booking.presentation.controller.contract.BookingFlowContract.UiAction
@@ -39,7 +43,11 @@ class BookingFlowDependencies(
     val createDraft: CreateBookingDraftUseCase,
     val deleteDraft: DeleteBookingDraftUseCase,
     val analytics: AnalyticsTracker,
+    /** Tattoo design image (§5.23): the gallery picker and the `BOOKING_REFERENCE` upload. */
+    val imagePicker: ImagePicker,
+    val uploadReference: UploadReferenceImageUseCase,
     val errorText: suspend (AppError) -> String = ::appErrorText,
+    val pickText: suspend (PickResult) -> String? = ::pickProblemText,
     val today: () -> LocalDate = { BusinessTime.nowInstant().toLocalDateTime(BusinessTime.zone).date },
 )
 
@@ -56,6 +64,9 @@ class BookingFlowViewModel(
 
     private var started = false
     private val drafts = DraftCoordinator(deps, { scope }, { uiState.value }, ::updateState)
+    private val references = ReferenceImageCoordinator(
+        deps, { scope }, { uiState.value }, ::updateState, ::updatePersonAt, ::emitSideEffect,
+    )
     private val calendar = CalendarCoordinator(salonId, deps, { scope }, { uiState.value }, ::updateState, ::updatePerson)
 
     override fun onStart() {
@@ -84,6 +95,8 @@ class BookingFlowViewModel(
                 updateState { copy(genderError = false) }
             }
             is UiAction.OnServiceToggle -> toggleService(event.serviceId)
+            UiAction.OnReferencePick -> references.pick()
+            UiAction.OnReferenceRemove -> references.remove()
             else -> return false
         }
         return true
@@ -145,8 +158,10 @@ class BookingFlowViewModel(
         updateState { withBranch(branchId) }
     }
 
-    private fun updatePerson(transform: DraftPerson.() -> DraftPerson) = updateState {
-        copy(persons = persons.mapIndexed { index, p -> if (index == currentPerson) p.transform() else p })
+    private fun updatePerson(transform: DraftPerson.() -> DraftPerson) = updatePersonAt(uiState.value.currentPerson, transform)
+
+    private fun updatePersonAt(person: Int, transform: DraftPerson.() -> DraftPerson) = updateState {
+        copy(persons = persons.mapIndexed { index, p -> if (index == person) p.transform() else p })
     }
 
     /** Multi-select (PRD S16 step 1); the selection is per person. */

@@ -91,4 +91,10 @@
     <string name="bookings_branch_label">Branch: %1$s</string>
     <string name="details_paid_at_salon">Paid at the salon</string>
     <string name="card_rejection_reason">Reason: %1$s</string>
+    <string name="booked_by">Booked by %1$s</string>
+    <string name="booked_by_branch">Booked by %1$s - %2$s</string>
+    <string name="card_rate">Rate</string>
+    <string name="card_book_again">Book again</string>
+    <string name="reference_image_title">Design image</string>
+    <string name="reference_image_description">Design image of %1$s</string>
 </resources>

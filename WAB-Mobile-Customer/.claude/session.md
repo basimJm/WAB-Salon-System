@@ -9,6 +9,21 @@
 
 ## Current task
 
+### CUS-104 — Bookings: Upcoming/Past + lens, "Booked by", Rate + Book again; tattoo design image
+- Branch: `feat/cus-104-bookings-tattoo` (from `feat/cus-103-search-filters`)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.20, §5.22, §5.23; contract 1.13.0: bookings `source`/`createdBy`, details `persons[].referenceImageUrl`, drafts `persons[].referenceImageKey`, uploads `BOOKING_REFERENCE`):
+  - [x] Bookings list: Upcoming / Past (existing) + the type lens chips All · Salons · Clinics · Tattoo (`businessType` query, kept while paging); every card shows the type badge
+  - [x] `BookingSource` (CUSTOMER_APP | MERCHANT) on list rows and details; MERCHANT bookings show "Booked by <place>" / "Booked by <place> - <branch>" on the card and the details salon block (AR + EN)
+  - [x] Completed cards: Rate (registered customers → `Screen.RateBooking`) + Book again (opens the business at the booked branch; the booking flow has no service preselection)
+  - [x] Uploads moved from feature/profile to core (`core/domain/upload`: `PresignedUpload`, `UploadPurpose` + `BOOKING_REFERENCE`, `UploadsRepository`, `uploadConfirmed`; `core/data/upload`: `UploadsApi`, `UploadsRepositoryImpl`, storage client bound in `dataModule`); the avatar uses the same path
+  - [x] Tattoo booking flow (TATTOO only, `BusinessRules.allowsReferenceImage`): step 0 per person "Design image (optional)" — gallery pick (the existing picker compresses to JPEG ≤ 1024 px), upload BOOKING_REFERENCE, preview (`AppLocalImage`, bytes), remove; the key goes in `persons[].referenceImageKey` of the draft
+  - [x] Booking details show each person's design image from the signed URL
+- Tests: `BookingFlowTattooTest` (upload purpose + key in the draft, remove, cancelled pick, failed pick/upload, other types never offer it), `ReferenceImageBodiesTest`, `BusinessMadeBookingMappersTest` (source, type, image URL), `BookingCardRulesTest` (Rate/Book again rules, Booked by), `BookingsViewModelTest` (+ rate / book again effects, tattoo lens), profile upload tests on the moved core types; `./gradlew testAndroidHostTest` green (560 tests in the XML reports, 0 failures); `:androidApp:assembleDevDebug` green (dev debug APK built); `policy_checks.py all` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS: design image from the gallery only (no camera option); Book again does not preselect services (no preselection in the booking flow); notifications already carry "Booked by" in their text, nothing changed there; no MERCHANT/tattoo sample in the mock fixtures (captured data only); no device run, no detekt, no iOS build (batch rule §3.13).
+
 ### CUS-103 — Search redesign: suggestions, recent searches, quick chips, multi-type + gender filters
 - Branch: `feat/cus-103-search-filters` (from `feat/cus-102-merged-home`)
 - Status: IN REVIEW (committed, not pushed)

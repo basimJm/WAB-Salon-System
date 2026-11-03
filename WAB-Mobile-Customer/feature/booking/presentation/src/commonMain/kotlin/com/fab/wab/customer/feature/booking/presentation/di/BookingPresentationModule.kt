@@ -21,6 +21,8 @@ val bookingPresentationModule = module {
             createDraft = get(),
             deleteDraft = get(),
             analytics = get(),
+            imagePicker = get(),
+            uploadReference = get(),
         )
     }
     viewModel { (args: BookingFlowArgs) -> BookingFlowViewModel(args.salonId, deps = get(), initialBranchId = args.branchId) }
