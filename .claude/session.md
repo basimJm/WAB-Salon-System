@@ -356,3 +356,15 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog statuses and the roles table only; no product code written.
+
+### T-150 — Tattoo studios, business-made bookings, closing reminders, merged discovery (owner decisions 2026-11-03)
+- Project: repo root (`BUSINESS_DOMAIN.md`, `INTEGRATION.md`, `CLAUDE.md`, the four backlogs)
+- Branch: `docs/tattoo-merchant-bookings` (from `server`; reaches the other masters through `server` → `main` → masters)
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Owner shown a design proposal with phone mockups (artifact "WAB Discovery Redesign"); 10 questions answered
+  - [x] BUSINESS_DOMAIN: `TATTOO`, `BOOKINGS_CREATE`, `BOOKING_REFERENCE`, `BookingSource`; bookings `source`/`createdBy`/`customerContact`/`closeReminders`, person `referenceImageKey`; state machine rows; new §5.20 business-made bookings, §5.21 closing, §5.22 merged discovery (no gender filter), §5.23 tattoo; §6, §8, §9, §10 updated; §5.19 visibility/home superseded; §12 point 11 with the assumptions still to confirm
+  - [x] Tasks SRV-183…186 (TODO), CUS-102…104, MER-084…086, ADM-111/112 (BLOCKED on their SRV tasks); INTEGRATION §5b; `tasks.py check` OK (known CUS-047 note); board regenerated
+- Tests: `python3 scripts/tasks.py check`
+- Loops: 1/1 — re-read each owner answer (1–10) against §5.20–§5.23 and the task rows; the three points not answered are written as assumptions in §12 point 11, not as decisions
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, PM ✔, UX ✔, Marketing ✔, QA ✔) — docs and backlog only. DEVIATION: the customer/merchant/admin PRDs are not edited; tasks point at BUSINESS_DOMAIN §5.20–§5.23.
