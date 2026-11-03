@@ -9,6 +9,20 @@
 
 ## Current task
 
+### CUS-102 — Merged home: type lens, Explore / Near you / Recommended / Book again, tattoo type
+- Branch: `feat/cus-102-merged-home`
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.22, §5.23; contract customer 1.13.0: `GET /home?businessType=` keys `explore`, `nearYou`, `recommendedAll`, `bookAgain`):
+  - [x] `apiSync` (1.13.0); captured fixtures `GetHome` / `GetBookings` / `GetBookingsById` given the new keys by script (explore = salon + clinic services, nearYou = both nearest lists by distance, recommendedAll = both rails, bookAgain null; bookings `source` CUSTOMER_APP) so mock mode and `ContractFixturesTest` decode
+  - [x] `BusinessType.TATTOO` everywhere the type is matched (labels "Tattoo studio" / "استوديو وشم", lens "Tattoo" / "الوشم", list title "Tattoo studios" / "استوديوهات الوشم"); `BusinessRules`: only salons lock the gender, bride only at salons, `allowsReferenceImage` only for TATTOO
+  - [x] Type colors as theme tokens (light + dark): salon violet, clinic teal, tattoo amber-brown (`salonType…tattooTypeContainer`), contrast ≥ 4.5:1 tested; `BusinessTypeBadge` on every Home card (Explore tiles, salon cards = badge + audience) and `BusinessTypeLens` chips in the design system
+  - [x] Home: no gender toggle (stored gender follows the session and only picks the banners); lens All · Salons · Clinics · Tattoo (default All) sends `businessType` and reloads every section; order banners → Explore → Near you → Recommended → Book again (`UiState.blocks`); Book again only for signed-in customers
+  - [x] "See all"/"See more" keep the lens (S04 / S06 with the lens type; S06 with lens All lists every type's catalog); an Explore tile opens S04 with that service and its type
+- Tests: `HomeMappersTest` (explore types incl. tattoo, recommended rail, nearYou null/branch entries, bookAgain), `RealHomeFixtureTest`, `HomeViewModelTest` (lens reload with the param, refresh keeps the lens, sections order, book-again null for guests, see-all keeps the lens), `HomeStateUpdatesTest`, `BusinessTypeTextsTest` + `ColorTokensTest` (type labels/colors), `BusinessTypeTest`; `./gradlew testAndroidHostTest` green (Terminal panel); `policy_checks.py all` ok; `api_sync.py --check` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS: Book again opens the business only (the booking flow has no service preselection yet; `salonServiceIds` are mapped but unused); no "location" line in the Home header (no reverse geocoding exists); S04/S06 routes still carry the stored gender (made optional in CUS-103); captured fixtures were migrated by script, not re-captured on a 1.13.0 stack; no tattoo sample in the captures; no device/simulator run, no detekt, no assemble in this task (batch rule §3.13).
+
 ### CUS-101 — Search + filter by business type; clinic details/booking regression
 - Branch: `fix/cus-101-clinics-search-filter`
 - Status: DONE (PR #603)

@@ -20,12 +20,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeLens
 import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.badge.countBadgeLabel
 import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
@@ -36,6 +38,7 @@ import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.home.presentation.analytics.HomeAnalytics
+import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.HomeBlock
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.HomeDialog
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiState
@@ -45,7 +48,10 @@ import com.fab.wab.customer.feature.home.presentation.resources.home_notificatio
 import com.fab.wab.customer.feature.home.presentation.resources.home_welcome
 import org.jetbrains.compose.resources.stringResource
 
-/** S03 (design `on.home`): greeting + bell → banner → search → gender tabs → services / recommended / nearest. */
+/**
+ * S03 merged home (BUSINESS_DOMAIN §5.22): greeting + bell → search → type lens → banners → Explore → Near you →
+ * Recommended → Book again. No gender toggle: the stored gender only picks the banners.
+ */
 @Composable
 fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier = Modifier) {
     TrackScreen(HomeAnalytics.SCREEN)
@@ -76,20 +82,24 @@ fun HomeScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifier 
 @Composable
 private fun HomeReady(state: UiState, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
+    val onLensSelect: (BusinessType?) -> Unit = remember(onAction) { { onAction(UiAction.OnLensSelect(it)) } }
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = spacing.space20 + tabBarInset())) {
         HomeHeader(state, onAction)
-        HomeBanners(state.banners, onAction, Modifier.padding(horizontal = spacing.space20))
-        HomeSearchButton(
-            onClick = { onAction(UiAction.OnSearchClick) },
-            Modifier.padding(start = spacing.space20, end = spacing.space20, top = spacing.space16),
+        HomeSearchButton(onClick = { onAction(UiAction.OnSearchClick) }, Modifier.padding(horizontal = spacing.space20))
+        BusinessTypeLens(
+            selected = state.lens,
+            onSelect = onLensSelect,
+            modifier = Modifier.padding(start = spacing.space20, end = spacing.space20, top = spacing.space14, bottom = spacing.space16),
         )
-        GenderTabs(state.gender, onAction, Modifier.padding(start = spacing.space20, end = spacing.space20, top = spacing.space14))
-        ServicesSection(state.salonServices, BusinessType.SALON, onAction)
-        ServicesSection(state.clinicServices, BusinessType.CLINIC, onAction)
-        RecommendedSection(state.recommendedSalons, BusinessType.SALON, onAction)
-        RecommendedSection(state.recommendedClinics, BusinessType.CLINIC, onAction)
-        NearestSection(state.nearestSalons, BusinessType.SALON, onAction)
-        NearestSection(state.nearestClinics, BusinessType.CLINIC, onAction)
+        state.blocks.forEach { block ->
+            when (block) {
+                HomeBlock.Banners -> HomeBanners(state.banners, onAction, Modifier.padding(horizontal = spacing.space20))
+                HomeBlock.Explore -> ExploreSection(state.explore, onAction)
+                HomeBlock.NearYou -> NearYouSection(state.nearYou, onAction)
+                HomeBlock.Recommended -> RecommendedSection(state.recommended, onAction)
+                HomeBlock.BookAgain -> BookAgainSection(state.bookAgain, onAction)
+            }
+        }
     }
 }
 

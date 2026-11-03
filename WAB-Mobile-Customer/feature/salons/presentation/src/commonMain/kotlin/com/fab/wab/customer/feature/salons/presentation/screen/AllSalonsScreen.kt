@@ -40,6 +40,7 @@ import com.fab.wab.customer.feature.salons.presentation.resources.salons_empty_b
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title_clinics
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title_salons
+import com.fab.wab.customer.feature.salons.presentation.resources.salons_title_tattoo
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -166,4 +167,5 @@ private fun titleOf(type: BusinessType?): StringResource = when (type) {
     null -> Res.string.salons_title
     BusinessType.SALON -> Res.string.salons_title_salons
     BusinessType.CLINIC -> Res.string.salons_title_clinics
+    BusinessType.TATTOO -> Res.string.salons_title_tattoo
 }

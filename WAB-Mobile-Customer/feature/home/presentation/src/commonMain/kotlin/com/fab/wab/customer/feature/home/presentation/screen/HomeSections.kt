@@ -28,44 +28,41 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonSummary
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeBadge
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.icons.AppIcons
 import com.fab.wab.customer.designsystem.theme.AppTheme
+import com.fab.wab.customer.feature.home.domain.model.BookAgainEntry
 import com.fab.wab.customer.feature.home.domain.model.HomeSection
 import com.fab.wab.customer.feature.home.domain.model.HomeService
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.NearestUi
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SalonSection
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.resources.Res
-import com.fab.wab.customer.feature.home.presentation.resources.home_clinic_services
+import com.fab.wab.customer.feature.home.presentation.resources.home_book_again
 import com.fab.wab.customer.feature.home.presentation.resources.home_enable_location
-import com.fab.wab.customer.feature.home.presentation.resources.home_nearest
-import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_clinics
-import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_clinics_empty
-import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_empty
+import com.fab.wab.customer.feature.home.presentation.resources.home_explore
+import com.fab.wab.customer.feature.home.presentation.resources.home_near_you
+import com.fab.wab.customer.feature.home.presentation.resources.home_near_you_empty
 import com.fab.wab.customer.feature.home.presentation.resources.home_nearest_location_off
 import com.fab.wab.customer.feature.home.presentation.resources.home_recommended
-import com.fab.wab.customer.feature.home.presentation.resources.home_recommended_clinics
-import com.fab.wab.customer.feature.home.presentation.resources.home_salon_services
 import com.fab.wab.customer.feature.home.presentation.resources.home_see_all
 import com.fab.wab.customer.feature.home.presentation.resources.home_see_more
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Design S03 services row: 136 dp tiles with a 96 dp image, 13.5 sp name and a two-line 11.5 sp description; one row of
- * salon services and one of clinic services (BUSINESS_DOMAIN §5.19), hidden when empty.
+ * Explore (BUSINESS_DOMAIN §5.22): the most-booked catalog services across the lens' types, 136 dp tiles with a 96 dp image,
+ * the type label, a 13.5 sp name and a two-line 11.5 sp description; hidden when empty.
  */
 @Composable
-internal fun ServicesSection(section: HomeSection<HomeService>, type: BusinessType, onAction: (UiAction) -> Unit) {
-    if (section.items.isEmpty()) return
+internal fun ExploreSection(section: HomeSection<HomeService>, onAction: (UiAction) -> Unit) {
     Column(Modifier.fillMaxWidth()) {
         SectionTitle(
-            title = stringResource(if (type == BusinessType.CLINIC) Res.string.home_clinic_services else Res.string.home_salon_services),
-            topMargin = if (type == BusinessType.CLINIC) DiscoveryDesign.SECTION_TOP else DiscoveryDesign.SECTION_TOP_FIRST,
+            title = stringResource(Res.string.home_explore),
+            topMargin = DiscoveryDesign.SECTION_TOP_FIRST,
             actionText = if (section.hasMore) stringResource(Res.string.home_see_more) else null,
-            onAction = { onAction(UiAction.OnServicesSeeMore(type)) },
+            onAction = { onAction(UiAction.OnServicesSeeMore) },
         )
         LazyRow(
             contentPadding = PaddingValues(
@@ -75,8 +72,8 @@ internal fun ServicesSection(section: HomeSection<HomeService>, type: BusinessTy
             ),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
         ) {
-            items(section.items, key = { it.id }, contentType = { SERVICE_TYPE }) { service ->
-                ServiceTile(service, onClick = { onAction(UiAction.OnServiceClick(service.id, type)) })
+            items(section.items, key = { it.businessType.code + it.id }, contentType = { SERVICE_TYPE }) { service ->
+                ServiceTile(service, onClick = { onAction(UiAction.OnServiceClick(service.id)) })
             }
         }
     }
@@ -93,11 +90,12 @@ private fun ServiceTile(service: HomeService, onClick: () -> Unit) {
                 .height(DiscoveryDesign.SERVICE_IMAGE_HEIGHT)
                 .clip(RoundedCornerShape(DiscoveryDesign.SERVICE_IMAGE_RADIUS)),
         )
+        BusinessTypeBadge(service.businessType, Modifier.padding(top = AppTheme.spacing.space8))
         AppText(
             text = service.name,
             style = discoveryBody(DiscoveryDesign.TEXT_13_5, FontWeight.SemiBold),
             maxLines = 1,
-            modifier = Modifier.padding(top = AppTheme.spacing.space8, bottom = AppTheme.spacing.space2),
+            modifier = Modifier.padding(top = AppTheme.spacing.space4, bottom = AppTheme.spacing.space2),
         )
         AppText(
             text = service.description,
@@ -108,41 +106,62 @@ private fun ServiceTile(service: HomeService, onClick: () -> Unit) {
     }
 }
 
+/** Recommended: one rail of the lens' active placements (§5.13, §5.22). */
 @Composable
-internal fun RecommendedSection(section: HomeSection<SalonSummary>, type: BusinessType, onAction: (UiAction) -> Unit) {
-    if (section.items.isEmpty()) return
+internal fun RecommendedSection(section: HomeSection<SalonSummary>, onAction: (UiAction) -> Unit) {
     Column(Modifier.fillMaxWidth()) {
         SectionTitle(
-            title = stringResource(if (type == BusinessType.CLINIC) Res.string.home_recommended_clinics else Res.string.home_recommended),
+            title = stringResource(Res.string.home_recommended),
             topMargin = DiscoveryDesign.SECTION_TOP,
             actionText = if (section.hasMore) stringResource(Res.string.home_see_all) else null,
-            onAction = { onAction(UiAction.OnSeeAll(SalonSection.Recommended, type)) },
+            onAction = { onAction(UiAction.OnSeeAll(SalonSection.Recommended)) },
         )
         SalonRow(section.items, onAction, showDistance = false)
     }
 }
 
+/** Book again (registered customers with completed bookings): a tap opens the business of that booking. */
+@Composable
+internal fun BookAgainSection(entries: List<BookAgainEntry>, onAction: (UiAction) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        SectionTitle(
+            title = stringResource(Res.string.home_book_again),
+            topMargin = DiscoveryDesign.SECTION_TOP,
+            actionText = null,
+            onAction = {},
+        )
+        LazyRow(
+            contentPadding = PaddingValues(start = AppTheme.spacing.space20, end = AppTheme.spacing.space20, bottom = AppTheme.spacing.space6),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
+        ) {
+            items(entries, key = { it.lastBookingId }, contentType = { SALON_TYPE }) { entry ->
+                DiscoverySalonCard(
+                    salon = entry.salon,
+                    onClick = { onAction(UiAction.OnBookAgainClick(entry.salon.id)) },
+                    onFavoriteClick = { onAction(UiAction.OnFavoriteClick(entry.salon.id)) },
+                    showDistance = false,
+                )
+            }
+        }
+    }
+}
+
 /**
- * PRD S03 item 7 / design `nearOn | nearOff | nearEmpty`; available to guests. Nearest clinics follow nearest salons and
- * never repeat the location prompt: without location only the salons section asks for it.
+ * Near you (PRD S03 item 7 / design `nearOn | nearOff | nearEmpty`, §5.22): one list of the lens' types ranked by distance;
+ * available to guests.
  */
 @Composable
-internal fun NearestSection(nearest: NearestUi, type: BusinessType, onAction: (UiAction) -> Unit) {
-    val clinics = type == BusinessType.CLINIC
-    if (clinics && nearest == NearestUi.LocationOff) return
+internal fun NearYouSection(nearest: NearestUi, onAction: (UiAction) -> Unit) {
     val spacing = AppTheme.spacing
     SectionTitle(
-        title = stringResource(if (clinics) Res.string.home_nearest_clinics else Res.string.home_nearest),
+        title = stringResource(Res.string.home_near_you),
         topMargin = DiscoveryDesign.SECTION_TOP,
         actionText = if ((nearest as? NearestUi.Salons)?.hasMore == true) stringResource(Res.string.home_see_all) else null,
-        onAction = { onAction(UiAction.OnSeeAll(SalonSection.Nearest, type)) },
+        onAction = { onAction(UiAction.OnSeeAll(SalonSection.Nearest)) },
     )
     when (nearest) {
         is NearestUi.Salons -> SalonRow(nearest.items, onAction, showDistance = true)
-        NearestUi.Empty -> NearestEmpty(
-            stringResource(if (clinics) Res.string.home_nearest_clinics_empty else Res.string.home_nearest_empty),
-            Modifier.padding(horizontal = spacing.space20),
-        )
+        NearestUi.Empty -> NearestEmpty(stringResource(Res.string.home_near_you_empty), Modifier.padding(horizontal = spacing.space20))
         NearestUi.LocationOff -> NearestLocationOff(
             onEnable = { onAction(UiAction.OnEnableLocationClick) },
             Modifier.padding(horizontal = spacing.space20),

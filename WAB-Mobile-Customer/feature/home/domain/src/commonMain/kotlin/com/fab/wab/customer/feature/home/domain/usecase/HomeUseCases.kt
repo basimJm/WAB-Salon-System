@@ -3,6 +3,7 @@ package com.fab.wab.customer.feature.home.domain.usecase
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.provider.DeviceLocationProvider
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.home.domain.model.HomeContent
 import com.fab.wab.customer.feature.home.domain.repository.HomeRepository
@@ -14,8 +15,8 @@ object HomeDefaults {
 }
 
 class LoadHomeUseCase(private val repository: HomeRepository) {
-    suspend operator fun invoke(gender: Gender, location: LocationData?): AppResult<HomeContent> =
-        repository.load(gender, location)
+    suspend operator fun invoke(gender: Gender, lens: BusinessType?, location: LocationData?): AppResult<HomeContent> =
+        repository.load(gender, lens, location)
 }
 
 /** One current fix from the device; the caller must have checked the permission and the location service first. */

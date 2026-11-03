@@ -19,6 +19,9 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+/** Route arguments of S06; a null type lists the catalog of every business type (Home lens "All", BUSINESS_DOMAIN §5.22). */
+data class AllServicesEntry(val gender: Gender, val businessType: BusinessType?)
+
 /**
  * S06: the catalog of the Home tab's gender and one business type (salon or clinic services, BUSINESS_DOMAIN §5.19), paged
  * by 10, expandable cards; a tap opens S04 for that service, filtered to the same type.
@@ -29,7 +32,7 @@ class AllServicesViewModel(
     private val analytics: AnalyticsTracker,
     private val errorText: suspend (AppError) -> String = ::appErrorText,
     testScope: CoroutineScope? = null,
-    private val businessType: BusinessType = BusinessType.SALON,
+    private val businessType: BusinessType? = BusinessType.SALON,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
     private var started = false

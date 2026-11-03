@@ -56,7 +56,7 @@ class HomeDependencies(
     val languageChanges: Flow<AppLanguage> = emptyFlow(),
 )
 
-/** S03: one request per gender tab, nearest by permission state, live unread badge, auth-gated favorites. */
+/** S03: one request per type lens (§5.22), Near you by permission state, live unread badge, auth-gated favorites. */
 class HomeViewModel(
     private val deps: HomeDependencies,
     testScope: CoroutineScope? = null,
@@ -84,7 +84,7 @@ class HomeViewModel(
 
     override fun handle(event: UiAction) {
         when (event) {
-            is UiAction.OnGenderSelect -> selectGender(event.gender)
+            is UiAction.OnLensSelect -> selectLens(event.lens)
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load()
             UiAction.OnResume -> resumeAfterSettings()
@@ -110,21 +110,26 @@ class HomeViewModel(
             UiAction.OnNotificationsClick -> emitSideEffect(SideEffect.OpenNotifications)
             is UiAction.OnServiceClick -> {
                 track(HomeAnalytics.ACTION_SERVICE_CLICK, HomeAnalytics.PARAM_ID to event.serviceId)
-                val name = uiState.value.servicesOf(event.businessType).items.firstOrNull { it.id == event.serviceId }?.name
-                openSalons(serviceId = event.serviceId, serviceName = name, businessType = event.businessType)
+                val service = uiState.value.explore.items.firstOrNull { it.id == event.serviceId }
+                openSalons(serviceId = event.serviceId, serviceName = service?.name, businessType = service?.businessType)
             }
-            is UiAction.OnServicesSeeMore ->
-                uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it, event.businessType)) }
+            UiAction.OnServicesSeeMore ->
+                uiState.value.gender?.let { emitSideEffect(SideEffect.OpenAllServices(it, uiState.value.lens)) }
             is UiAction.OnSalonClick -> {
                 track(HomeAnalytics.ACTION_SALON_CLICK, HomeAnalytics.PARAM_ID to event.salonId)
                 emitSideEffect(SideEffect.OpenSalon(event.salonId, event.branchId))
             }
-            is UiAction.OnSeeAll -> openSalons(filter = event.section.filter(), businessType = event.businessType)
+            is UiAction.OnBookAgainClick -> {
+                // The booking flow has no service preselection yet: Book again opens the business (§5.22).
+                track(HomeAnalytics.ACTION_BOOK_AGAIN, HomeAnalytics.PARAM_ID to event.salonId)
+                emitSideEffect(SideEffect.OpenSalon(event.salonId))
+            }
+            is UiAction.OnSeeAll -> openSalons(filter = event.section.filter(), businessType = uiState.value.lens)
             else -> Unit
         }
     }
 
-    /** S04 always opens for the gender of the selected tab (PRD S04 "selected gender"); clinic sections open it filtered to CLINIC. */
+    /** S04 opens with the Home lens (or the tapped service's type); the route still carries the stored gender. */
     private fun openSalons(
         serviceId: String? = null,
         serviceName: String? = null,
@@ -141,7 +146,8 @@ class HomeViewModel(
             is SessionState.Guest -> session.profile.nickname.orEmpty()
             is SessionState.SignedIn -> session.user.firstName
         }
-        val gender = previous.gender ?: session.genderScope ?: Gender.entries.first()
+        // No gender toggle on Home any more (§5.22): the stored gender follows the session and only picks the banners.
+        val gender = session.genderScope ?: previous.gender ?: Gender.entries.first()
         updateState {
             copy(
                 welcomeName = name,
@@ -150,23 +156,25 @@ class HomeViewModel(
                 unreadCount = if (session.isSignedIn) unreadCount else 0,
             )
         }
-        if (previous.gender == null || previous.signedIn != session.isSignedIn) load()
+        if (previous.gender != gender || previous.signedIn != session.isSignedIn) load()
     }
 
-    private fun selectGender(gender: Gender) {
-        if (gender == uiState.value.gender) return
-        track(HomeAnalytics.ACTION_GENDER_TAB, HomeAnalytics.PARAM_GENDER to gender.code.lowercase())
-        updateState { copy(gender = gender, hasContent = false) }
+    /** The lens filters every section at once: one new request with `businessType` (BUSINESS_DOMAIN §5.22). */
+    private fun selectLens(lens: BusinessType?) {
+        if (lens == uiState.value.lens) return
+        track(HomeAnalytics.ACTION_LENS, HomeAnalytics.PARAM_TYPE to (lens?.code ?: HomeAnalytics.VALUE_ALL).lowercase())
+        updateState { copy(lens = lens, hasContent = false) }
         load()
     }
 
     private fun load(refresh: Boolean = false) {
         val gender = uiState.value.gender ?: return
+        val lens = uiState.value.lens
         loadJob?.cancel()
         loadJob = scope.launch {
             updateState { copy(loading = !refresh, refreshing = refresh, error = null, offline = false) }
             val location = currentLocationIfAllowed()
-            when (val result = deps.loadHome(gender, location)) {
+            when (val result = deps.loadHome(gender, lens, location)) {
                 is AppResult.Success -> apply(result.data, located = location != null)
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)
@@ -192,7 +200,7 @@ class HomeViewModel(
 
     /** Back from the system settings (PRD S03 item 7 "after enabling → loads automatically"). */
     private fun resumeAfterSettings() {
-        if (uiState.value.nearestSalons !is NearestUi.LocationOff || !uiState.value.hasContent) return
+        if (uiState.value.nearYou !is NearestUi.LocationOff || !uiState.value.hasContent) return
         scope.launch { if (currentLocationIfAllowed() != null) load(refresh = true) }
     }
 

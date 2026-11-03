@@ -55,13 +55,6 @@ object DiscoveryDesign {
     val SEARCH_HEIGHT = 50.dp
     val SEARCH_ICON = 18.dp
 
-    // Gender tabs
-    val TABS_PADDING = 5.dp
-    val TAB_HEIGHT = 40.dp
-    val TAB_RADIUS = 12.dp
-    val TAB_SHADOW = 6.dp
-    const val TAB_SHADOW_ALPHA = 0.25f
-
     // Section headers
     val SECTION_TOP_FIRST = 24.dp
     val SECTION_TOP = 26.dp

@@ -51,11 +51,11 @@ internal object AuthDiscoveryActionEvents {
         is OtpContract.UiAction.OnCodeChange, OtpContract.UiAction.OnDialogDismiss -> ActionEvent.Silent
     }
     fun home(a: HomeContract.UiAction): ActionEvent = when (a) {
-        is HomeContract.UiAction.OnGenderSelect, is HomeContract.UiAction.OnBannerClick, HomeContract.UiAction.OnSearchClick,
+        is HomeContract.UiAction.OnLensSelect, is HomeContract.UiAction.OnBannerClick, HomeContract.UiAction.OnSearchClick,
         is HomeContract.UiAction.OnServiceClick, is HomeContract.UiAction.OnSalonClick, is HomeContract.UiAction.OnFavoriteClick,
-        HomeContract.UiAction.OnEnableLocationClick, -> ActionEvent.ByViewModel
+        is HomeContract.UiAction.OnBookAgainClick, HomeContract.UiAction.OnEnableLocationClick, -> ActionEvent.ByViewModel
         HomeContract.UiAction.OnNotificationsClick -> ActionEvent.Named(Events.NOTIFICATIONS_OPEN)
-        is HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
+        HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
         HomeContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         HomeContract.UiAction.OnRefresh, HomeContract.UiAction.OnRetry, HomeContract.UiAction.OnResume,
         HomeContract.UiAction.OnDialogDismiss,

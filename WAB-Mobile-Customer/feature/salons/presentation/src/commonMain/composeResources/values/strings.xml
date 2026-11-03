@@ -2,6 +2,7 @@
     <string name="salons_title">Salons &amp; clinics</string>
     <string name="salons_title_salons">Salons</string>
     <string name="salons_title_clinics">Beauty clinics</string>
+    <string name="salons_title_tattoo">Tattoo studios</string>
     <string name="salons_search_hint">Search salons and clinics</string>
     <string name="salons_filter">Filter</string>
     <string name="salons_chip_remove">Remove %1$s</string>

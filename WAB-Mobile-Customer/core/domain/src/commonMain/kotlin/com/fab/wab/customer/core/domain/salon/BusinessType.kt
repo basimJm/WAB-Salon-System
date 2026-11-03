@@ -2,10 +2,11 @@ package com.fab.wab.customer.core.domain.salon
 
 import com.fab.wab.customer.core.domain.session.Gender
 
-/** What a business is (BUSINESS_DOMAIN §2 `BusinessType`, §5.19); immutable after the application. */
+/** What a business is (BUSINESS_DOMAIN §2 `BusinessType`, §5.19, §5.23); immutable after the application. */
 enum class BusinessType(val code: String) {
     SALON("SALON"),
     CLINIC("CLINIC"),
+    TATTOO("TATTOO"),
     ;
 
     companion object {
@@ -17,7 +18,7 @@ enum class BusinessType(val code: String) {
     }
 }
 
-/** Who a business serves (BUSINESS_DOMAIN §2 `Audience`); a CLINIC is always [BOTH]. */
+/** Who a business serves (BUSINESS_DOMAIN §2 `Audience`); a CLINIC and a TATTOO studio are always [BOTH]. */
 enum class Audience(val code: String) {
     MALE("MALE"),
     FEMALE("FEMALE"),
@@ -38,11 +39,14 @@ enum class Audience(val code: String) {
 
 /** BUSINESS_DOMAIN §5.19 booking rules that depend on the business type and audience. */
 object BusinessRules {
-    /** Persons of a booking must all match the audience only for a MALE or FEMALE salon. */
+    /** Persons of a booking must all match the audience only for a MALE or FEMALE salon (clinics and tattoo studios: any). */
     fun lockedGender(type: BusinessType, audience: Audience?): Gender? =
-        if (type == BusinessType.CLINIC) null else audience?.lockedGender
+        if (type == BusinessType.SALON) audience?.lockedGender else null
 
-    /** Bride bookings exist only for FEMALE or BOTH salons, never for clinics. */
+    /** Bride bookings exist only for FEMALE or BOTH salons, never for clinics or tattoo studios. */
     fun allowsBride(type: BusinessType, audience: Audience?): Boolean =
         type == BusinessType.SALON && (audience == Audience.FEMALE || audience == Audience.BOTH)
+
+    /** Only a tattoo studio takes one optional design image per person (§5.23, `BOOKING_REFERENCE`). */
+    fun allowsReferenceImage(type: BusinessType): Boolean = type == BusinessType.TATTOO
 }

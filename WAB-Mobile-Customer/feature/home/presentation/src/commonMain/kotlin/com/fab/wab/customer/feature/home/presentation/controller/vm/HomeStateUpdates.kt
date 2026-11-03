@@ -1,48 +1,39 @@
 package com.fab.wab.customer.feature.home.presentation.controller.vm
 
-import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.core.navigation.route.SalonListFilter
+import com.fab.wab.customer.feature.home.domain.model.BookAgainEntry
 import com.fab.wab.customer.feature.home.domain.model.HomeContent
 import com.fab.wab.customer.feature.home.domain.model.HomeSection
-import com.fab.wab.customer.feature.home.domain.model.HomeService
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.NearestUi
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SalonSection
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiState
 
-/** Pure state updates of S03 (BUSINESS_DOMAIN §5.19: every section exists once for salons and once for clinics). */
+/** Pure state updates of S03 (BUSINESS_DOMAIN §5.22: one merged section per kind, filtered by the lens on the server). */
 internal fun UiState.withContent(content: HomeContent, located: Boolean): UiState = copy(
     loading = false,
     refreshing = false,
     hasContent = true,
     banners = content.banners,
-    salonServices = content.salonServices,
-    clinicServices = content.clinicServices,
-    recommendedSalons = content.recommendedSalons,
-    recommendedClinics = content.recommendedClinics,
-    nearestSalons = nearestOf(content.nearestSalons, located),
-    nearestClinics = nearestOf(content.nearestClinics, located),
+    explore = content.explore,
+    nearYou = nearestOf(content.nearYou, located),
+    recommended = content.recommended,
+    bookAgain = if (signedIn) content.bookAgain?.items.orEmpty() else emptyList(),
     unreadCount = if (signedIn) content.unreadCount else 0,
 )
 
-internal fun UiState.servicesOf(type: BusinessType): HomeSection<HomeService> = when (type) {
-    BusinessType.SALON -> salonServices
-    BusinessType.CLINIC -> clinicServices
-}
-
-/** The same business can appear in a recommended and a nearest section: every copy follows the favorite. */
+/** The same business can appear in several sections: every copy follows the favorite. */
 internal fun UiState.withFavorite(salonId: String, value: Boolean): UiState {
     val favorite: (SalonSummary) -> SalonSummary = { it.copy(isFavorite = value) }
     return copy(
-        recommendedSalons = recommendedSalons.mapSalon(salonId, favorite),
-        recommendedClinics = recommendedClinics.mapSalon(salonId, favorite),
-        nearestSalons = nearestSalons.mapSalon(salonId, favorite),
-        nearestClinics = nearestClinics.mapSalon(salonId, favorite),
+        recommended = recommended.mapSalon(salonId, favorite),
+        nearYou = nearYou.mapSalon(salonId, favorite),
+        bookAgain = bookAgain.map { if (it.salon.id == salonId) it.copy(salon = favorite(it.salon)) else it },
     )
 }
 
 internal fun UiState.salon(id: String): SalonSummary? =
-    sequenceOf(recommendedSalons.items, recommendedClinics.items, nearestSalons.items(), nearestClinics.items())
+    sequenceOf(recommended.items, nearYou.items(), bookAgain.map(BookAgainEntry::salon))
         .flatten()
         .firstOrNull { it.id == id }
 

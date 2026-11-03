@@ -2,6 +2,7 @@
     <string name="salons_title">الصالونات والعيادات</string>
     <string name="salons_title_salons">الصالونات</string>
     <string name="salons_title_clinics">عيادات التجميل</string>
+    <string name="salons_title_tattoo">استوديوهات الوشم</string>
     <string name="salons_search_hint">ابحث عن صالون أو عيادة</string>
     <string name="salons_filter">فلتر</string>
     <string name="salons_chip_remove">إزالة %1$s</string>

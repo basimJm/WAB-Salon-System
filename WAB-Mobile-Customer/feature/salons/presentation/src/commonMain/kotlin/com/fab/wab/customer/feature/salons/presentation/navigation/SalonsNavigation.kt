@@ -29,6 +29,7 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllS
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsEntry
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllSalonsViewModel
+import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllServicesEntry
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllServicesViewModel
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.FilterSheetViewModel
 import com.fab.wab.customer.feature.salons.presentation.resources.Res
@@ -58,19 +59,20 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         navGraphBuilder.composable<Screen.AllServices> { entry ->
             val route = entry.toRoute<Screen.AllServices>()
             val gender = Gender.fromCode(route.gender) ?: Gender.entries.first()
-            AllServicesDestination(gender, BusinessType.fromCodeOrNull(route.businessType) ?: BusinessType.SALON)
+            AllServicesDestination(AllServicesEntry(gender, BusinessType.fromCodeOrNull(route.businessType)))
         }
     }
 
     @Composable
-    private fun AllServicesDestination(gender: Gender, businessType: BusinessType) {
-        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(gender, businessType) }
+    private fun AllServicesDestination(entry: AllServicesEntry) {
+        val gender = entry.gender
+        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(entry) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is AllServicesContract.SideEffect.OpenSalons ->
-                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType.code))
+                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType?.code))
                 is AllServicesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
