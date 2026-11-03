@@ -68,6 +68,10 @@ class BookingsViewModelTest {
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnTabSelect(BookingsTab.TODAY))
         assertEquals(BookingsTab.TODAY, repository.queries.last().first.tab)
+        // MER-086 (§5.21): the "To close" tab asks the server for `tab=TO_CLOSE`.
+        viewModel.onEvent(UiAction.OnTabSelect(BookingsTab.TO_CLOSE))
+        assertEquals(BookingsTab.TO_CLOSE, repository.queries.last().first.tab)
+        assertEquals("TO_CLOSE", BookingsTab.TO_CLOSE.name)
         val filter = BookingFilter(statuses = setOf(BookingStatus.APPROVED), brideOnly = true)
         viewModel.onEvent(UiAction.OnFilterApply(filter))
         assertEquals(filter, repository.queries.last().first.filter)

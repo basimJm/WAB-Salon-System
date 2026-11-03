@@ -6,6 +6,9 @@
     <string name="bookings_tab_upcoming">القادمة</string>
     <string name="bookings_tab_today">اليوم</string>
     <string name="bookings_tab_past">السابقة</string>
+    <string name="bookings_tab_to_close">للإغلاق</string>
+    <string name="bookings_empty_to_close">لا توجد حجوزات للإغلاق</string>
+    <string name="bookings_empty_to_close_body">تظهر هنا الحجوزات المنتهية التي تحتاج إلى «مكتمل» أو «لم يحضر».</string>
     <string name="bookings_empty_pending">لا توجد طلبات معلّقة</string>
     <string name="bookings_empty_pending_body">ستظهر هنا طلبات الحجز الجديدة فور وصولها.</string>
     <string name="bookings_empty_upcoming">لا توجد حجوزات قادمة</string>

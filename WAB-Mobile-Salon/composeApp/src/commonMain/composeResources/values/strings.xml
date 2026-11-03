@@ -37,6 +37,14 @@
     <string name="request_accepted">Booking accepted</string>
     <string name="request_handled">Already handled by another team member</string>
     <string name="request_failed">Could not accept the booking. Open the app to try again.</string>
+    <string name="close_channel">Bookings to close</string>
+    <string name="close_title">Close this booking</string>
+    <string name="close_completed">Completed</string>
+    <string name="close_no_show">No-show</string>
+    <string name="close_done_completed">Booking marked completed</string>
+    <string name="close_done_no_show">Booking marked as no-show</string>
+    <string name="close_already">This booking is already closed</string>
+    <string name="close_open">Could not update the booking. Tap to open it.</string>
     <string name="alerts_notifications_title">Get booking requests on time</string>
     <string name="alerts_notifications_message">Allow notifications so new booking requests, reminders and business alerts reach you even when the app is closed.</string>
     <string name="alerts_notifications_allow">Allow notifications</string>

@@ -22,7 +22,7 @@ import com.fab.wab.merchant.designsystem.theme.SurfaceTone
 import com.fab.wab.merchant.designsystem.utils.brandBackground
 import com.fab.wab.merchant.designsystem.utils.brandBrush
 
-/** Two to four equal tabs in a soft track (segment tabs, upcoming/past orders). Order follows the layout direction. */
+/** Two to five equal tabs in a soft track (segment tabs, upcoming/past orders). Order follows the layout direction. */
 @Composable
 fun AppSegmentedTabs(
     tabs: List<String>,

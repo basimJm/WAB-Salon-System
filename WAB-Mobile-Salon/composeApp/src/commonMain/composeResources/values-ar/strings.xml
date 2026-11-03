@@ -37,6 +37,14 @@
     <string name="request_accepted">تم قبول الحجز</string>
     <string name="request_handled">تمت معالجته من عضو آخر في الفريق</string>
     <string name="request_failed">تعذّر قبول الحجز. افتح التطبيق وحاول مرة أخرى.</string>
+    <string name="close_channel">حجوزات للإغلاق</string>
+    <string name="close_title">أغلق هذا الحجز</string>
+    <string name="close_completed">مكتمل</string>
+    <string name="close_no_show">لم يحضر</string>
+    <string name="close_done_completed">تم تسجيل الحجز مكتملاً</string>
+    <string name="close_done_no_show">تم تسجيل عدم الحضور</string>
+    <string name="close_already">هذا الحجز مُغلق بالفعل</string>
+    <string name="close_open">تعذّر تحديث الحجز. اضغط لفتحه.</string>
     <string name="alerts_notifications_title">استلم طلبات الحجز في وقتها</string>
     <string name="alerts_notifications_message">اسمح بالإشعارات لتصلك طلبات الحجز الجديدة والتذكيرات والتنبيهات حتى عندما يكون التطبيق مغلقاً.</string>
     <string name="alerts_notifications_allow">السماح بالإشعارات</string>

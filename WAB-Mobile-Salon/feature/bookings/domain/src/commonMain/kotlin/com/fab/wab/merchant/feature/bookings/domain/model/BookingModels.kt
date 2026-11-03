@@ -7,8 +7,8 @@ import com.fab.wab.merchant.core.domain.policy.PolicyTerms
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
-/** PRD M08 tabs (`GET /bookings?tab`). */
-enum class BookingsTab { PENDING, UPCOMING, TODAY, PAST }
+/** PRD M08 tabs (`GET /bookings?tab`); TO_CLOSE = approved bookings whose end passed, oldest first (§5.21). */
+enum class BookingsTab { PENDING, UPCOMING, TODAY, TO_CLOSE, PAST }
 
 /**
  * A staff member; [branchId] = the member's branch (null for the owner or an older server); [photoUrl] = the member's

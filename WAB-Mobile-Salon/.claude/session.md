@@ -9,6 +9,23 @@
 
 ## Current task
 
+### MER-086 — Close finished bookings (owner 2026-11-03)
+
+- Branch: `feat/mer-086-close-bookings` (from `feat/mer-085-new-booking`; batch MER-084…086)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.21; SRV-186; `GET /merchant/v1/bookings?tab=TO_CLOSE`, `POST …/bookings/{id}/complete|no-show`):
+  - [x] Bookings tab "To close" (`TO_CLOSE`, between Today and Past) with AR + EN label and empty state
+  - [x] `booking.close_reminder` / `booking.close_overdue` parsed (`bookingId`, `reference`, `actions=COMPLETED,NO_SHOW`; missing actions = both)
+  - [x] Android: a close push reaching `onMessageReceived` in the background → notification (channel "Bookings to close") with Completed / No-show (broadcast to `RequestActionReceiver`), tap = booking details; the outcome replaces it ("marked completed / no-show", "already closed", or "could not update — tap to open")
+  - [x] iOS: category `BOOKING_CLOSE` (Completed / No-show, background) registered with the request category; the action answers in the background, the outcome replaces the alert, the fallback publishes the booking link
+  - [x] `CloseBookingUseCase`: reads the details' server `actions` first (permission + own-staff rule), not allowed → open details, final status / ALREADY_HANDLED / INVALID_TRANSITION → already closed, other failures → open details; never retries
+  - [x] A tapped close push opens the booking details (`bookings/<id>` on the web base; the server's relative `deepLink` is not accepted by the link store)
+  - [x] Assigned staff: the details screen shows COMPLETE / NO_SHOW whenever the server sends them (test)
+- Tests: `CloseBookingUseCaseTest` (5), `BookingClosePushTest` (5: parse, non-close, identifiers, tap link, outcome texts), `BookingsViewModelTest` (TO_CLOSE query), `BookingDetailsViewModelTest` (+1 own staff COMPLETE / NO_SHOW); `./gradlew testAndroidHostTest` green (all modules); `:androidApp:assembleDevDebug` and `:composeApp:compileKotlinIosSimulatorArm64` green; `policy_checks.py all` ok
+- Loops: 0/1 (batch rule §3.13: loop + review after the batch)
+- Review: PENDING
+- Notes: DEVIATIONS — the server sends close reminders as VISIBLE pushes without an iOS `actionCategory`: on iOS the actions appear only once the server sets `aps.category = BOOKING_CLOSE` (server follow-up), and on Android a visible push in the background is drawn by the system without actions (the actionable notification shows only when the message reaches the app: data-only delivery); in the foreground the usual in-app banner shows. Android 12+ blocks opening an activity from a notification action, so the "open details" fallback is the replaced notification's tap. No "To close (n)" shortcut on Home. A fifth tab in `AppSegmentedTabs` (designed for 2–4) not measured at 200 % font scale. Detekt and the device run deferred to the batch / end of backlog.
+
 ### MER-085 — New booking for a customer (owner 2026-11-03)
 
 - Branch: `feat/mer-085-new-booking` (from `feat/mer-084-tattoo`; batch MER-084…086)
