@@ -34,7 +34,7 @@ const deactivated: string[] = [];
 const self = createMemberSelfService({
   members: new MembersRepository(membersM.model as never),
   storage: new FakeStorageProvider(),
-  uploads: { assertConfirmed: () => Promise.resolve() },
+  files: { replace: () => Promise.reject(new Error('unused')), remove: () => Promise.resolve() },
   phones: { resolve: () => Promise.reject(new Error('unused')), verify: () => Promise.resolve() },
   otpGate: { reset: () => Promise.resolve() },
   lifecycle: {

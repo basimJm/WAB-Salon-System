@@ -95,7 +95,8 @@ export const buildDemoBusinesses = (
       memberIndex += 1;
       const id = demoId(`member:business:${spec.key}:${label}`);
       const names = DEMO_FIRST_NAMES[gender];
-      const photoKey = demoFileKey('members', `business-${spec.key}-${label}`);
+      // Labels hold ':' (branch:staffN), which no storage key may contain (SRV-179).
+      const photoKey = demoFileKey('members', `business-${spec.key}-${label.replaceAll(':', '-')}`);
       data.Member.push({
         _id: id,
         salonId,

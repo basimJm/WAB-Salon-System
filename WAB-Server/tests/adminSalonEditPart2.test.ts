@@ -96,6 +96,7 @@ const app = createApp({
         services: servicesRepo,
         storage: new FakeStorageProvider(),
         uploads: verifier,
+        cleanup: { enqueue: () => Promise.resolve() },
         state,
       }),
       staff: createStaffService({

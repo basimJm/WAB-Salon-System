@@ -48,6 +48,8 @@ import type { RefreshTokenService } from '../auth/refreshTokens.service';
 import { createSessionTokens, type TokenPair } from '../auth/sessionTokens';
 import type { SettingsService } from '../settings';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import type { StorageCleanup } from '../files/storageCleanup.service';
+import { droppedKeys } from '../files/storedObjects';
 
 export interface SalonDraft {
   readonly name: string;
@@ -119,6 +121,8 @@ export interface SalonApplicationDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   /** When set, license documents must be files the server issued and confirmed. */
   readonly uploads?: UploadVerifier;
+  /** Documents replaced on a resubmission are deleted through the outbox (SRV-182). */
+  readonly cleanup?: Pick<StorageCleanup, 'enqueue'>;
   readonly accessSecret: string;
   readonly now?: () => Date;
   /** A new or resubmitted application (the admin panel's live list, `application.created`). */
@@ -289,6 +293,14 @@ export const createSalonApplicationService = (
         },
       });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
+      const dropped = [
+        ...droppedKeys(salon.application.documentKeys, updated.application.documentKeys),
+        ...droppedKeys(
+          salon.application.medicalLicenseKeys ?? [],
+          updated.application.medicalLicenseKeys ?? [],
+        ),
+      ];
+      if (dropped.length > 0) await deps.cleanup?.enqueue(dropped, 'FILE_REMOVED');
       deps.onSubmitted?.(updated);
       return toStatus(updated);
     },

@@ -12,6 +12,9 @@ import type { Entity } from '../../utils/database/plain';
 import { ForbiddenError, NotFoundError } from '../../utils/errors';
 import { assertPlace } from '../locations/place';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import type { FileSlots } from '../files/fileSlots.service';
+import { applySlotPatch } from '../files/slotPatch';
+import { SLOT_KEYS } from '../../constants/uploads';
 import type { SalonStateService } from './salonState.service';
 
 export interface SalonProfile {
@@ -75,6 +78,8 @@ export interface SalonProfileDeps {
   readonly state: Pick<SalonStateService, 'recompute'>;
   /** When set, images must be files this salon uploaded and confirmed. */
   readonly uploads?: UploadVerifier;
+  /** Cover and logo (`profileKey`) are file slots (SRV-181): replaced in place, removed via the outbox. */
+  readonly files: Pick<FileSlots, 'replace' | 'remove'>;
   /** Salon-level endpoint: address and contacts are copied to the main branch (§5.16). */
   readonly mainBranches?: Pick<MainBranches, 'mirror'>;
   /** Edits a branch member's own branch (address/contacts). */
@@ -87,7 +92,7 @@ export const createSalonProfileService = ({
   areas,
   storage,
   state,
-  uploads,
+  files,
   mainBranches,
   branchEditor,
 }: SalonProfileDeps): SalonProfileService => {
@@ -155,18 +160,37 @@ export const createSalonProfileService = ({
       const cityId = patch.cityId ?? (patch.areaId === undefined ? undefined : current.cityId);
       await assertPlace({ cities, areas }, 'body', cityId, patch.areaId);
 
-      for (const [purpose, key, current_] of [
-        ['SALON_COVER', patch.coverKey, current.coverKey],
-        ['SALON_PROFILE', patch.profileKey, current.profileKey],
+      const accept =
+        options?.acceptUpload ?? ((upload: Entity<UploadRaw>) => upload.salonId === salonId);
+      for (const [purpose, field, value, current_, key] of [
+        [
+          'SALON_COVER',
+          'coverKey',
+          patch.coverKey,
+          current.coverKey,
+          SLOT_KEYS.salonCover(salonId),
+        ],
+        [
+          'SALON_PROFILE',
+          'profileKey',
+          patch.profileKey,
+          current.profileKey,
+          SLOT_KEYS.salonLogo(salonId),
+        ],
       ] as const) {
-        if (typeof key === 'string' && key !== current_) {
-          await uploads?.assertConfirmed({
-            keys: [key],
-            purpose,
-            field: purpose === 'SALON_COVER' ? 'body.coverKey' : 'body.profileKey',
-            accept: options?.acceptUpload ?? ((upload) => upload.salonId === salonId),
-          });
-        }
+        await applySlotPatch(files, {
+          target: { purpose, key, ownerType: 'MEMBER', ownerId: salonId, salonId },
+          current: current_,
+          value,
+          field: `body.${field}`,
+          accept,
+          write: async (ref) => {
+            await salons.patch(
+              salonId,
+              ref === null ? { set: {}, unset: [field] } : { set: { [field]: ref } },
+            );
+          },
+        });
       }
 
       const set: Record<string, unknown> = {};
@@ -179,8 +203,6 @@ export const createSalonProfileService = ({
         set['name'] = patch.name;
       }
       put('description', patch.description);
-      put('coverKey', patch.coverKey);
-      put('profileKey', patch.profileKey);
       put('locationText', patch.locationText);
       put('phone', patch.phone);
       put('whatsapp', patch.whatsapp);

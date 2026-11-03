@@ -77,7 +77,7 @@ const app = createApp({
             return Promise.resolve(0);
           },
         } as never,
-        storage: { delete: () => Promise.resolve() } as never,
+        files: { remove: () => Promise.resolve() },
         audit,
         access: {
           accessRevoked: (target) => {

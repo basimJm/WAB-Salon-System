@@ -8,6 +8,7 @@ import {
 import { StorageError, validationError } from './errors';
 import type {
   ConfirmUploadRequest,
+  CopyObjectRequest,
   SignedUrlRequest,
   UploadUrlRequest,
   WriteObjectRequest,
@@ -67,6 +68,13 @@ export const assertWriteRequest = (request: WriteObjectRequest): void => {
   assertVisibility(request.visibility);
   assertContentType(request.contentType);
   if (!Buffer.isBuffer(request.body)) throw validationError('body must be a Buffer');
+};
+
+export const assertCopyRequest = (request: CopyObjectRequest): void => {
+  assertKey(request.fromKey);
+  assertKey(request.toKey);
+  assertVisibility(request.visibility);
+  if (request.fromKey === request.toKey) throw validationError('fromKey and toKey must differ');
 };
 
 export const encodeKey = (key: string): string => key.split('/').map(encodeURIComponent).join('/');

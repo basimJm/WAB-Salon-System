@@ -17,6 +17,7 @@ import { SalonsRepository } from '../src/repositories/salons.repository';
 import { signAccessToken } from '../src/utils/auth/accessToken';
 import { ValidationError } from '../src/utils/errors';
 import { createLogger } from '../src/utils/logger';
+import { fileSlotsKit } from './helpers/fileSlots';
 import { createFakeModel } from './helpers/fakeModel';
 
 const logger = createLogger({ level: 'silent' });
@@ -71,6 +72,7 @@ const verifier: UploadVerifier = {
 };
 const salonRepo = new SalonsRepository(m.salons.model as never);
 const storage = new FakeStorageProvider();
+const kit = fileSlotsKit(storage);
 const state = createSalonStateService({
   salons: salonRepo,
   facts: {
@@ -93,11 +95,13 @@ const app = createApp({
         storage,
         state,
         uploads: verifier,
+        files: kit.slots,
       }),
       gallery: createGalleryService({
         gallery: new GalleryRepository(m.gallery.model as never),
         storage,
         uploads: verifier,
+        cleanup: kit.cleanup,
         settings: { get: () => Promise.resolve(60 as never) },
       }),
       hours: undefined as never,
@@ -128,8 +132,13 @@ const call = (
   const req = request(app)[method](`${salon}${path}`).set('Authorization', bearer());
   return body === undefined ? req : req.send(body);
 };
-const addUpload = (key: string, purpose: string, ownerType = 'ADMIN'): void => {
+const addUpload = async (key: string, purpose: string, ownerType = 'ADMIN'): Promise<void> => {
   uploads.set(key, { purpose, ownerType });
+  await kit.confirmed(key, {
+    purpose: purpose as never,
+    ownerType: ownerType as never,
+    ownerId: ownerType === 'ADMIN' ? 'admin-1' : 'someone-else',
+  });
 };
 
 beforeEach(() => {
@@ -217,14 +226,16 @@ describe('admin salon edit: profile', () => {
   });
 
   it('accepts images the admin uploaded for that purpose and refuses anyone else’s', async () => {
-    addUpload('salons/cover/admin.jpg', 'SALON_COVER');
-    addUpload('salons/cover/customer.jpg', 'SALON_COVER', 'CUSTOMER');
-    addUpload('salons/profile/admin.jpg', 'SALON_PROFILE');
+    await addUpload('salons/cover/admin.jpg', 'SALON_COVER');
+    await addUpload('salons/cover/customer.jpg', 'SALON_COVER', 'CUSTOMER');
+    await addUpload('salons/profile/admin.jpg', 'SALON_PROFILE');
     const ok = await call('patch', '/profile', {
       coverKey: 'salons/cover/admin.jpg',
       reason: REASON,
     });
     expect(ok.status).toBe(200);
+    // The admin's upload went into the salon's cover slot (SRV-181).
+    expect(m.salons.docs[0]?.['coverKey']).toBe(`salons/${salonId.toHexString()}/cover?v=1`);
     const wrongOwner = await call('patch', '/profile', {
       coverKey: 'salons/cover/customer.jpg',
       reason: REASON,
@@ -249,7 +260,7 @@ describe('admin salon edit: profile', () => {
 
 describe('admin salon edit: gallery', () => {
   const add = async (key: string): Promise<string> => {
-    addUpload(key, 'GALLERY_IMAGE');
+    await addUpload(key, 'GALLERY_IMAGE');
     const res = await call('post', '/gallery', { type: 'IMAGE', key, reason: REASON });
     expect(res.status).toBe(201);
     return String(bodyOf(res).data['id']);
@@ -274,14 +285,14 @@ describe('admin salon edit: gallery', () => {
       reason: REASON,
     });
     expect(unknown.status).toBe(400);
-    addUpload('gallery/video.mp4', 'GALLERY_VIDEO');
+    await addUpload('gallery/video.mp4', 'GALLERY_VIDEO');
     const wrongPurpose = await call('post', '/gallery', {
       type: 'IMAGE',
       key: 'gallery/video.mp4',
       reason: REASON,
     });
     expect(wrongPurpose.status).toBe(400);
-    addUpload('gallery/b.jpg', 'GALLERY_IMAGE');
+    await addUpload('gallery/b.jpg', 'GALLERY_IMAGE');
     expect((await call('post', '/gallery', { type: 'IMAGE', key: 'gallery/b.jpg' })).status).toBe(
       400,
     );

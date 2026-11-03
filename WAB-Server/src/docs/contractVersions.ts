@@ -20,13 +20,13 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-177: upload purpose enum gains MEDICAL_LICENSE (merchant-only purpose; no client change)',
   },
   merchant: {
-    version: '1.9.0',
-    sha256: 'b616a55ad461714e21471fed7dc3aaedeb23c68be45a9e476f048269a21d181e',
-    note: 'SRV-177: application medicalLicenseKeys (required for CLINIC; guest license presign takes purpose MEDICAL_LICENSE), PATCH /salon/audience (owner widens MALE/FEMALE -> BOTH; else 422 AUDIENCE_CHANGE_NOT_ALLOWED), notification salon.audience_widened. Client: MER-080, MER-081',
+    version: '1.10.0',
+    sha256: 'f938c86cd062b9b69ec66e8abd021e1f8b98216839280222e38234855029e392',
+    note: 'Additive: single-image fields (coverKey, profileKey, photoKey) also accept the returned file reference key?v=n (SRV-182); no client change needed',
   },
   admin: {
-    version: '1.12.0',
-    sha256: '67581175ea2080f4ad2e9aaad72b5b36c3e9c1ef400151ecaed7af52e2620e94',
-    note: 'SRV-178: businessType filter on applications, bookings (+ BOOKINGS export), reviews, catalog requests (salons/catalog/placements since SRV-174); application detail medicalLicenseUrls (signed). Client: ADM-109, ADM-110',
+    version: '1.13.0',
+    sha256: '12f75204c3a159f2a604ebdb9f9b66d1c2ae1eb2f6156eed22d474d9d501c295',
+    note: 'Additive: catalog imageKey, banner imageKey.ar/en, salon coverKey/profileKey also accept the returned file reference key?v=n (SRV-182); no client change needed',
   },
 };

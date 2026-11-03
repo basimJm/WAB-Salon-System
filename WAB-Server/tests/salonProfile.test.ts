@@ -4,7 +4,6 @@ import { createApp } from '../src/app';
 import { createAuditWriter } from '../src/domain/audit/audit.service';
 import { createSalonProfileService } from '../src/domain/salons/salonProfile.service';
 import { createSalonStateService } from '../src/domain/salons/salonState.service';
-import type { UploadVerifier } from '../src/domain/uploads/uploads.service';
 import { requireAuth } from '../src/middlewares/auth';
 import { loadMember } from '../src/middlewares/permission';
 import { FakeStorageProvider } from '../src/providers/storage';
@@ -13,6 +12,7 @@ import { AreasRepository, CitiesRepository } from '../src/repositories/locations
 import { SalonsRepository } from '../src/repositories/salons.repository';
 import { signAccessToken } from '../src/utils/auth/accessToken';
 import { createLogger } from '../src/utils/logger';
+import { fileSlotsKit } from './helpers/fileSlots';
 import { createFakeModel } from './helpers/fakeModel';
 
 const logger = createLogger({ level: 'silent' });
@@ -46,6 +46,15 @@ const state = createSalonStateService({
   },
   logger,
 });
+const kitStorage = new FakeStorageProvider();
+const kit = fileSlotsKit(kitStorage);
+const salonUpload = (key: string, purpose: 'SALON_COVER' | 'SALON_PROFILE'): Promise<string> =>
+  kit.confirmed(key, {
+    purpose,
+    ownerType: 'MEMBER',
+    ownerId: 'owner',
+    salonId: salonId.toHexString(),
+  });
 const app = createApp({
   logger,
   services: {
@@ -54,8 +63,9 @@ const app = createApp({
         salons: salonRepo,
         cities: new CitiesRepository(cities.model as never),
         areas: new AreasRepository(areas.model as never),
-        storage: new FakeStorageProvider(),
+        storage: kitStorage,
         state,
+        files: kit.slots,
       }),
       guard: [
         requireAuth('merchant', SECRET),
@@ -117,11 +127,17 @@ const COMPLETING = {
   location: { latitude: 31.95, longitude: 35.91 },
 };
 
-beforeEach(() => {
-  for (const f of [salons, members]) f.docs.length = 0;
+beforeEach(async () => {
+  for (const f of [salons, members, kit.uploadsModel, kit.cleanupsModel]) f.docs.length = 0;
   events.length = 0;
   facts.services = 1;
   facts.staff = 1;
+  // The images of COMPLETING are this salon's confirmed uploads (each test sends them once).
+  for (const [key, purpose] of [
+    [COMPLETING.coverKey, 'SALON_COVER'],
+    [COMPLETING.profileKey, 'SALON_PROFILE'],
+  ] as const)
+    await salonUpload(key, purpose);
 });
 
 describe('GET /merchant/v1/salon', () => {
@@ -282,69 +298,51 @@ describe('PATCH /merchant/v1/salon/profile', () => {
   });
 });
 
-describe('images must be confirmed uploads of this salon', () => {
-  const checks: Parameters<UploadVerifier['assertConfirmed']>[0][] = [];
-  const strict = createApp({
-    logger,
-    services: {
-      salonProfile: {
-        service: createSalonProfileService({
-          salons: salonRepo,
-          cities: new CitiesRepository(cities.model as never),
-          areas: new AreasRepository(areas.model as never),
-          storage: new FakeStorageProvider(),
-          state,
-          uploads: {
-            assertConfirmed: (input) => {
-              checks.push(input);
-              return input.keys.includes('salons/bad.jpg')
-                ? Promise.reject(new Error('UPLOAD_INVALID'))
-                : Promise.resolve();
-            },
-          },
-        }),
-        guard: [
-          requireAuth('merchant', SECRET),
-          loadMember(new MembersRepository(members.model as never)),
-        ],
-      },
-    },
-  });
-  const send = async (id: string, body: object): Promise<{ status: number }> =>
-    await request(strict)
-      .patch('/merchant/v1/salon/profile')
-      .set('Authorization', `Bearer ${token(id)}`)
-      .send(body);
-
-  it('verifies a changed cover/profile key with the right purpose and salon, and skips unchanged ones', async () => {
-    checks.length = 0;
+describe('images: cover and logo are file slots of this salon (SRV-181)', () => {
+  it('moves a confirmed upload into the slot, skips an unchanged reference, removes on null', async () => {
     addSalon('LIVE', { coverKey: 'salons/cover/old.jpg' });
     const owner = addMember('OWNER', []);
-    expect(
-      (
-        await send(owner, {
-          coverKey: 'salons/cover/new.jpg',
-          profileKey: 'salons/profile/new.jpg',
-        })
-      ).status,
-    ).toBe(200);
-    expect(checks.map((c) => c.purpose)).toEqual(['SALON_COVER', 'SALON_PROFILE']);
-    expect(checks[0]?.accept?.({ salonId: salonId.toHexString() } as never)).toBe(true);
-    expect(checks[0]?.accept?.({ salonId: 'x' } as never)).toBe(false);
-    checks.length = 0;
-    expect((await send(owner, { coverKey: 'salons/cover/new.jpg' })).status).toBe(200);
-    expect(checks).toHaveLength(0);
-    expect((await send(owner, { coverKey: null })).status).toBe(200);
-    expect(checks).toHaveLength(0);
+    await salonUpload('salons/cover/new.jpg', 'SALON_COVER');
+    await salonUpload('salons/profile/new.jpg', 'SALON_PROFILE');
+    const res = await patch(owner, {
+      coverKey: 'salons/cover/new.jpg',
+      profileKey: 'salons/profile/new.jpg',
+    });
+    expect(res.status).toBe(200);
+    const salon = salonId.toHexString();
+    expect(salons.docs[0]).toMatchObject({
+      coverKey: `salons/${salon}/cover?v=1`,
+      profileKey: `salons/${salon}/logo?v=1`,
+    });
+    expect(kit.queued()).toEqual(
+      expect.arrayContaining([
+        'salons/cover/new.jpg',
+        'salons/profile/new.jpg',
+        'salons/cover/old.jpg',
+      ]),
+    );
+    const copies = kitStorage.copies;
+    // The app sends back what it read: nothing changes.
+    expect((await patch(owner, { coverKey: `salons/${salon}/cover?v=1` })).status).toBe(200);
+    expect(kitStorage.copies).toBe(copies);
+    expect((await patch(owner, { coverKey: null })).status).toBe(200);
+    expect(salons.docs[0]?.['coverKey']).toBeUndefined();
+    expect(kit.queued()).toContain(`salons/${salon}/cover`);
   });
 
-  it('refuses an unconfirmed key and saves nothing', async () => {
+  it("refuses an unconfirmed key or another salon's upload and saves nothing", async () => {
     addSalon('LIVE');
-    const res = await send(addMember('OWNER', []), {
-      coverKey: 'salons/bad.jpg',
-      description: 'changed',
-    });
-    expect(res.status).toBe(500);
+    const owner = addMember('OWNER', []);
+    const res = await patch(owner, { coverKey: 'salons/bad.jpg', description: 'changed' });
+    expect(res.status).toBe(400);
     expect(salons.docs[0]?.['description']).toBeUndefined();
+    await kit.confirmed('salons/other.jpg', {
+      purpose: 'SALON_COVER',
+      ownerType: 'MEMBER',
+      ownerId: 'x',
+      salonId: '64b000000000000000000099',
+    });
+    expect((await patch(owner, { coverKey: 'salons/other.jpg' })).status).toBe(400);
+    expect(salons.docs[0]?.['coverKey']).toBeUndefined();
   });
 });

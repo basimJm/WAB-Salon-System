@@ -1,5 +1,6 @@
 import type { Gender, Language } from '../../constants/enums';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
+import { SLOT_KEYS } from '../../constants/uploads';
 import type { CustomerRaw } from '../../models/customer.model';
 import type { StorageProvider } from '../../providers/storage';
 import type { AreasRepository, CitiesRepository } from '../../repositories/locations.repository';
@@ -13,7 +14,7 @@ import {
 } from '../../utils/errors';
 import type { Logger } from '../../utils/logger';
 import type { AccountLifecycleService } from '../auth/accountLifecycle.service';
-import type { UploadVerifier } from '../uploads/uploads.service';
+import type { FileSlots, SlotTarget } from '../files/fileSlots.service';
 
 export interface ProfileView {
   readonly id: string;
@@ -53,8 +54,9 @@ export interface CustomerProfileDeps {
   readonly customers: Pick<CustomersRepository, 'findById' | 'patch'>;
   readonly cities: Pick<CitiesRepository, 'findOne'>;
   readonly areas: Pick<AreasRepository, 'findOne'>;
-  readonly uploads: UploadVerifier;
-  readonly storage: Pick<StorageProvider, 'getPublicUrl' | 'delete'>;
+  /** The avatar is a file slot (SRV-181): replaced in place, removed through the cleanup outbox. */
+  readonly files: Pick<FileSlots, 'replace' | 'remove'>;
+  readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly lifecycle: Pick<AccountLifecycleService, 'requestCustomerDeletion'>;
   readonly logger: Logger;
 }
@@ -69,11 +71,16 @@ export const createCustomerProfileService = ({
   customers,
   cities,
   areas,
-  uploads,
+  files,
   storage,
   lifecycle,
-  logger,
 }: CustomerProfileDeps): CustomerProfileService => {
+  const avatarSlot = (customerId: string): SlotTarget => ({
+    purpose: 'CUSTOMER_AVATAR',
+    key: SLOT_KEYS.customerAvatar(customerId),
+    ownerType: 'CUSTOMER',
+    ownerId: customerId,
+  });
   const toView = (c: Entity<CustomerRaw>): ProfileView => ({
     id: c.id,
     firstName: c.firstName,
@@ -101,16 +108,6 @@ export const createCustomerProfileService = ({
     if (customer.status === 'BLOCKED')
       throw new ForbiddenError({ code: ERROR_CODES.ACCOUNT_BLOCKED });
     return customer;
-  };
-
-  const dropFile = async (key: string | undefined): Promise<void> => {
-    if (key === undefined) return;
-    try {
-      await storage.delete([key]);
-    } catch (error) {
-      // The profile already points elsewhere; a leftover file is harmless.
-      logger.warn({ err: error }, 'customer avatar file could not be deleted');
-    }
   };
 
   return {
@@ -144,25 +141,35 @@ export const createCustomerProfileService = ({
 
     async setAvatar({ customerId, key }) {
       const customer = await current(customerId);
-      await uploads.assertConfirmed({
-        keys: [key],
-        purpose: 'CUSTOMER_AVATAR',
+      let view = toView(customer);
+      await files.replace({
+        target: avatarSlot(customerId),
+        current: customer.avatarKey,
+        incoming: key,
         field: 'body.key',
         accept: (upload) => upload.ownerType === 'CUSTOMER' && upload.ownerId === customerId,
+        commit: async (ref) => {
+          const updated = await customers.patch(customerId, { set: { avatarKey: ref } });
+          if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+          view = toView(updated);
+        },
       });
-      const updated = await customers.patch(customerId, { set: { avatarKey: key } });
-      if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
-      if (customer.avatarKey !== key) await dropFile(customer.avatarKey);
-      return toView(updated);
+      return view;
     },
 
     async removeAvatar(customerId) {
       const customer = await current(customerId);
-      if (customer.avatarKey === undefined) return toView(customer);
-      const updated = await customers.patch(customerId, { set: {}, unset: ['avatarKey'] });
-      if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
-      await dropFile(customer.avatarKey);
-      return toView(updated);
+      let view = toView(customer);
+      await files.remove({
+        target: avatarSlot(customerId),
+        current: customer.avatarKey,
+        commit: async () => {
+          const updated = await customers.patch(customerId, { set: {}, unset: ['avatarKey'] });
+          if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+          view = toView(updated);
+        },
+      });
+      return view;
     },
 
     async deleteAccount(customerId) {

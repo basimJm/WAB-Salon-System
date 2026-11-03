@@ -144,11 +144,17 @@ describe('loadConfig', () => {
   it('requires production to name every provider as real (payments: disabled), never defaulting or faking', () => {
     const production = validEnv({ NODE_ENV: 'production', ...PAYOUT_KEY });
     expect(invalidKeysOf(production)).toEqual([
+      ENV_KEYS.storageProvider,
       ...PROVIDER_ENV_KEYS,
       ENV_KEYS.otpProvider,
       ENV_KEYS.paymentProvider,
     ]);
-    for (const key of [...PROVIDER_ENV_KEYS, ENV_KEYS.otpProvider, ENV_KEYS.paymentProvider]) {
+    for (const key of [
+      ENV_KEYS.storageProvider,
+      ...PROVIDER_ENV_KEYS,
+      ENV_KEYS.otpProvider,
+      ENV_KEYS.paymentProvider,
+    ]) {
       expect(invalidKeysOf({ ...production, ...REAL_PROVIDERS, [key]: 'fake' })).toEqual([key]);
       const others = Object.fromEntries(
         Object.entries(REAL_PROVIDERS).filter(([name]) => name !== key),
@@ -225,6 +231,66 @@ describe('loadConfig', () => {
         'EMAIL_FROM_ADDRESS',
       ]);
       expect(loadConfig(validEnv()).notifier).toBeUndefined();
+    });
+  });
+
+  describe('cloudflare-r2 storage settings (SRV-180)', () => {
+    const base = validEnv({ STORAGE_PROVIDER: 'cloudflare-r2' });
+    const r2 = {
+      R2_ACCOUNT_ID: 'acc123',
+      R2_ACCESS_KEY_ID: 'not-a-real-r2-key',
+      R2_SECRET_ACCESS_KEY: 'not-a-real-r2-secret',
+      R2_PUBLIC_BUCKET_NAME: 'wab-public',
+      R2_PRIVATE_BUCKET_NAME: 'wab-private',
+      R2_PUBLIC_URL: 'https://files.example.test',
+    };
+
+    it('names every missing key, never a value', () => {
+      expect([...invalidKeysOf(base)].sort()).toEqual(Object.keys(r2).sort());
+      const partial = invalidKeysOf({ ...base, ...r2, R2_SECRET_ACCESS_KEY: undefined });
+      expect(partial).toEqual(['R2_SECRET_ACCESS_KEY']);
+    });
+
+    it('builds typed R2 settings (endpoint optional) and the provider mode', () => {
+      const config = loadConfig({ ...base, ...r2 });
+      expect(config.providers.storage).toBe('cloudflare-r2');
+      expect(config.storage).toEqual({
+        provider: 'r2',
+        accountId: 'acc123',
+        publicBucket: 'wab-public',
+        privateBucket: 'wab-private',
+        credentials: { accessKeyId: 'not-a-real-r2-key', secretAccessKey: 'not-a-real-r2-secret' },
+        cdnBaseUrl: 'https://files.example.test',
+      });
+      const endpoint = 'https://acc123.eu.r2.cloudflarestorage.com';
+      expect(loadConfig({ ...base, ...r2, R2_ENDPOINT: endpoint }).storage).toMatchObject({
+        endpoint,
+      });
+    });
+
+    it('refuses one bucket for public and private files (R2 public access is per bucket)', () => {
+      expect(invalidKeysOf({ ...base, ...r2, R2_PRIVATE_BUCKET_NAME: 'wab-public' })).toEqual([
+        'R2_PRIVATE_BUCKET_NAME',
+      ]);
+    });
+
+    it('is accepted in production over https only; production refuses fake storage', () => {
+      const production = {
+        ...validEnv({ NODE_ENV: 'production', ...PAYOUT_KEY }),
+        ...REAL_PROVIDERS,
+        ...r2,
+        STORAGE_PROVIDER: 'cloudflare-r2',
+      };
+      expect(loadConfig(production).providers.storage).toBe('cloudflare-r2');
+      expect(invalidKeysOf({ ...production, R2_PUBLIC_URL: 'http://files.example.test' })).toEqual([
+        'R2_PUBLIC_URL',
+      ]);
+      expect(invalidKeysOf({ ...production, R2_ENDPOINT: 'http://localhost:9000' })).toEqual([
+        'R2_ENDPOINT',
+      ]);
+      expect(invalidKeysOf({ ...production, STORAGE_PROVIDER: 'fake' })).toEqual([
+        'STORAGE_PROVIDER',
+      ]);
     });
   });
 

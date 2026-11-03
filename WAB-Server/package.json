@@ -29,7 +29,8 @@
     "pretypecheck": "npm run ensure-sdks",
     "pretest": "npm run ensure-sdks",
     "env:check": "node dist/config/checkEnvCli.js",
-    "otp:arqam-check": "node dist/providers/otp/arqamCheckCli.js"
+    "otp:arqam-check": "node dist/providers/otp/arqamCheckCli.js",
+    "storage:cors": "node dist/providers/storage/corsSetupCli.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

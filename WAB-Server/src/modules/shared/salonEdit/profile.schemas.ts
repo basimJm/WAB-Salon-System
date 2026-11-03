@@ -9,10 +9,10 @@ import {
   SALON_NAME_MAX_LENGTH,
   SALON_NAME_MIN_LENGTH,
   STORAGE_KEY_MAX_LENGTH,
-  STORAGE_KEY_PATTERN,
+  FILE_REF_PATTERN,
 } from '../../../constants/salon';
 
-const key = z.string().max(STORAGE_KEY_MAX_LENGTH).regex(STORAGE_KEY_PATTERN);
+const key = z.string().max(STORAGE_KEY_MAX_LENGTH).regex(FILE_REF_PATTERN);
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 
 /** Profile edit (M13): send only what changed; `null` clears an optional field. */

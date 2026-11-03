@@ -17,6 +17,7 @@ import {
   ARQAM_SENDER_ID_PATTERN,
   ARQAM_TEMPLATE_NAME_PATTERN,
   STORAGE_REAL_REQUIRED_KEYS,
+  STORAGE_R2_REQUIRED_KEYS,
   CLOUDFRONT_KEYS,
   MONGO_DATABASE_NAME_PATTERN,
   MONGO_URI_PATTERN,
@@ -33,7 +34,10 @@ import {
   PAYMENT_PROVIDER_MODES,
   ARQAM_OTP_MODE,
   PROVIDER_MODES,
+  R2_STORAGE_MODE,
   REAL_PROVIDER_MODE,
+  REAL_STORAGE_MODES,
+  STORAGE_PROVIDER_MODES,
 } from '../constants/providers';
 import {
   DEFAULT_TRUST_PROXY_HOPS,
@@ -84,7 +88,7 @@ export const envSchema = z
     // Optional outside production (bank-details endpoints answer 503 without it); never has a default.
     [ENV_KEYS.payoutEncryptionKey]: z.string().refine(isEncryptionKey).optional(),
     [ENV_KEYS.otpProvider]: otpProviderMode,
-    [ENV_KEYS.storageProvider]: providerMode,
+    [ENV_KEYS.storageProvider]: z.enum(STORAGE_PROVIDER_MODES).optional(),
     [ENV_KEYS.notifierProvider]: providerMode,
     [ENV_KEYS.paymentProvider]: paymentProviderMode,
     [ENV_KEYS.fcmServiceAccountJson]: z.string().min(1).optional(),
@@ -121,6 +125,13 @@ export const envSchema = z
     [ENV_KEYS.s3AccessKeyId]: z.string().min(1).optional(),
     [ENV_KEYS.s3SecretAccessKey]: z.string().min(1).optional(),
     [ENV_KEYS.cdnBaseUrl]: z.url().optional(),
+    [ENV_KEYS.r2AccountId]: z.string().min(1).optional(),
+    [ENV_KEYS.r2AccessKeyId]: z.string().min(1).optional(),
+    [ENV_KEYS.r2SecretAccessKey]: z.string().min(1).optional(),
+    [ENV_KEYS.r2PublicBucketName]: z.string().min(1).optional(),
+    [ENV_KEYS.r2PrivateBucketName]: z.string().min(1).optional(),
+    [ENV_KEYS.r2Endpoint]: z.url().optional(),
+    [ENV_KEYS.r2PublicUrl]: z.url().optional(),
     [ENV_KEYS.cloudfrontBaseUrl]: z.url().optional(),
     [ENV_KEYS.cloudfrontKeyPairId]: z.string().min(1).optional(),
     [ENV_KEYS.cloudfrontPrivateKey]: z.string().min(1).optional(),
@@ -175,7 +186,35 @@ export const envSchema = z
         }
       }
     }
+    // R2 needs its account, keys, two different buckets and the public URL of the public bucket.
+    if (env[ENV_KEYS.storageProvider] === R2_STORAGE_MODE) {
+      for (const key of STORAGE_R2_REQUIRED_KEYS) {
+        if (env[key] === undefined) context.addIssue({ code: 'custom', path: [key], message: key });
+      }
+      const publicBucket = env[ENV_KEYS.r2PublicBucketName];
+      if (publicBucket !== undefined && publicBucket === env[ENV_KEYS.r2PrivateBucketName]) {
+        context.addIssue({
+          code: 'custom',
+          path: [ENV_KEYS.r2PrivateBucketName],
+          message: ENV_KEYS.r2PrivateBucketName,
+        });
+      }
+    }
     if (env[ENV_KEYS.nodeEnv] !== 'production') return;
+    // Production stores files in a real object store, reached and served over https only.
+    const storageMode = env[ENV_KEYS.storageProvider];
+    if (storageMode === undefined || !REAL_STORAGE_MODES.includes(storageMode)) {
+      context.addIssue({
+        code: 'custom',
+        path: [ENV_KEYS.storageProvider],
+        message: ENV_KEYS.storageProvider,
+      });
+    }
+    for (const key of [ENV_KEYS.r2PublicUrl, ENV_KEYS.r2Endpoint] as const) {
+      const url = env[key];
+      if (storageMode === R2_STORAGE_MODE && url !== undefined && !url.startsWith(HTTPS_URL_PREFIX))
+        context.addIssue({ code: 'custom', path: [key], message: key });
+    }
     // Demo data at startup under production rules only with the hosted dev database named (SRV-160).
     if (env[ENV_KEYS.seedDemoOnStart] && env[ENV_KEYS.seedDemoDatabase] === undefined) {
       context.addIssue({

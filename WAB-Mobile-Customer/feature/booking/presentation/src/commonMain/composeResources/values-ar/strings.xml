@@ -56,7 +56,7 @@
     <string name="booking_staff_title">اختر الموظف</string>
     <string name="booking_staff_title_bride">اختر خبيرة مؤهلة للعرائس</string>
     <string name="booking_staff_any">أي موظف متاح</string>
-    <string name="booking_staff_any_hint">سيقوم الصالون بتعيين موظف متاح</string>
+    <string name="booking_staff_any_hint">سيتم تعيين موظف متاح لك</string>
     <string name="booking_staff_unavailable">غير متاح في هذا الوقت</string>
     <string name="booking_staff_on_leave">في إجازة</string>
     <string name="booking_staff_available">متاح</string>
@@ -73,7 +73,7 @@
     <string name="booking_companion_limit">الحد الأقصى 5 مرافقين</string>
     <string name="booking_summary_title">ملخص الحجز</string>
     <string name="booking_grand_total">الإجمالي</string>
-    <string name="booking_rules_title">قواعد الصالون</string>
+    <string name="booking_rules_title">قواعد الحجز</string>
     <plurals name="booking_rules_window">
         <item quantity="one">يمكن الإلغاء حتى ساعة واحدة قبل الموعد</item>
         <item quantity="two">يمكن الإلغاء حتى ساعتين قبل الموعد</item>
@@ -84,16 +84,16 @@
     <string name="booking_rules_deposit">العربون %1$d% من إجمالي الحجز</string>
     <string name="booking_rules_deposit_refundable">يُسترد العربون عند الإلغاء في الوقت المسموح</string>
     <string name="booking_rules_deposit_non_refundable">لا يُسترد العربون عند الإلغاء من قبلك</string>
-    <string name="booking_rules_approval">الحجز بحاجة لموافقة الصالون</string>
+    <string name="booking_rules_approval">الحجز بحاجة للموافقة أولاً</string>
     <string name="booking_payment_title">طريقة الدفع</string>
     <string name="booking_pay_on_arrival">الدفع عند الوصول</string>
-    <string name="booking_pay_on_arrival_sub">ادفع كامل المبلغ في الصالون</string>
+    <string name="booking_pay_on_arrival_sub">ادفع كامل المبلغ عند الوصول</string>
     <string name="booking_pay_deposit">عربون %1$d% = %2$s د.أ</string>
     <string name="booking_pay_deposit_sub">ادفع الآن والباقي عند الوصول</string>
     <string name="booking_pay_full">الدفع كاملاً</string>
     <string name="booking_pay_full_sub">ادفع كامل المبلغ أونلاين</string>
     <string name="success_title">تم إرسال طلب الحجز</string>
-    <string name="success_message">تم إرسال طلب الحجز وبانتظار موافقة الصالون. سنرسل لك إشعاراً فور الموافقة.</string>
+    <string name="success_message">تم إرسال طلب الحجز وهو بانتظار الموافقة. سنرسل لك إشعاراً فور الموافقة.</string>
     <string name="success_reference">رقم المرجع</string>
     <string name="success_copy">نسخ</string>
     <string name="success_copied_label">تم النسخ</string>
@@ -103,7 +103,7 @@
     <string name="booking_pay_online_soon">الدفع الإلكتروني قريباً</string>
     <string name="verify_title">تأكيد الحجز</string>
     <string name="verify_heading">راجع وتحقق</string>
-    <string name="verify_salon">الصالون</string>
+    <string name="verify_salon">المكان</string>
     <string name="verify_when">التاريخ والوقت</string>
     <string name="verify_people">عدد الأشخاص</string>
     <string name="verify_payment">الدفع</string>

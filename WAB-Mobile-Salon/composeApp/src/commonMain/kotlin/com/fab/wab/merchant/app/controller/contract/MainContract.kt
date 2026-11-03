@@ -12,14 +12,17 @@ sealed interface MainContract {
         val gate: LaunchGate? = null,
         val error: String? = null,
         val appVersion: String? = null,
+        /** MER-082: the splash stays until the brand logo animation has played once, even when config is faster. */
+        val logoShown: Boolean = false,
     ) {
-        val showSplash: Boolean get() = gate == null
+        val showSplash: Boolean get() = gate == null || !logoShown
     }
 
     sealed interface UiAction {
         data object OnUpdateClicked : UiAction
         data object OnOptionalUpdateDismissed : UiAction
         data object OnRetryClicked : UiAction
+        data object OnLogoAnimationFinished : UiAction
         data object OnSessionTimeOut : UiAction
     }
 

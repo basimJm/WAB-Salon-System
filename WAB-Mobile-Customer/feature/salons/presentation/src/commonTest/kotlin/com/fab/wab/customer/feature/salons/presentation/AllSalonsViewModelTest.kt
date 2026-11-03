@@ -152,20 +152,20 @@ class AllSalonsViewModelTest {
     }
 
     @Test
-    fun clinicEntryFiltersToClinicsAndTheTabsSwitchTheTypeWithAReload() = runTest(UnconfinedTestDispatcher()) {
+    fun clinicEntryFiltersToClinicsAndTheSheetChoosesTheTypeWithAReload() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel(AllSalonsEntry(filter = SalonListFilter.RECOMMENDED, businessType = BusinessType.CLINIC))
-        assertEquals(BusinessType.CLINIC, vm.state.value.businessType)
+        assertEquals(BusinessType.CLINIC, vm.state.value.filters.businessType, "the entry type is a filter (owner 2026-10-30)")
         assertEquals(BusinessType.CLINIC, search.queries.single().businessType)
-        vm.onEvent(UiAction.OnBusinessTypeSelect(null))
+        vm.onEvent(UiAction.OnFiltersApplied(vm.state.value.filters.copy(businessType = null)))
         assertEquals(null, search.queries.last().businessType, "All lists salons and clinics")
         assertEquals(GeneralFilter.RECOMMENDED, search.queries.last().filters.general, "other filters stay")
-        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
+        vm.onEvent(UiAction.OnFiltersApplied(vm.state.value.filters.copy(businessType = BusinessType.SALON)))
         assertEquals(BusinessType.SALON, search.queries.last().businessType)
-        val count = search.queries.size
-        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
-        assertEquals(count, search.queries.size, "the selected tab does not reload")
         vm.onEvent(UiAction.OnLoadMore)
         assertEquals(BusinessType.SALON, search.queries.last().businessType, "paging keeps the type")
+        vm.onEvent(UiAction.OnChipRemove(FilterChipId.Type))
+        assertEquals(null, search.queries.last().businessType, "removing the type chip lists every business")
+        assertEquals(GeneralFilter.RECOMMENDED, search.queries.last().filters.general, "only the type is dropped")
     }
 
     @Test
