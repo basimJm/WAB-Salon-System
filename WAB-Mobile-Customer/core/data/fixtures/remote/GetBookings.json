@@ -41,7 +41,9 @@
           "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/gentlemen-staff0.jpg"
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "1a0b34d4849e855f1120ca7f",
@@ -76,7 +78,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "05310befeb8850a9c34d4235",
@@ -111,7 +115,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "8ef881f63e1c5ed6468e8273",
@@ -152,7 +158,9 @@
           "photoUrl": null
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "a24176b9ef983c12cc731641",
@@ -187,7 +195,9 @@
           "photoUrl": "https://d3a0ua5olhml0f.cloudfront.net/demo/members/ostaz-staff0.jpg"
         }
       ],
-      "rejection": null
+      "rejection": null,
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     }
   ],
   "meta": {

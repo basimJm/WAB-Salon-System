@@ -96,6 +96,7 @@ internal fun PersonStep(state: UiState, onAction: (UiAction) -> Unit) {
                 modifier = Modifier.padding(top = spacing.space16),
             )
         }
+        ReferenceImageSection(state, onAction, Modifier.padding(top = spacing.space16))
     }
 }
 

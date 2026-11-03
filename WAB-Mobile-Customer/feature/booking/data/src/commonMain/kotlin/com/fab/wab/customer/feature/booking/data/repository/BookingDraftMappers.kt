@@ -36,6 +36,7 @@ fun draftBodyOf(
             serviceIds = person.serviceIds,
             staffId = (person.staff as? StaffChoice.Specific)?.staffId,
             start = start,
+            referenceImageKey = person.referenceImage?.key,
         )
     }
     return PostBookingsDraftsBody(salonId = salonId, branchId = branchId, paymentMethod = paymentMethod.code, persons = items)

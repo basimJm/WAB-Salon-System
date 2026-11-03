@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -43,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun SalonsSearchRow(
     value: String,
     onValueChange: (String) -> Unit,
+    onSearch: () -> Unit,
     chipCount: Int,
     onFilterClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -55,13 +57,13 @@ internal fun SalonsSearchRow(
         horizontalArrangement = Arrangement.spacedBy(spacing.space10),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SearchField(value, onValueChange, Modifier.weight(1f))
+        SearchField(value, onValueChange, onSearch, Modifier.weight(1f))
         FilterButton(chipCount, onFilterClick)
     }
 }
 
 @Composable
-private fun SearchField(value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier) {
+private fun SearchField(value: String, onValueChange: (String) -> Unit, onSearch: () -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = AppTheme.shapes.medium
     val textStyle = discoveryBody(DiscoveryDesign.TEXT_14).copy(color = colors.ink)
@@ -83,6 +85,7 @@ private fun SearchField(value: String, onValueChange: (String) -> Unit, modifier
             singleLine = true,
             cursorBrush = SolidColor(colors.accent),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearch() }),
             decorationBox = { inner ->
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (value.isEmpty()) {

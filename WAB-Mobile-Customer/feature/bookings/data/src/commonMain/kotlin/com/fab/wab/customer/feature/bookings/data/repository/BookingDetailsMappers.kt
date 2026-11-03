@@ -8,11 +8,13 @@ import com.fab.wab.customer.core.domain.booking.BookingPerson
 import com.fab.wab.customer.core.domain.booking.BookingPolicy
 import com.fab.wab.customer.core.domain.booking.BookingReason
 import com.fab.wab.customer.core.domain.booking.BookingService
+import com.fab.wab.customer.core.domain.booking.BookingSource
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.FullPaymentRefundRule
 import com.fab.wab.customer.core.domain.booking.PaymentMethod
 import com.fab.wab.customer.core.domain.booking.PaymentStatus
 import com.fab.wab.customer.core.domain.booking.RefundStatus
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -62,6 +64,8 @@ fun GetBookingsByIdData.toDomain(): BookingDetails = BookingDetails(
     policy = policy.toPolicy(),
     rejection = rejection?.let { BookingReason(it.reasonCode, it.reasonText, it.at) },
     cancellation = cancellation?.let { BookingReason(it.reasonCode, it.reasonText, it.at) },
+    source = BookingSource.fromCode(source),
+    businessType = BusinessType.fromCode(businessType),
 )
 
 fun GetBookingsByIdDataPersonsItem.toDomain(): BookingPerson = BookingPerson(
@@ -74,4 +78,5 @@ fun GetBookingsByIdDataPersonsItem.toDomain(): BookingPerson = BookingPerson(
     staffName = staff?.let { member -> member.firstName.ifBlank { member.name } },
     services = services.map { BookingService(it.name, it.price, it.durationMinutes.toInt()) },
     staffPhotoUrl = staff?.photoUrl?.takeIf { it.isNotBlank() },
+    referenceImageUrl = referenceImageUrl?.takeIf { it.isNotBlank() },
 )

@@ -5,13 +5,18 @@ import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.PriceRange
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.ServiceRef
+import com.fab.wab.customer.core.domain.session.Gender
 import kotlin.math.roundToInt
 
 sealed interface FilterSheetContract {
 
     data class UiState(
-        /** Chosen first (owner 2026-10-30): the service categories below are the catalog of this type; null = both. */
-        val businessType: BusinessType? = null,
+        /** Chosen first (owner 2026-10-30, multi since §5.22): the services below are the catalog of one chosen type; none = all. */
+        val businessTypes: Set<BusinessType> = emptySet(),
+        /** Men = audience MALE or BOTH, Women = FEMALE or BOTH (§5.22); null = everyone. */
+        val gender: Gender? = null,
+        /** Kept from S04 (a quick chip): the sheet does not show it. */
+        val openNow: Boolean = false,
         val services: List<ServiceRef> = emptyList(),
         val servicesPage: Int = 0,
         val servicesHasMore: Boolean = false,
@@ -25,21 +30,27 @@ sealed interface FilterSheetContract {
         val minRating: Int? = null,
     ) {
         val canReset: Boolean
-            get() = selectedServices.isNotEmpty() || general != null || minRating != null || businessType != null
-        /** PRD S05 item 2: the price section exists only with a selected service and server bounds. */
-        val showPrice: Boolean get() = selectedServices.isNotEmpty() && priceBounds != null
+            get() = selectedServices.isNotEmpty() || general != null || minRating != null || businessTypes.isNotEmpty() ||
+                gender != null || priceSelection?.toPriceRange(priceBounds) != null
+        /** §5.22: price works without services; the section shows whenever the server has bounds for the scope. */
+        val showPrice: Boolean get() = priceBounds != null
 
         fun toFilters(): SalonFilters = SalonFilters(
             services = selectedServices,
             priceRange = if (showPrice) priceSelection?.toPriceRange(priceBounds) else null,
             general = general,
             minRating = minRating,
-            businessType = businessType,
+            businessTypes = businessTypes,
+            gender = gender,
+            openNow = openNow,
         )
     }
 
     sealed interface UiAction {
-        data class OnBusinessTypeSelect(val businessType: BusinessType?) : UiAction
+        /** Null = All (clears the types); a type toggles in or out. */
+        data class OnBusinessTypeToggle(val businessType: BusinessType?) : UiAction
+        /** The chosen gender again clears it. */
+        data class OnGenderSelect(val gender: Gender) : UiAction
         data class OnServiceToggle(val service: ServiceRef) : UiAction
         data object OnSeeMoreServices : UiAction
         data object OnRetryServices : UiAction
@@ -73,4 +84,11 @@ fun ClosedFloatingPointRange<Float>.toPriceRange(bounds: PriceRange?): PriceRang
     val full = bounds?.toFloatRange()
     if (full != null && start <= full.start && endInclusive >= full.endInclusive) return null
     return PriceRange(start.roundToInt().toString(), endInclusive.roundToInt().toString())
+}
+
+/** Multi-select of the type section: All clears, a type toggles (BUSINESS_DOMAIN §5.22). */
+fun Set<BusinessType>.toggled(type: BusinessType?): Set<BusinessType> = when {
+    type == null -> emptySet()
+    type in this -> this - type
+    else -> this + type
 }

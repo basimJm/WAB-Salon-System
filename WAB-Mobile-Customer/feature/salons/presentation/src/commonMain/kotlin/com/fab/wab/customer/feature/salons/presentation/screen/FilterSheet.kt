@@ -71,6 +71,7 @@ fun FilterSheet(state: UiState, onAction: (UiAction) -> Unit, onDismiss: () -> U
                     ),
             ) {
                 FilterBusinessTypeSection(state, onAction)
+                FilterGenderSection(state, onAction)
                 when {
                     state.servicesLoading && state.services.isEmpty() && state.servicesError == null -> FilterChipsShimmer()
                     state.servicesError != null && state.services.isEmpty() -> FilterError(onRetry = { onAction(UiAction.OnRetryServices) })

@@ -95,4 +95,10 @@
     <string name="bookings_branch_label">الفرع: %1$s</string>
     <string name="details_paid_at_salon">المدفوع في الصالون</string>
     <string name="card_rejection_reason">السبب: %1$s</string>
+    <string name="booked_by">حجز بواسطة %1$s</string>
+    <string name="booked_by_branch">حجز بواسطة %1$s - %2$s</string>
+    <string name="card_rate">قيّم</string>
+    <string name="card_book_again">احجز مجدداً</string>
+    <string name="reference_image_title">صورة التصميم</string>
+    <string name="reference_image_description">صورة تصميم %1$s</string>
 </resources>

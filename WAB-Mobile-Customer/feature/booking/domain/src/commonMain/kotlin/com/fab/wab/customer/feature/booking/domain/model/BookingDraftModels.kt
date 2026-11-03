@@ -33,9 +33,17 @@ data class DraftPerson(
     val end: String? = null,
     /** The person's gender, sent with the draft and availability (BUSINESS_DOMAIN §5.19); null until chosen. */
     val gender: Gender? = null,
+    /** Tattoo studios only (§5.23): one optional, already uploaded design image. */
+    val referenceImage: DraftReferenceImage? = null,
 ) {
     val hasSlot: Boolean get() = start != null
 }
+
+/**
+ * A confirmed `BOOKING_REFERENCE` upload: [key] goes into the draft; [preview] is the compressed image shown on the
+ * device until the booking is made (identity equality: one object per upload).
+ */
+class DraftReferenceImage(val key: String, val preview: ByteArray)
 
 /** Running totals of a person's selection (PRD S16 step 1). */
 data class SelectionTotals(val priceFils: Long, val durationMinutes: Int)

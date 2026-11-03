@@ -10,7 +10,7 @@ sealed interface BookingsContract {
         val signedIn: Boolean? = null,
         val welcomeName: String = "",
         val tab: BookingTab = BookingTab.UPCOMING,
-        /** All / Salons / Clinics (null = all, §5.19). */
+        /** The type lens All / Salons / Clinics / Tattoo (null = all, §5.22). */
         val businessType: BusinessType? = null,
         val query: String = "",
         val loading: Boolean = false,
@@ -30,6 +30,10 @@ sealed interface BookingsContract {
         data class OnBusinessTypeSelect(val businessType: BusinessType?) : UiAction
         data class OnQueryChange(val value: String) : UiAction
         data class OnBookingClick(val bookingId: String) : UiAction
+        /** A completed card's Rate (registered customers, §5.20). */
+        data class OnRateClick(val bookingId: String) : UiAction
+        /** A completed card's Book again: opens the business of that booking. */
+        data class OnBookAgainClick(val bookingId: String) : UiAction
         data object OnLoadMore : UiAction
         data object OnRefresh : UiAction
         data object OnRetry : UiAction
@@ -40,6 +44,8 @@ sealed interface BookingsContract {
         data object OpenLogin : SideEffect
         data object OpenHome : SideEffect
         data class OpenBooking(val bookingId: String) : SideEffect
+        data class OpenRating(val bookingId: String) : SideEffect
+        data class OpenSalon(val salonId: String, val branchId: String?) : SideEffect
         data class ShowError(val message: String) : SideEffect
     }
 }

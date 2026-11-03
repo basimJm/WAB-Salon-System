@@ -6,6 +6,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostBookingsByIdCancelB
 import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.booking.BookingDetails
 import com.fab.wab.customer.core.domain.booking.BookingReason
+import com.fab.wab.customer.core.domain.booking.BookingSource
 import com.fab.wab.customer.core.domain.booking.BookingStatus
 import com.fab.wab.customer.core.domain.booking.BookingSummary
 import com.fab.wab.customer.core.domain.booking.BookingTab
@@ -52,6 +53,7 @@ fun GetBookingsDataItem.toDomain(): BookingSummary = BookingSummary(
     staffNames = staff.map { it.name },
     rejection = rejection?.let { BookingReason(it.reasonCode, it.reasonText, it.at) },
     businessType = BusinessType.fromCode(businessType),
+    source = BookingSource.fromCode(source),
 )
 
 /** The branch as booked (`branch {id,name,locationText}`); null on bookings made before branches. */

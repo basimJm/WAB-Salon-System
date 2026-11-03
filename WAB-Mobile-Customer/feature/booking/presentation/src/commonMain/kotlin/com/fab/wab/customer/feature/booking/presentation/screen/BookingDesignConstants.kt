@@ -27,6 +27,9 @@ internal object BookingDesignConstants {
     val switchTrackPadding = Dp(3f)
     val switchKnob = Dp(22f)
 
+    /** Tattoo design image preview (BUSINESS_DOMAIN §5.23): full width, 180 dp tall. */
+    val referenceImageHeight = Dp(180f)
+
     /** Selection cards (`card(sel)`): `padding:12px 14px; border-radius:16px; border:1.5px`, check box `22px / radius 7px`. */
     val checkBox = Dp(22f)
     val checkBoxRadius = Dp(7f)

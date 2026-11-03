@@ -23,12 +23,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
+import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.designsystem.components.domain.businessTypeTabLabel
 import com.fab.wab.customer.designsystem.components.domain.businessTypeTabOrder
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.shimmer.AppShimmerBox
 import com.fab.wab.customer.designsystem.components.text.AppText
 import com.fab.wab.customer.designsystem.resources.Res as DsRes
+import com.fab.wab.customer.designsystem.resources.audience_men
+import com.fab.wab.customer.designsystem.resources.audience_women
 import com.fab.wab.customer.designsystem.resources.price_jod
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.designsystem.theme.GlassStyle
@@ -41,6 +44,7 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.toFl
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.generalFilterOptions
 import com.fab.wab.customer.feature.salons.presentation.resources.Res
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_business_type
+import com.fab.wab.customer.feature.salons.presentation.resources.filter_gender
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_general
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_price
 import com.fab.wab.customer.feature.salons.presentation.resources.filter_rating
@@ -53,8 +57,7 @@ import com.fab.wab.customer.feature.salons.presentation.resources.salons_chip_re
 import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.stringResource
 
-/** Design `fReady` services block: 15 sp bold title, wrapped 38 dp chips, shimmer chips while paging, "See more". */
-/** First choice of S05 (owner 2026-10-30): All / Salons / Clinics; the service categories below follow it. */
+/** First choice of S05: All / Salons / Clinics / Tattoo, several types at once (§5.22); the services below follow it. */
 @Composable
 internal fun FilterBusinessTypeSection(state: UiState, onAction: (UiAction) -> Unit) {
     Column(Modifier.fillMaxWidth()) {
@@ -63,14 +66,31 @@ internal fun FilterBusinessTypeSection(state: UiState, onAction: (UiAction) -> U
             businessTypeTabOrder.forEach { type ->
                 FilterChoiceChip(
                     label = stringResource(businessTypeTabLabel(type)),
-                    selected = state.businessType == type,
-                    onClick = { onAction(UiAction.OnBusinessTypeSelect(type)) },
+                    selected = if (type == null) state.businessTypes.isEmpty() else type in state.businessTypes,
+                    onClick = { onAction(UiAction.OnBusinessTypeToggle(type)) },
                 )
             }
         }
         SectionDivider()
     }
 }
+
+/** Men (audience MALE or BOTH) / Women (FEMALE or BOTH); none chosen = everyone (§5.22). */
+@Composable
+internal fun FilterGenderSection(state: UiState, onAction: (UiAction) -> Unit) {
+    Column(Modifier.fillMaxWidth()) {
+        SectionTitle(stringResource(Res.string.filter_gender))
+        ChipFlow {
+            Gender.entries.forEach { gender ->
+                val label = if (gender == Gender.MALE) DsRes.string.audience_men else DsRes.string.audience_women
+                FilterChoiceChip(stringResource(label), state.gender == gender, onClick = { onAction(UiAction.OnGenderSelect(gender)) })
+            }
+        }
+        SectionDivider()
+    }
+}
+
+/** Design `fReady` services block: 15 sp bold title, wrapped 38 dp chips, shimmer chips while paging, "See more". */
 
 @Composable
 internal fun FilterServicesSection(state: UiState, onAction: (UiAction) -> Unit) {

@@ -43,6 +43,7 @@ import com.fab.wab.customer.designsystem.resources.time_pm
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiAction
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingDetailsContract.UiState
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.bookedByOf
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_auto_cancel_reason
 import com.fab.wab.customer.feature.bookings.presentation.resources.details_bride
@@ -178,6 +179,7 @@ internal fun SalonBlock(booking: BookingDetails, state: UiState, onAction: (UiAc
                     style = AppTheme.typography.titleSmall.copy(fontSize = BookingsDesign.fontTitle, fontWeight = FontWeight.Bold),
                 )
                 BookedBranchLines(booking.branch)
+                BookedByLine(bookedByOf(booking.source, booking.salonName, booking.branch))
             }
             if (state.salonPhone != null) {
                 TintedIconButton(
@@ -220,6 +222,7 @@ internal fun PersonCard(person: BookingPerson) {
                 AppText(text = person.name, style = AppTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
                 if (person.isBride) BrideChip()
             }
+            person.referenceImageUrl?.let { PersonReferenceImage(it, person.name) }
             person.services.forEach { service ->
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(vertical = BookingsDesign.lineVerticalPadding),

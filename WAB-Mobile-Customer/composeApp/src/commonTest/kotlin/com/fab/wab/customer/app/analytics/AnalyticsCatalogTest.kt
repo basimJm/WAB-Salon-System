@@ -77,7 +77,7 @@ private val PRD_EVENTS: Map<String, String> = mapOf(
     "onboarding_skip" to OnboardingAnalytics.ACTION_SKIP,
     "onboarding_complete" to OnboardingAnalytics.ACTION_COMPLETE,
     "nickname_saved" to GuestProfileAnalytics.ACTION_SAVED,
-    "gender_tab_switch" to HomeAnalytics.ACTION_GENDER_TAB,
+    "type_lens_select" to HomeAnalytics.ACTION_LENS,
     "banner_click" to HomeAnalytics.ACTION_BANNER_CLICK,
     "search_query" to SalonsAnalytics.ACTION_SEARCH,
     "filter_apply" to SalonsAnalytics.ACTION_FILTER_APPLY,

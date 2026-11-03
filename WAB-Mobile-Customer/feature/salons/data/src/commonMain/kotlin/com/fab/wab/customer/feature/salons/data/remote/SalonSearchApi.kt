@@ -3,57 +3,24 @@ package com.fab.wab.customer.feature.salons.data.remote
 import com.fab.wab.customer.core.data.BaseResponse
 import com.fab.wab.customer.core.data.contract.generated.CustomerOperations
 import com.fab.wab.customer.core.data.contract.generated.GetSalonsDataItem
-import com.fab.wab.customer.core.domain.salon.GeneralFilter
+import com.fab.wab.customer.core.data.contract.generated.GetSalonsSuggestionsData
+import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.SalonQuery
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
 class SalonSearchApi(private val client: HttpClient) {
     suspend fun search(query: SalonQuery): BaseResponse<List<GetSalonsDataItem>> =
-        client.get(CustomerOperations.getSalons.path) {
-            parameter(Q.PAGE, query.page)
-            parameter(Q.PAGE_SIZE, query.pageSize)
-            parameter(Q.GENDER, query.gender.code)
-            query.businessType?.let { parameter(Q.BUSINESS_TYPE, it.code) }
-            query.text.takeIf { it.isNotBlank() }?.let { parameter(Q.TEXT, it) }
-            query.filters.services.forEach { parameter(Q.SERVICE_IDS, it.id) }
-            query.filters.priceRange?.let {
-                parameter(Q.MIN_PRICE, it.min)
-                parameter(Q.MAX_PRICE, it.max)
-            }
-            query.filters.minRating?.let { parameter(Q.MIN_RATING, it) }
-            when (query.filters.general) {
-                GeneralFilter.RECOMMENDED -> parameter(Q.GENERAL, GENERAL_RECOMMENDED)
-                GeneralFilter.NEAREST -> parameter(Q.SORT, SORT_NEAREST)
-                null -> Unit
-            }
-            query.location?.let {
-                parameter(Q.LAT, it.latitude)
-                parameter(Q.LNG, it.longitude)
-            }
+        client.get(CustomerOperations.getSalons.path) { parameters(query.toParams()) }.body()
+
+    suspend fun suggestions(text: String, filters: SalonFilters): BaseResponse<GetSalonsSuggestionsData> =
+        client.get(CustomerOperations.getSalonsSuggestions.path) {
+            parameter(SalonQueryKeys.TEXT, text)
+            parameters(filters.scopeParams())
         }.body()
-
-    /** Query keys of `GET /salons` (contract). */
-    private object Q {
-        const val PAGE = "page"
-        const val PAGE_SIZE = "pageSize"
-        const val GENDER = "gender"
-        const val BUSINESS_TYPE = "businessType"
-        const val TEXT = "q"
-        const val SERVICE_IDS = "serviceIds"
-        const val MIN_PRICE = "minPrice"
-        const val MAX_PRICE = "maxPrice"
-        const val MIN_RATING = "minRating"
-        const val GENERAL = "general"
-        const val LAT = "lat"
-        const val LNG = "lng"
-        const val SORT = "sort"
-    }
-
-    private companion object {
-        const val GENERAL_RECOMMENDED = "RECOMMENDED"
-        const val SORT_NEAREST = "NEAREST"
-    }
 }
+
+internal fun HttpRequestBuilder.parameters(params: List<Pair<String, String>>) = params.forEach { (key, value) -> parameter(key, value) }
