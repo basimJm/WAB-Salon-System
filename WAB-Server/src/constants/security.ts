@@ -26,6 +26,8 @@ export const ROUTE_LIMIT_FAMILIES = {
   payment: 'payment',
   payoutDetails: 'payout-details',
   upload: 'upload',
+  /** Phone lookups of business-made bookings (§5.20): strict, no number enumeration. */
+  customerLookup: 'customer-lookup',
 } as const;
 export type RouteLimitFamily = (typeof ROUTE_LIMIT_FAMILIES)[keyof typeof ROUTE_LIMIT_FAMILIES];
 export const ROUTE_LIMIT_NAMESPACES = ['customer', 'merchant', 'admin'] as const;

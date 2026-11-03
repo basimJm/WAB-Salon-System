@@ -15,18 +15,18 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.12.0',
-    sha256: 'fcc4ab522896f22fe0fdb60ddd2270d569f700eb68883162e1f88b068358a7ee',
-    note: 'SRV-184: discovery without a gender filter; businessType lens (several types) on search/filters/home; home explore, nearYou, recommendedAll, bookAgain; GET /salons/suggestions; price range without services (CUS-102, CUS-103)',
+    version: '1.13.0',
+    sha256: '92ca7c8a190dcd5f094a11f337818cb8f370644d6a6ff12d32d5e42679785e41',
+    note: 'SRV-185: booking rows source (MERCHANT = Booked by the business) + createdBy (always null for customers) (CUS-104)',
   },
   merchant: {
-    version: '1.11.0',
-    sha256: '103548fe8ac1e4713d77cf6cf5668a116962aabf05980f33c917aaf2e459a667',
-    note: 'SRV-183: TATTOO business type (application, catalog), referenceImageUrl on booking details (MER-084)',
+    version: '1.12.0',
+    sha256: 'cc057e5987f2782234a036bee595b88dc63aff00093cf9b93c42827d0194f75f',
+    note: 'SRV-185: POST /bookings (book for a customer), GET /customers/lookup, permission BOOKINGS_CREATE, upload BOOKING_REFERENCE for members, rows source/createdBy, customer.id nullable (MER-085)',
   },
   admin: {
-    version: '1.14.0',
-    sha256: '5726401a9d80b597aa3d255b903b8878bd3b3980a9caff9bc2686951796cf99d',
-    note: 'SRV-183: TATTOO business type in filters/catalog/placements, referenceImageUrl on booking details (ADM-111)',
+    version: '1.15.0',
+    sha256: '62c368a024c93c07aa7d49ffe7f122e1b1a8650be173e5417229efe1db975363',
+    note: 'SRV-185: bookings source filter + export column, rows source/createdBy, customer.id nullable, search booking customerId nullable, permission BOOKINGS_CREATE (ADM-112)',
   },
 };

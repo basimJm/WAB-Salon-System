@@ -151,6 +151,17 @@ export class BookingsRepository
     return visits;
   }
 
+  /** Business-made bookings of this number without an account join the customer (§5.20). */
+  async claimByPhone(e164: string, customerId: string): Promise<number> {
+    const result = await this.model
+      .updateMany(
+        { 'customerContact.phone.e164': e164, customerId: { $exists: false } },
+        { $set: { customerId: toObjectId(customerId) } },
+      )
+      .exec();
+    return result.modifiedCount;
+  }
+
   /** Stores the file-slot reference of one person's design image (§5.23). */
   async setPersonReference(id: string, personIndex: number, ref: string): Promise<void> {
     if (!isObjectIdString(id)) return;

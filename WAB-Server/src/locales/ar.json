@@ -73,6 +73,8 @@
   "notifications.booking.created.customer.body": "تم إرسال طلبك {reference} إلى {salon} لموعد {when} وهو بانتظار رد الصالون.",
   "notifications.booking.requested.members.title": "طلب حجز جديد",
   "notifications.booking.requested.members.body": "طلب {customer} الحجز {reference} لموعد {when}.",
+  "notifications.booking.created_by_merchant.customer.title": "تم حجز موعد لك",
+  "notifications.booking.created_by_merchant.customer.body": "حجز لك {salon} الموعد {reference} بتاريخ {when}. تم الحجز بواسطة {salon}.",
   "notifications.booking.approved.customer.title": "تمت الموافقة على الحجز",
   "notifications.booking.approved.customer.body": "وافق {salon} على حجزك {reference} لموعد {when}.",
   "notifications.booking.rejected.customer.title": "تعذّر قبول الحجز",

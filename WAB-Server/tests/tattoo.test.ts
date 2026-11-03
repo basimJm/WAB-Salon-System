@@ -57,11 +57,12 @@ describe('TATTOO business type (BUSINESS_DOMAIN §5.23)', () => {
 });
 
 describe('design images of tattoo bookings (§5.23)', () => {
-  it('BOOKING_REFERENCE is a private customer image with its own slot per booking person', () => {
+  it('BOOKING_REFERENCE is a private image (customer, or a member booking for one) with its own slot per booking person', () => {
     expect(UPLOAD_POLICIES.BOOKING_REFERENCE).toMatchObject({
       kind: 'image',
       visibility: 'PRIVATE',
-      scopes: ['customer'],
+      scopes: ['customer', 'merchant'],
+      permission: 'BOOKINGS_CREATE',
     });
     expect(SLOT_PURPOSES).toContain('BOOKING_REFERENCE');
     expect(SLOT_KEYS.bookingReference('b1', 2)).toBe('bookings/b1/persons/2/reference');

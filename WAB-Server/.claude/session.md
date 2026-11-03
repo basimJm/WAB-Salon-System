@@ -10,6 +10,28 @@
 
 ## Current task
 
+### SRV-185 — Bookings created by the business (owner 2026-11-03)
+
+- Branch: `feat/srv-185-merchant-bookings` (from `feat/srv-184-discovery-merged`, batch SRV-183…186)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.20, §5.7 new row, §6 `BOOKINGS_CREATE`, §8 `booking.created_by_merchant`, §3.5 `source`/`createdBy`/`customerContact`; operations `GET /merchant/v1/customers/lookup`, `POST /merchant/v1/bookings`, `GET /admin/v1/bookings?source=`, BOOKINGS export, customer register + change phone):
+  - [x] Permission `BOOKINGS_CREATE` (16 keys; in the MANAGER template; owner always); `BOOKING_REFERENCE` uploads for members with it
+  - [x] Lookup: registered + first name + gender only for an active account; strict per-IP limiter in its own counter
+  - [x] Create (every business type): registered number → `customerId`, account name/gender (blocked → 403 `ACCOUNT_BLOCKED`); unknown → name + gender required, `customerContact` stored, no message; persons/audience/bride/services/staff/slots through the same planner; overlap re-check under the staff locks (409 `SLOT_TAKEN`); APPROVED, PAY_ON_ARRIVAL, history actor MEMBER, `createdBy`, `closeReminders`; branch member books their own branch (`BRANCH_SCOPE_DENIED`); tattoo design images checked as this salon's member uploads, moved into slots
+  - [x] Side effects: socket update (never a request), `booking.created_by_merchant` to a registered customer ("Booked by {salon}", AR + EN), reminder jobs
+  - [x] `customerId` optional on bookings: notifications, sockets, rows, admin search work without it (rows show the contact, `customer.id` null)
+  - [x] Claim: register and phone change link the number's account-less MERCHANT bookings (never fails the account)
+  - [x] Rows: `source`, `createdBy` (null for customers); admin filter `source` + export columns; rating prompt / reviews only with an account (notifications skip a booking without `customerId`)
+  - [x] Shared `toBookingPersons` (drafts + business bookings); indexes `{status, appointmentEnd}` + partial `customerContact.phone.e164`
+  - [x] Contracts customer 1.13.0, merchant 1.12.0, admin 1.15.0 (CUS-104, MER-085, ADM-112)
+- Tests: `tests/merchantBooking.test.ts` (new, 11: lookup, name/gender needed, APPROVED with contact/creator/history + main gender, registered link, blocked, branch scope, SLOT_TAKEN, design images, claim scope, claim never fails), `tests/bookingQueries.test.ts` (+2 source filter/contact row, app row), `tests/permissions.test.ts`, `tests/team.test.ts`, `tests/exports.test.ts`, `tests/tattoo.test.ts` (template/columns/scope updates); affected suites green
+- API docs: customer/merchant/admin regenerated + bumped
+- Loops: 1/1 — re-read §5.20 bullet by bullet + §6/§8 rows against service, routes, producers, claims, rows; owner answers 5 (no message to unregistered), 6 (registered + unregistered, all types, every status notified), 7 (reviews only registered) applied
+- Review: PASSED (SE ✔ (one service, shared persons builder, typed optional customer everywhere), Mobile ✔ (MER-085 / CUS-104 named; additive except nullable `customer.id` in merchant/admin rows), Architect ✔ (three contracts bumped; same locks as the app; no payment path), PM ✔, UX ✔ (lookup first, then name/gender only when needed), Marketing ✔ (customers without the app join their history on sign-up), QA ✔ (each criterion tested))
+- Notes: DEVIATIONS — "Booked by" is in the `booking.created_by_merchant` message only; later status messages name the place as before and the apps show the label from `source`; the customer app's own list filter by source is not added (not asked). The lookup reveals whether a number is registered (needed by the owner's rule; limited + permission-gated).
+
+## Last blocks
+
 ### SRV-184 — Discovery across business types without a gender filter (owner 2026-11-03)
 
 - Branch: `feat/srv-184-discovery-merged` (from `feat/srv-183-tattoo`, batch SRV-183…186)
@@ -26,8 +48,6 @@
 - Loops: 1/1 — re-read §5.22 bullet by bullet (no gender filter, lens chips, five home sections in order, search suggestions/chips/filter sheet, bookings) against routes and services; Bookings Upcoming/Past is an app concern (the customer list already filters by tab/status and type); found and fixed: Recommended ids duplicated when a lookup returns a salon for two types
 - Review: PASSED (SE ✔ (one condition helper, bounded queries: book-again reads ≤ 50 bookings, Explore one cached aggregate), Mobile ✔ (additive keys; old keys kept for apps before CUS-102), Architect ✔ (customer 1.12.0; no merchant/admin change), PM ✔ (owner decision 10 applied), UX ✔ (sections in the §5.22 order), Marketing ✔ (Book again + Explore popularity), QA ✔ (each criterion tested))
 - Notes: DEVIATIONS — full suite deferred to the batch gate (SRV-186); `explore` popularity counts bookings of every status created in the window (not only completed); the lens takes the types the customer picks, `All` = omit.
-
-## Last blocks
 
 ### SRV-183 — Tattoo studios (owner 2026-11-03)
 
@@ -48,20 +68,3 @@
 - Loops: 1/1 — re-read §5.23 point by point (type, BOTH, no bride, no age check, catalog per type, one optional image per person, private + signed, trade license) against rules, schemas, draft, creation, details and the demo
 - Review: PASSED (SE ✔ (one helper module for the image rule, mover and URL; repository update only), Mobile ✔ (additive fields; CUS-104 / MER-084 named), Architect ✔ (three contracts bumped; storage through FileSlots + outbox), PM ✔ (owner answers 1–4 applied), UX N/A, Marketing N/A, QA ✔ (rule, refusal, ownership, failure, demo tests))
 - Notes: DEVIATION — the full suite was not re-run after the two fixture fixes (affected suites only; the next task's gate runs it). Design images are not deleted when an account is purged (bookings are kept for history; retention not decided). The merchant cannot upload a design image yet (SRV-185 adds the merchant scope with `BOOKINGS_CREATE`).
-
-### SRV-182 — Every module on the file lifecycle (owner 2026-11-01)
-
-- Branch: `feat/srv-180-r2-storage` (batch SRV-180…182 on one branch)
-- Status: DONE (PR #605)
-- Acceptance criteria (BUSINESS_DOMAIN §3.7 file slots + storageCleanups; operations PUT/DELETE `/customer/v1/profile/avatar`, PATCH `/merchant/v1/salon/profile`, `/merchant/v1/team/members[/{id}]`, PATCH `/merchant/v1/me`, `/merchant/v1/salon/services/{id}`, DELETE `/merchant/v1/salon/gallery/{id}`, `/merchant/v1/salon/application/resubmit`, admin catalog / banners / catalog requests / salon edit):
-  - [x] Slots (same key + version, replaced in place): customer avatar, salon cover + logo (`profileKey`, merchant and admin edit), member photo (team create/update + own profile), catalog image (admin create/update + approved catalog request), banner image per language
-  - [x] Lists queue what they drop: service media, gallery item files (now through the outbox instead of a best-effort delete), license + medical-license documents replaced on resubmit, catalog-request images (rejected, mapped to an existing entry, or replaced by the admin's)
-  - [x] Customer purge removes the avatar slot (record + objects queued) instead of a direct delete
-  - [x] Request schemas of every slot field accept the returned reference `key?v=n` (an app may send back what it read): merchant 1.10.0, admin 1.13.0 (additive, no client change; customer avatar body had no pattern)
-  - [x] No module deletes stored objects directly any more (grep: only the outbox and the provider); every write goes through `StorageProvider`
-- Tests: `tests/fileSlots.test.ts` (12: create, read URL with version, replace keeps file id + key, no duplicate, old content replaced, legacy key queued, delete DB-first + idempotent, live slot kept, demo never queued, vanished temp / copy failure keep the old file, failed deletion retried with backoff, cross-tenant refused, concurrent replacements serialised), `tests/adminImageSlots.test.ts` (5), updated `customerProfile`, `team`, `memberSelf`, `salonProfile`, `adminSalonEdit`, `gallery`, `salonServices`, `accountLifecycle` suites (`tests/helpers/fileSlots.ts` kit: real slots + outbox over fake models)
-- API docs: merchant 1.10.0, admin 1.13.0 regenerated (patterns only)
-- Gate (Terminal panel): prettier, eslint, tsc, build, `npm run docs` (no drift), full jest 175 suites / 3044 tests green; wab-storage `npm run verify` (216) + loop green
-- Loops: 1/1 — re-checked the owner's spec point by point (R2, central service, CRUD lifecycle, per-module prefixes, metadata, entity integration, consistency, security, tests); found and fixed during the loop: slot fields refused the returned `?v=` reference (contract break for apps that echo values), the first FILE_REF pattern refused dotted single-segment keys (banners), the admin image wrapper ran rules after copying (now before)
-- Review: PASSED (SE ✔ (one FileSlots + one outbox, DB written before objects are queued, locks per slot, idempotent deletes), Mobile ✔ (no app change: same request/response shapes, URLs gain `?v=`), Architect ✔ (additive contracts, R2/S3 by env, demo assets protected, Phase 2 untouched), QA ✔ (spec tests 1–12; migration test not applicable))
-- Notes: DEVIATIONS / LIMITS — (1) temporary upload keys keep the existing prefixes (`customers/`, `salons/cover/`, `gallery/`, `services/`, `licenses/`…); only slot keys follow the new per-entity layout, multi-file items keep one key per file (no `documents/{ownerType}/{ownerId}/` move); (2) `originalName` is not stored (the presign request has no file name; adding it is an API change); (3) there are no booking attachments in the product, so nothing to integrate; (4) salon deletion only takes a salon offline (history kept), so it deletes no files; exports are never deleted (retention not decided); (5) if the entity write fails after the copy, the slot already holds the new content while the entity keeps the previous version number (same key: the image is right, only a cache may be stale); (6) slot rows of salon-owned images record `ownerType: MEMBER`, `ownerId = salonId` (+ `salonId`), admin images `ADMIN`; (7) no S3→R2 migration tool (owner) and no run against real R2 (no credentials).

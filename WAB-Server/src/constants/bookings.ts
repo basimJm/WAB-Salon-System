@@ -91,3 +91,9 @@ export const REMINDER_EVENT_BY_MINUTES = {
 } as const;
 /** Active bookings handed to the planner per database page when jobs are rebuilt. */
 export const JOB_RECONCILE_PAGE_SIZE = 200;
+/** Business-made bookings (§5.20): create under `/bookings`, phone lookup under `/customers`. */
+export const MERCHANT_NEW_BOOKING_ROUTES = {
+  create: '/',
+  customersBase: '/customers',
+  lookup: '/lookup',
+} as const;

@@ -129,7 +129,9 @@ export const UPLOAD_POLICIES: Readonly<Record<UploadPurpose, UploadPolicy>> = {
     kind: 'image',
     visibility: 'PRIVATE',
     prefix: 'bookings/reference',
-    scopes: ['customer'],
+    // The customer in the app; a member booking for a customer (§5.20).
+    scopes: ['customer', 'merchant'],
+    permission: 'BOOKINGS_CREATE',
   },
 };
 

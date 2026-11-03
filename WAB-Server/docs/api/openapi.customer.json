@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.12.0"
+    "version": "1.13.0"
   },
   "servers": [
     {
@@ -10769,7 +10769,10 @@
                             ],
                             "properties": {
                               "id": {
-                                "type": "string"
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "name": {
                                 "type": "string"
@@ -10783,7 +10786,34 @@
                               "name",
                               "phone"
                             ],
-                            "description": "Merchant and admin views only."
+                            "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "CUSTOMER_APP",
+                              "MERCHANT"
+                            ],
+                            "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                          },
+                          "createdBy": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                           },
                           "staff": {
                             "type": "array",
@@ -10861,6 +10891,8 @@
                           "salon",
                           "branch",
                           "customer",
+                          "source",
+                          "createdBy",
                           "staff",
                           "rejection"
                         ]
@@ -11303,7 +11335,10 @@
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": [
+                                "string",
+                                "null"
+                              ]
                             },
                             "name": {
                               "type": "string"
@@ -11317,7 +11352,34 @@
                             "name",
                             "phone"
                           ],
-                          "description": "Merchant and admin views only."
+                          "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "CUSTOMER_APP",
+                            "MERCHANT"
+                          ],
+                          "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                        },
+                        "createdBy": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                         },
                         "staff": {
                           "type": "array",
@@ -11612,6 +11674,8 @@
                         "salon",
                         "branch",
                         "customer",
+                        "source",
+                        "createdBy",
                         "staff",
                         "rejection",
                         "refundStatus",

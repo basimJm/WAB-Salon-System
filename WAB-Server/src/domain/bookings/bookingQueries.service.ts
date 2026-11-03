@@ -22,6 +22,7 @@ import type {
   MembersRepository,
 } from '../../repositories/identity.repository';
 import type { StorageProvider } from '../../providers/storage';
+import type { BookingSource } from '../../models/booking.model';
 import { referenceImageUrl } from './referenceImages';
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
@@ -61,6 +62,8 @@ export interface BookingQuery {
   readonly paymentStatus?: BookingPaymentStatus | undefined;
   /** Salon or clinic bookings only (§5.19 bookings filter: all / salons / clinics). */
   readonly businessType?: BusinessType | undefined;
+  /** Made in the app or by the business (§5.20); bookings before §5.20 count as the app's. */
+  readonly source?: BookingSource | undefined;
   /** Admin only. */
   readonly salonId?: string | undefined;
   readonly customerId?: string | undefined;
@@ -88,7 +91,12 @@ export interface BookingRow {
   readonly salon: { id: string; name: string } | null;
   /** The branch of the appointment, as booked (§3.5 `branchSnapshot`); `null` for older rows. */
   readonly branch: { id: string; name: string; locationText: string | null } | null;
-  readonly customer: { id: string; name: string; phone: string } | null;
+  /** `id` is null for a business-made booking of someone without the app (§5.20). */
+  readonly customer: { id: string | null; name: string; phone: string } | null;
+  /** Who made it (§5.20): the app shows "Booked by <place>" for MERCHANT. */
+  readonly source: BookingSource;
+  /** The member who made a MERCHANT booking; never shown to the customer. */
+  readonly createdBy: { id: string; name: string } | null;
   /** The distinct staff of the booking (customers see first names only). */
   readonly staff: BookingStaffRef[];
   /** The salon's rejection reason (S14 card, M10), `null` unless REJECTED. */
@@ -288,6 +296,8 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     if (query.brideOnly === true) and.push({ hasBride: true });
     if (query.paymentStatus !== undefined) and.push({ paymentStatus: query.paymentStatus });
     if (query.businessType !== undefined) and.push({ businessType: query.businessType });
+    if (query.source === 'MERCHANT') and.push({ source: 'MERCHANT' });
+    if (query.source === 'CUSTOMER_APP') and.push({ source: { $ne: 'MERCHANT' } });
 
     const text = query.q?.trim();
     if (text !== undefined && text !== '') {
@@ -324,7 +334,9 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     staff: Map<string, { firstName: string; fullName: string; photoUrl: string | null }>;
   }> => {
     const salonIds = [...new Set(rows.map((b) => b.salonId))];
-    const customerIds = [...new Set(rows.map((b) => b.customerId))];
+    const customerIds = [
+      ...new Set(rows.flatMap((b) => (b.customerId === undefined ? [] : [b.customerId]))),
+    ];
     const staffIds = [...new Set(rows.flatMap((b) => b.persons.map((p) => p.staffId)))];
     const [salonRows, customerRows, staffRows] = await Promise.all([
       audience.kind === 'MERCHANT' || salonIds.length === 0
@@ -410,11 +422,23 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     customer:
       audience.kind === 'CUSTOMER'
         ? null
-        : {
-            id: b.customerId,
-            name: l.customer.get(b.customerId)?.name ?? '',
-            phone: l.customer.get(b.customerId)?.phone ?? '',
-          },
+        : b.customerId === undefined
+          ? // A business-made booking for someone without the app (§5.20): the contact as entered.
+            {
+              id: null,
+              name: b.customerContact?.name ?? '',
+              phone: b.customerContact?.phone.e164 ?? '',
+            }
+          : {
+              id: b.customerId,
+              name: l.customer.get(b.customerId)?.name ?? '',
+              phone: l.customer.get(b.customerId)?.phone ?? '',
+            },
+    source: b.source ?? 'CUSTOMER_APP',
+    createdBy:
+      b.createdBy === undefined || audience.kind === 'CUSTOMER'
+        ? null
+        : { id: b.createdBy.memberId, name: b.createdBy.name },
     staff: [...new Set(b.persons.map((p) => p.staffId))].map((id) => staffRef(id, audience, l)),
     rejection: decision(b.rejection),
   });

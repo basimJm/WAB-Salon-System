@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Merchant API",
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   "servers": [
     {
@@ -204,7 +204,8 @@
                 "REVIEWS_VIEW",
                 "STATISTICS_VIEW",
                 "FINANCE_VIEW",
-                "SUBSCRIPTION_VIEW"
+                "SUBSCRIPTION_VIEW",
+                "BOOKINGS_CREATE"
               ]
             },
             "description": "The OWNER always has all of them."
@@ -12744,7 +12745,8 @@
                                 "REVIEWS_VIEW",
                                 "STATISTICS_VIEW",
                                 "FINANCE_VIEW",
-                                "SUBSCRIPTION_VIEW"
+                                "SUBSCRIPTION_VIEW",
+                                "BOOKINGS_CREATE"
                               ]
                             },
                             "description": "The OWNER always has all."
@@ -12941,7 +12943,7 @@
                       "type": "string",
                       "maxLength": 64
                     },
-                    "maxItems": 23
+                    "maxItems": 24
                   },
                   "photoKey": {
                     "type": "string",
@@ -13028,7 +13030,8 @@
                               "REVIEWS_VIEW",
                               "STATISTICS_VIEW",
                               "FINANCE_VIEW",
-                              "SUBSCRIPTION_VIEW"
+                              "SUBSCRIPTION_VIEW",
+                              "BOOKINGS_CREATE"
                             ]
                           },
                           "description": "The OWNER always has all."
@@ -13252,7 +13255,8 @@
                               "REVIEWS_VIEW",
                               "STATISTICS_VIEW",
                               "FINANCE_VIEW",
-                              "SUBSCRIPTION_VIEW"
+                              "SUBSCRIPTION_VIEW",
+                              "BOOKINGS_CREATE"
                             ]
                           },
                           "description": "The OWNER always has all."
@@ -13447,7 +13451,7 @@
                       "type": "string",
                       "maxLength": 64
                     },
-                    "maxItems": 23
+                    "maxItems": 24
                   },
                   "branchId": {
                     "type": "string",
@@ -13523,7 +13527,8 @@
                               "REVIEWS_VIEW",
                               "STATISTICS_VIEW",
                               "FINANCE_VIEW",
-                              "SUBSCRIPTION_VIEW"
+                              "SUBSCRIPTION_VIEW",
+                              "BOOKINGS_CREATE"
                             ]
                           },
                           "description": "The OWNER always has all."
@@ -13747,7 +13752,8 @@
                               "REVIEWS_VIEW",
                               "STATISTICS_VIEW",
                               "FINANCE_VIEW",
-                              "SUBSCRIPTION_VIEW"
+                              "SUBSCRIPTION_VIEW",
+                              "BOOKINGS_CREATE"
                             ]
                           },
                           "description": "The OWNER always has all."
@@ -13971,7 +13977,8 @@
                               "REVIEWS_VIEW",
                               "STATISTICS_VIEW",
                               "FINANCE_VIEW",
-                              "SUBSCRIPTION_VIEW"
+                              "SUBSCRIPTION_VIEW",
+                              "BOOKINGS_CREATE"
                             ]
                           },
                           "description": "The OWNER always has all."
@@ -17840,7 +17847,460 @@
         }
       }
     },
+    "/merchant/v1/customers/lookup": {
+      "get": {
+        "tags": [
+          "Bookings"
+        ],
+        "summary": "Is this mobile number a WAB customer? (before booking for them, §5.20)",
+        "description": "Needs BOOKINGS_CREATE. Rate-limited per IP. A registered, active account answers its first name and gender only; anything else `registered: false` (or true with nulls for a blocked account).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$"
+            },
+            "required": true,
+            "name": "countryCode",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4,15}$"
+            },
+            "required": true,
+            "name": "number",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lookup",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "registered": {
+                          "type": "boolean"
+                        },
+                        "firstName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "gender": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "enum": [
+                            "MALE",
+                            "FEMALE",
+                            null
+                          ]
+                        }
+                      },
+                      "required": [
+                        "registered",
+                        "firstName",
+                        "gender"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/merchant/v1/bookings": {
+      "post": {
+        "tags": [
+          "Bookings"
+        ],
+        "summary": "Book for a customer with or without the app (§5.20): APPROVED, pay at the business",
+        "description": "Needs BOOKINGS_CREATE (a branch member books their own branch: 403 `BRANCH_SCOPE_DENIED`). Same persons, audience (`GENDER_MISMATCH`), bride, service, staff and slot rules as the app; created under the staff locks (409 `SLOT_TAKEN`). A registered number links the booking to that account and notifies it (\"Booked by\"); a blocked account answers 403 `ACCOUNT_BLOCKED`; an unknown number needs `customer.name` + `customer.gender` and gets no message. Tattoo studios may attach `persons[].referenceImageKey` (a member `BOOKING_REFERENCE` upload of this salon).",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "branchId": {
+                    "type": "string",
+                    "pattern": "^[a-fA-F0-9]{24}$"
+                  },
+                  "customer": {
+                    "type": "object",
+                    "properties": {
+                      "phone": {
+                        "type": "object",
+                        "properties": {
+                          "countryCode": {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          "number": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4,15}$"
+                          }
+                        },
+                        "required": [
+                          "countryCode",
+                          "number"
+                        ]
+                      },
+                      "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 50
+                      },
+                      "gender": {
+                        "type": "string",
+                        "enum": [
+                          "MALE",
+                          "FEMALE"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "phone"
+                    ]
+                  },
+                  "persons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 50
+                        },
+                        "isBride": {
+                          "type": "boolean",
+                          "default": false
+                        },
+                        "gender": {
+                          "type": "string",
+                          "enum": [
+                            "MALE",
+                            "FEMALE"
+                          ]
+                        },
+                        "serviceIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "pattern": "^[a-fA-F0-9]{24}$"
+                          },
+                          "minItems": 1,
+                          "maxItems": 20
+                        },
+                        "staffId": {
+                          "type": "string",
+                          "pattern": "^[a-fA-F0-9]{24}$"
+                        },
+                        "start": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "referenceImageKey": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "serviceIds",
+                        "start"
+                      ]
+                    },
+                    "minItems": 1,
+                    "maxItems": 20
+                  }
+                },
+                "required": [
+                  "customer",
+                  "persons"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Booking",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "referenceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "paymentMethod": {
+                          "type": "string"
+                        },
+                        "paymentStatus": {
+                          "type": "string"
+                        },
+                        "appointmentStart": {
+                          "type": "string"
+                        },
+                        "appointmentEnd": {
+                          "type": "string"
+                        },
+                        "respondBy": {
+                          "type": "string"
+                        },
+                        "money": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "string"
+                            },
+                            "dueOnline": {
+                              "type": "string"
+                            },
+                            "paidOnline": {
+                              "type": "string"
+                            },
+                            "remaining": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "total",
+                            "dueOnline",
+                            "paidOnline",
+                            "remaining"
+                          ]
+                        },
+                        "customerRegistered": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "referenceNumber",
+                        "status",
+                        "paymentMethod",
+                        "paymentStatus",
+                        "appointmentStart",
+                        "appointmentEnd",
+                        "respondBy",
+                        "money",
+                        "customerRegistered"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed (token scope or permission)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict with the current state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Business rule violated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
           "Bookings"
@@ -18118,7 +18578,10 @@
                             ],
                             "properties": {
                               "id": {
-                                "type": "string"
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "name": {
                                 "type": "string"
@@ -18132,7 +18595,34 @@
                               "name",
                               "phone"
                             ],
-                            "description": "Merchant and admin views only."
+                            "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                          },
+                          "source": {
+                            "type": "string",
+                            "enum": [
+                              "CUSTOMER_APP",
+                              "MERCHANT"
+                            ],
+                            "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                          },
+                          "createdBy": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ],
+                            "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                           },
                           "staff": {
                             "type": "array",
@@ -18210,6 +18700,8 @@
                           "salon",
                           "branch",
                           "customer",
+                          "source",
+                          "createdBy",
                           "staff",
                           "rejection"
                         ]
@@ -18607,7 +19099,10 @@
                           ],
                           "properties": {
                             "id": {
-                              "type": "string"
+                              "type": [
+                                "string",
+                                "null"
+                              ]
                             },
                             "name": {
                               "type": "string"
@@ -18621,7 +19116,34 @@
                             "name",
                             "phone"
                           ],
-                          "description": "Merchant and admin views only."
+                          "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                        },
+                        "source": {
+                          "type": "string",
+                          "enum": [
+                            "CUSTOMER_APP",
+                            "MERCHANT"
+                          ],
+                          "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                        },
+                        "createdBy": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                         },
                         "staff": {
                           "type": "array",
@@ -18916,6 +19438,8 @@
                         "salon",
                         "branch",
                         "customer",
+                        "source",
+                        "createdBy",
                         "staff",
                         "rejection",
                         "refundStatus",
@@ -21129,7 +21653,10 @@
                                     ],
                                     "properties": {
                                       "id": {
-                                        "type": "string"
+                                        "type": [
+                                          "string",
+                                          "null"
+                                        ]
                                       },
                                       "name": {
                                         "type": "string"
@@ -21143,7 +21670,34 @@
                                       "name",
                                       "phone"
                                     ],
-                                    "description": "Merchant and admin views only."
+                                    "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "enum": [
+                                      "CUSTOMER_APP",
+                                      "MERCHANT"
+                                    ],
+                                    "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                                  },
+                                  "createdBy": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                                   },
                                   "staff": {
                                     "type": "array",
@@ -21221,6 +21775,8 @@
                                   "salon",
                                   "branch",
                                   "customer",
+                                  "source",
+                                  "createdBy",
                                   "staff",
                                   "rejection"
                                 ]
@@ -21347,7 +21903,10 @@
                                   ],
                                   "properties": {
                                     "id": {
-                                      "type": "string"
+                                      "type": [
+                                        "string",
+                                        "null"
+                                      ]
                                     },
                                     "name": {
                                       "type": "string"
@@ -21361,7 +21920,34 @@
                                     "name",
                                     "phone"
                                   ],
-                                  "description": "Merchant and admin views only."
+                                  "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                                },
+                                "source": {
+                                  "type": "string",
+                                  "enum": [
+                                    "CUSTOMER_APP",
+                                    "MERCHANT"
+                                  ],
+                                  "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                                },
+                                "createdBy": {
+                                  "type": [
+                                    "object",
+                                    "null"
+                                  ],
+                                  "properties": {
+                                    "id": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "name"
+                                  ],
+                                  "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                                 },
                                 "staff": {
                                   "type": "array",
@@ -21439,6 +22025,8 @@
                                 "salon",
                                 "branch",
                                 "customer",
+                                "source",
+                                "createdBy",
                                 "staff",
                                 "rejection"
                               ]
@@ -21544,7 +22132,10 @@
                                     ],
                                     "properties": {
                                       "id": {
-                                        "type": "string"
+                                        "type": [
+                                          "string",
+                                          "null"
+                                        ]
                                       },
                                       "name": {
                                         "type": "string"
@@ -21558,7 +22149,34 @@
                                       "name",
                                       "phone"
                                     ],
-                                    "description": "Merchant and admin views only."
+                                    "description": "Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered."
+                                  },
+                                  "source": {
+                                    "type": "string",
+                                    "enum": [
+                                      "CUSTOMER_APP",
+                                      "MERCHANT"
+                                    ],
+                                    "description": "Who made the booking (§5.20); the customer app shows \"Booked by <place>\" for MERCHANT."
+                                  },
+                                  "createdBy": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The member who made a MERCHANT booking; null otherwise and always in the customer view."
                                   },
                                   "staff": {
                                     "type": "array",
@@ -21636,6 +22254,8 @@
                                   "salon",
                                   "branch",
                                   "customer",
+                                  "source",
+                                  "createdBy",
                                   "staff",
                                   "rejection"
                                 ]

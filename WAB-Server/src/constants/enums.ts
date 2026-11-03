@@ -49,6 +49,8 @@ export const PERMISSIONS = [
   'STATISTICS_VIEW',
   'FINANCE_VIEW',
   'SUBSCRIPTION_VIEW',
+  /** Book for a customer with or without the app (§5.20). */
+  'BOOKINGS_CREATE',
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

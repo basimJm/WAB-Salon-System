@@ -132,6 +132,10 @@ import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
 import { createFileSlots } from './domain/files/fileSlots.service';
 import { createReferenceImageMover } from './domain/bookings/referenceImages';
+import {
+  createBookingClaims,
+  createMerchantBookingService,
+} from './domain/bookings/merchantBooking.service';
 import { createCatalogPopularity, createPastVisits } from './domain/home/homeSources';
 import { createStorageCleanup } from './domain/files/storageCleanup.service';
 import { FILE_SLOT_LOCK, FILE_SLOT_LOCK_PREFIX } from './constants/uploads';
@@ -373,6 +377,7 @@ const buildServices = (
     installations: new InstallationsRepository(),
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
+    claims: createBookingClaims({ bookings: new BookingsRepository(), logger }),
   });
   const installationService = createInstallationService({
     installations: new InstallationsRepository(),
@@ -646,6 +651,31 @@ const buildServices = (
       bookings: bookingsRepository,
       logger,
     }),
+  });
+  // The business books for a customer (§5.20): approved at once, so an update, never a request.
+  const merchantBooking = createMerchantBookingService({
+    redis,
+    bookings: bookingsRepository,
+    availability,
+    catalog: new CatalogServicesRepository(),
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    phones: createPhoneVerifier(phoneServices),
+    settings,
+    branches: branchesRepository,
+    uploads,
+    referenceImages: createReferenceImageMover({
+      slots: fileSlots,
+      bookings: bookingsRepository,
+      logger,
+    }),
+    hook: {
+      created: async (booking) => {
+        await bookingEvents.changed(booking, booking.status);
+        await producers.bookingCreatedByMerchant.created(booking);
+        await bookingJobs.hook.created(booking);
+      },
+    },
   });
   const bookingActions = createBookingActionsService({
     hook: bookingChanges,
@@ -1088,6 +1118,7 @@ const buildServices = (
       actions: bookingActions,
     }),
     bookingQueries,
+    merchantBooking,
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({

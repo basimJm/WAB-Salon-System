@@ -41,6 +41,30 @@ export const assertReferenceImages = async (input: {
   });
 };
 
+/**
+ * Who uploaded a booking's design images: the customer (app booking) or a member of the business
+ * (business-made booking, §5.20; the slot row is the salon's, like other salon-owned images).
+ */
+export const referenceImageOwner = (
+  booking: Pick<Entity<BookingRaw>, 'source' | 'customerId' | 'salonId'>,
+): {
+  ownerType: 'CUSTOMER' | 'MEMBER';
+  ownerId: string;
+  accept: (upload: Entity<UploadRaw>) => boolean;
+} =>
+  booking.source === 'MERCHANT' || booking.customerId === undefined
+    ? {
+        ownerType: 'MEMBER',
+        ownerId: booking.salonId,
+        accept: (upload) => upload.ownerType === 'MEMBER' && upload.salonId === booking.salonId,
+      }
+    : {
+        ownerType: 'CUSTOMER',
+        ownerId: booking.customerId,
+        accept: (upload) =>
+          upload.ownerType === 'CUSTOMER' && upload.ownerId === booking.customerId,
+      };
+
 /** Moves the design images of a new booking into their file slots (after the booking exists). */
 export interface ReferenceImageMover {
   move(booking: Entity<BookingRaw>): Promise<void>;
@@ -52,6 +76,8 @@ export const createReferenceImageMover = (deps: {
   readonly logger: Logger;
 }): ReferenceImageMover => ({
   async move(booking) {
+    // The customer uploaded the images of an app booking; a member those of a business-made one.
+    const owner = referenceImageOwner(booking);
     for (const [index, person] of booking.persons.entries()) {
       const incoming = person.referenceImageKey;
       if (incoming === undefined) continue;
@@ -61,15 +87,14 @@ export const createReferenceImageMover = (deps: {
           target: {
             purpose: 'BOOKING_REFERENCE',
             key,
-            ownerType: 'CUSTOMER',
-            ownerId: booking.customerId,
+            ownerType: owner.ownerType,
+            ownerId: owner.ownerId,
             salonId: booking.salonId,
           },
           current: undefined,
           incoming,
           field: REFERENCE_IMAGE_FIELD,
-          accept: (upload) =>
-            upload.ownerType === 'CUSTOMER' && upload.ownerId === booking.customerId,
+          accept: owner.accept,
           commit: async (ref) => {
             await deps.bookings.setPersonReference(booking.id, index, ref);
           },

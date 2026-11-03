@@ -6,7 +6,6 @@ import type { Gender, Language } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import { MS_PER_MINUTE } from '../../constants/time';
 import type { BookingDraftRaw, DraftHold } from '../../models/bookingDraft.model';
-import type { BookingPersonRaw } from '../../models/bookingPerson';
 import type { SalonPolicy } from '../../models/salon.model';
 import type { PAYMENT_OPTIONS } from '../../constants/salon';
 import type { BookingDraftsRepository } from '../../repositories/bookingDrafts.repository';
@@ -29,6 +28,7 @@ import type { AvailabilityService, PlanPersonInput } from '../availability/avail
 import type { HoldsStore } from '../availability/holds';
 import type { UploadVerifier } from '../uploads/uploads.service';
 import { assertReferenceImages } from './referenceImages';
+import { toBookingPersons } from './bookingPersons';
 
 /** A draft person: the plan input plus an optional tattoo design image (§5.23). */
 export type DraftPersonInput = PlanPersonInput & {
@@ -238,38 +238,17 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
           if (!policy.paymentOptions.includes(paymentMethod)) {
             throw new BusinessRuleError({ code: ERROR_CODES.PAYMENT_OPTION_NOT_ALLOWED });
           }
-          const catalogIds = [
-            ...new Set(plan.persons.flatMap((p) => p.services.map((s) => s.catalogServiceId))),
-          ];
-          const entries = await catalog.findMany({ _id: { $in: catalogIds } });
-          const nameOf = new Map(entries.map((c) => [c.id, c.name]));
-
           const amounts = calculateAmounts({
             persons: plan.persons.map((p) => ({ services: p.services })),
             paymentOption: paymentMethod,
             depositPercentage: policy.depositPercentage,
           });
-          const bookingPersons: BookingPersonRaw[] = plan.persons.map((p, index) => ({
-            name: p.name,
-            isMain: index === 0,
-            isBride: p.isBride,
-            ...(p.gender === undefined ? {} : { gender: p.gender }),
-            services: p.services.map((s) => ({
-              salonServiceId: toObjectId(s.id),
-              catalogServiceId: toObjectId(s.catalogServiceId),
-              name: nameOf.get(s.catalogServiceId) ?? { ar: '', en: '' },
-              price: s.price,
-              durationMinutes: s.durationMinutes,
-            })),
-            staffId: toObjectId(p.staffId),
-            staffSelection: p.staffSelection,
-            start: p.start,
-            end: p.end,
-            subtotal: amounts.persons[index]?.subtotal ?? 0,
-            ...(persons[index]?.referenceImageKey === undefined
-              ? {}
-              : { referenceImageKey: persons[index].referenceImageKey }),
-          }));
+          const bookingPersons = await toBookingPersons({
+            plan,
+            subtotals: amounts.persons.map((p) => p.subtotal),
+            references: persons.map((p) => p.referenceImageKey),
+            catalog,
+          });
           const holdMinutes = await settings.get('booking.paymentHoldMinutes');
           const at = now();
           const hold: DraftHold[] = plan.persons.map((p) => ({

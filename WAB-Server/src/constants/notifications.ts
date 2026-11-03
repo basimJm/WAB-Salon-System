@@ -53,6 +53,8 @@ export const NOTIFICATION_EVENTS = {
     priority: 'HIGH',
     request: true,
   },
+  /** The business booked for a registered customer (§5.20): "Booked by <place>". */
+  'booking.created_by_merchant': { type: 'BOOKING', audiences: [customer] },
   'booking.approved': { type: 'BOOKING', audiences: [customer] },
   'booking.rejected': { type: 'BOOKING', audiences: [customer] },
   'booking.cancelled_by_salon': { type: 'BOOKING', audiences: [customer] },

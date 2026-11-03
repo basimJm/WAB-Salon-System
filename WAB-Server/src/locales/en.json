@@ -73,6 +73,8 @@
   "notifications.booking.created.customer.body": "Your request {reference} at {salon} for {when} was sent and is waiting for the salon's reply.",
   "notifications.booking.requested.members.title": "New booking request",
   "notifications.booking.requested.members.body": "{customer} requested {reference} for {when}.",
+  "notifications.booking.created_by_merchant.customer.title": "Booked for you",
+  "notifications.booking.created_by_merchant.customer.body": "{salon} booked {reference} for you on {when}. Booked by {salon}.",
   "notifications.booking.approved.customer.title": "Booking approved",
   "notifications.booking.approved.customer.body": "{salon} approved your booking {reference} for {when}.",
   "notifications.booking.rejected.customer.title": "Booking declined",
