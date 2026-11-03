@@ -9,6 +9,31 @@
 
 ## Current task
 
+### MER-083 — Clinic regression + salon-or-clinic wording
+- Branch: `fix/mer-083-clinic-regression`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-30 "fix customer and merchant ... make loop test for customer merchant and admin test full flow regression"; BUSINESS_DOMAIN §5.19; operations `POST /merchant/v1/auth/*`, merchant bookings approve):
+  - [x] Regression on the local stack (server with SRV-179): clinic owner (Glow Aesthetic Clinic, demo `+962789020001`, fake OTP) signs in; the customer's clinic booking WAB-C5EC9K (CUS-101 journey) arrives as a new request sheet (person, Botox, Ahmad, 31/10 11:00, 120 JOD, pay on arrival) and Accept shows "booking accepted"
+  - [x] Texts seen before sign-in or by any member no longer say "salon" only: login welcome/subtitle, register entry, OTP register mode, not-registered dialog, inactive, access removed, notifications permission (AR + EN)
+- Tests: full gate (Terminal panel): policy_checks all ok, run_detekt.sh 0 findings, `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green; device (emulator-5554, dev debug against the local stack, AR): login screen shows the new texts
+- Loops: 1/1 — re-ran the device journey after the text change (login → OTP → home with the request); string-only change, no logic to unit-test (DEVIATION: no new unit test; policy I-checks cover AR/EN key parity)
+- Review: PASSED (SE ✔ (strings only), Mobile ✔ (AR natural wording, RTL unchanged), Architect ✔ (no contract change), QA ✔ (gate green; cross-app journey customer → merchant))
+- Notes: KNOWN (not fixed): on the first cold start right after install the splash took ~10 s and the logo slot stayed empty for several seconds (debug build, fresh install); later starts are normal. DEVICE SETUP (local only, never committed): `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000`, untracked `androidApp/src/devDebug/AndroidManifest.xml`.
+
+### MER-082 — Animated brand logo on the launch/config screen
+- Branch: `feat/mer-082-animated-logo`
+- Status: IN PROGRESS
+- Acceptance criteria (owner 2026-10-29 "do the same for merchant", same as CUS-100; PRD M01 splash; no API change):
+  - [x] Native splash untouched; only the logo of the config screen (`SplashScreen`) becomes the owner's Lottie `files/wab_logo_splash.json` (unmodified), tile 108 dp as the design
+  - [x] Played once in `AppTheme.motion.logoReveal` (2000 ms, same as customer) and held on its last frame
+  - [x] `LaunchGateContent` leaves the splash only when config is known AND the logo finished (`UiState.logoShown`, `OnLogoAnimationFinished`); static logo until parsed; parse failure finishes at once
+  - [x] Compottie 2.1.0 (Compose 1.10.3 / Kotlin 2.3.20, same as customer)
+  - [x] Tests: `AnimatedLogoTest` (speed), `MainViewModelTest` (splash waits for logo; logo alone does not leave before config)
+- Tests: policy_checks all ok; run_detekt.sh clean (after wrapping one KDoc line); `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green; device: emulator-5554 dev debug cold start → navy tile, W stroke tracing, then Login (~2 s); no crash
+- Loops: 1/1 — re-checked every criterion; found and fixed: detekt MaxLineLength on the LaunchGateContent KDoc, wrong backlog dependency (MER-008 → MER-019)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — port of CUS-100 into the merchant design system (own package, token, test); no literals; brand mark not mirrored in RTL; content description kept; no contract change
+- Notes: DEVIATIONS: iOS checked by the framework link only (no simulator run); one cold-start frame showed the logo slot empty for a moment before even the static fallback drew; dark mode not captured separately.
+
 ### MER-081 — Clinic and audience in the merchant app
 - Branch: `feat/mer-081-clinic-audience`
 - Status: IN REVIEW
@@ -39,18 +64,3 @@
 - Loops: 1/1 — Batch gate (rules §3.13, both tasks on `feat/mer-081-clinic-audience`): `policy_checks.py all` ok, `scripts/ci/tests` 116 OK, `run_detekt.sh` ok (empty baseline), `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green (190 suites / 653 tests / 0 failures, no `w:`), `api_sync --check` ok, `contract_gaps` 0; device (own Pixel 8 Pro emulator, mock): AR clinic registration (type, unisex note, medical license via camera → "Uploaded" in review), EN salon registration (Men → Both, review "Men and women")
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: rules in core `BusinessKind` (no UI logic), clinic audience never sent, medical license through the public license routes with `purpose`, resubmission type locked; detekt complexity fix of `allErrors` landed in the MER-081 commit
 - Notes: PRD M04 is still the single-screen form (no PRD section for clinics yet): "first step" = the first card of the form, "review step" = a review card above Submit. DEVIATION: captured fixtures were migrated by script, not re-captured (needs the local stack with SRV-174…178). Not done on device: a full submit (keyboard covered the lower fields in the scripted run; submit is covered by `RegistrationViewModelTest`); iOS simulator not run (framework link only).
-
-### MER-079 — Measured performance pass with the Android skills + deferred device checks of MER-076…078
-- Branch: `perf/mer-079-measured-performance`
-- Status: IN PROGRESS
-- Acceptance criteria (owner 2026-10-27 "complete working and run skill to optimize performance"; CLAUDE.md §6; skills android-profiler, r8-analyzer, jetpack-compose-performance, anr-audit-and-fix):
-  - [ ] Baseline: devRelease on the emulator against the local stack; cold start ×5 median; Perfetto startup + Home + bookings scroll + calendar day/week + request sheet (jank %, frame percentiles, main-thread hotspots); release smoke end to end
-  - [ ] r8-analyzer: broad keep rules (Ktor, core.data/network/domain) narrowed, proved by the release smoke test
-  - [ ] jetpack-compose-performance on the hot screens (compiler reports, stability, lazy keys, deferred reads, calendar grid); anr-audit-and-fix
-  - [ ] Baseline Profile + Startup Profile if feasible
-  - [ ] After: same measurements; before/after table here and in `docs/PERFORMANCE.md`
-  - [ ] MER-076 device checks on Android + iOS simulator; Release-Dev iOS launch + scroll; iOS builds without `Local.xcconfig`
-- Tests: `MerchantRootTabsTest`, `LocationFallbackTest`, `MapPickerLocateTest`, `test_performance_config.py` (policy forbids package-wide keep rules); gate: policy + detekt + host unit tests + devDebug/devRelease/prodRelease + all four iOS simulator configurations green
-- Loops: 1/1 — re-checked once: gate above green; release smoke test on the emulator (sign-in, dashboard, request accept, calendar, salon hub, upload) after the R8 narrowing; measurements in `docs/PERFORMANCE.md`. DEFERRED (owner 2026-10-28: skip): the remaining device checks of MER-076 on iOS, macrobenchmark/startup profile module
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: tab routes by serial name (release bottom bar), package-wide keep rules removed with a policy guard, tone off the main thread, stability config reaches every Compose module, calendar `drawWithCache`, geocoder/location bounded with fallbacks; temporary local manifests removed, none committed.
-- Notes: results — main-thread binder time −54 %, recomposition −19 %, request-sheet long frames 6.3 → 4.8, APK −6.9 %, R8 scores 83 % → 98.5 %; cold start and whole-journey jank unchanged within the noise of a shared host.
