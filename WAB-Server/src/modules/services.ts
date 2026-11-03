@@ -34,6 +34,7 @@ import type { AdminReviewsService } from '../domain/reviews/adminReviews.service
 import type { ReviewsService } from '../domain/reviews/reviews.service';
 import type { CustomerProfileService } from '../domain/customers/customerProfile.service';
 import type { BookingActionsService } from '../domain/bookings/bookingActions.service';
+import type { MerchantBookingService } from '../domain/bookings/merchantBooking.service';
 import type { MerchantFinanceService } from '../domain/finance/merchantFinance.service';
 import type { MerchantReviewsService } from '../domain/reviews/merchantReviews.service';
 import type { MerchantStatisticsService } from '../domain/statistics/merchantStatistics.service';
@@ -137,6 +138,8 @@ export interface ApiServices {
   readonly bookingBulk?: BookingBulkService;
   readonly bookingAdmin?: BookingAdminService;
   readonly bookingQueries?: BookingQueriesService;
+  /** Bookings made by the business for a customer (§5.20). */
+  readonly merchantBooking?: MerchantBookingService;
   readonly bookingReassign?: BookingReassignService;
   readonly bookingActions?: BookingActionsService;
   readonly customerProfile?: CustomerProfileService;
@@ -544,6 +547,11 @@ export const unavailableBookingReassign: BookingReassignService = {
   eligibleStaff: unavailable,
 };
 
+export const unavailableMerchantBooking: MerchantBookingService = {
+  lookup: unavailable,
+  create: unavailable,
+};
+
 export const unavailableBookingQueries: BookingQueriesService = {
   list: unavailable,
   detail: unavailable,
@@ -658,6 +666,7 @@ export const unavailableSearch: SearchService = {
   cards: unavailable,
   priceBounds: unavailable,
   nearestBranches: unavailable,
+  suggest: unavailable,
 };
 
 export const unavailableAdminBranches: AdminBranchesService = {

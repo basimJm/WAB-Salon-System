@@ -446,6 +446,9 @@ describe('BOOKINGS export', () => {
       { id: 'm1', name: 'Rana' },
       { id: 'm2', name: 'Dina' },
     ],
+    // §5.20: who made it (MERCHANT rows also name the member).
+    source: i === 0 ? 'MERCHANT' : 'CUSTOMER_APP',
+    createdBy: i === 0 ? { id: 'm1', name: 'Rana' } : null,
   });
 
   it('pages through every page as the admin audience and keeps the filters', async () => {
@@ -505,6 +508,8 @@ describe('BOOKINGS export', () => {
       'PAY_ON_ARRIVAL',
       'PENDING',
       '25.000',
+      'MERCHANT',
+      'Rana',
     ]);
     expect(table.columns).toHaveLength(table.rows[0]?.length ?? 0);
   });

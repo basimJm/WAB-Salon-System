@@ -224,7 +224,7 @@ describe('GET /admin/v1/salons/:id/members', () => {
       permissions: string[];
     }[];
     expect(rows.map((r) => r.role)).toEqual(['OWNER', 'EMPLOYEE', 'MANAGER']);
-    expect(rows[0]?.permissions).toHaveLength(15);
+    expect(rows[0]?.permissions).toHaveLength(16);
     expect(rows[1]?.permissions).toEqual(['REVIEWS_VIEW']);
     expect(rows[2]?.active).toBe(false);
   });

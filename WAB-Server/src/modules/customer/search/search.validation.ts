@@ -7,6 +7,7 @@ import {
   LONGITUDE_LIMIT,
   SEARCH_GENERAL_FILTERS,
   SEARCH_SORTS,
+  SEARCH_MAX_BUSINESS_TYPES,
   SEARCH_MAX_SERVICE_FILTERS,
   SEARCH_RATING_MAX,
   SEARCH_RATING_MIN,
@@ -22,6 +23,13 @@ const serviceIds = z
     (Array.isArray(v) ? v : v.split(',')).map((id) => id.trim()).filter((id) => id !== ''),
   )
   .pipe(z.array(z.string().regex(OBJECT_ID_PATTERN)).max(SEARCH_MAX_SERVICE_FILTERS));
+/** Type lens (§5.22): `?businessType=SALON,TATTOO` or repeated; one value still works. */
+export const businessTypesParam = z
+  .union([z.string(), z.array(z.string())])
+  .transform((v) =>
+    (Array.isArray(v) ? v : v.split(',')).map((t) => t.trim()).filter((t) => t !== ''),
+  )
+  .pipe(z.array(z.enum(BUSINESS_TYPES)).max(SEARCH_MAX_BUSINESS_TYPES));
 const jod = z
   .string()
   .refine((v) => isJodString(v))
@@ -29,12 +37,16 @@ const jod = z
 
 export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
   .extend({
-    gender: z.enum(GENDERS),
-    /** Only salons or only clinics (§5.19); omitted = both. */
-    businessType: z.enum(BUSINESS_TYPES).optional(),
+    /** Search filter (§5.22): businesses serving this gender (own or BOTH); omitted = all. */
+    gender: z.enum(GENDERS).optional(),
+    /** Type lens (§5.22): one or several types; omitted = every type. */
+    businessType: businessTypesParam.optional(),
     q: z.string().trim().max(SEARCH_TEXT_MAX_LENGTH).optional(),
     serviceIds: serviceIds.optional(),
-    /** JOD decimal strings: the range of the SUM of the selected services' prices. */
+    /**
+     * JOD decimal strings. With `serviceIds`: range of the SUM of their prices; without: at least
+     * one active service priced inside the range (§5.22).
+     */
     minPrice: jod.optional(),
     maxPrice: jod.optional(),
     minRating: z.coerce.number().int().min(SEARCH_RATING_MIN).max(SEARCH_RATING_MAX).optional(),
@@ -54,18 +66,18 @@ export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
   .refine((q) => q.minPrice === undefined || q.maxPrice === undefined || q.minPrice <= q.maxPrice, {
     path: ['maxPrice'],
     message: 'maxPrice must not be below minPrice',
-  })
-  .refine(
-    (q) =>
-      (q.minPrice === undefined && q.maxPrice === undefined) || (q.serviceIds?.length ?? 0) > 0,
-    {
-      path: ['serviceIds'],
-      message: 'a price range needs selected services',
-    },
-  );
+  });
 
 export const filtersQuerySchema = z.object({
-  gender: z.enum(GENDERS),
-  businessType: z.enum(BUSINESS_TYPES).optional(),
-  serviceIds: serviceIds.pipe(z.array(z.string()).min(1)),
+  gender: z.enum(GENDERS).optional(),
+  businessType: businessTypesParam.optional(),
+  /** Omitted: the price range of every active service of the matching businesses (§5.22). */
+  serviceIds: serviceIds.optional(),
+});
+
+/** Typed suggestions (§5.22). */
+export const suggestionsQuerySchema = z.object({
+  q: z.string().trim().min(1).max(SEARCH_TEXT_MAX_LENGTH),
+  gender: z.enum(GENDERS).optional(),
+  businessType: businessTypesParam.optional(),
 });

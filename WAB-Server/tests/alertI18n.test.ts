@@ -186,7 +186,9 @@ describe('alert subject type (S12)', () => {
   it('normalizes known values and drops unknown ones', () => {
     expect(normalizeAlertEntityType('catalog_request')).toBe('CATALOG_REQUEST');
     expect(normalizeAlertEntityType('REVIEW')).toBe('REVIEW');
-    expect(normalizeAlertEntityType('booking')).toBeNull();
+    // §5.21: overdue bookings are alert subjects.
+    expect(normalizeAlertEntityType('booking')).toBe('BOOKING');
+    expect(normalizeAlertEntityType('payout')).toBeNull();
     expect(normalizeAlertEntityType(undefined)).toBeNull();
     expect(normalizeAlertEntityType(7)).toBeNull();
   });

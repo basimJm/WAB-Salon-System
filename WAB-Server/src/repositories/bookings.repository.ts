@@ -105,6 +105,107 @@ export class BookingsRepository
     return updated === null ? null : toEntity<BookingRaw>(updated);
   }
 
+  /** Catalog service ids by bookings since `from`, most booked first (home *Explore*, §5.22). */
+  async catalogPopularity(from: Date, limit: number): Promise<string[]> {
+    const rows = await this.model
+      .aggregate<{ _id: unknown }>([
+        { $match: { createdAt: { $gte: from } } },
+        { $unwind: '$persons' },
+        { $unwind: '$persons.services' },
+        { $group: { _id: '$persons.services.catalogServiceId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: limit },
+      ])
+      .exec();
+    return rows.map((row) => String(row._id));
+  }
+
+  /** The customer's newest completed booking per business, newest first (*Book again*, §5.22). */
+  async recentVisits(
+    customerId: string,
+    statuses: readonly string[],
+    limit: number,
+    /** How many of the newest bookings are read to find `limit` different businesses. */
+    scan: number,
+  ): Promise<{ salonId: string; bookingId: string; salonServiceIds: string[] }[]> {
+    if (!isObjectIdString(customerId)) return [];
+    const { items: found } = await this.findPage(
+      { customerId, status: { $in: [...statuses] } } as never,
+      { page: 1, pageSize: scan },
+      { appointmentStart: -1 },
+    );
+    const seen = new Set<string>();
+    const visits: { salonId: string; bookingId: string; salonServiceIds: string[] }[] = [];
+    for (const booking of found) {
+      if (seen.has(booking.salonId)) continue;
+      seen.add(booking.salonId);
+      visits.push({
+        salonId: booking.salonId,
+        bookingId: booking.id,
+        salonServiceIds: [
+          ...new Set(booking.persons.flatMap((p) => p.services.map((s) => s.salonServiceId))),
+        ],
+      });
+      if (visits.length >= limit) break;
+    }
+    return visits;
+  }
+
+  /** Records close reminder round `round` of a still-approved booking (§5.21). */
+  async recordCloseReminder(
+    id: string,
+    round: number,
+    at: Date,
+  ): Promise<Entity<BookingRaw> | null> {
+    if (!isObjectIdString(id)) return null;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: 'APPROVED' },
+        { $set: { 'closeReminders.count': round, 'closeReminders.lastAt': at } },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<BookingRaw>(updated);
+  }
+
+  /** Marks the overdue alert of a still-approved booking as sent, once (§5.21). */
+  async markCloseOverdue(id: string, at: Date): Promise<boolean> {
+    if (!isObjectIdString(id)) return false;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: 'APPROVED', 'closeReminders.overdueAlertedAt': { $exists: false } },
+        { $set: { 'closeReminders.overdueAlertedAt': at } },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated !== null;
+  }
+
+  /** Business-made bookings of this number without an account join the customer (§5.20). */
+  async claimByPhone(e164: string, customerId: string): Promise<number> {
+    const result = await this.model
+      .updateMany(
+        { 'customerContact.phone.e164': e164, customerId: { $exists: false } },
+        { $set: { customerId: toObjectId(customerId) } },
+      )
+      .exec();
+    return result.modifiedCount;
+  }
+
+  /** Stores the file-slot reference of one person's design image (§5.23). */
+  async setPersonReference(id: string, personIndex: number, ref: string): Promise<void> {
+    if (!isObjectIdString(id)) return;
+    await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        { $set: { [`persons.${String(personIndex)}.referenceImageKey`]: ref } },
+      )
+      .lean()
+      .exec();
+  }
+
   /** Keeps the booking's refund summary in step with its refunds (`refundedDelta` fils just returned). */
   async recordRefund(
     id: string,
@@ -153,13 +254,14 @@ export class BookingsRepository
     }));
   }
 
-  /** One page of bookings that still need background jobs: every PENDING one and upcoming APPROVED ones. */
-  jobCandidates(
-    now: Date,
-    params: { page: number; pageSize: number },
-  ): Promise<Page<Entity<BookingRaw>>> {
+  /**
+   * One page of bookings that still need background jobs: every PENDING and APPROVED one (an
+   * approved booking past its end still needs its close reminders, §5.21).
+   */
+  jobCandidates(params: { page: number; pageSize: number }): Promise<Page<Entity<BookingRaw>>> {
     return this.findPage(
-      { $or: [{ status: 'PENDING' }, { status: 'APPROVED', appointmentStart: { $gt: now } }] },
+      // Approved bookings keep jobs after their start too: close reminders (§5.21).
+      { status: { $in: ['PENDING', 'APPROVED'] } },
       params,
       { appointmentStart: 1 },
     );

@@ -1,5 +1,6 @@
 import { DEEP_LINKS, EVENT_BY_BOOKING_STATUS } from '../../constants/notifications';
 import type { Language } from '../../constants/i18n';
+import type { CustomerRaw } from '../../models/customer.model';
 import type { BookingRaw } from '../../models/booking.model';
 import type { RefundRaw } from '../../models/refund.model';
 import type { PayoutRaw } from '../../models/payout.model';
@@ -45,12 +46,32 @@ type Params = Record<string, ParamValue>;
  */
 /** The booking events that background jobs raise (SRV-096). */
 export type JobBookingEvent =
-  'booking.reminder_1h' | 'booking.reminder_15m' | 'booking.pending_30m';
+  | 'booking.reminder_1h'
+  | 'booking.reminder_15m'
+  | 'booking.pending_30m'
+  | 'booking.close_reminder'
+  | 'booking.close_overdue';
+
+/** Push actions of the close messages (§5.21): the merchant app answers from the notification. */
+export const CLOSE_PUSH_ACTIONS = 'COMPLETED,NO_SHOW';
+const CLOSE_EVENTS: readonly JobBookingEvent[] = [
+  'booking.close_reminder',
+  'booking.close_overdue',
+];
 
 export interface NotificationProducers {
   readonly bookingCreated: BookingCreatedHook;
-  /** Sends a reminder / pending alert; one delivery per booking and event even if the job repeats. */
-  readonly bookingJobEvent: (event: JobBookingEvent, booking: Entity<BookingRaw>) => Promise<void>;
+  /** A business-made booking (§5.20): "Booked by <place>" to a registered customer only. */
+  readonly bookingCreatedByMerchant: BookingCreatedHook;
+  /**
+   * Sends a reminder / pending alert / close message; one delivery per booking, event and `round`
+   * (close reminders repeat, each round once) even if the job repeats.
+   */
+  readonly bookingJobEvent: (
+    event: JobBookingEvent,
+    booking: Entity<BookingRaw>,
+    round?: number,
+  ) => Promise<void>;
   /** Tells a salon owner that the subscription is ending soon or has expired (once per end date). */
   readonly subscriptionAlert: (
     event: 'subscription.ending_7d' | 'subscription.expired',
@@ -80,10 +101,16 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
   const salonName = async (salonId: string): Promise<string> =>
     (await salons.findById(salonId))?.name ?? '';
 
+  /** The booking's customer account; `null` for a business-made booking without one (§5.20). */
+  const customerOf = (booking: Entity<BookingRaw>): Promise<Entity<CustomerRaw> | null> =>
+    booking.customerId === undefined
+      ? Promise.resolve(null)
+      : customers.findById(booking.customerId);
+
   const bookingParams = async (booking: Entity<BookingRaw>): Promise<Params> => {
     const [salon, customer, timeZone] = await Promise.all([
       salons.findById(booking.salonId),
-      customers.findById(booking.customerId),
+      customerOf(booking),
       settings.get('timezone'),
     ]);
     return {
@@ -96,20 +123,20 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
           booking.branchSnapshot?.name[language],
           salon?.branchCount ?? 0,
         ),
-      customer: customer?.firstName ?? '',
+      customer: customer?.firstName ?? booking.customerContact?.name ?? '',
       when: (language: Language) => formatDateTime(booking.appointmentStart, timeZone, language),
     };
   };
   const bookingTarget = (
     booking: Entity<BookingRaw>,
   ): {
-    customerId: string;
+    customerId?: string;
     salonId: string;
     branchId?: string;
     staffIds: string[];
     data: { bookingId: string; salonId: string; deepLink: string };
   } => ({
-    customerId: booking.customerId,
+    ...(booking.customerId === undefined ? {} : { customerId: booking.customerId }),
     salonId: booking.salonId,
     ...(booking.branchId === undefined ? {} : { branchId: booking.branchId }),
     staffIds: [...new Set(booking.persons.map((p) => p.staffId))],
@@ -127,7 +154,7 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
         ...base,
         key: `booking.created:${booking.id}`,
       });
-      const customer = await customers.findById(booking.customerId);
+      const customer = await customerOf(booking);
       const timeZone = await settings.get('timezone');
       const staff = await Promise.all(
         base.staffIds.map(async (staffId) => (await members.findById(staffId))?.firstName ?? ''),
@@ -182,11 +209,25 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
     }),
   };
 
-  const bookingJobEvent: NotificationProducers['bookingJobEvent'] = async (event, booking) => {
+  const bookingJobEvent: NotificationProducers['bookingJobEvent'] = async (
+    event,
+    booking,
+    round,
+  ) => {
     await notifications.notify(event, {
       ...bookingTarget(booking),
       params: await bookingParams(booking),
-      key: `${event}:${booking.id}`,
+      key:
+        round === undefined ? `${event}:${booking.id}` : `${event}:${booking.id}:${String(round)}`,
+      ...(CLOSE_EVENTS.includes(event)
+        ? {
+            pushData: () => ({
+              bookingId: booking.id,
+              reference: booking.referenceNumber,
+              actions: CLOSE_PUSH_ACTIONS,
+            }),
+          }
+        : {}),
     });
   };
 
@@ -304,8 +345,20 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
     }),
   };
 
+  const bookingCreatedByMerchant: BookingCreatedHook = {
+    created: guarded('booking.created_by_merchant', async (booking) => {
+      if (booking.customerId === undefined) return;
+      await notifications.notify('booking.created_by_merchant', {
+        ...bookingTarget(booking),
+        params: await bookingParams(booking),
+        key: `booking.created_by_merchant:${booking.id}`,
+      });
+    }),
+  };
+
   return {
     bookingCreated,
+    bookingCreatedByMerchant,
     bookingJobEvent,
     subscriptionAlert,
     bookingChanged,

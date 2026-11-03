@@ -1,5 +1,5 @@
 import type { Audience, BusinessType, Gender, Language } from '../../constants/enums';
-import { visibleAudiences } from '../businessTypes/rules';
+import { audienceCondition, typeCondition } from '../businessTypes/rules';
 import type { StorageProvider } from '../../providers/storage';
 import type { CatalogServicesRepository } from '../../repositories/catalog.repository';
 import type { Logger } from '../../utils/logger';
@@ -17,8 +17,8 @@ export interface PublicCatalogService {
 
 export interface CatalogService {
   list(input: {
-    /** Only this business type (§5.19); omitted = every type. */
-    businessType?: BusinessType;
+    /** One type or the lens' types (§5.19, §5.22); omitted = every type. */
+    businessType?: BusinessType | readonly BusinessType[];
     /** Only services a customer of this gender sees (own + BOTH); omitted = every audience. */
     gender?: Gender;
     language: Language;
@@ -47,8 +47,8 @@ export const createCatalogService = ({
       const page = await catalog.findPage(
         {
           active: true,
-          ...(businessType === undefined ? {} : { businessType }),
-          ...(gender === undefined ? {} : { audience: { $in: visibleAudiences(gender) } }),
+          ...typeCondition(businessType),
+          ...audienceCondition(gender),
         },
         params,
         { sortOrder: 1 },
