@@ -51,11 +51,11 @@ internal object AuthDiscoveryActionEvents {
         is OtpContract.UiAction.OnCodeChange, OtpContract.UiAction.OnDialogDismiss -> ActionEvent.Silent
     }
     fun home(a: HomeContract.UiAction): ActionEvent = when (a) {
-        is HomeContract.UiAction.OnGenderSelect, is HomeContract.UiAction.OnBannerClick, HomeContract.UiAction.OnSearchClick,
+        is HomeContract.UiAction.OnLensSelect, is HomeContract.UiAction.OnBannerClick, HomeContract.UiAction.OnSearchClick,
         is HomeContract.UiAction.OnServiceClick, is HomeContract.UiAction.OnSalonClick, is HomeContract.UiAction.OnFavoriteClick,
-        HomeContract.UiAction.OnEnableLocationClick, -> ActionEvent.ByViewModel
+        is HomeContract.UiAction.OnBookAgainClick, HomeContract.UiAction.OnEnableLocationClick, -> ActionEvent.ByViewModel
         HomeContract.UiAction.OnNotificationsClick -> ActionEvent.Named(Events.NOTIFICATIONS_OPEN)
-        is HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
+        HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
         HomeContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         HomeContract.UiAction.OnRefresh, HomeContract.UiAction.OnRetry, HomeContract.UiAction.OnResume,
         HomeContract.UiAction.OnDialogDismiss,
@@ -64,11 +64,14 @@ internal object AuthDiscoveryActionEvents {
     fun allSalons(a: AllSalonsContract.UiAction): ActionEvent = when (a) {
         is AllSalonsContract.UiAction.OnTextChange, AllSalonsContract.UiAction.OnFilterClick, is AllSalonsContract.UiAction.OnChipRemove,
         is AllSalonsContract.UiAction.OnSalonClick, is AllSalonsContract.UiAction.OnFavoriteClick,
-        is AllSalonsContract.UiAction.OnFiltersApplied,
+        is AllSalonsContract.UiAction.OnFiltersApplied, is AllSalonsContract.UiAction.OnSuggestedServiceClick,
+        is AllSalonsContract.UiAction.OnSuggestedPlaceClick, is AllSalonsContract.UiAction.OnQuickChip,
+        is AllSalonsContract.UiAction.OnLensSelect,
         -> ActionEvent.ByViewModel
         AllSalonsContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         AllSalonsContract.UiAction.OnLoadMore, AllSalonsContract.UiAction.OnRefresh, AllSalonsContract.UiAction.OnRetry,
-        AllSalonsContract.UiAction.OnDialogDismiss, -> ActionEvent.Silent
+        AllSalonsContract.UiAction.OnDialogDismiss, AllSalonsContract.UiAction.OnSearchSubmit,
+        is AllSalonsContract.UiAction.OnRecentClick, AllSalonsContract.UiAction.OnRecentClear, -> ActionEvent.Silent
     }
     fun salonDetails(a: SalonDetailsContract.UiAction): ActionEvent = when (a) {
         SalonDetailsContract.UiAction.OnShareClick, SalonDetailsContract.UiAction.OnFavoriteClick,

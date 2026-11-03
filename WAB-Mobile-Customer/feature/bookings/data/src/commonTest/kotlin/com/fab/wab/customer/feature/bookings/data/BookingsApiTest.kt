@@ -54,7 +54,7 @@ class BookingsApiTest {
             respondBy = "2026-10-18T09:00:00Z", requestedAt = "2026-10-17T09:00:00Z",
             personsCount = 2.0, total = "30", salon = GetBookingsDataItemSalon("s1", "Glow"),
             businessType = "SALON", salonAudience = "FEMALE",
-            customer = null, staff = emptyList(),
+            customer = null, staff = emptyList(), source = "CUSTOMER_APP",
         ).toDomain()
         assertEquals(BookingStatus.APPROVED, item.status)
         assertEquals(PaymentStatus.UNKNOWN, item.paymentStatus)
@@ -71,7 +71,7 @@ class BookingsApiTest {
             respondBy = "2026-10-18T09:00:00Z", requestedAt = "2026-10-17T09:00:00Z",
             personsCount = 1.0, total = "8", salon = GetBookingsDataItemSalon("s1", "Hifa"),
             businessType = "SALON", salonAudience = "FEMALE",
-            customer = null, staff = emptyList(), branch = branch,
+            customer = null, staff = emptyList(), branch = branch, source = "CUSTOMER_APP",
         ).toDomain()
         val withAddress = row(GetBookingsDataItemBranch("br1", "Mecca Street", "Amman, Mecca St."))
         assertEquals(BranchRef("br1", "Mecca Street", "Amman, Mecca St."), withAddress.branch)

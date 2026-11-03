@@ -29,6 +29,7 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllS
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsEntry
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllSalonsViewModel
+import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllServicesEntry
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllServicesViewModel
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.FilterSheetViewModel
 import com.fab.wab.customer.feature.salons.presentation.resources.Res
@@ -47,7 +48,6 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         navGraphBuilder.composable<Screen.AllSalons> { entry ->
             val route = entry.toRoute<Screen.AllSalons>()
             val entry = AllSalonsEntry(
-                gender = Gender.fromCode(route.gender),
                 serviceId = route.serviceId,
                 serviceName = route.serviceName,
                 filter = SalonListFilter.fromCode(route.filter),
@@ -58,19 +58,21 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         navGraphBuilder.composable<Screen.AllServices> { entry ->
             val route = entry.toRoute<Screen.AllServices>()
             val gender = Gender.fromCode(route.gender) ?: Gender.entries.first()
-            AllServicesDestination(gender, BusinessType.fromCodeOrNull(route.businessType) ?: BusinessType.SALON)
+            AllServicesDestination(gender, AllServicesEntry(BusinessType.fromCodeOrNull(route.businessType)))
         }
     }
 
     @Composable
-    private fun AllServicesDestination(gender: Gender, businessType: BusinessType) {
-        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(gender, businessType) }
+    private fun AllServicesDestination(gender: Gender, entry: AllServicesEntry) {
+        val viewModel: AllServicesViewModel = koinViewModel { parametersOf(entry) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         val notifications = rememberNotificationManager()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is AllServicesContract.SideEffect.OpenSalons ->
-                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType.code))
+                    navigateTo(
+                        Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType?.code),
+                    )
                 is AllServicesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }
@@ -100,17 +102,14 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         }
         AllSalonsScreen(state = state, onAction = viewModel::onEvent, onBack = ::navigateBack)
         sheet?.let { request ->
-            state.gender?.let { gender ->
-                FilterSheetDestination(
-                    request = request,
-                    gender = gender,
-                    onApply = { filters ->
-                        sheet = null
-                        viewModel.onEvent(UiAction.OnFiltersApplied(filters))
-                    },
-                    onDismiss = { sheet = null },
-                )
-            }
+            FilterSheetDestination(
+                request = request,
+                onApply = { filters ->
+                    sheet = null
+                    viewModel.onEvent(UiAction.OnFiltersApplied(filters))
+                },
+                onDismiss = { sheet = null },
+            )
         }
     }
 
@@ -118,11 +117,10 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
     @Composable
     private fun FilterSheetDestination(
         request: FilterSheetRequest,
-        gender: Gender,
         onApply: (SalonFilters) -> Unit,
         onDismiss: () -> Unit,
     ) {
-        val viewModel: FilterSheetViewModel = koinViewModel(key = request.key.toString()) { parametersOf(request.filters, gender) }
+        val viewModel: FilterSheetViewModel = koinViewModel(key = request.key.toString()) { parametersOf(request.filters) }
         val state by viewModel.state.collectAsStateWithLifecycle()
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {

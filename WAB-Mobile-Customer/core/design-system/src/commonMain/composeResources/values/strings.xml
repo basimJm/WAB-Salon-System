@@ -133,8 +133,10 @@
     <string name="business_type_all">All</string>
     <string name="business_type_salons">Salons</string>
     <string name="business_type_clinics">Clinics</string>
+    <string name="business_type_tattoo">Tattoo</string>
     <string name="business_salon">Salon</string>
     <string name="business_clinic">Beauty clinic</string>
+    <string name="business_tattoo">Tattoo studio</string>
     <string name="audience_men">Men</string>
     <string name="audience_women">Women</string>
     <string name="audience_both">Men &amp; women</string>

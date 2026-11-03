@@ -25,7 +25,7 @@ sealed interface AllServicesContract {
 
     sealed interface SideEffect {
         /** → S04 pre-filtered by that service (PRD S06). */
-        data class OpenSalons(val serviceId: String, val serviceName: String, val businessType: BusinessType) : SideEffect
+        data class OpenSalons(val serviceId: String, val serviceName: String, val businessType: BusinessType?) : SideEffect
         data class ShowError(val message: String) : SideEffect
     }
 }

@@ -21,6 +21,8 @@ data class BookingSummary(
     val staffNames: List<String>,
     /** The salon's rejection reason; null unless REJECTED (PRD S14 card, SRV-170). */
     val rejection: BookingReason? = null,
-    /** Salon or clinic, snapshotted on the booking (BUSINESS_DOMAIN §5.19). */
+    /** Salon, clinic or tattoo studio, snapshotted on the booking (BUSINESS_DOMAIN §5.19, §5.23). */
     val businessType: BusinessType = BusinessType.SALON,
+    /** MERCHANT = made by the business for the customer: labelled "Booked by <place>" (§5.20). */
+    val source: BookingSource = BookingSource.CUSTOMER_APP,
 )

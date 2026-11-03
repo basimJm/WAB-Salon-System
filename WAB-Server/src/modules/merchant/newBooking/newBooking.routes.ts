@@ -31,8 +31,10 @@ export const createMerchantNewBookingRouter = (
         customer: body.customer,
         persons: body.persons,
       });
+      // `sendCreated` takes the data itself (SRV-188: it was wrapped in `data` twice).
       sendCreated(req, res, {
-        data: { ...presentSummary(created), customerRegistered: created.customerRegistered },
+        ...presentSummary(created),
+        customerRegistered: created.customerRegistered,
       });
     }),
   );

@@ -12,10 +12,15 @@ import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonFilters
+import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.designsystem.components.chip.ActiveFilterChip
 import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
 import com.fab.wab.customer.designsystem.components.dialog.GlobalDialogKind
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeLens
 import com.fab.wab.customer.designsystem.components.domain.businessTypeTabLabel
+import com.fab.wab.customer.designsystem.resources.Res as DsRes
+import com.fab.wab.customer.designsystem.resources.audience_men
+import com.fab.wab.customer.designsystem.resources.audience_women
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -40,12 +45,14 @@ import com.fab.wab.customer.feature.salons.presentation.resources.salons_empty_b
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title_clinics
 import com.fab.wab.customer.feature.salons.presentation.resources.salons_title_salons
+import com.fab.wab.customer.feature.salons.presentation.resources.salons_title_tattoo
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * S04 (design `on.salons`): top bar titled by the business type, search + filter button (the type is chosen first in
- * S05, owner 2026-10-30), active chips (the type is one), paged salon rows with design states.
+ * S04 search (design `on.salons`, BUSINESS_DOMAIN §5.22): top bar titled by the lens type, search + filter button, type
+ * lens, quick chips; while typing the grouped suggestions replace the list; otherwise recent searches (empty text), active
+ * chips and the paged rows with design states.
  */
 @Composable
 fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
@@ -53,16 +60,28 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
     val spacing = AppTheme.spacing
     AppScreen(
         modifier = modifier,
-        topBar = { DiscoveryTopBar(title = stringResource(titleOf(state.businessType)), onBack = onBack) },
+        topBar = { DiscoveryTopBar(title = stringResource(titleOf(state.lens)), onBack = onBack) },
     ) { _ ->
         Column(modifier = Modifier.fillMaxSize()) {
             val chips = state.filters.chips()
             SalonsSearchRow(
                 value = state.text,
                 onValueChange = { onAction(UiAction.OnTextChange(it)) },
+                onSearch = { onAction(UiAction.OnSearchSubmit) },
                 chipCount = chips.size,
                 onFilterClick = { onAction(UiAction.OnFilterClick) },
             )
+            BusinessTypeLens(
+                selected = state.lens,
+                onSelect = { onAction(UiAction.OnLensSelect(it)) },
+                modifier = Modifier.padding(start = spacing.space20, end = spacing.space20, bottom = spacing.space8),
+            )
+            SearchQuickChips(state.filters, onAction, Modifier.padding(bottom = spacing.space12))
+            if (state.showSuggestions) {
+                SearchSuggestionList(state.suggestionRows, onAction)
+                return@Column
+            }
+            if (state.showRecent) SearchRecent(state.recent, onAction)
             SalonsActiveChips(chips = chips, onRemove = { chip -> onAction(UiAction.OnChipRemove(chip.toFilterId())) })
             AppPullToRefresh(
                 refreshing = state.refreshing,
@@ -70,12 +89,12 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
                 modifier = Modifier.fillMaxSize(),
             ) {
                 when {
-                    state.loading && state.salons.isEmpty() -> SalonsShimmer()
+                    state.loading && state.visibleSalons.isEmpty() -> SalonsShimmer()
                     state.salons.isEmpty() && (state.offline || state.error != null) -> DiscoveryPlaceholderView(
                         placeholder = if (state.offline) DiscoveryPlaceholder.Offline else DiscoveryPlaceholder.ServerError,
                         onRetry = { onAction(UiAction.OnRetry) },
                     )
-                    state.loaded && state.salons.isEmpty() -> DiscoveryPlaceholderView(
+                    state.loaded && state.visibleSalons.isEmpty() -> DiscoveryPlaceholderView(
                         placeholder = DiscoveryPlaceholder.Empty(
                             title = stringResource(Res.string.salons_empty),
                             body = stringResource(Res.string.salons_empty_body),
@@ -83,7 +102,7 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
                         onRetry = { onAction(UiAction.OnRetry) },
                     )
                     else -> AppPagedList(
-                        items = state.salons,
+                        items = state.visibleSalons,
                         itemKey = { it.id },
                         hasMore = state.hasMore,
                         loadingMore = state.loadingMore,
@@ -127,10 +146,21 @@ private fun SalonsShimmer() {
     }
 }
 
-/** Chip ids are stable codes; labels are localized here (service names already are). */
+/**
+ * Chip ids are stable codes; labels are localized here (service names already are). One type is shown by the lens, so
+ * type chips appear only when several types are chosen in the sheet.
+ */
 @Composable
 private fun SalonFilters.chips(): List<ActiveFilterChip> = buildList {
-    businessType?.let { add(ActiveFilterChip(ChipCodes.BUSINESS_TYPE, stringResource(businessTypeTabLabel(it)))) }
+    if (businessTypes.size > 1) {
+        businessTypes.sortedBy { it.ordinal }.forEach {
+            add(ActiveFilterChip(ChipCodes.BUSINESS_TYPE + it.code, stringResource(businessTypeTabLabel(it))))
+        }
+    }
+    gender?.let {
+        val label = if (it == Gender.MALE) DsRes.string.audience_men else DsRes.string.audience_women
+        add(ActiveFilterChip(ChipCodes.GENDER, stringResource(label)))
+    }
     services.forEach { add(ActiveFilterChip(ChipCodes.SERVICE + it.id, it.name)) }
     priceRange?.let { add(ActiveFilterChip(ChipCodes.PRICE, stringResource(Res.string.salons_chip_price, it.min, it.max))) }
     general?.let {
@@ -144,7 +174,8 @@ private fun ActiveFilterChip.toFilterId(): FilterChipId = when {
     id.startsWith(ChipCodes.SERVICE) -> FilterChipId.Service(id.removePrefix(ChipCodes.SERVICE))
     id == ChipCodes.PRICE -> FilterChipId.Price
     id == ChipCodes.RATING -> FilterChipId.Rating
-    id == ChipCodes.BUSINESS_TYPE -> FilterChipId.Type
+    id.startsWith(ChipCodes.BUSINESS_TYPE) -> FilterChipId.Type(BusinessType.fromCode(id.removePrefix(ChipCodes.BUSINESS_TYPE)))
+    id == ChipCodes.GENDER -> FilterChipId.Gender
     else -> FilterChipId.General
 }
 
@@ -159,11 +190,13 @@ private object ChipCodes {
     const val PRICE = "price"
     const val GENERAL = "general"
     const val RATING = "rating"
-    const val BUSINESS_TYPE = "business_type"
+    const val BUSINESS_TYPE = "business_type:"
+    const val GENDER = "gender"
 }
 
 private fun titleOf(type: BusinessType?): StringResource = when (type) {
     null -> Res.string.salons_title
     BusinessType.SALON -> Res.string.salons_title_salons
     BusinessType.CLINIC -> Res.string.salons_title_clinics
+    BusinessType.TATTOO -> Res.string.salons_title_tattoo
 }

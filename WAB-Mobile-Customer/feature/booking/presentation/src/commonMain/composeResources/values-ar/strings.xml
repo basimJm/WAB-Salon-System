@@ -126,4 +126,10 @@
     <string name="booking_gender_error">اختر جنس الشخص</string>
     <string name="booking_who_companion_any">أدخل اسم المرافق وجنسه.</string>
     <string name="booking_companions_subtitle_any">يمكنك إضافة حتى 5 مرافقين، رجالاً أو نساءً، ولكل مرافق خدماته وموعده.</string>
+    <string name="booking_reference_title">صورة التصميم (اختياري)</string>
+    <string name="booking_reference_hint">أضف التصميم الذي تفكر فيه، وسيراه الاستوديو مع حجزك.</string>
+    <string name="booking_reference_add">إضافة صورة</string>
+    <string name="booking_reference_remove">إزالة الصورة</string>
+    <string name="booking_reference_uploading">جارٍ رفع الصورة…</string>
+    <string name="booking_reference_preview">صورة تصميمك</string>
 </resources>

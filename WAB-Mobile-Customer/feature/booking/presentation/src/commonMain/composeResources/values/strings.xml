@@ -124,4 +124,10 @@
     <string name="booking_gender_error">Choose the person’s gender</string>
     <string name="booking_who_companion_any">Enter the companion’s name and gender.</string>
     <string name="booking_companions_subtitle_any">Add up to 5 companions, men or women, each with their own services and time.</string>
+    <string name="booking_reference_title">Design image (optional)</string>
+    <string name="booking_reference_hint">Add the design you have in mind; the studio sees it with your booking.</string>
+    <string name="booking_reference_add">Add image</string>
+    <string name="booking_reference_remove">Remove image</string>
+    <string name="booking_reference_uploading">Uploading the image…</string>
+    <string name="booking_reference_preview">Your design image</string>
 </resources>

@@ -13,23 +13,33 @@ data class PriceRange(val min: String, val max: String)
 /** General single-select filter of S05 (PRD S04 presets). */
 enum class GeneralFilter { RECOMMENDED, NEAREST }
 
-/** All active filters of S04 / S05; combined with the search text in one query (PRD S04 "AND"). */
+/**
+ * All active filters of S04 / S05; combined with the search text in one query (PRD S04 "AND"). BUSINESS_DOMAIN §5.22:
+ * nothing filters by the customer's gender unless [gender] is chosen here (Men = audience MALE or BOTH, Women = FEMALE or
+ * BOTH); [businessTypes] empty = every type; [openNow] is applied on the device (the contract has no open-now filter).
+ */
 data class SalonFilters(
     val services: List<ServiceRef> = emptyList(),
     val priceRange: PriceRange? = null,
     val general: GeneralFilter? = null,
     val minRating: Int? = null,
-    /** Salons or clinics only, chosen first in S05 (owner 2026-10-30); null = both (BUSINESS_DOMAIN §5.19). */
-    val businessType: BusinessType? = null,
+    val businessTypes: Set<BusinessType> = emptySet(),
+    val gender: Gender? = null,
+    val openNow: Boolean = false,
 ) {
+    /** The one chosen type (lens, list title, catalog of the sheet); null for none or several. */
+    val singleBusinessType: BusinessType? get() = businessTypes.singleOrNull()
+
     val isEmpty: Boolean
-        get() = services.isEmpty() && priceRange == null && general == null && minRating == null && businessType == null
+        get() = services.isEmpty() && priceRange == null && general == null && minRating == null && businessTypes.isEmpty() &&
+            gender == null && !openNow
+
+    /** The lens chips All · Salons · Clinics · Tattoo set exactly one type, or none. */
+    fun withLens(type: BusinessType?): SalonFilters = copy(businessTypes = setOfNotNull(type))
 }
 
-/** One `GET /salons` page; `location` only when the user allowed it (needed by [GeneralFilter.NEAREST]); `businessType` null = all. */
+/** One `GET /salons` page; `location` only when the user allowed it (needed by [GeneralFilter.NEAREST]). */
 data class SalonQuery(
-    val gender: Gender,
-    val businessType: BusinessType? = null,
     val text: String = "",
     val filters: SalonFilters = SalonFilters(),
     val location: LocationData? = null,

@@ -6,6 +6,7 @@ import com.fab.wab.customer.feature.booking.domain.usecase.CreateBookingUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.DeleteBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.GetBookingDraftUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.LoadAvailabilityUseCase
+import com.fab.wab.customer.feature.booking.domain.usecase.UploadReferenceImageUseCase
 import com.fab.wab.customer.feature.booking.domain.usecase.VerifyBookingOtpUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -18,4 +19,5 @@ val bookingModule = module {
     singleOf(::LoadAvailabilityUseCase)
     singleOf(::VerifyBookingOtpUseCase)
     singleOf(::CreateBookingUseCase)
+    singleOf(::UploadReferenceImageUseCase)
 }
