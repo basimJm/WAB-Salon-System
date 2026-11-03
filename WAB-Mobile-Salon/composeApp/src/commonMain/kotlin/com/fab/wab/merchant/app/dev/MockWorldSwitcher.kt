@@ -26,6 +26,7 @@ import com.fab.wab.merchant.app.resources.mock_employee
 import com.fab.wab.merchant.app.resources.mock_kind_both
 import com.fab.wab.merchant.app.resources.mock_kind_clinic
 import com.fab.wab.merchant.app.resources.mock_kind_men
+import com.fab.wab.merchant.app.resources.mock_kind_tattoo
 import com.fab.wab.merchant.app.resources.mock_kind_women
 import com.fab.wab.merchant.app.resources.mock_manager
 import com.fab.wab.merchant.app.resources.mock_member
@@ -106,12 +107,13 @@ fun MockWorldSwitcher(useCase: SwitchMockWorldUseCase, modifier: Modifier = Modi
     }
 }
 
-/** Salon or clinic presets (BUSINESS_DOMAIN §5.19) the fixtures answer with. */
+/** Salon, clinic or tattoo studio presets (BUSINESS_DOMAIN §5.19, §5.23) the fixtures answer with. */
 private val MOCK_KINDS: List<Pair<BusinessKind, StringResource>> = listOf(
     BusinessKind(BusinessType.SALON, Audience.FEMALE) to Res.string.mock_kind_women,
     BusinessKind(BusinessType.SALON, Audience.MALE) to Res.string.mock_kind_men,
     BusinessKind(BusinessType.SALON, Audience.BOTH) to Res.string.mock_kind_both,
     BusinessKind(BusinessType.CLINIC, Audience.BOTH) to Res.string.mock_kind_clinic,
+    BusinessKind(BusinessType.TATTOO, Audience.BOTH) to Res.string.mock_kind_tattoo,
 )
 
 private fun presetLabel(preset: MockMemberPreset): StringResource = when (preset) {

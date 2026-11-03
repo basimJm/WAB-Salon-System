@@ -6,9 +6,9 @@ object MockPresets {
     const val MANAGER = "MANAGER"
     const val EMPLOYEE = "EMPLOYEE"
 
-    /** The 15 grantable keys of `MemberProfile.permissions`. */
+    /** The 16 grantable keys of `MemberProfile.permissions`. */
     val ALL_PERMISSIONS: Set<String> = setOf(
-        "DASHBOARD_VIEW", "BOOKINGS_VIEW_ALL", "BOOKINGS_VIEW_OWN", "BOOKINGS_RESPOND", "BOOKINGS_OPERATE",
+        "DASHBOARD_VIEW", "BOOKINGS_VIEW_ALL", "BOOKINGS_VIEW_OWN", "BOOKINGS_RESPOND", "BOOKINGS_OPERATE", "BOOKINGS_CREATE",
         "SALON_PROFILE_MANAGE", "GALLERY_MANAGE", "WORKING_HOURS_MANAGE", "SERVICES_MANAGE", "STAFF_MANAGE",
         "POLICIES_MANAGE", "REVIEWS_VIEW", "STATISTICS_VIEW", "FINANCE_VIEW", "SUBSCRIPTION_VIEW",
     )
@@ -16,7 +16,10 @@ object MockPresets {
     val owner = MockMember(OWNER, ALL_PERMISSIONS)
     val manager = MockMember(
         MANAGER,
-        setOf("DASHBOARD_VIEW", "BOOKINGS_VIEW_ALL", "BOOKINGS_RESPOND", "BOOKINGS_OPERATE", "SERVICES_MANAGE", "STAFF_MANAGE"),
+        setOf(
+            "DASHBOARD_VIEW", "BOOKINGS_VIEW_ALL", "BOOKINGS_RESPOND", "BOOKINGS_OPERATE", "BOOKINGS_CREATE", "SERVICES_MANAGE",
+            "STAFF_MANAGE",
+        ),
     )
     val employee = MockMember(EMPLOYEE, setOf("BOOKINGS_VIEW_OWN", "BOOKINGS_OPERATE"))
     val noPermissions = MockMember(EMPLOYEE, emptySet())

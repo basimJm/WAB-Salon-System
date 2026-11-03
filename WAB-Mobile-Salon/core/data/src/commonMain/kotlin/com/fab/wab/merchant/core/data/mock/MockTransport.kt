@@ -83,6 +83,7 @@ fun createMockEngine(
                 if (request.method == HttpMethod.Patch && request.url.encodedPath.endsWith(AUDIENCE_PATH)) scenarios.widenAudience()
                 val patched = patchFixture(body, scenarios.salonState.value, scenarios.member.value, scenarios.businessKind.value)
                     .let { patchPendingBooking(it, request.url.encodedPath, scenarios.pendingBookings.value) }
+                    .let { patchCustomerLookup(it, request.url.encodedPath, request.url.parameters[LOOKUP_NUMBER_PARAM]) }
                 respond(localizeFixture(patched, language), HttpStatusCode.OK, json)
             }
         }

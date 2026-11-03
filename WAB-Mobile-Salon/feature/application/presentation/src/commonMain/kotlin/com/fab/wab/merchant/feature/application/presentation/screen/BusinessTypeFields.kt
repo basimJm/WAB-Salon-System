@@ -25,6 +25,8 @@ import com.fab.wab.merchant.feature.application.presentation.resources.reg_audie
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_both
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_business_type
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_clinic
+import com.fab.wab.merchant.feature.application.presentation.resources.reg_tattoo_unisex
+import com.fab.wab.merchant.feature.application.presentation.resources.reg_tattoo
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_clinic_unisex
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_medical
 import com.fab.wab.merchant.feature.application.presentation.resources.reg_medical_error
@@ -59,7 +61,7 @@ internal fun BusinessTypeFields(state: UiState, onAction: (UiAction) -> Unit) {
                         label = stringResource(type.label),
                         selected = type == selected,
                         onClick = { onAction(UiAction.OnBusinessTypeSelect(type)) },
-                        icon = if (type == BusinessType.CLINIC) AppIcons.Shield else AppIcons.Store,
+                        icon = type.icon,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -78,8 +80,10 @@ internal fun BusinessTypeFields(state: UiState, onAction: (UiAction) -> Unit) {
 @Composable
 internal fun AudienceFields(state: UiState, onAction: (UiAction) -> Unit) {
     when (state.input.businessType) {
-        BusinessType.CLINIC -> AppText(
-            text = stringResource(Res.string.reg_clinic_unisex),
+        BusinessType.CLINIC, BusinessType.TATTOO -> AppText(
+            text = stringResource(
+                if (state.input.businessType == BusinessType.TATTOO) Res.string.reg_tattoo_unisex else Res.string.reg_clinic_unisex,
+            ),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.colors.muted,
         )
@@ -132,7 +136,7 @@ internal fun ReviewCard(state: UiState) {
         Column(verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space8)) {
             Label(Res.string.reg_review)
             ReviewRow(Res.string.reg_review_type, stringResource(type.label))
-            val audience = if (type == BusinessType.CLINIC) Audience.BOTH else state.input.audience
+            val audience = if (type != BusinessType.SALON) Audience.BOTH else state.input.audience
             ReviewRow(Res.string.reg_review_audience, stringResource(audience?.summary ?: Res.string.reg_review_missing))
             if (type == BusinessType.CLINIC) {
                 val uploaded = state.input.medicalLicenseKeys.isNotEmpty()
@@ -159,7 +163,18 @@ private fun Label(text: StringResource) {
 }
 
 private val BusinessType.label: StringResource
-    get() = if (this == BusinessType.CLINIC) Res.string.reg_clinic else Res.string.reg_salon
+    get() = when (this) {
+        BusinessType.SALON -> Res.string.reg_salon
+        BusinessType.CLINIC -> Res.string.reg_clinic
+        BusinessType.TATTOO -> Res.string.reg_tattoo
+    }
+
+private val BusinessType.icon
+    get() = when (this) {
+        BusinessType.SALON -> AppIcons.Store
+        BusinessType.CLINIC -> AppIcons.Shield
+        BusinessType.TATTOO -> AppIcons.Edit
+    }
 
 private val Audience.choice: StringResource
     get() = when (this) {

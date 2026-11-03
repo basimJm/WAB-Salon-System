@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.media.RingtoneManager
 import androidx.core.app.NotificationCompat
 import com.fab.wab.merchant.R
+import com.fab.wab.merchant.app.request.CloseReminders
 import com.fab.wab.merchant.app.request.OutsideBookingRequests
 import com.fab.wab.merchant.core.domain.AppSettings
 import com.fab.wab.merchant.core.firebase.PushTokenRelay
@@ -39,6 +40,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         // PRD M10: a booking request is a data message (no visible payload) — overlay / heads-up / in-app sheet.
         if (KoinJavaComponent.getKoin().get<OutsideBookingRequests>().onPush(remoteMessage.data)) return
+        // MER-086 (§5.21): a close reminder delivered to the app in the background gets Completed / No-show actions.
+        val shown = remoteMessage.notification
+        val closeReminders = KoinJavaComponent.getKoin().get<CloseReminders>()
+        if (closeReminders.onPush(remoteMessage.data, shown?.title, shown?.body)) return
         val push = pushNotificationOf(remoteMessage.data, remoteMessage.notification?.title, remoteMessage.notification?.body) ?: return
         if (PushSignals.appForeground.value) PushSignals.publishReceived(push) else showSystemNotification(push)
     }

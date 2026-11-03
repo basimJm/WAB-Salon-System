@@ -1,9 +1,10 @@
 package com.fab.wab.merchant.core.domain.salon
 
-/** What the business is (BUSINESS_DOMAIN §5.19): chosen in the application and never changed afterwards. */
+/** What the business is (BUSINESS_DOMAIN §5.19, §5.23): chosen in the application and never changed afterwards. */
 enum class BusinessType {
     SALON,
     CLINIC,
+    TATTOO,
     ;
 
     companion object {
@@ -11,7 +12,7 @@ enum class BusinessType {
     }
 }
 
-/** Who the business serves (§5.19): a salon MALE, FEMALE or BOTH; a clinic always BOTH. */
+/** Who the business serves (§5.19): a salon MALE, FEMALE or BOTH; a clinic and a tattoo studio always BOTH. */
 enum class Audience {
     MALE,
     FEMALE,
@@ -27,19 +28,22 @@ enum class Audience {
 data class BusinessKind(val type: BusinessType, val audience: Audience) {
     val isClinic: Boolean get() = type == BusinessType.CLINIC
 
+    /** A tattoo studio (§5.23): its bookings may carry a design image per person. */
+    val isTattoo: Boolean get() = type == BusinessType.TATTOO
+
     /** Bride bookings, `brideOnly` services and `brideQualified` staff: salons serving women (FEMALE or BOTH) only. */
     val brideAllowed: Boolean get() = type == BusinessType.SALON && audience != Audience.MALE
 
-    /** The owner may widen a MALE or FEMALE salon to BOTH; clinics and BOTH salons never change. */
+    /** The owner may widen a MALE or FEMALE salon to BOTH; clinics, tattoo studios and BOTH salons never change. */
     val canWidenAudience: Boolean get() = type == BusinessType.SALON && audience != Audience.BOTH
 
     /** `gender` filter of `GET /catalog/services` (own audience + BOTH); null = every audience of the type. */
     val catalogGender: Audience? get() = audience.takeIf { type == BusinessType.SALON && it != Audience.BOTH }
 
     companion object {
-        /** A clinic is always unisex; a salon keeps the audience it chose (null while not chosen). */
+        /** A clinic or tattoo studio is always unisex; a salon keeps the audience it chose (null while not chosen). */
         fun of(type: BusinessType, audience: Audience?): BusinessKind? = when (type) {
-            BusinessType.CLINIC -> BusinessKind(type, Audience.BOTH)
+            BusinessType.CLINIC, BusinessType.TATTOO -> BusinessKind(type, Audience.BOTH)
             BusinessType.SALON -> audience?.let { BusinessKind(type, it) }
         }
     }

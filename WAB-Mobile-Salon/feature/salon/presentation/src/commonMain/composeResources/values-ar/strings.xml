@@ -7,7 +7,9 @@
     <string name="hub_men">صالون رجالي</string>
     <string name="hub_both">صالون للرجال والنساء</string>
     <string name="hub_clinic">عيادة تجميل · للرجال والنساء</string>
+    <string name="hub_tattoo">استوديو وشم · للرجال والنساء</string>
     <string name="hub_title_clinic">إدارة العيادة</string>
+    <string name="hub_title_tattoo">إدارة الاستوديو</string>
     <string name="tile_profile">الملف والصور</string>
     <string name="tile_profile_sub">الاسم، الوصف، الموقع والتواصل</string>
     <string name="tile_gallery">المعرض</string>
@@ -35,6 +37,7 @@
     <string name="profile_logo_hint">الشعار</string>
     <string name="profile_name">اسم الصالون</string>
     <string name="profile_name_clinic">اسم العيادة</string>
+    <string name="profile_name_tattoo">اسم الاستوديو</string>
     <string name="profile_description">الوصف</string>
     <string name="profile_count">%1$d / %2$d</string>
     <string name="profile_location">الموقع على الخريطة</string>
@@ -49,6 +52,7 @@
     <string name="profile_type">نوع النشاط</string>
     <string name="profile_locked">لا يمكن تغيير النوع، ويمكن للمالك اختيار خدمة الرجال والنساء.</string>
     <string name="profile_clinic_note">العيادات تخدم الرجال والنساء، ولا يمكن تغيير النوع.</string>
+    <string name="profile_tattoo_note">استوديوهات الوشم تخدم الرجال والنساء، ولا يمكن تغيير النوع.</string>
     <string name="profile_widen">خدمة الرجال والنساء</string>
     <string name="profile_widen_title">خدمة الرجال والنساء؟</string>
     <string name="profile_widen_body">سيرى عملاء من الجنسين صالونك ويمكنهم الحجز فوراً. لا يمكن التراجع عن ذلك إلا عن طريق WAB.</string>
@@ -170,6 +174,7 @@
     <string name="catalog_note_men">كتالوج الصالونات الرجالية</string>
     <string name="catalog_note_both">كتالوج صالونات الرجال والنساء</string>
     <string name="catalog_note_clinic">كتالوج عيادات التجميل</string>
+    <string name="catalog_note_tattoo">كتالوج استوديوهات الوشم</string>
     <string name="catalog_added">مضافة</string>
     <string name="catalog_cant_find">لا تجد خدمتك؟</string>
     <string name="catalog_request">اطلب إضافتها للكتالوج</string>

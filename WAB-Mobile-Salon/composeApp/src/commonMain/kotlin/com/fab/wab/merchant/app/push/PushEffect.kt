@@ -7,12 +7,15 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fab.wab.merchant.app.analytics.ShellAnalytics
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
+import com.fab.wab.merchant.app.request.closeReminderLink
 import com.fab.wab.merchant.core.analytics.compose.LocalAnalyticsTracker
+import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.notification.composable.rememberNotificationManager
 import com.fab.wab.merchant.core.notification.model.NotificationStyle
 import com.fab.wab.merchant.core.notification.push.PushKeys
 import com.fab.wab.merchant.core.notification.push.PushSignals
 import com.fab.wab.merchant.core.realtime.RealtimeEvents
+import org.koin.compose.koinInject
 
 /**
  * Foreground pushes become an in-app banner; a tapped system push that carries a link the app handles is published to
@@ -36,10 +39,13 @@ fun PushEffect(deepLinks: DeepLinkStore) {
     }
     val tap by PushSignals.tap.collectAsStateWithLifecycle()
     val tracker = LocalAnalyticsTracker.current
+    val environment = koinInject<AppEnvironment>()
     LaunchedEffect(tap) {
         val current = tap ?: return@LaunchedEffect
         PushSignals.consumeTap(current)
         tracker.trackAction(ShellAnalytics.pushOpen(current))
-        current.deepLink?.let(deepLinks::publish)
+        // MER-086: a close reminder always opens its booking (details = the fallback of Completed / No-show).
+        val closeLink = closeReminderLink(current.data, environment.webBaseUrl)
+        (closeLink ?: current.deepLink)?.let(deepLinks::publish)
     }
 }

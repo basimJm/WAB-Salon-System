@@ -126,10 +126,10 @@ class RegistrationViewModel(
         return true
     }
 
-    /** A clinic serves everyone (no audience question, §5.19); the type of a resubmission is fixed. */
+    /** Clinics and tattoo studios serve everyone (no audience question, §5.19, §5.23); a resubmission's type is fixed. */
     private fun selectType(type: BusinessType) {
         if (uiState.value.typeLocked) return
-        edit { copy(businessType = type, audience = if (type == BusinessType.CLINIC) null else audience) }
+        edit { copy(businessType = type, audience = if (type != BusinessType.SALON) null else audience) }
     }
 
     private fun edit(change: RegistrationInput.() -> RegistrationInput) {
@@ -157,7 +157,7 @@ class RegistrationViewModel(
         scope.launch {
             val kind = deps.salonKind() ?: return@launch
             updateState { copy(typeLocked = true) }
-            edit { copy(businessType = kind.type, audience = kind.audience.takeUnless { kind.isClinic }) }
+            edit { copy(businessType = kind.type, audience = kind.audience.takeIf { kind.type == BusinessType.SALON }) }
         }
     }
 

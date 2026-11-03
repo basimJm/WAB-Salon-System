@@ -103,6 +103,8 @@
     <string name="perm_bookings_respond_sub">قبول الطلبات الجديدة أو رفضها واستلام التنبيهات الفورية</string>
     <string name="perm_bookings_operate">إدارة الحجوزات</string>
     <string name="perm_bookings_operate_sub">مكتمل ومدفوع، عدم حضور، إلغاء حجوزات مقبولة، إعادة توزيع الطاقم</string>
+    <string name="perm_bookings_create">الحجز للعملاء</string>
+    <string name="perm_bookings_create_sub">إنشاء حجز لعميل لديه تطبيق WAB أو ليس لديه (مقبول، والدفع في المكان)</string>
     <string name="perm_salon_profile_manage">ملف الصالون</string>
     <string name="perm_salon_profile_manage_sub">الملف والصور والموقع والتواصل</string>
     <string name="perm_gallery_manage">المعرض</string>

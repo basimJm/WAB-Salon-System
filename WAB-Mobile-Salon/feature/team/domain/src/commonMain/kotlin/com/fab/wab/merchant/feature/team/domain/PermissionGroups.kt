@@ -6,7 +6,12 @@ import com.fab.wab.merchant.core.domain.permission.Permission
 
 /** PRD M18 groups (Bookings, Salon, Staff, Finance, Insights); owner-only capabilities are shown locked. */
 enum class PermissionGroup(val permissions: List<Permission>, val ownerOnly: List<OwnerCapability> = emptyList()) {
-    BOOKINGS(listOf(Permission.BOOKINGS_VIEW_ALL, Permission.BOOKINGS_VIEW_OWN, Permission.BOOKINGS_RESPOND, Permission.BOOKINGS_OPERATE)),
+    BOOKINGS(
+        listOf(
+            Permission.BOOKINGS_VIEW_ALL, Permission.BOOKINGS_VIEW_OWN, Permission.BOOKINGS_RESPOND, Permission.BOOKINGS_OPERATE,
+            Permission.BOOKINGS_CREATE,
+        ),
+    ),
     SALON(
         listOf(
             Permission.SALON_PROFILE_MANAGE, Permission.GALLERY_MANAGE, Permission.WORKING_HOURS_MANAGE,

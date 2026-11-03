@@ -22,6 +22,8 @@ sealed interface BookingsContract {
         val staffOptions: List<StaffRef> = emptyList(),
         val nowMs: Long = 0L,
         val branchScope: BranchScope = BranchScope(),
+        /** "New booking" shows only with `BOOKINGS_CREATE` (BUSINESS_DOMAIN §5.20; hidden, not disabled). */
+        val canCreate: Boolean = false,
     ) {
         val isEmpty: Boolean get() = !loading && error == null && items.isEmpty()
 
@@ -45,10 +47,12 @@ sealed interface BookingsContract {
         data object OnRefresh : UiAction
         data object OnRetry : UiAction
         data class OnBranchSelect(val branchId: String?) : UiAction
+        data object OnNewBooking : UiAction
     }
 
     sealed interface SideEffect {
         data class OpenDetails(val id: String) : SideEffect
         data class ShowError(val message: String) : SideEffect
+        data object OpenNewBooking : SideEffect
     }
 }

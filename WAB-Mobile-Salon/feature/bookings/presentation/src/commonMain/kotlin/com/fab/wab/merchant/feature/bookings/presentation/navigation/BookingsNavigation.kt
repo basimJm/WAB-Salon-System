@@ -22,13 +22,14 @@ import com.fab.wab.merchant.feature.bookings.presentation.screen.BookingsScreen
 import com.fab.wab.merchant.feature.bookings.presentation.screen.CalendarScreen
 import org.koin.compose.viewmodel.koinViewModel
 
-/** `Graph.Bookings` tab: list (M08) and booking details (M09); `Graph.Calendar` tab (M11). */
+/** `Graph.Bookings` tab: list (M08), booking details (M09) and the new booking form (§5.20); `Graph.Calendar` tab (M11). */
 class BookingsNavigation(override val navController: NavHostController) : Navigator by NavigatorDelegation(navController) {
 
     override fun registerGraph(navGraphBuilder: NavGraphBuilder) {
         navGraphBuilder.navigation<Graph.Bookings>(startDestination = Screen.Bookings) {
             composable<Screen.Bookings> { ListDestination() }
             bookingDetailsDestination(this@BookingsNavigation)
+            newBookingDestination(this@BookingsNavigation)
         }
         navGraphBuilder.navigation<Graph.Calendar>(startDestination = Screen.Calendar) {
             composable<Screen.Calendar> { CalendarDestination() }
@@ -58,6 +59,7 @@ class BookingsNavigation(override val navController: NavHostController) : Naviga
             when (effect) {
                 is BookingsContract.SideEffect.OpenDetails -> navigateTo(Screen.BookingDetails(effect.id))
                 is BookingsContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
+                BookingsContract.SideEffect.OpenNewBooking -> navigateTo(Screen.NewBooking)
             }
         }
         BookingsScreen(state = state, onAction = viewModel::onEvent)
