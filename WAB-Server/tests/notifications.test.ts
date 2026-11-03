@@ -456,6 +456,38 @@ describe('producers', () => {
     expect(ios?.title).toBe('New booking request');
     expect(ios?.fullScreen).toBeUndefined();
   });
+  it('a close reminder (§5.21, SRV-187) is a data message for Android and a BOOKING_CLOSE alert for iOS, once per round', async () => {
+    device({ memberId: ids.staff }, 'tok-staff', 'en');
+    device({ memberId: ids.staff }, 'tok-staff-ios', 'en', 'IOS');
+    const b = booking('APPROVED');
+    await producers.bookingJobEvent('booking.close_reminder', b, 1);
+    await producers.bookingJobEvent('booking.close_reminder', b, 1);
+    const toStaff = sent.filter(
+      (p) => p.tokens.includes('tok-staff') || p.tokens.includes('tok-staff-ios'),
+    );
+    expect(toStaff).toHaveLength(2);
+    const android = toStaff.find((p) => p.tokens.includes('tok-staff'));
+    const ios = toStaff.find((p) => p.tokens.includes('tok-staff-ios'));
+    expect(android).toMatchObject({
+      kind: 'DATA_ONLY',
+      collapseKey: (b as unknown as { id: string }).id,
+    });
+    expect(android?.data).toMatchObject({
+      event: 'booking.close_reminder',
+      actions: 'COMPLETED,NO_SHOW',
+      title: 'Did this booking finish?',
+    });
+    expect(android?.fullScreen).toBeUndefined();
+    expect(ios).toMatchObject({
+      kind: 'VISIBLE',
+      interruption: 'TIME_SENSITIVE',
+      actionCategory: 'BOOKING_CLOSE',
+    });
+    expect(ios?.data).toMatchObject({ actions: 'COMPLETED,NO_SHOW' });
+    // The next round is a new occurrence.
+    await producers.bookingJobEvent('booking.close_reminder', b, 2);
+    expect(sent.filter((p) => p.tokens.includes('tok-staff')).length).toBe(2);
+  });
   it('a booking request is pushed once per device group even if the hook repeats', async () => {
     const b = booking('PENDING');
     await producers.bookingCreated.created(b);
