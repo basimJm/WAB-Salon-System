@@ -369,14 +369,14 @@
 - Loops: 1/1 — re-read each owner answer (1–10) against §5.20–§5.23 and the task rows; the three points not answered are written as assumptions in §12 point 11, not as decisions
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, PM ✔, UX ✔, Marketing ✔, QA ✔) — docs and backlog only. DEVIATION: the customer/merchant/admin PRDs are not edited; tasks point at BUSINESS_DOMAIN §5.20–§5.23.
 
-### T-151 — 2026-11-03 round merged: SRV-183…187, ADM-111/112, MER-084…086; masters synced
+### T-151 — 2026-11-03 round merged: SRV-183…188, ADM-111/112, MER-084…086, CUS-102…104; masters synced
 - Project: repo root
-- Branch: `chore/sync-masters-into-main-17` (PR into `main`), then `main` → each master
-- Status: IN REVIEW
+- Branch: `chore/sync-masters-into-main-17`, then `chore/round-statuses-18` (statuses) into `main`, then `main` → each master
+- Status: DONE
 - Acceptance criteria:
   - [x] Merged: SRV-183…186 (#617), ADM-111/112 (#623), MER-084…086 (#624), SRV-187 (#625); admin → main (#626)
   - [x] `merchant` + `server` merged into one branch from `main`; conflicts = backlog status cells (kept the more advanced status per row) + generated board (regenerated); statuses DONE
-  - [ ] main → every master; customer tasks CUS-102…104 next
+  - [x] main → every master (#629–#632); customer CUS-102…104 (#634) and SRV-188 (#633) merged, masters synced again (#635–#640); statuses DONE
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog statuses only, no product code written.
