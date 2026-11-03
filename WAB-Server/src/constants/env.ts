@@ -96,6 +96,19 @@ export const ENV_KEYS = {
   s3SecretAccessKey: 'S3_SECRET_ACCESS_KEY',
   /** Public media base URL (the CDN domain). */
   cdnBaseUrl: 'CDN_BASE_URL',
+  /**
+   * Cloudflare R2 (STORAGE_PROVIDER=cloudflare-r2, SRV-180). R2 public access is per bucket, so public
+   * media and private documents live in two buckets; the private one never gets public access.
+   */
+  r2AccountId: 'R2_ACCOUNT_ID',
+  r2AccessKeyId: 'R2_ACCESS_KEY_ID',
+  r2SecretAccessKey: 'R2_SECRET_ACCESS_KEY',
+  r2PublicBucketName: 'R2_PUBLIC_BUCKET_NAME',
+  r2PrivateBucketName: 'R2_PRIVATE_BUCKET_NAME',
+  /** Optional: unset = `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com` (set it for a jurisdiction endpoint). */
+  r2Endpoint: 'R2_ENDPOINT',
+  /** Public base URL of the public bucket (custom domain or r2.dev); https in production. */
+  r2PublicUrl: 'R2_PUBLIC_URL',
   /** CloudFront signing for private files; all three together, or none (then S3 presigned GET is used). */
   cloudfrontBaseUrl: 'CLOUDFRONT_PRIVATE_BASE_URL',
   cloudfrontKeyPairId: 'CLOUDFRONT_KEY_PAIR_ID',
@@ -111,9 +124,10 @@ export const ENV_KEYS = {
 
 /**
  * Keys that pick `fake` or `real` for an external provider; production must set them to `real`.
- * Payments (`fake` | `disabled`) and OTP (`fake` | `arqam`) have their own production rules.
+ * Storage (`real` | `cloudflare-r2`), payments (`fake` | `disabled`) and OTP (`fake` | `arqam`) have
+ * their own production rules.
  */
-export const PROVIDER_ENV_KEYS = [ENV_KEYS.storageProvider, ENV_KEYS.notifierProvider] as const;
+export const PROVIDER_ENV_KEYS = [ENV_KEYS.notifierProvider] as const;
 
 /** Keys that must be present when the OTP provider is `arqam`. */
 export const OTP_ARQAM_REQUIRED_KEYS = [
@@ -136,6 +150,15 @@ export const STORAGE_REAL_REQUIRED_KEYS = [
   ENV_KEYS.s3PublicBucket,
   ENV_KEYS.s3PrivateBucket,
   ENV_KEYS.cdnBaseUrl,
+] as const;
+/** Keys that must be present when the storage provider is `cloudflare-r2` (R2 has no instance roles). */
+export const STORAGE_R2_REQUIRED_KEYS = [
+  ENV_KEYS.r2AccountId,
+  ENV_KEYS.r2AccessKeyId,
+  ENV_KEYS.r2SecretAccessKey,
+  ENV_KEYS.r2PublicBucketName,
+  ENV_KEYS.r2PrivateBucketName,
+  ENV_KEYS.r2PublicUrl,
 ] as const;
 export const CLOUDFRONT_KEYS = [
   ENV_KEYS.cloudfrontBaseUrl,

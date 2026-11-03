@@ -14,6 +14,8 @@ import { StorageError, isStorageError } from '../errors';
 import type {
   ConfirmUploadRequest,
   ConfirmUploadResult,
+  CopyObjectRequest,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,
@@ -22,6 +24,7 @@ import type {
 } from '../types';
 import {
   assertConfirmRequest,
+  assertCopyRequest,
   assertKey,
   assertSignedRequest,
   assertUploadRequest,
@@ -208,6 +211,33 @@ export class LocalFsStorage implements StorageProvider {
     } catch (error) {
       throw mapFsError(error);
     }
+  }
+
+  async copy(request: CopyObjectRequest): Promise<void> {
+    assertCopyRequest(request);
+    let body: Buffer;
+    try {
+      body = await readFile(this.pathOf(request.visibility, request.fromKey));
+    } catch (error) {
+      if (isMissing(error))
+        throw new StorageError(ERROR_CODES.OBJECT_NOT_FOUND, 'Source object does not exist');
+      throw mapFsError(error);
+    }
+    await this.store(request.visibility, request.toKey, body);
+  }
+
+  /** The file system keeps no content type: `contentType` is always null here. */
+  async stat(key: string): Promise<ObjectInfo | null> {
+    assertKey(key);
+    for (const visibility of ['PUBLIC', 'PRIVATE'] as const) {
+      try {
+        const info = await stat(this.pathOf(visibility, key));
+        return { visibility, size: info.size, contentType: null, updatedAt: info.mtime };
+      } catch (error) {
+        if (!isMissing(error)) throw mapFsError(error);
+      }
+    }
+    return null;
   }
 
   private sign(key: string, expires: number): string {

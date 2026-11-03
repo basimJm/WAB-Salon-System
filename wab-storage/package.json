@@ -1,6 +1,6 @@
 {
   "name": "@wab/storage",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Provider-independent file storage (S3 + CDN, presigned uploads, confirmation, variants) for WAB projects.",
   "license": "UNLICENSED",
   "engines": {

@@ -10,10 +10,60 @@
 
 ## Current task
 
+### SRV-182 — Every module on the file lifecycle (owner 2026-11-01)
+
+- Branch: `feat/srv-180-r2-storage` (batch SRV-180…182 on one branch)
+- Status: IN PROGRESS (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §3.7 file slots + storageCleanups; operations PUT/DELETE `/customer/v1/profile/avatar`, PATCH `/merchant/v1/salon/profile`, `/merchant/v1/team/members[/{id}]`, PATCH `/merchant/v1/me`, `/merchant/v1/salon/services/{id}`, DELETE `/merchant/v1/salon/gallery/{id}`, `/merchant/v1/salon/application/resubmit`, admin catalog / banners / catalog requests / salon edit):
+  - [x] Slots (same key + version, replaced in place): customer avatar, salon cover + logo (`profileKey`, merchant and admin edit), member photo (team create/update + own profile), catalog image (admin create/update + approved catalog request), banner image per language
+  - [x] Lists queue what they drop: service media, gallery item files (now through the outbox instead of a best-effort delete), license + medical-license documents replaced on resubmit, catalog-request images (rejected, mapped to an existing entry, or replaced by the admin's)
+  - [x] Customer purge removes the avatar slot (record + objects queued) instead of a direct delete
+  - [x] Request schemas of every slot field accept the returned reference `key?v=n` (an app may send back what it read): merchant 1.10.0, admin 1.13.0 (additive, no client change; customer avatar body had no pattern)
+  - [x] No module deletes stored objects directly any more (grep: only the outbox and the provider); every write goes through `StorageProvider`
+- Tests: `tests/fileSlots.test.ts` (12: create, read URL with version, replace keeps file id + key, no duplicate, old content replaced, legacy key queued, delete DB-first + idempotent, live slot kept, demo never queued, vanished temp / copy failure keep the old file, failed deletion retried with backoff, cross-tenant refused, concurrent replacements serialised), `tests/adminImageSlots.test.ts` (5), updated `customerProfile`, `team`, `memberSelf`, `salonProfile`, `adminSalonEdit`, `gallery`, `salonServices`, `accountLifecycle` suites (`tests/helpers/fileSlots.ts` kit: real slots + outbox over fake models)
+- API docs: merchant 1.10.0, admin 1.13.0 regenerated (patterns only)
+- Gate (Terminal panel): prettier, eslint, tsc, build, `npm run docs` (no drift), full jest 175 suites / 3044 tests green; wab-storage `npm run verify` (216) + loop green
+- Loops: 1/1 — re-checked the owner's spec point by point (R2, central service, CRUD lifecycle, per-module prefixes, metadata, entity integration, consistency, security, tests); found and fixed during the loop: slot fields refused the returned `?v=` reference (contract break for apps that echo values), the first FILE_REF pattern refused dotted single-segment keys (banners), the admin image wrapper ran rules after copying (now before)
+- Review: PASSED (SE ✔ (one FileSlots + one outbox, DB written before objects are queued, locks per slot, idempotent deletes), Mobile ✔ (no app change: same request/response shapes, URLs gain `?v=`), Architect ✔ (additive contracts, R2/S3 by env, demo assets protected, Phase 2 untouched), QA ✔ (spec tests 1–12; migration test not applicable))
+- Notes: DEVIATIONS / LIMITS — (1) temporary upload keys keep the existing prefixes (`customers/`, `salons/cover/`, `gallery/`, `services/`, `licenses/`…); only slot keys follow the new per-entity layout, multi-file items keep one key per file (no `documents/{ownerType}/{ownerId}/` move); (2) `originalName` is not stored (the presign request has no file name; adding it is an API change); (3) there are no booking attachments in the product, so nothing to integrate; (4) salon deletion only takes a salon offline (history kept), so it deletes no files; exports are never deleted (retention not decided); (5) if the entity write fails after the copy, the slot already holds the new content while the entity keeps the previous version number (same key: the image is right, only a cache may be stale); (6) slot rows of salon-owned images record `ownerType: MEMBER`, `ownerId = salonId` (+ `salonId`), admin images `ADMIN`; (7) no S3→R2 migration tool (owner) and no run against real R2 (no credentials).
+
+### SRV-181 — File slots: same-key replacement + reliable cleanup (owner 2026-11-01)
+
+- Branch: `feat/srv-180-r2-storage` (batch)
+- Status: IN PROGRESS (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §3.7, updated in this batch):
+  - [x] `uploads` rows: `slot`, `version`, `size`, status `CONSUMED`; one row per slot key, kept across replacements (file id stable)
+  - [x] `FileSlots.replace`: ownership via `assertConfirmed`, server-side copy temp → slot key under a per-slot Redis lock, `stat` for size/type, version $inc, variants regenerated, entity commit, temp `CONSUMED` + queued, older plain key queued; `remove`: entity first, then record + objects queued
+  - [x] References `key?v=n`: the provider builds versioned public URLs, strips the version for reads/deletes/signing, `variantKey` keeps it
+  - [x] `storageCleanups` outbox + `periodic.storage-cleanup` (every 5 min) + drain after enqueue: batch delete, backoff retries (no give-up), live slots skipped, `demo/` keys never queued, malformed keys refused
+- Tests: see SRV-182 (`tests/fileSlots.test.ts`)
+- Loops: 1/1 — covered by the SRV-182 batch loop
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — see SRV-182
+- Notes: lock = 30 s TTL, waits up to ~5 s, then 409.
+
+### SRV-180 (+ STO-011) — Cloudflare R2 storage provider (owner 2026-11-01)
+
+- Branch: `feat/srv-180-r2-storage`
+- Branched: from `origin/server` (SRV-179 is on its own unmerged branch)
+- Status: IN PROGRESS (batch SRV-180…182, rules §3.13)
+- Owner decisions 2026-11-01: two R2 buckets (public + private), same-key replacement with a version in the URL (SRV-181), no S3→R2 migration tool
+- Acceptance criteria (BUSINESS_DOMAIN §3.7 uploads, §2 visibility; BRD storage NFRs; no API change):
+  - [x] Inspected first: storage already central (server `StorageProvider` → `@wab/storage` SDK S3 adapter; `uploads` collection = file metadata; presign → confirm → `assertConfirmed`); gaps recorded for SRV-181/182 (replacement leaves old objects for salon cover/profile, member photo, service media, catalog, banners, licenses)
+  - [x] SDK 0.2.0: provider `r2` on the S3 adapter (account endpoint, region `auto`, checksums only when required, public ≠ private bucket, prod https); `copy` (same bucket, atomic replace, `STORAGE_OBJECT_NOT_FOUND`) + `stat` on S3/R2, memory, local-fs; `configureBucketCors`
+  - [x] Server: `STORAGE_PROVIDER=fake|real|cloudflare-r2`; `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_PUBLIC_BUCKET_NAME`, `R2_PRIVATE_BUCKET_NAME`, `R2_ENDPOINT` (optional), `R2_PUBLIC_URL`; required together; buckets must differ; production = `real` or `cloudflare-r2`, https only; `real` (AWS S3) kept as fallback
+  - [x] `StorageProvider.copy` (`COPIED` | `SOURCE_MISSING`) + `stat` on the SDK-backed and the fake provider
+  - [x] `npm run storage:cors` (both buckets, exact admin origins from `CORS_ALLOWED_ORIGINS`; prints counts / error codes only)
+  - [x] `.env.example`, `docker/env.{dev,prod}.example` (R2 active, S3 commented), `docs/DEPLOYMENT.md` R2 runbook (buckets, public domain only on the public bucket, scoped token, CORS, re-seed)
+- Tests: wab-storage `tests/r2.test.ts` (20: config, endpoint/region, prod rules, presign without checksum params, copy/stat per adapter, CORS) — `npm run verify` 216 tests + coverage + loop green; server `tests/storageR2.test.ts` (9), `tests/storageCors.test.ts` (3), `tests/config.test.ts` (+4 R2), `tests/checkEnv.test.ts` (templates with R2)
+- API docs: no change
+- Loops: 1/1 — batch gate after SRV-182 (see SRV-182): full server gate + wab-storage verify/loop green; re-checked the R2 rules (region auto, two buckets, https in prod, checksums when required, credentials never printed)
+- Review: PASSED (SE ✔ (one adapter for S3 and R2, no duplicate storage code), Mobile N/A (no app change), Architect ✔ (provider switch by env, `real` kept as fallback, SDK 0.2.0 additive), QA ✔ (config/prod rules/presign/copy/stat/CORS tests))
+- Notes: no R2 credentials here: real R2 calls are not verified (presigned URLs are built locally by the real AWS SDK and checked for host, region `auto`, no checksum parameters). No S3→R2 copy (owner).
+
 ### SRV-179 — Fix: clinic and BOTH-salon details answered 500 (owner 2026-10-30)
 
 - Branch: `fix/srv-179-demo-photo-keys`
-- Status: IN PROGRESS (committed, not pushed)
+- Status: DONE (PR #602)
 - Acceptance criteria (BUSINESS_DOMAIN §5.19 demo businesses; operations `GET /customer/v1/salons/{salonId}` and every page that lists the business staff):
   - [x] Root cause: the demo business seed (SRV-174) built staff photo keys from labels like `abdoun:staff0`; ':' is not a valid object key, so `storage.getPublicUrl` threw `RangeError invalid object key` and the details of both clinics (and Unity Salon) answered 500 INTERNAL (reproduced on the hosted dev API and on a local stack)
   - [x] Seed key uses '-' (same rule as `salons.ts`); every stored file key of the demo businesses passes `assertObjectKey`

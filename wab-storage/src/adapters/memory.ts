@@ -1,10 +1,18 @@
-import { CONTENT_TYPE_HEADER, UPLOAD_METHOD, type Visibility } from '../constants/codes';
+import {
+  CONTENT_TYPE_HEADER,
+  ERROR_CODES,
+  UPLOAD_METHOD,
+  type Visibility,
+} from '../constants/codes';
 import { MAGIC_BYTES_LENGTH } from '../constants/defaults';
 import { judgeUpload } from '../confirm';
 import type { ResolvedConfig } from '../config/options';
+import { StorageError } from '../errors';
 import type {
   ConfirmUploadRequest,
+  CopyObjectRequest,
   ConfirmUploadResult,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,
@@ -13,6 +21,7 @@ import type {
 } from '../types';
 import {
   assertConfirmRequest,
+  assertCopyRequest,
   assertKey,
   assertSignedRequest,
   assertUploadRequest,
@@ -27,10 +36,13 @@ const PRIVATE_PATH = 'private';
 interface Pending {
   readonly visibility: Visibility;
   readonly expiresAt: number;
+  readonly contentType: string;
 }
 interface Stored {
   readonly visibility: Visibility;
   readonly body: Buffer;
+  readonly contentType: string | null;
+  readonly updatedAt: Date;
 }
 
 /** In-memory storage for tests and offline dev. Production config refuses it. */
@@ -53,6 +65,7 @@ export class MemoryStorage implements StorageProvider {
       this.pending.set(request.key, {
         visibility: request.visibility,
         expiresAt: expiresAt.getTime(),
+        contentType: request.contentType,
       });
       return {
         url: `${this.config.cdnBaseUrl}/${UPLOAD_PATH}/${encodeKey(request.key)}`,
@@ -103,7 +116,12 @@ export class MemoryStorage implements StorageProvider {
   write(request: WriteObjectRequest): Promise<void> {
     return run(() => {
       assertWriteRequest(request);
-      this.objects.set(request.key, { visibility: request.visibility, body: request.body });
+      this.objects.set(request.key, {
+        visibility: request.visibility,
+        body: request.body,
+        contentType: request.contentType,
+        updatedAt: this.now(),
+      });
     });
   }
 
@@ -117,11 +135,41 @@ export class MemoryStorage implements StorageProvider {
     });
   }
 
+  copy(request: CopyObjectRequest): Promise<void> {
+    return run(() => {
+      assertCopyRequest(request);
+      const source = this.objects.get(request.fromKey);
+      if (source?.visibility !== request.visibility)
+        throw new StorageError(ERROR_CODES.OBJECT_NOT_FOUND, 'Source object does not exist');
+      this.objects.set(request.toKey, { ...source, updatedAt: this.now() });
+    });
+  }
+
+  stat(key: string): Promise<ObjectInfo | null> {
+    return run(() => {
+      assertKey(key);
+      const stored = this.objects.get(key);
+      return stored === undefined
+        ? null
+        : {
+            visibility: stored.visibility,
+            size: stored.body.length,
+            contentType: stored.contentType,
+            updatedAt: stored.updatedAt,
+          };
+    });
+  }
+
   /** Test helper: the client PUTs to the presigned URL. False when no valid URL exists (403). */
   simulateUpload(key: string, body: Buffer): boolean {
     const upload = this.pending.get(key);
     if (upload === undefined || upload.expiresAt <= this.now().getTime()) return false;
-    this.objects.set(key, { visibility: upload.visibility, body });
+    this.objects.set(key, {
+      visibility: upload.visibility,
+      body,
+      contentType: upload.contentType,
+      updatedAt: this.now(),
+    });
     return true;
   }
 

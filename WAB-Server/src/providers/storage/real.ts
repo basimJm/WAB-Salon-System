@@ -14,12 +14,16 @@ import { toSdkLogger } from '../notifier/real';
 import type {
   ConfirmUploadRequest,
   ConfirmUploadResult,
+  CopyObjectRequest,
+  CopyObjectResult,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,
   UploadUrlRequest,
   WriteObjectRequest,
 } from './types';
+import { objectKeyOf, parseFileRef, withVersion } from './fileRef';
 
 export interface RealStorageDeps {
   readonly settings: StorageSettings;
@@ -55,6 +59,27 @@ const guarded = async <T>(work: () => Promise<T>): Promise<T> => {
 /** Maps the server's settings to the SDK options (the only place that knows both vocabularies). */
 export const toStorageOptions = (deps: RealStorageDeps): StorageOptions => {
   const { settings } = deps;
+  const common = {
+    environment: deps.isProduction ? ('prod' as const) : ('dev' as const),
+    cdn: { baseUrl: settings.cdnBaseUrl },
+    upload: { maxTtlSec: UPLOAD_URL_TTL_SEC },
+    logger: toSdkLogger(deps.logger),
+  };
+  // Cloudflare R2 (SRV-180): the SDK maps it onto the S3 API (account endpoint, region `auto`).
+  if (settings.provider === 'r2') {
+    return {
+      ...common,
+      provider: 'r2',
+      r2: {
+        accountId: settings.accountId,
+        publicBucket: settings.publicBucket,
+        privateBucket: settings.privateBucket,
+        ...(settings.endpoint === undefined ? {} : { endpoint: settings.endpoint }),
+        credentials: { ...settings.credentials },
+      },
+      signedUrl: { maxTtlSec: STORAGE_SIGNED_URL_MAX_TTL_SEC, mode: 's3' },
+    };
+  }
   return {
     environment: deps.isProduction ? 'prod' : 'dev',
     provider: 's3',
@@ -78,7 +103,7 @@ export const toStorageOptions = (deps: RealStorageDeps): StorageOptions => {
   };
 };
 
-/** Storage backed by the `wab-storage` SDK (S3 + CDN). */
+/** Storage backed by the `wab-storage` SDK (Cloudflare R2, or AWS S3 + CDN). */
 export const createRealStorage = (deps: RealStorageDeps): StorageProvider => {
   const sdk = (deps.build ?? createStorage)(toStorageOptions(deps));
   return {
@@ -94,17 +119,34 @@ export const createRealStorage = (deps: RealStorageDeps): StorageProvider => {
           reason: result.reason === 'EMPTY' ? 'TYPE_MISMATCH' : result.reason,
         };
       }),
-    getPublicUrl: (key: string): string => {
+    // Stored references may carry a slot version (`key?v=3`, SRV-181): the object is the key, the
+    // public URL keeps the version so caches refresh after a replacement.
+    getPublicUrl: (ref: string): string => {
+      const parsed = parseFileRef(ref);
       try {
-        return sdk.getPublicUrl(key);
+        return withVersion(sdk.getPublicUrl(parsed.key), parsed);
       } catch (error) {
         return mapStorageError(error);
       }
     },
     getSignedUrl: (request: SignedUrlRequest): Promise<string> =>
-      guarded(() => sdk.getSignedUrl(request)),
-    read: (key: string): Promise<Buffer | null> => guarded(() => sdk.read(key)),
+      guarded(() => sdk.getSignedUrl({ ...request, key: objectKeyOf(request.key) })),
+    read: (ref: string): Promise<Buffer | null> => guarded(() => sdk.read(objectKeyOf(ref))),
     write: (request: WriteObjectRequest): Promise<void> => guarded(() => sdk.write(request)),
-    delete: (keys: readonly string[]): Promise<void> => guarded(() => sdk.delete(keys)),
+    delete: (refs: readonly string[]): Promise<void> =>
+      guarded(() => sdk.delete(refs.map(objectKeyOf))),
+    copy: (request: CopyObjectRequest): Promise<CopyObjectResult> =>
+      guarded(async () => {
+        try {
+          await sdk.copy(request);
+          return 'COPIED';
+        } catch (error) {
+          // A missing source is an answer (nothing changed), not a provider failure.
+          if (isStorageError(error) && error.code === SDK_ERRORS.OBJECT_NOT_FOUND)
+            return 'SOURCE_MISSING';
+          throw error;
+        }
+      }),
+    stat: (ref: string): Promise<ObjectInfo | null> => guarded(() => sdk.stat(objectKeyOf(ref))),
   };
 };

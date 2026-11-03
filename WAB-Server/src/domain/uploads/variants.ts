@@ -7,15 +7,20 @@ import {
   VARIANT_SEPARATOR,
   type ImageVariantName,
 } from '../../constants/uploads';
+import { formatFileRef, objectKeyOf, parseFileRef } from '../../providers/storage/fileRef';
 import type { StorageProvider } from '../../providers/storage';
 import type { Logger } from '../../utils/logger';
 
 /** `salons/cover/<id>/x.jpg` + `thumb` -> `salons/cover/<id>/x_thumb.webp` (beside the original). */
-export const variantKey = (key: string, name: ImageVariantName): string => {
+export const variantKey = (ref: string, name: ImageVariantName): string => {
+  // A slot reference keeps its version on the variant (`a/logo?v=3` -> `a/logo_thumb.webp?v=3`).
+  const parsed = parseFileRef(ref);
+  const { key } = parsed;
   const dot = key.lastIndexOf('.');
   const slash = key.lastIndexOf('/');
   const base = dot > slash ? key.slice(0, dot) : key;
-  return `${base}${VARIANT_SEPARATOR}${name}.${VARIANT_EXTENSION}`;
+  const variant = `${base}${VARIANT_SEPARATOR}${name}.${VARIANT_EXTENSION}`;
+  return parsed.version === null ? variant : formatFileRef(variant, parsed.version);
 };
 
 /** Every variant key of an original (to delete them together with it). */
@@ -44,7 +49,9 @@ export interface ImageVariantsDeps {
  * is skipped with a warning: clients fall back to the original.
  */
 export const createImageVariants = ({ storage, logger }: ImageVariantsDeps): ImageVariants => ({
-  async generate(key) {
+  async generate(ref) {
+    // Variants are written under the object key; a slot version only belongs in URLs.
+    const key = objectKeyOf(ref);
     const original = await storage.read(key);
     if (original === null) return { created: [], skipped: 'MISSING' };
     const created: string[] = [];

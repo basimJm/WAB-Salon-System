@@ -29,6 +29,8 @@ export interface PeriodicJobsDeps {
   /** The `reports:aggregate` run (SRV-108): stores yesterday's numbers; resolves to that date. */
   readonly aggregateReports?: (now: Date) => Promise<string>;
   readonly onDelayedRefunds?: (refunds: Entity<RefundRaw>[]) => Promise<void>;
+  /** The storage cleanup outbox (SRV-181): deletes queued objects; without it the job does nothing. */
+  readonly cleanupStorage?: () => Promise<{ deleted: number; kept: number; failed: number }>;
   /** The admin overview tick (SRV-124); without it the job does nothing. */
   readonly overviewTick?: () => void;
   readonly logger: Logger;
@@ -96,6 +98,10 @@ export const createPeriodicJobs = (deps: PeriodicJobsDeps): PeriodicJobs => {
       if (deps.aggregateReports === undefined) return;
       const date = await deps.aggregateReports(new Date());
       logger.info({ job: PERIODIC_JOBS.reportsAggregate.name, date }, 'periodic job finished');
+    },
+    [PERIODIC_JOBS.storageCleanup.name]: async () => {
+      if (deps.cleanupStorage === undefined) return;
+      report(PERIODIC_JOBS.storageCleanup.name, { ...(await deps.cleanupStorage()) });
     },
     [PERIODIC_JOBS.overviewTick.name]: () => {
       deps.overviewTick?.();
