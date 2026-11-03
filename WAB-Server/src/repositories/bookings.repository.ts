@@ -151,6 +151,38 @@ export class BookingsRepository
     return visits;
   }
 
+  /** Records close reminder round `round` of a still-approved booking (§5.21). */
+  async recordCloseReminder(
+    id: string,
+    round: number,
+    at: Date,
+  ): Promise<Entity<BookingRaw> | null> {
+    if (!isObjectIdString(id)) return null;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: 'APPROVED' },
+        { $set: { 'closeReminders.count': round, 'closeReminders.lastAt': at } },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated === null ? null : toEntity<BookingRaw>(updated);
+  }
+
+  /** Marks the overdue alert of a still-approved booking as sent, once (§5.21). */
+  async markCloseOverdue(id: string, at: Date): Promise<boolean> {
+    if (!isObjectIdString(id)) return false;
+    const updated = await this.model
+      .findOneAndUpdate(
+        { _id: id, status: 'APPROVED', 'closeReminders.overdueAlertedAt': { $exists: false } },
+        { $set: { 'closeReminders.overdueAlertedAt': at } },
+        { new: true },
+      )
+      .lean()
+      .exec();
+    return updated !== null;
+  }
+
   /** Business-made bookings of this number without an account join the customer (§5.20). */
   async claimByPhone(e164: string, customerId: string): Promise<number> {
     const result = await this.model
@@ -222,13 +254,14 @@ export class BookingsRepository
     }));
   }
 
-  /** One page of bookings that still need background jobs: every PENDING one and upcoming APPROVED ones. */
-  jobCandidates(
-    now: Date,
-    params: { page: number; pageSize: number },
-  ): Promise<Page<Entity<BookingRaw>>> {
+  /**
+   * One page of bookings that still need background jobs: every PENDING and APPROVED one (an
+   * approved booking past its end still needs its close reminders, §5.21).
+   */
+  jobCandidates(params: { page: number; pageSize: number }): Promise<Page<Entity<BookingRaw>>> {
     return this.findPage(
-      { $or: [{ status: 'PENDING' }, { status: 'APPROVED', appointmentStart: { $gt: now } }] },
+      // Approved bookings keep jobs after their start too: close reminders (§5.21).
+      { status: { $in: ['PENDING', 'APPROVED'] } },
       params,
       { appointmentStart: 1 },
     );

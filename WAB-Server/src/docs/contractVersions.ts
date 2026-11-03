@@ -20,13 +20,13 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-185: booking rows source (MERCHANT = Booked by the business) + createdBy (always null for customers) (CUS-104)',
   },
   merchant: {
-    version: '1.12.0',
-    sha256: 'cc057e5987f2782234a036bee595b88dc63aff00093cf9b93c42827d0194f75f',
-    note: 'SRV-185: POST /bookings (book for a customer), GET /customers/lookup, permission BOOKINGS_CREATE, upload BOOKING_REFERENCE for members, rows source/createdBy, customer.id nullable (MER-085)',
+    version: '1.13.0',
+    sha256: '7057da79969f1412306411a23d31a39dba22aa2806bf1c285db46b7cb6db36d0',
+    note: 'SRV-186: bookings tab TO_CLOSE; the booking\'s own staff may complete / no-show (route accepts BOOKINGS_VIEW_OWN); push booking.close_reminder / close_overdue with actions COMPLETED,NO_SHOW (MER-086)',
   },
   admin: {
-    version: '1.15.0',
-    sha256: '62c368a024c93c07aa7d49ffe7f122e1b1a8650be173e5417229efe1db975363',
-    note: 'SRV-185: bookings source filter + export column, rows source/createdBy, customer.id nullable, search booking customerId nullable, permission BOOKINGS_CREATE (ADM-112)',
+    version: '1.16.0',
+    sha256: '8098cfaed0332e93ae5bd9b4a3c4e17eb201993d42911088a2686802898a4a20',
+    note: 'SRV-186: bookings tab TO_CLOSE; alert kind BOOKING_CLOSE_OVERDUE (entity BOOKING); settings booking.closeReminderIntervalMinutes / closeOverdueAlertHours (ADM-112)',
   },
 };

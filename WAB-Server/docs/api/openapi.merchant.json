@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Merchant API",
-    "version": "1.12.0"
+    "version": "1.13.0"
   },
   "servers": [
     {
@@ -18336,7 +18336,8 @@
                 "PENDING",
                 "UPCOMING",
                 "TODAY",
-                "PAST"
+                "PAST",
+                "TO_CLOSE"
               ]
             },
             "required": false,

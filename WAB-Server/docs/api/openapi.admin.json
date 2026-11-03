@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.15.0"
+    "version": "1.16.0"
   },
   "servers": [
     {
@@ -16260,7 +16260,8 @@
                 "PENDING",
                 "UPCOMING",
                 "TODAY",
-                "PAST"
+                "PAST",
+                "TO_CLOSE"
               ]
             },
             "required": false,
@@ -21572,7 +21573,8 @@
                 "REVIEW_PENDING",
                 "CATALOG_REQUEST",
                 "SALON_DELETION_REQUEST",
-                "SALON_AUDIENCE_WIDENED"
+                "SALON_AUDIENCE_WIDENED",
+                "BOOKING_CLOSE_OVERDUE"
               ]
             },
             "required": false,
@@ -21631,7 +21633,8 @@
                               "REVIEW_PENDING",
                               "CATALOG_REQUEST",
                               "SALON_DELETION_REQUEST",
-                              "SALON_AUDIENCE_WIDENED"
+                              "SALON_AUDIENCE_WIDENED",
+                              "BOOKING_CLOSE_OVERDUE"
                             ]
                           },
                           "severity": {
@@ -21670,6 +21673,7 @@
                               "REFUND",
                               "REVIEW",
                               "CATALOG_REQUEST",
+                              "BOOKING",
                               null
                             ]
                           },
@@ -21970,7 +21974,8 @@
                             "REVIEW_PENDING",
                             "CATALOG_REQUEST",
                             "SALON_DELETION_REQUEST",
-                            "SALON_AUDIENCE_WIDENED"
+                            "SALON_AUDIENCE_WIDENED",
+                            "BOOKING_CLOSE_OVERDUE"
                           ]
                         },
                         "severity": {
@@ -22009,6 +22014,7 @@
                             "REFUND",
                             "REVIEW",
                             "CATALOG_REQUEST",
+                            "BOOKING",
                             null
                           ]
                         },

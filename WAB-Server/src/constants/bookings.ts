@@ -28,7 +28,8 @@ export const CUSTOMER_BOOKING_ROUTES = { cancel: '/:id/cancel' } as const;
 export const CUSTOMER_CANCEL_REASON_CODE = 'CUSTOMER_REQUEST';
 
 /** Booking queries (SRV-077): list tabs, calendar window, search limits. */
-export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST'] as const;
+/** `TO_CLOSE` (§5.21): approved bookings whose end passed, oldest first. */
+export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST', 'TO_CLOSE'] as const;
 export type BookingTab = (typeof BOOKING_TABS)[number];
 export const CUSTOMER_BOOKING_TABS = ['UPCOMING', 'PAST'] as const;
 /** At most this many days per calendar request (week view). */
@@ -83,6 +84,10 @@ export const BOOKING_JOB_NAMES = {
   reminder: 'booking.reminder',
   pendingAlert: 'booking.pending-alert',
   autoCancel: 'booking.auto-cancel',
+  /** §5.21: "Did this booking finish?" each interval after the end, until it is closed. */
+  closeReminder: 'booking.close-reminder',
+  /** §5.21: once, after `booking.closeOverdueAlertHours` still open: merchant + admin. */
+  closeOverdue: 'booking.close-overdue',
 } as const;
 /** The reminder minutes that have a message template; other values of the setting are ignored. */
 export const REMINDER_EVENT_BY_MINUTES = {

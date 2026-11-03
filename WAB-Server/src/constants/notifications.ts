@@ -76,6 +76,17 @@ export const NOTIFICATION_EVENTS = {
     audiences: [customer, { who: 'members', permissions: RESPOND }],
     priority: 'HIGH',
   },
+  // §5.21: the booking's staff and the branch members who close bookings (owner included).
+  'booking.close_reminder': {
+    type: 'BOOKING',
+    audiences: [{ who: 'members', permissions: ['BOOKINGS_OPERATE'], assigned: true }],
+    priority: 'HIGH',
+  },
+  'booking.close_overdue': {
+    type: 'BOOKING',
+    audiences: [{ who: 'members', permissions: ['BOOKINGS_OPERATE'], assigned: true }],
+    priority: 'HIGH',
+  },
   'booking.completed': { type: 'BOOKING', audiences: [customer] },
   'booking.no_show': { type: 'BOOKING', audiences: [customer] },
   'booking.reassigned': {

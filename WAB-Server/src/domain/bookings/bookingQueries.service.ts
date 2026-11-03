@@ -270,6 +270,9 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
         and.push({ appointmentStart: { $gte: day.start, $lt: day.end } });
         break;
       }
+      case 'TO_CLOSE':
+        and.push({ status: 'APPROVED', appointmentEnd: { $lt: at } });
+        break;
       case 'PAST':
         and.push({
           $or: [{ status: { $in: [...FINAL_STATUSES] } }, { appointmentEnd: { $lt: at } }],
@@ -452,7 +455,12 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     const can = (key: string): boolean => audience.member.permissions.includes(key);
     const started = at >= b.appointmentStart;
     if (b.status === 'PENDING') return can('BOOKINGS_RESPOND') ? ['APPROVE', 'REJECT'] : [];
-    if (b.status !== 'APPROVED' || !can('BOOKINGS_OPERATE')) return [];
+    if (b.status !== 'APPROVED') return [];
+    if (!can('BOOKINGS_OPERATE')) {
+      // §5.21: the booking's own staff may close it once it has started.
+      const assigned = b.persons.some((p) => p.staffId === audience.member.id);
+      return assigned && started ? ['COMPLETE', 'NO_SHOW'] : [];
+    }
     return started ? ['COMPLETE', 'NO_SHOW', 'REASSIGN'] : ['CANCEL', 'REASSIGN'];
   };
 

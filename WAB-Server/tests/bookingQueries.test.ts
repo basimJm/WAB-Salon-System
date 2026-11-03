@@ -434,6 +434,19 @@ describe('calendar', () => {
   });
 });
 
+describe('to close (§5.21)', () => {
+  it('lists approved bookings whose end passed, oldest first; the own staff may close them', async () => {
+    const doc = m.bookings.docs.find((d) => String(d['_id']) === ids['b3']?.toHexString());
+    if (doc === undefined) throw new Error('fixture b3 missing');
+    doc['status'] = 'APPROVED';
+    const res = await merchant('?tab=TO_CLOSE');
+    expect(refsOf(res)).toEqual([refs.b3]);
+    // b3's staff (staffA) without BOOKINGS_OPERATE: may complete / no-show their own booking.
+    const own = await merchant(`/${ids['b3']?.toHexString() ?? ''}`, 'BOOKINGS_VIEW_OWN', staffA);
+    expect((bodyOf(own).data as { actions: string[] }).actions).toEqual(['COMPLETE', 'NO_SHOW']);
+  });
+});
+
 describe('admin', () => {
   const admin = (path: string): request.Test => request(app).get(`/admin/v1/bookings${path}`);
   it('lists every salon, with salon and customer, 25 per page', async () => {

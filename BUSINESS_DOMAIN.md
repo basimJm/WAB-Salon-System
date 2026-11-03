@@ -525,7 +525,7 @@ Customer: `DELETION_PENDING`, tokens revoked, `deletionScheduledAt` = +30 days; 
 - A booking still **APPROVED** after its `appointmentEnd` is *to close*. At `appointmentEnd + booking.closeReminderIntervalMinutes` and then every interval, **until it is COMPLETED or NO_SHOW** (no cap; owner), the assigned staff of each person, the branch members with `BOOKINGS_OPERATE` and the owner get `booking.close_reminder` (push with actions Completed / No-show + in-app + socket); `closeReminders.count/lastAt` updated.
 - At `appointmentEnd + booking.closeOverdueAlertHours` (once): `booking.close_overdue` to the same merchant recipients **and the admin** (email + admin alerts list); reminders continue.
 - The **assigned staff** may mark their own booking COMPLETED or NO_SHOW (no `BOOKINGS_OPERATE` needed); `TOO_EARLY_TO_COMPLETE` before `appointmentStart` (unchanged).
-- Merchant list *To close*: `GET /merchant/v1/bookings?toClose=true` (permission-scoped like the bookings list). The customer sees COMPLETED at once (socket `booking.updated` + push `booking.completed`).
+- Merchant list *To close*: `GET /merchant/v1/bookings?tab=TO_CLOSE` (also on the admin list; permission-scoped like the bookings list, oldest first). The customer sees COMPLETED at once (socket `booking.updated` + push `booking.completed`).
 
 ### 5.22 Discovery across business types (customer, owner decisions 2026-11-03)
 - **No gender filter in discovery:** gender is still asked in guest onboarding and registration, but home, nearest, Recommended, favorites, deep links and search list every LIVE business of every type and audience. Booking rules are unchanged: a Men/Women salon still takes only persons of its audience (`GENDER_MISMATCH`); cards and details show the audience label.

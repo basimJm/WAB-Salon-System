@@ -46,14 +46,32 @@ type Params = Record<string, ParamValue>;
  */
 /** The booking events that background jobs raise (SRV-096). */
 export type JobBookingEvent =
-  'booking.reminder_1h' | 'booking.reminder_15m' | 'booking.pending_30m';
+  | 'booking.reminder_1h'
+  | 'booking.reminder_15m'
+  | 'booking.pending_30m'
+  | 'booking.close_reminder'
+  | 'booking.close_overdue';
+
+/** Push actions of the close messages (§5.21): the merchant app answers from the notification. */
+export const CLOSE_PUSH_ACTIONS = 'COMPLETED,NO_SHOW';
+const CLOSE_EVENTS: readonly JobBookingEvent[] = [
+  'booking.close_reminder',
+  'booking.close_overdue',
+];
 
 export interface NotificationProducers {
   readonly bookingCreated: BookingCreatedHook;
   /** A business-made booking (§5.20): "Booked by <place>" to a registered customer only. */
   readonly bookingCreatedByMerchant: BookingCreatedHook;
-  /** Sends a reminder / pending alert; one delivery per booking and event even if the job repeats. */
-  readonly bookingJobEvent: (event: JobBookingEvent, booking: Entity<BookingRaw>) => Promise<void>;
+  /**
+   * Sends a reminder / pending alert / close message; one delivery per booking, event and `round`
+   * (close reminders repeat, each round once) even if the job repeats.
+   */
+  readonly bookingJobEvent: (
+    event: JobBookingEvent,
+    booking: Entity<BookingRaw>,
+    round?: number,
+  ) => Promise<void>;
   /** Tells a salon owner that the subscription is ending soon or has expired (once per end date). */
   readonly subscriptionAlert: (
     event: 'subscription.ending_7d' | 'subscription.expired',
@@ -191,11 +209,25 @@ export const createNotificationProducers = (deps: ProducerDeps): NotificationPro
     }),
   };
 
-  const bookingJobEvent: NotificationProducers['bookingJobEvent'] = async (event, booking) => {
+  const bookingJobEvent: NotificationProducers['bookingJobEvent'] = async (
+    event,
+    booking,
+    round,
+  ) => {
     await notifications.notify(event, {
       ...bookingTarget(booking),
       params: await bookingParams(booking),
-      key: `${event}:${booking.id}`,
+      key:
+        round === undefined ? `${event}:${booking.id}` : `${event}:${booking.id}:${String(round)}`,
+      ...(CLOSE_EVENTS.includes(event)
+        ? {
+            pushData: () => ({
+              bookingId: booking.id,
+              reference: booking.referenceNumber,
+              actions: CLOSE_PUSH_ACTIONS,
+            }),
+          }
+        : {}),
     });
   };
 

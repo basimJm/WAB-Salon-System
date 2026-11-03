@@ -609,6 +609,21 @@ const buildServices = (
     notify: producers.bookingJobEvent,
     settings,
     logger,
+    // §5.21: the admin side of a booking still open after the overdue hours (panel + email).
+    alertCloseOverdue: async (booking) => {
+      await adminAlerts.raise({
+        kind: 'BOOKING_CLOSE_OVERDUE',
+        severity: 'WARNING',
+        dedupeKey: `booking-close-overdue:${booking.id}`,
+        entityType: 'BOOKING',
+        entityId: booking.id,
+        data: {
+          referenceNumber: booking.referenceNumber,
+          salonId: booking.salonId,
+          appointmentEnd: booking.appointmentEnd.toISOString(),
+        },
+      });
+    },
   });
   Object.assign(jobs.handlers, bookingJobs.handlers);
   jobs.reconcilers.push(() => bookingJobs.reconcile());
