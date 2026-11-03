@@ -19,6 +19,9 @@ export const SETTING_DEFAULTS = {
   'booking.autoCancelAfterStartMinutes': 60,
   'booking.pendingAlertBeforeMinutes': 30,
   'booking.reminderMinutes': [60, 15],
+  // §5.21: "Did it finish?" every interval after the end; merchant + admin alert after the hours.
+  'booking.closeReminderIntervalMinutes': 60,
+  'booking.closeOverdueAlertHours': 24,
   'otp.length': 6,
   'otp.resendAfterSec': 60,
   'otp.maxRequests': 5,

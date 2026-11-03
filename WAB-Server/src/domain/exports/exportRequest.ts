@@ -1,3 +1,4 @@
+import { BOOKING_SOURCES } from '../../models/booking.model';
 import { z } from 'zod';
 import { OBJECT_ID_PATTERN } from '../../constants/database';
 import {
@@ -71,6 +72,7 @@ export const exportRequestSchema = z.discriminatedUnion('kind', [
       paymentStatus: z.enum(BOOKING_PAYMENT_STATUSES).optional(),
       salonId: objectId.optional(),
       businessType: z.enum(BUSINESS_TYPES).optional(),
+      source: z.enum(BOOKING_SOURCES).optional(),
       branchId: objectId.optional(),
       customerId: objectId.optional(),
       /** Appointment days (Asia/Amman), both inclusive. */

@@ -11,6 +11,8 @@ export interface Actor {
   readonly id?: string | undefined;
   /** Permissions of a MEMBER (owners carry all). */
   readonly permissions?: readonly string[] | undefined;
+  /** A MEMBER who is the staff of one of the booking's persons (§5.21). */
+  readonly assigned?: boolean | undefined;
 }
 
 export interface BookingFacts {
@@ -25,6 +27,8 @@ interface Rule {
   readonly to: BookingStatus;
   readonly actors: readonly ActorType[];
   readonly permission?: TransitionPermission;
+  /** The booking's own staff may do it without the permission (§5.21: close their booking). */
+  readonly assignedMay?: boolean;
   readonly reasonRequired?: boolean;
   /** Extra precondition on the clock; throws a domain error when it does not hold. */
   readonly check?: (facts: BookingFacts, now: Date) => void;
@@ -74,6 +78,7 @@ export const TRANSITIONS: readonly Rule[] = [
     to: 'COMPLETED',
     actors: ['MEMBER'],
     permission: 'BOOKINGS_OPERATE',
+    assignedMay: true,
     check: afterStart,
   },
   {
@@ -81,6 +86,7 @@ export const TRANSITIONS: readonly Rule[] = [
     to: 'NO_SHOW',
     actors: ['MEMBER'],
     permission: 'BOOKINGS_OPERATE',
+    assignedMay: true,
     check: afterStart,
   },
 ];
@@ -139,7 +145,8 @@ export const applyTransition = (input: {
   if (
     rule.permission !== undefined &&
     actor.type === 'MEMBER' &&
-    !(actor.permissions ?? []).includes(rule.permission)
+    !(actor.permissions ?? []).includes(rule.permission) &&
+    !(rule.assignedMay === true && actor.assigned === true)
   ) {
     throw new ForbiddenError({ code: ERROR_CODES.PERMISSION_DENIED });
   }

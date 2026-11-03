@@ -37,7 +37,8 @@ export interface SearchBooking {
   readonly status: BookingStatus;
   readonly appointmentStart: Date;
   readonly salonId: string;
-  readonly customerId: string;
+  /** `null` for a business-made booking of an unregistered customer (§5.20). */
+  readonly customerId: string | null;
 }
 export interface SearchMember {
   readonly id: string;
@@ -183,7 +184,7 @@ export const createAdminSearchService = (deps: AdminSearchDeps): AdminSearchServ
                   status: b.status,
                   appointmentStart: b.appointmentStart,
                   salonId: b.salonId,
-                  customerId: b.customerId,
+                  customerId: b.customerId ?? null,
                 })),
               },
             }),

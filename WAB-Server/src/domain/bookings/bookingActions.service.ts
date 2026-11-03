@@ -117,7 +117,12 @@ export const createBookingActionsService = (deps: BookingActionsDeps): BookingAc
         cancellationWindowHours: booking.policySnapshot.cancellationWindowHours,
       },
       to,
-      actor: { type: 'MEMBER', id: target.member.id, permissions: target.member.permissions },
+      actor: {
+        type: 'MEMBER',
+        id: target.member.id,
+        permissions: target.member.permissions,
+        assigned: booking.persons.some((p) => p.staffId === target.member.id),
+      },
       reason: options.decision === undefined ? undefined : reasonOf(options.decision),
       now: at,
     });

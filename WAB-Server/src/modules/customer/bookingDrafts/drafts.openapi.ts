@@ -27,6 +27,10 @@ const draft = z.object({
       isMain: z.boolean(),
       isBride: z.boolean(),
       gender: z.enum(GENDERS).nullable(),
+      referenceImageKey: z
+        .string()
+        .nullable()
+        .describe('Tattoo design image upload key (§5.23); null when none.'),
       services: z.array(
         z.object({
           salonServiceId: z.string(),

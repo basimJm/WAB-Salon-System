@@ -20,13 +20,16 @@ export const MERCHANT_BOOKING_ROUTES = {
 } as const;
 export const REASON_CODE_PATTERN = /^[A-Z][A-Z0-9_]{1,39}$/;
 export const REASON_TEXT_MAX_LENGTH = 300;
+/** Lifetime of the signed URL of a tattoo design image on booking details (§5.23). */
+export const REFERENCE_IMAGE_URL_TTL_SEC = 300;
 
 export const CUSTOMER_BOOKING_ROUTES = { cancel: '/:id/cancel' } as const;
 /** Reason code stored when the customer cancels (no code is asked in the app). */
 export const CUSTOMER_CANCEL_REASON_CODE = 'CUSTOMER_REQUEST';
 
 /** Booking queries (SRV-077): list tabs, calendar window, search limits. */
-export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST'] as const;
+/** `TO_CLOSE` (§5.21): approved bookings whose end passed, oldest first. */
+export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST', 'TO_CLOSE'] as const;
 export type BookingTab = (typeof BOOKING_TABS)[number];
 export const CUSTOMER_BOOKING_TABS = ['UPCOMING', 'PAST'] as const;
 /** At most this many days per calendar request (week view). */
@@ -81,6 +84,10 @@ export const BOOKING_JOB_NAMES = {
   reminder: 'booking.reminder',
   pendingAlert: 'booking.pending-alert',
   autoCancel: 'booking.auto-cancel',
+  /** §5.21: "Did this booking finish?" each interval after the end, until it is closed. */
+  closeReminder: 'booking.close-reminder',
+  /** §5.21: once, after `booking.closeOverdueAlertHours` still open: merchant + admin. */
+  closeOverdue: 'booking.close-overdue',
 } as const;
 /** The reminder minutes that have a message template; other values of the setting are ignored. */
 export const REMINDER_EVENT_BY_MINUTES = {
@@ -89,3 +96,9 @@ export const REMINDER_EVENT_BY_MINUTES = {
 } as const;
 /** Active bookings handed to the planner per database page when jobs are rebuilt. */
 export const JOB_RECONCILE_PAGE_SIZE = 200;
+/** Business-made bookings (§5.20): create under `/bookings`, phone lookup under `/customers`. */
+export const MERCHANT_NEW_BOOKING_ROUTES = {
+  create: '/',
+  customersBase: '/customers',
+  lookup: '/lookup',
+} as const;

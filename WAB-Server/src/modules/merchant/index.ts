@@ -31,7 +31,11 @@ import {
 import { MERCHANT_POLICY_ROUTES, MERCHANT_SALON_ROUTES } from '../../constants/salon';
 import { UPLOAD_ROUTES } from '../../constants/uploads';
 import { ROUTE_LIMIT_FAMILIES } from '../../constants/security';
-import { createBrowseRouteLimiter, createRouteLimiter } from '../shared/rateLimits';
+import {
+  createBrowseRouteLimiter,
+  createCustomerLookupLimiter,
+  createRouteLimiter,
+} from '../shared/rateLimits';
 import { mount } from '../../routes/mount';
 import { createMerchantUploadsRouter } from '../shared/uploads';
 import { createMerchantAppConfigRouter } from '../shared/appConfig';
@@ -42,6 +46,7 @@ import {
   unavailableCatalogRequests,
   unavailableCatalogService,
   unavailableBookingActions,
+  unavailableMerchantBooking,
   unavailableMerchantFinance,
   unavailableMerchantReviews,
   unavailableMerchantStatistics,
@@ -77,7 +82,11 @@ import { createMerchantTeamRouter } from './team/team.routes';
 import { createMerchantServicesRouter } from './services/services.routes';
 import { createMerchantHoursRouter } from './hours/hours.routes';
 import { createMerchantBookingsRouter } from './bookings/bookings.routes';
-import { MERCHANT_BOOKING_ROUTES } from '../../constants/bookings';
+import { MERCHANT_BOOKING_ROUTES, MERCHANT_NEW_BOOKING_ROUTES } from '../../constants/bookings';
+import {
+  createMerchantCustomerLookupRouter,
+  createMerchantNewBookingRouter,
+} from './newBooking/newBooking.routes';
 import { createMerchantBranchesRouter } from './branches/branches.routes';
 import { createMerchantGalleryRouter } from './gallery/gallery.routes';
 import { createMerchantProfileRouter } from './salon/profile.routes';
@@ -173,6 +182,23 @@ export const createMerchantRouter = (services: ApiServices = {}): Router => {
     }),
   );
   mount(router, UPLOAD_ROUTES.base, createMerchantUploadsRouter(services));
+  mount(
+    router,
+    MERCHANT_BOOKING_ROUTES.base,
+    createMerchantNewBookingRouter(
+      services.merchantBooking ?? unavailableMerchantBooking,
+      services.salonProfile?.guard ?? [unavailableGuard],
+    ),
+  );
+  mount(
+    router,
+    MERCHANT_NEW_BOOKING_ROUTES.customersBase,
+    createMerchantCustomerLookupRouter(
+      services.merchantBooking ?? unavailableMerchantBooking,
+      services.salonProfile?.guard ?? [unavailableGuard],
+      createCustomerLookupLimiter(services, 'merchant'),
+    ),
+  );
   mount(
     router,
     MERCHANT_BOOKING_ROUTES.base,

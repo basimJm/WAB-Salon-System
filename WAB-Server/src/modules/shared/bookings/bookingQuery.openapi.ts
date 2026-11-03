@@ -62,10 +62,22 @@ const row = z.object({
     .describe(
       'The branch as booked, name in the request language; null for bookings made before branches.',
     ),
-  customer: person
-    .extend({ phone: z.string() })
+  customer: z
+    .object({ id: z.string().nullable(), name: z.string(), phone: z.string() })
     .nullable()
-    .describe('Merchant and admin views only.'),
+    .describe(
+      'Merchant and admin views only. `id` is null for a business-made booking of someone without the app (§5.20): name and phone as entered.',
+    ),
+  source: z
+    .enum(['CUSTOMER_APP', 'MERCHANT'])
+    .describe(
+      'Who made the booking (§5.20); the customer app shows "Booked by <place>" for MERCHANT.',
+    ),
+  createdBy: person
+    .nullable()
+    .describe(
+      'The member who made a MERCHANT booking; null otherwise and always in the customer view.',
+    ),
   staff: z.array(staffRef).describe('The distinct staff of the booking (every view).'),
   rejection: decision.nullable().describe('The salon’s rejection reason; null unless REJECTED.'),
 });
@@ -79,6 +91,10 @@ const detail = row.extend({
       name: z.string(),
       isBride: z.boolean(),
       gender: z.enum(GENDERS).nullable(),
+      referenceImageUrl: z
+        .string()
+        .nullable()
+        .describe('Tattoo design image (§5.23): short-lived signed URL; null when none.'),
       start: z.string(),
       end: z.string(),
       subtotal: z.string(),

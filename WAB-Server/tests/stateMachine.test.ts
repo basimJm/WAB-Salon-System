@@ -128,3 +128,31 @@ describe('state machine', () => {
     expect(nextStatuses('NO_SHOW')).toEqual([]);
   });
 });
+
+describe('the booking’s own staff closes it (§5.21)', () => {
+  const assigned: Actor = {
+    type: 'MEMBER',
+    id: 'm2',
+    permissions: ['BOOKINGS_VIEW_OWN'],
+    assigned: true,
+  };
+  const other: Actor = { type: 'MEMBER', id: 'm3', permissions: ['BOOKINGS_VIEW_OWN'] };
+
+  it('may mark it completed or no-show after the start without BOOKINGS_OPERATE', () => {
+    expect(run('APPROVED', 'COMPLETED', assigned, at(H))).toMatchObject({
+      status: 'COMPLETED',
+      actorType: 'MEMBER',
+      actorId: 'm2',
+    });
+    expect(run('APPROVED', 'NO_SHOW', assigned, at(H))).toMatchObject({ status: 'NO_SHOW' });
+  });
+
+  it('not before the start, not for someone else’s booking, and never cancel or answer requests', () => {
+    expect(codeOf(() => run('APPROVED', 'COMPLETED', assigned, at(-H)))).toBe('INVALID_TRANSITION');
+    expect(codeOf(() => run('APPROVED', 'COMPLETED', other, at(H)))).toBe('PERMISSION_DENIED');
+    expect(codeOf(() => run('APPROVED', 'CANCELLED_BY_SALON', assigned, at(-H), 'x'))).toBe(
+      'PERMISSION_DENIED',
+    );
+    expect(codeOf(() => run('PENDING', 'APPROVED', assigned, at(-H)))).toBe('PERMISSION_DENIED');
+  });
+});

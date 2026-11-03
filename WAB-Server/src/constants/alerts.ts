@@ -11,6 +11,8 @@ export const ALERT_KINDS = [
   'CATALOG_REQUEST',
   'SALON_DELETION_REQUEST',
   'SALON_AUDIENCE_WIDENED',
+  /** A finished booking still open after `booking.closeOverdueAlertHours` (§5.21). */
+  'BOOKING_CLOSE_OVERDUE',
 ] as const;
 export type AlertKind = (typeof ALERT_KINDS)[number];
 export const ALERT_SEVERITIES = ['INFO', 'WARNING', 'CRITICAL'] as const;
@@ -19,7 +21,13 @@ export const ALERT_STATUSES = ['NEW', 'ACKNOWLEDGED'] as const;
 export type AlertStatus = (typeof ALERT_STATUSES)[number];
 export const ALERT_TITLE_MAX_LENGTH = 200;
 /** What an alert points at: one uppercase spelling on every path (SRV-150, server issue S12). */
-export const ALERT_ENTITY_TYPES = ['SALON', 'REFUND', 'REVIEW', 'CATALOG_REQUEST'] as const;
+export const ALERT_ENTITY_TYPES = [
+  'SALON',
+  'REFUND',
+  'REVIEW',
+  'CATALOG_REQUEST',
+  'BOOKING',
+] as const;
 export type AlertEntityType = (typeof ALERT_ENTITY_TYPES)[number];
 /** Locale key of an alert kind's title (`ar.json` / `en.json`). */
 export const alertTitleKey = (kind: AlertKind): string => `alerts.${kind}.title`;

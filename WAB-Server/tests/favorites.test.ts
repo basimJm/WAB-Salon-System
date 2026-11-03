@@ -112,21 +112,12 @@ describe('favorites', () => {
     expect(m.favorites.docs).toHaveLength(0);
   });
 
-  it('follows the audience rule: men’s salons are refused and dropped, BOTH and clinics kept (§5.19)', async () => {
+  it('saves and lists businesses of every audience and type, whatever the customer’s gender (§5.22)', async () => {
     const men = addSalon('Barber', { audience: 'MALE' });
     const unisex = addSalon('Unisex', { audience: 'BOTH' });
     const clinic = addSalon('Clinic', { businessType: 'CLINIC', audience: 'BOTH' });
-    const refused = await put(men);
-    expect(refused.status).toBe(404);
-    expect(bodyOf(refused).error.code).toBe('SALON_NOT_FOUND');
-    expect((await put(unisex)).status).toBe(200);
-    expect((await put(clinic)).status).toBe(200);
-    m.favorites.docs.push({
-      _id: id(),
-      customerId: new Types.ObjectId(me),
-      salonId: new Types.ObjectId(men),
-      createdAt: NOW,
-    });
+    const studio = addSalon('Ink', { businessType: 'TATTOO', audience: 'BOTH' });
+    for (const salon of [men, unisex, clinic, studio]) expect((await put(salon)).status).toBe(200);
     const list = await request(app)
       .get('/customer/v1/favorites')
       .set('Authorization', tokenFor(me));
@@ -134,7 +125,7 @@ describe('favorites', () => {
       bodyOf(list)
         .data.map((c) => c.name)
         .sort(),
-    ).toEqual(['Clinic', 'Unisex']);
+    ).toEqual(['Barber', 'Clinic', 'Ink', 'Unisex']);
   });
 
   it('removes a favorite, and removing one that is not saved is fine', async () => {

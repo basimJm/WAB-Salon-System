@@ -6,7 +6,7 @@ import { validate } from '../../../middlewares/validate';
 import { asyncHandler } from '../../../utils/async';
 import { formatJod } from '../../../utils/money';
 import { sendPaginated, sendSuccess } from '../../../utils/response/successResponse';
-import { filtersQuerySchema, searchQuerySchema } from './search.validation';
+import { filtersQuerySchema, searchQuerySchema, suggestionsQuerySchema } from './search.validation';
 
 const query = <S extends z.ZodType>(req: Request): z.infer<S> =>
   (req.validated as { query: z.infer<S> }).query;
@@ -33,9 +33,9 @@ export const createSearchRouter = ({
     optionalAuth,
     validate({ query: searchQuerySchema }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { page, pageSize, ...rest } = query<typeof searchQuerySchema>(req);
+      const { page, pageSize, businessType, ...rest } = query<typeof searchQuerySchema>(req);
       const result = await service.search({
-        query: rest,
+        query: { ...rest, businessTypes: businessType },
         params: { page, pageSize },
         customerId: req.auth?.subjectId,
         language: req.language,
@@ -49,16 +49,28 @@ export const createSearchRouter = ({
     validate({ query: filtersQuerySchema }),
     asyncHandler(async (req: Request, res: Response) => {
       const { gender, businessType, serviceIds } = query<typeof filtersQuerySchema>(req);
-      const bounds = await service.priceBounds({
-        gender,
-        serviceIds,
-        ...(businessType === undefined ? {} : { businessType }),
-      });
+      const bounds = await service.priceBounds({ gender, serviceIds, businessTypes: businessType });
       sendSuccess(req, res, {
         data: {
           priceRange:
             bounds === null ? null : { min: formatJod(bounds.min), max: formatJod(bounds.max) },
         },
+      });
+    }),
+  );
+  router.get(
+    SEARCH_ROUTES.suggestions,
+    limiter,
+    validate({ query: suggestionsQuerySchema }),
+    asyncHandler(async (req: Request, res: Response) => {
+      const { q, gender, businessType } = query<typeof suggestionsQuerySchema>(req);
+      sendSuccess(req, res, {
+        data: await service.suggest({
+          q,
+          gender,
+          businessTypes: businessType,
+          language: req.language,
+        }),
       });
     }),
   );

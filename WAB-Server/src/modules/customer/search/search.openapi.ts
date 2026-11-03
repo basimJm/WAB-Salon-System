@@ -11,7 +11,7 @@ import {
   businessKindShape,
 } from '../../../docs/schemas';
 import { z } from '../../../docs/zod';
-import { filtersQuerySchema, searchQuerySchema } from './search.validation';
+import { filtersQuerySchema, searchQuerySchema, suggestionsQuerySchema } from './search.validation';
 
 const card = z.object({
   id: z.string(),
@@ -49,9 +49,9 @@ export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags: ['Salon search'],
     summary:
-      'Search LIVE salons and clinics the gender may see (§5.19: own audience, BOTH, every clinic), optionally of one businessType: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended (salons first, then clinics, each in the admin order)',
+      'Search LIVE businesses of every type and audience (§5.22): type lens `businessType` (one or several), optional `gender` filter (businesses serving it: own audience or BOTH), name text, ALL selected services offered, price range (of their sum with services, else of any active service; JOD strings), minimum rating, recommended (each type in the admin order)',
     description:
-      'Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating.',
+      'Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating. Booking still applies the audience rule (§5.19).',
     security: [],
     request: { headers, query: searchQuerySchema },
     responses: {
@@ -72,7 +72,7 @@ export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {
     path: `${base}${SEARCH_ROUTES.filters}`,
     tags: ['Salon search'],
     summary:
-      'Price slider bounds for the selected services (min/max of the sums over matching salons)',
+      'Price slider bounds: min/max of the sums of the selected services over matching businesses, or of every active service price when none is selected (§5.22)',
     security: [],
     request: { headers, query: filtersQuerySchema },
     responses: {
@@ -80,6 +80,34 @@ export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {
         'Bounds',
         successResponseSchema(
           z.object({ priceRange: z.object({ min: z.string(), max: z.string() }).nullable() }),
+        ),
+      ),
+      ...failures,
+    },
+  });
+  registry.registerPath({
+    method: 'get',
+    path: `${base}${SEARCH_ROUTES.suggestions}`,
+    tags: ['Salon search'],
+    summary:
+      'Typed suggestions (§5.22): matching catalog services with the number of places offering them (most first), then matching places; both follow the lens and the gender filter',
+    security: [],
+    request: { headers, query: suggestionsQuerySchema },
+    responses: {
+      [HTTP_STATUS.ok]: jsonResponse(
+        'Suggestions',
+        successResponseSchema(
+          z.object({
+            services: z.array(
+              z.object({
+                id: z.string(),
+                name: z.string(),
+                businessType: businessKindShape.businessType,
+                placesCount: z.number(),
+              }),
+            ),
+            places: z.array(z.object({ id: z.string(), name: z.string(), ...businessKindShape })),
+          }),
         ),
       ),
       ...failures,
