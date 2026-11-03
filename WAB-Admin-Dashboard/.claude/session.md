@@ -10,6 +10,38 @@
 
 ## Current task
 
+### ADM-112 — Business-made bookings + closing finished bookings in the panel
+
+- Branch: `feat/adm-111-tattoo` (together with ADM-111: the contract re-sync forced both; see Notes)
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.20, §5.21; SRV-185, SRV-186; admin contract 1.16.0; operations getBookings, getBookingsById, postExports, getAlerts, getSettings/patchSettings):
+  - [x] Bookings list: "Made by" column (Customer app / The business), source filter (URL key `source`, chip, server param), tab "To close" (`TO_CLOSE`)
+  - [x] Booking details: customer without an account shown as name + "No WAB account" (no link), "Made by" + "Created by" (member) rows
+  - [x] BOOKINGS export sends `source`
+  - [x] Alert kind `BOOKING_CLOSE_OVERDUE` (AR + EN label); settings `booking.closeReminderIntervalMinutes` (minutes) + `booking.closeOverdueAlertHours` (hours) editable in the booking group
+  - [x] Settings labels moved to a lazy locale area (`locales/lazy/settings.ts`): the dev-release entry was 80.3 KB > 80 with the new strings
+- Tests: tests/business-bookings.test.tsx (new, 6: tattoo rules, design link, source filter + export, origin rows, details without account, TO_CLOSE + alert kind + settings); catalog/settings-domain/branchesContract updated; `sh scripts/gate.sh` GATE OK (all suites, 4 builds, check:size)
+- Browser check (mock dev-debug build, preview :4173, built-in browser): EN light desktop — bookings headers incl. "Made by", source options, `?source=MERCHANT` → 1 row + chip, tabs incl. "To close", booking WAB-000003 shows "Hiba Saleh · No WAB account" / "The business" / "Created by Sara Ali", no customer link, settings shows both new labels, salons type switch has "Tattoo studios"; AR dark 375 — catalog (3 types; Tattoo → `?type=TATTOO`, empty list), booking details (screenshot checked by eye), bookings (radio "بحاجة إلى إغلاق", "استوديوهات الوشم"), settings, alerts: 0 overflow, 0 error states, console 0 errors
+- Loops: 1/1 — re-read §5.20/§5.21 admin points against list, details, export, alerts, settings; found and fixed: mock filter complexity, entry budget (settings lazy)
+- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔ (contract 1.16.0 consumed; server-side filters only), QA ✔)
+- Notes: DEVIATIONS — one branch for ADM-111 + ADM-112 (the api:sync broke both type sets at once); no e2e (owner decision 2026-10-14); the mock does not filter by tab (server does); "BOOKINGS_CREATE in the permission labels" — the panel shows no permission labels (member rows show roles only), nothing to add.
+
+### ADM-111 — Tattoo studios in the panel
+
+- Branch: `feat/adm-111-tattoo`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.23; SRV-183; contract 1.14.0+):
+  - [x] `npm run api:sync` → admin contract 1.16.0 (TATTOO, source/createdBy, nullable customer id, TO_CLOSE, alert kind)
+  - [x] Kernel: `BUSINESS_TYPES` + TATTOO; `audiencesFor`/`audienceFor` force BOTH for every non-salon; catalog create fixes TATTOO to BOTH; tone + AR/EN labels ("Tattoo studio(s)" / "استوديو وشم", "استوديوهات الوشم")
+  - [x] Every business-type switch (salons, applications, bookings, reviews, catalog, requests, placements) gains Tattoo through the shared list (no per-screen code); applications need the trade license only (medical flag stays CLINIC)
+  - [x] Booking details: "Design" column with a "View design image" link (signed URL, new tab) when any person has one
+  - [x] Texts that named only salons/clinics generalised (catalog subtitle, audience error, "Always for everyone")
+- Tests / gate / browser check: see ADM-112 (same branch)
+- Loops: 1/1 — see ADM-112
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — see ADM-112
+
+## Last blocks
+
 ### ADM-110 — Catalog per business type + salon audience dialog (widen/narrow, conflict list)
 
 - Branch: `feat/adm-110-catalog-types`
@@ -26,32 +58,3 @@
 - Loops: 1/1 — re-checked every criterion against the diff, the tests and the browser run; found and fixed: dev-release entry 80.2 KB > 80 (drawer strings moved to the lazy `salonAudience` area), conflict-list digits not localised and links unstyled (now `formatNumber` + `Link`), catalog subtitle still salon-only
 - Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — rules shared with the server (`catalogFits`, widening, clinic = BOTH) live in the domain kernel; drawer, conflict list and catalog filters are small single-purpose components; server-side filters only; contract-driven types
 - Notes: DEVIATIONS: no e2e (user decision 2026-10-14); WebKit not run; not pushed (lead instruction); placements have no audience filter (the order is per type; a filtered reorder would send a partial list)
-
-## Last blocks
-
-### ADM-109 — Business types: contract 1.12.0 re-sync + type filters + badges + medical license
-
-- Branch: `feat/adm-109-business-types`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §2, §3.3, §5.13, §5.19, §12.10; INTEGRATION §5a; SRV-174…178; operations getSalons, getSalonsById, patchSalonsByIdAudience, getSalonsApplications(+ById), getBookings(+ById), getReviews, getRecommended, putRecommendedReorder, getCatalogServices, postCatalogServices, getCatalogRequests, postExports, getSearch, getAlerts):
-  - [x] `npm run api:sync` → admin contract 1.12.0 (`gender` → `businessType` + `audience`, `/gender` → `/audience`, type filters, `medicalLicenseUrls`, alert kind `SALON_AUDIENCE_WIDENED`, 3 new error codes, branches list paged)
-  - [x] Domain kernel `domain/shared/businessType.ts` (enums, `audiencesFor`, `audienceFor`, `isWidening`, `canChangeAudience`, `catalogFits` = server rule, `brideAllowed`, `PersonGender` for customers/campaigns); `gender` gone from salons, applications, catalog, placements, bookings (snapshots + person gender), search
-  - [x] All / Salons / Clinics switch (`BusinessTypeFilter`, URL key `type`) on salons (+ audience filter, export), applications, bookings (+ export), reviews, catalog services, catalog requests; placements per type (Recommended salons / clinics, reorder per type); server-side params only
-  - [x] Type + audience badges (`BusinessBadges`, status registry kinds `businessType`/`audience`) on salon rows/details, applications rows/review, booking rows/details, catalog rows, placements rows
-  - [x] Application review: trade license + medical license documents (signed URLs); a clinic without one is flagged
-  - [x] Error codes `BUSINESS_TYPE_MISMATCH`, `AUDIENCE_CHANGE_NOT_ALLOWED`, `BRIDE_NOT_ALLOWED` (AR + EN); alert kind label; salon-edit services/staff use `catalogFits`/`brideAllowed`
-  - [x] Mocks follow the server (clinic salon, clinic application with medical license, clinic catalog service + placement, type filters, audience change refusals)
-- Tests: new tests/business-types.test.tsx (13); updated applications, catalog, catalog-approve, placements, salons, salonInsights, salon-actions, list-exports, alerts, contract, contract-ids, status, search, salonEdit; `vitest run` 120 files / 1397 tests green; `sh scripts/gate.sh` GATE OK
-- Browser check: done once for both tasks after ADM-110 (see the ADM-110 block)
-- Loops: 1/1 — re-checked every criterion against the diff, the tests and the shared browser run (filters on every listed screen send `businessType`, badges on rows/details, medical license on the clinic review)
-- Review: PASSED (SE ✔, Mobile N/A (web responsive ✔), Architect ✔, QA ✔) — one kernel module for type/audience rules, one filter component + URL key for every list, status registry for badge tones, tolerant read only where the contract is wrong (salon-edit profile)
-- Notes: DEVIATIONS: browser check run after ADM-110, not before this commit (lead instruction: one check for both); reports/banners/campaigns/transactions have no `businessType` parameter in contract 1.12.0, so no type filter there (server gap); `getSalonsByIdProfile` still declares `gender` while the server sends `businessType` + `audience`: read with `.omit({ gender })` (server gap, reported); the catalog page and the salon audience dialog get their full per-type behaviour in ADM-110; contract re-sync also fixed the 3 `contract.test` failures noted in ADM-108 (branches list now sends page/pageSize).
-
-### ADM-108 — Cloudflare Pages deploy
-
-- Branch: `feat/adm-108-cloudflare`
-- Status: DONE
-- Acceptance criteria: `write-hosting.ts --target cloudflare` writes the same `_headers`/`_redirects` (Cloudflare Pages reads them); `.node-version` 22; `docs/DEPLOY.md` has the Git settings (root directory, build command, output directory, variables) and a wrangler CLI deploy
-- Tests: tests/hosting.test.ts (+1, 16 total) green; full suite 1374 pass; builds dev-release + prod-release and the Cloudflare `_headers` generation checked. DEVIATION: 3 tests in tests/contract.test.ts fail on `origin/admin` itself (the committed contract is behind the server spec; a resync changes the branches query and breaks 77 test files): not touched here, needs its own contract re-sync task.
-- Loops: 1/1 (user decision)
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — config and docs only. DEVIATION: no e2e; the deploy itself needs the owner's Cloudflare login.

@@ -33,6 +33,8 @@ export interface EventDefinition {
   readonly priority?: PushPriority;
   /** A booking request the merchant must answer: pushed as an overlay / time-sensitive alert (Merchant PRD M10). */
   readonly request?: true;
+  /** A finished booking to close (§5.21): pushed with Completed / No-show actions (Android data, iOS category). */
+  readonly closeActions?: true;
 }
 
 const VIEW_ALL: readonly Permission[] = ['BOOKINGS_VIEW_ALL'];
@@ -81,11 +83,13 @@ export const NOTIFICATION_EVENTS = {
     type: 'BOOKING',
     audiences: [{ who: 'members', permissions: ['BOOKINGS_OPERATE'], assigned: true }],
     priority: 'HIGH',
+    closeActions: true,
   },
   'booking.close_overdue': {
     type: 'BOOKING',
     audiences: [{ who: 'members', permissions: ['BOOKINGS_OPERATE'], assigned: true }],
     priority: 'HIGH',
+    closeActions: true,
   },
   'booking.completed': { type: 'BOOKING', audiences: [customer] },
   'booking.no_show': { type: 'BOOKING', audiences: [customer] },
@@ -165,6 +169,12 @@ export const MAX_READ_IDS = 50;
 export const INBOX_SEARCH_MAX_LENGTH = 100;
 
 /** How the merchant apps present a booking request outside the app (Merchant PRD M10). */
+/** Close pushes of §5.21 (SRV-187): the merchant app draws / registers these actions. */
+export const CLOSE_PUSH = {
+  iosActionCategory: 'BOOKING_CLOSE',
+  actions: 'COMPLETED,NO_SHOW',
+} as const;
+
 export const REQUEST_PUSH = {
   androidChannelId: 'booking_requests',
   iosActionCategory: 'BOOKING_REQUEST',

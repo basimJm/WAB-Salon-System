@@ -1,14 +1,15 @@
 /**
- * Business types and audience (BUSINESS_DOMAIN §2, §5.19): a business is a SALON or a CLINIC; a SALON serves
- * men, women or both, a CLINIC always serves both. `businessType` never changes after the application.
+ * Business types and audience (BUSINESS_DOMAIN §2, §5.19, §5.23): a business is a SALON, a CLINIC or a TATTOO
+ * studio; a SALON serves men, women or both, a CLINIC and a TATTOO studio always serve both. `businessType` never
+ * changes after the application.
  */
-export const BUSINESS_TYPES = ['SALON', 'CLINIC'] as const;
+export const BUSINESS_TYPES = ['SALON', 'CLINIC', 'TATTOO'] as const;
 export type BusinessType = (typeof BUSINESS_TYPES)[number];
 
 export const AUDIENCES = ['FEMALE', 'MALE', 'BOTH'] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
-/** The audience every CLINIC has (§5.19: never asked, never changed). */
+/** The audience every CLINIC and TATTOO studio has (§5.19, §5.23: never asked, never changed). */
 export const CLINIC_AUDIENCE: Audience = 'BOTH';
 
 export const isBusinessType = (value: unknown): value is BusinessType =>
@@ -16,11 +17,11 @@ export const isBusinessType = (value: unknown): value is BusinessType =>
 
 export const isAudience = (value: unknown): value is Audience => AUDIENCES.some((a) => a === value);
 
-/** The audiences a business of this type may have: every audience for a SALON, only BOTH for a CLINIC. */
+/** The audiences a business of this type may have: every audience for a SALON, only BOTH for the others. */
 export const audiencesFor = (type: BusinessType): readonly Audience[] =>
-  type === 'CLINIC' ? [CLINIC_AUDIENCE] : AUDIENCES;
+  type === 'SALON' ? AUDIENCES : [CLINIC_AUDIENCE];
 
-/** The audience to keep when the type changes on a form: a CLINIC forces BOTH. */
+/** The audience to keep when the type changes on a form: a CLINIC or TATTOO studio forces BOTH. */
 export const audienceFor = (type: BusinessType, wanted: Audience): Audience =>
   audiencesFor(type).includes(wanted) ? wanted : CLINIC_AUDIENCE;
 
