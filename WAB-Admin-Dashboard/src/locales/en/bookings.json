@@ -6,10 +6,20 @@
       "PENDING": "Pending",
       "UPCOMING": "Upcoming",
       "TODAY": "Today",
-      "PAST": "Past"
+      "PAST": "Past",
+      "TO_CLOSE": "To close"
     },
     "reference": "Reference",
     "customer": "Customer",
+    "design": "Design",
+    "viewDesign": "View design image",
+    "source": "Made by",
+    "createdBy": "Created by",
+    "noAccount": "No WAB account",
+    "sources": {
+      "CUSTOMER_APP": "Customer app",
+      "MERCHANT": "The business"
+    },
     "salon": "Salon",
     "appointment": "Appointment",
     "persons": "Persons",

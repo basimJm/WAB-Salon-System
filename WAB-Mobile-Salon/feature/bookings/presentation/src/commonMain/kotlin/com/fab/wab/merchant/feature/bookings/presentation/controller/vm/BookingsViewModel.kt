@@ -39,6 +39,8 @@ class BookingsDependencies(
     /** BUSINESS_DOMAIN §6 branch scope (owner switcher); a fixed "own branch" scope when not provided. */
     val branchScope: Flow<BranchScope> = flowOf(BranchScope()),
     val selectBranch: (String?) -> Unit = {},
+    /** The member holds `BOOKINGS_CREATE` (live with permission refreshes). */
+    val canCreate: Flow<Boolean> = flowOf(false),
 )
 
 /** PRD M08 bookings list. */
@@ -61,6 +63,7 @@ class BookingsViewModel(
             updateState { copy(branchScope = branches, filter = if (changed) filter.copy(staffIds = emptySet()) else filter) }
             if (changed) reload()
         }.launchIn(scope)
+        deps.canCreate.onEach { allowed -> updateState { copy(canCreate = allowed) } }.launchIn(scope)
         scope.launch { (deps.repository.staff() as? AppResult.Success)?.let { staff -> updateState { copy(staffOptions = staff.data) } } }
         reload()
     }
@@ -84,6 +87,7 @@ class BookingsViewModel(
             UiAction.OnRefresh -> reload(refreshing = true)
             UiAction.OnRetry -> reload()
             is UiAction.OnBranchSelect -> deps.selectBranch(event.branchId)
+            UiAction.OnNewBooking -> if (uiState.value.canCreate) emitSideEffect(SideEffect.OpenNewBooking)
         }
     }
 

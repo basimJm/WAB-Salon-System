@@ -20,6 +20,12 @@ object RealtimeEvents {
     /** A booking was (re)assigned to this member (room `member:{id}`). */
     const val BOOKING_ASSIGNED = "booking.assigned"
 
+    /** An APPROVED booking whose end passed is still open (BUSINESS_DOMAIN §5.21): push with Completed / No-show. */
+    const val BOOKING_CLOSE_REMINDER = "booking.close_reminder"
+
+    /** The same booking still open after `booking.closeOverdueAlertHours` (once; reminders continue). */
+    const val BOOKING_CLOSE_OVERDUE = "booking.close_overdue"
+
     /** The owner changed this member's permissions: re-fetch them. */
     const val PERMISSIONS_UPDATED = "permissions.updated"
 

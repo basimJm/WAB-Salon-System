@@ -13,6 +13,8 @@ import com.fab.wab.merchant.feature.team.presentation.resources.group_finance
 import com.fab.wab.merchant.feature.team.presentation.resources.group_insights
 import com.fab.wab.merchant.feature.team.presentation.resources.group_salon
 import com.fab.wab.merchant.feature.team.presentation.resources.group_staff
+import com.fab.wab.merchant.feature.team.presentation.resources.perm_bookings_create
+import com.fab.wab.merchant.feature.team.presentation.resources.perm_bookings_create_sub
 import com.fab.wab.merchant.feature.team.presentation.resources.perm_bookings_operate
 import com.fab.wab.merchant.feature.team.presentation.resources.perm_bookings_operate_sub
 import com.fab.wab.merchant.feature.team.presentation.resources.perm_bookings_respond
@@ -52,6 +54,7 @@ internal val PERMISSION_COPY: Map<Permission, Pair<StringResource, StringResourc
     Permission.BOOKINGS_VIEW_OWN to (Res.string.perm_bookings_view_own to Res.string.perm_bookings_view_own_sub),
     Permission.BOOKINGS_RESPOND to (Res.string.perm_bookings_respond to Res.string.perm_bookings_respond_sub),
     Permission.BOOKINGS_OPERATE to (Res.string.perm_bookings_operate to Res.string.perm_bookings_operate_sub),
+    Permission.BOOKINGS_CREATE to (Res.string.perm_bookings_create to Res.string.perm_bookings_create_sub),
     Permission.SALON_PROFILE_MANAGE to (Res.string.perm_salon_profile_manage to Res.string.perm_salon_profile_manage_sub),
     Permission.GALLERY_MANAGE to (Res.string.perm_gallery_manage to Res.string.perm_gallery_manage_sub),
     Permission.WORKING_HOURS_MANAGE to (Res.string.perm_working_hours_manage to Res.string.perm_working_hours_manage_sub),

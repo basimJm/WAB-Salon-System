@@ -13,6 +13,7 @@ import {
 } from '@/domain/bookings/bookings';
 import { formatInstant, formatJodAmount } from '@/domain/shared/format';
 import { BookingActions } from './BookingActions';
+import { CustomerValue, DesignLink, originItems } from './bookingOrigin';
 import { StaffCell, StaffList } from './BookingStaff';
 import { reasonLabel } from './bookingReason';
 import { KeyValue } from '../components/core/KeyValue';
@@ -61,6 +62,15 @@ function Facts({ b }: { b: BookingDetails }) {
     },
     { key: 'staff', header: t('bookings.staff'), render: (p) => <StaffCell staff={p.staff} /> },
     { key: 'subtotal', header: t('bookings.total'), ltr: true, render: (p) => jod(p.subtotal) },
+    ...(b.persons.some((p) => p.referenceImageUrl !== null)
+      ? [
+          {
+            key: 'design',
+            header: t('bookings.design'),
+            render: (p: Person) => <DesignLink url={p.referenceImageUrl} t={t} />,
+          },
+        ]
+      : []),
   ];
   return (
     <div className="wab-stack">
@@ -70,10 +80,9 @@ function Facts({ b }: { b: BookingDetails }) {
           {
             key: 'customer',
             label: t('bookings.customer'),
-            value: b.customer ? (
-              <RouterLink to={`${ROUTES.customers}/${b.customer.id}`}>{b.customer.name}</RouterLink>
-            ) : null,
+            value: b.customer ? <CustomerValue customer={b.customer} t={t} /> : null,
           },
+          ...originItems(b, t),
           {
             key: 'branch',
             label: t('branches.name'),

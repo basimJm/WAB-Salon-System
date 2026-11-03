@@ -9,6 +9,7 @@ object BookingsAnalytics {
     val SCREEN_REQUEST = AnalyticsScreen("booking_request_sheet")
     val SCREEN_REQUEST_OVERLAY = AnalyticsScreen("booking_request_overlay")
     val SCREEN_CALENDAR = AnalyticsScreen("calendar")
+    val SCREEN_NEW_BOOKING = AnalyticsScreen("new_booking")
     const val ACTION_SHOWN = "request_shown"
     const val ACTION_ACCEPT = "request_accept"
     const val ACTION_REJECT = "request_reject"
@@ -17,6 +18,7 @@ object BookingsAnalytics {
     const val ACTION_NO_SHOW = "booking_no_show"
     const val ACTION_REASSIGN = "booking_reassign"
     const val ACTION_FILTER = "bookings_filter_apply"
+    const val ACTION_CREATE = "booking_create_by_business"
     const val ACTION_CALENDAR_MODE = "calendar_mode_change"
     const val ACTION_CALENDAR_FILTER = "calendar_staff_filter"
     const val PARAM_REASON = "reason"

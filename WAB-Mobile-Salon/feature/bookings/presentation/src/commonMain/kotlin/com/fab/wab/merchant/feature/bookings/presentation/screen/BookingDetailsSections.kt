@@ -1,5 +1,10 @@
 package com.fab.wab.merchant.feature.bookings.presentation.screen
 
+import com.fab.wab.merchant.feature.bookings.presentation.resources.details_design
+import com.fab.wab.merchant.designsystem.components.image.AppImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -84,7 +89,21 @@ private fun PersonBlock(person: BookingPerson) {
         if (staff != null && start != null && end != null) {
             PersonStaffRow(staff, stringResource(Res.string.request_time_range, dateTimeText(start).time, dateTimeText(end).time))
         }
+        person.referenceImageUrl?.let { DesignImage(it) }
     }
+}
+
+/** The customer's tattoo design (BUSINESS_DOMAIN §5.23): a signed image, fitted, with its label. */
+@Composable
+private fun DesignImage(url: String) {
+    val label = stringResource(Res.string.details_design)
+    AppText(text = label, style = AppTheme.typography.labelMedium, color = AppTheme.colors.muted)
+    AppImage(
+        url = url,
+        contentDescription = label,
+        contentScale = ContentScale.Fit,
+        modifier = Modifier.fillMaxWidth().height(AppTheme.sizes.cardImageHeight).clip(AppTheme.shapes.medium),
+    )
 }
 
 /** Design 03 person footer: 26 dp staff photo (letter when there is none), staff name, start – end. */

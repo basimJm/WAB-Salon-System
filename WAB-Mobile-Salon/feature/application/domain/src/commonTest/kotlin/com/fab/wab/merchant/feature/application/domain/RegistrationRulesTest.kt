@@ -92,4 +92,14 @@ class RegistrationRulesTest {
         assertNotNull(minimal.toForm(resubmission = true))
         assertEquals(setOf(RegistrationField.DOCUMENTS), registrationErrors(minimal.copy(documentKeys = emptyList()), resubmission = true))
     }
+
+    /** §5.23: a tattoo studio is unisex (no audience) and needs the trade license only. */
+    @Test
+    fun aTattooStudioNeedsNoAudienceAndNoMedicalLicense() {
+        val studio = valid.copy(businessType = BusinessType.TATTOO, audience = null)
+        assertEquals(emptySet(), registrationErrors(studio))
+        val form = assertNotNull(studio.copy(medicalLicenseKeys = listOf("m/1.pdf")).toForm())
+        assertEquals(Audience.BOTH, form.kind.audience)
+        assertTrue(form.medicalLicenseKeys.isEmpty(), "a tattoo studio never sends a medical license")
+    }
 }

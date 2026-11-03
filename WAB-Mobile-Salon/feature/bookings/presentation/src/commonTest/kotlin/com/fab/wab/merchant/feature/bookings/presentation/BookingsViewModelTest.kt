@@ -68,6 +68,10 @@ class BookingsViewModelTest {
         viewModel.state.first { !it.loading }
         viewModel.onEvent(UiAction.OnTabSelect(BookingsTab.TODAY))
         assertEquals(BookingsTab.TODAY, repository.queries.last().first.tab)
+        // MER-086 (§5.21): the "To close" tab asks the server for `tab=TO_CLOSE`.
+        viewModel.onEvent(UiAction.OnTabSelect(BookingsTab.TO_CLOSE))
+        assertEquals(BookingsTab.TO_CLOSE, repository.queries.last().first.tab)
+        assertEquals("TO_CLOSE", BookingsTab.TO_CLOSE.name)
         val filter = BookingFilter(statuses = setOf(BookingStatus.APPROVED), brideOnly = true)
         viewModel.onEvent(UiAction.OnFilterApply(filter))
         assertEquals(filter, repository.queries.last().first.filter)
@@ -152,6 +156,24 @@ class BookingsViewModelTest {
         )
         assertFalse(viewModel.state.first { !it.loading }.branchScope.showsSwitcher)
         assertNull(repository.queries.last().first.branchId)
+    }
+
+    @Test
+    fun newBookingEntryFollowsBookingsCreatePermission() = runTest(UnconfinedTestDispatcher()) {
+        val allowed = MutableStateFlow(false)
+        val viewModel = BookingsViewModel(
+            BookingsDependencies(repository, changes, clock, NoOpAnalyticsTracker, errorText = { "failed" }, canCreate = allowed),
+            testScope = backgroundScope,
+        )
+        assertFalse(viewModel.state.first { !it.loading }.canCreate, "hidden without BOOKINGS_CREATE")
+        val effects = mutableListOf<SideEffect>()
+        backgroundScope.launch { viewModel.sideEffect.collect { effects += it } }
+        viewModel.onEvent(UiAction.OnNewBooking)
+        assertTrue(effects.isEmpty())
+        allowed.value = true
+        assertTrue(viewModel.state.first().canCreate)
+        viewModel.onEvent(UiAction.OnNewBooking)
+        assertEquals(listOf<SideEffect>(SideEffect.OpenNewBooking), effects)
     }
 
     private companion object {

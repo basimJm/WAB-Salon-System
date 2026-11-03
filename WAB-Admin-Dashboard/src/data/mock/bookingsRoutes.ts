@@ -38,7 +38,7 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   referenceNumber: `WAB-00000${String(n)}`,
   status,
   // Every mock booking is at Noor Salon (a women's salon): the snapshots of §5.19.
-  businessType: 'SALON' as 'SALON' | 'CLINIC',
+  businessType: 'SALON' as 'SALON' | 'CLINIC' | 'TATTOO',
   salonAudience: 'FEMALE' as 'FEMALE' | 'MALE' | 'BOTH',
   paymentMethod: payment === 'PAY_ON_ARRIVAL' ? 'PAY_ON_ARRIVAL' : 'DEPOSIT',
   paymentStatus: payment,
@@ -52,7 +52,13 @@ const make = ({ n, status, payment, bride, total }: Seed) => ({
   total,
   salon: { id: '64f000000000000000000001', name: 'Noor Salon' },
   branch: bookingBranchRef(n === 2 ? MOCK_BRANCH_IDS.noorSecond : MOCK_BRANCH_IDS.noorMain),
-  customer: { id: '64g000000000000000000001', name: 'Dana Khoury', phone: '+962790000301' },
+  // Booking 3 was made by the salon for a customer without the app (§5.20).
+  customer:
+    n === 3
+      ? { id: null, name: 'Hiba Saleh', phone: '+962791112222' }
+      : { id: '64g000000000000000000001', name: 'Dana Khoury', phone: '+962790000301' },
+  source: n === 3 ? ('MERCHANT' as const) : ('CUSTOMER_APP' as const),
+  createdBy: n === 3 ? { id: MOCK_STAFF.id, name: MOCK_STAFF.name } : null,
   staff: [MOCK_STAFF],
   rejection:
     status === REJECTED
@@ -66,6 +72,10 @@ export const MOCK_BOOKINGS = [
   make({ n: 3, status: 'COMPLETED', payment: 'FULLY_PAID', bride: false, total: '40.000' }),
   make({ n: 4, status: REJECTED, payment: 'PAY_ON_ARRIVAL', bride: false, total: '18.000' }),
 ];
+
+/** A query filter the server applies only when the parameter is sent. */
+const equalsWhenSet = (query: URLSearchParams, key: string, value: string | undefined): boolean =>
+  !query.get(key) || value === query.get(key);
 
 export function bookingsRoutes(): readonly MockRoute[] {
   const rows = MOCK_BOOKINGS.map((b) => ({ ...b }));
@@ -85,9 +95,10 @@ export function bookingsRoutes(): readonly MockRoute[] {
             (statuses.length === 0 || statuses.includes(r.status)) &&
             (!query.get('tab') || query.get('tab') !== 'PENDING' || r.status === 'PENDING') &&
             (query.get('brideOnly') !== 'true' || r.hasBride) &&
-            (!query.get('paymentStatus') || r.paymentStatus === query.get('paymentStatus')) &&
-            (!query.get('branchId') || r.branch?.id === query.get('branchId')) &&
-            (!query.get('businessType') || r.businessType === query.get('businessType')) &&
+            equalsWhenSet(query, 'paymentStatus', r.paymentStatus) &&
+            equalsWhenSet(query, 'branchId', r.branch?.id) &&
+            equalsWhenSet(query, 'businessType', r.businessType) &&
+            equalsWhenSet(query, 'source', r.source) &&
             `${r.referenceNumber} ${r.customer.name} ${r.salon.name}`.toLowerCase().includes(q),
         );
         return {
@@ -112,6 +123,7 @@ export function bookingsRoutes(): readonly MockRoute[] {
                 name: 'Dana',
                 isBride: r.hasBride,
                 gender: 'FEMALE' as const,
+                referenceImageUrl: null,
                 start: r.appointmentStart,
                 end: r.appointmentEnd,
                 subtotal: r.total,

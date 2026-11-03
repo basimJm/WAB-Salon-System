@@ -3,6 +3,8 @@ package com.fab.wab.merchant.app.request
 import com.fab.wab.merchant.app.deeplink.DeepLinkStore
 import com.fab.wab.merchant.app.deeplink.MerchantDeepLinkPaths
 import com.fab.wab.merchant.app.resources.Res
+import com.fab.wab.merchant.app.resources.close_completed
+import com.fab.wab.merchant.app.resources.close_no_show
 import com.fab.wab.merchant.app.resources.request_accept
 import com.fab.wab.merchant.app.resources.request_accepted
 import com.fab.wab.merchant.app.resources.request_failed
@@ -41,11 +43,12 @@ import platform.UserNotifications.UNUserNotificationCenter
  * PRD M10 on iOS outside the app (MER-030): the server sends a time-sensitive alert with category
  * [BookingRequestCategory.ID]. Accept answers in the background (the outcome replaces the alert); Reject and a tap
  * open the booking in the app with the request sheet (reason picker). In the foreground the in-app sheet takes the
- * push (MER-028).
+ * push (MER-028). Close reminders (MER-086) register their category here too ([IosCloseReminders]).
  */
 class IosBookingRequests(private val koin: Koin) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val center get() = UNUserNotificationCenter.currentNotificationCenter()
+    private val closeReminders = IosCloseReminders(koin, scope)
 
     /** Registers the Accept / Reject category in the app language, again whenever the language changes. */
     fun start() {
@@ -54,6 +57,7 @@ class IosBookingRequests(private val koin: Koin) {
 
     /** True when [data] is a booking request; [action] = the notification action identifier (or the default tap). */
     fun onResponse(data: Map<String, String>, action: String, completion: () -> Unit): Boolean {
+        if (closeReminders.onResponse(data, action, completion)) return true
         val bookingId = bookingRequestId(data) ?: return false
         if (action == BookingRequestCategory.ACCEPT) accept(bookingId, completion) else open(bookingId).also { completion() }
         return true
@@ -109,7 +113,9 @@ class IosBookingRequests(private val koin: Koin) {
             accept = getString(Res.string.request_accept),
             reject = getString(Res.string.request_reject),
         )
-        center.setNotificationCategories(setOf(bookingRequestCategory(titles)))
+        val closeTitles = CloseTitles(completed = getString(Res.string.close_completed), noShow = getString(Res.string.close_no_show))
+        // One call registers every category (a second call would replace the first set).
+        center.setNotificationCategories(setOf(bookingRequestCategory(titles), bookingCloseCategory(closeTitles)))
     }
 }
 
