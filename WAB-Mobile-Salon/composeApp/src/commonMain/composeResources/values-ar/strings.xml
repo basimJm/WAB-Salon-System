@@ -4,7 +4,7 @@
     <!-- Update Dialogs -->
     <!-- Maintenance Dialog -->
     <!-- Session -->
-    <string name="access_removed_message">أزال مالك الصالون صلاحية دخولك.</string>
+    <string name="access_removed_message">أزال المالك صلاحية دخولك.</string>
     <string name="unauthorized_logout_message">أنت غير مصرح لك وسيتم تسجيل خروجك.</string>
     <string name="splash_version">v%1$s</string>
     <string name="force_update_title">تحديث مطلوب</string>
@@ -37,7 +37,7 @@
     <string name="request_handled">تمت معالجته من عضو آخر في الفريق</string>
     <string name="request_failed">تعذّر قبول الحجز. افتح التطبيق وحاول مرة أخرى.</string>
     <string name="alerts_notifications_title">استلم طلبات الحجز في وقتها</string>
-    <string name="alerts_notifications_message">اسمح بالإشعارات لتصلك طلبات الحجز الجديدة والتذكيرات وتنبيهات الصالون حتى عندما يكون التطبيق مغلقاً.</string>
+    <string name="alerts_notifications_message">اسمح بالإشعارات لتصلك طلبات الحجز الجديدة والتذكيرات والتنبيهات حتى عندما يكون التطبيق مغلقاً.</string>
     <string name="alerts_notifications_allow">السماح بالإشعارات</string>
     <string name="alerts_overlay_title">اعرض الطلبات فوق التطبيقات الأخرى</string>
     <string name="alerts_overlay_message">فعّل «الظهور فوق التطبيقات الأخرى» ليظهر طلب الحجز الجديد فوق أي تطبيق تستخدمه. يمكنك تغيير ذلك لاحقاً من المزيد ← الإعدادات.</string>

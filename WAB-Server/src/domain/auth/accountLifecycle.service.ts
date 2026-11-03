@@ -14,7 +14,6 @@ import { ERROR_CODES } from '../../constants/errorCodes';
 import { MS_PER_DAY } from '../../constants/time';
 import type { CustomerRaw } from '../../models/customer.model';
 import type { MemberRaw } from '../../models/member.model';
-import type { StorageProvider } from '../../providers';
 import type {
   CustomersRepository,
   InstallationsRepository,
@@ -28,8 +27,11 @@ import { noAccessEvents, type AccessEvents } from '../access/accessEvents';
 import type { AuditWriter } from '../audit';
 import type { SettingsService } from '../settings';
 import type { RefreshTokenService } from './refreshTokens.service';
+import type { FileSlots } from '../files/fileSlots.service';
+import { SLOT_KEYS } from '../../constants/uploads';
 
 /** Who performs an admin action, for the audit log (CLAUDE.md §5.12). */
+
 export interface AdminActor {
   readonly adminId: string;
   readonly ip: string;
@@ -64,7 +66,8 @@ export interface AccountLifecycleDeps {
   readonly members: MembersRepository;
   readonly installations: InstallationsRepository;
   readonly refreshTokens: RefreshTokenService;
-  readonly storage: StorageProvider;
+  /** The avatar slot is removed through the file lifecycle (SRV-181): record dropped, objects queued. */
+  readonly files: Pick<FileSlots, 'remove'>;
   readonly audit: AuditWriter;
   readonly settings: Pick<SettingsService, 'get'>;
   readonly logger: Logger;
@@ -81,7 +84,7 @@ export interface AccountLifecycleDeps {
 export const createAccountLifecycleService = (
   deps: AccountLifecycleDeps,
 ): AccountLifecycleService => {
-  const { customers, members, installations, refreshTokens, storage, audit, logger } = deps;
+  const { customers, members, installations, refreshTokens, files, audit, logger } = deps;
   const access = deps.access ?? noAccessEvents;
   const now = deps.now ?? ((): Date => new Date());
 
@@ -127,10 +130,20 @@ export const createAccountLifecycleService = (
     ]);
     if (customer.avatarKey !== undefined) {
       try {
-        await storage.delete([customer.avatarKey]);
+        // Already unset above: only the slot record and the stored objects remain to go.
+        await files.remove({
+          target: {
+            purpose: 'CUSTOMER_AVATAR',
+            key: SLOT_KEYS.customerAvatar(customer.id),
+            ownerType: 'CUSTOMER',
+            ownerId: customer.id,
+          },
+          current: customer.avatarKey,
+          commit: () => Promise.resolve(),
+        });
       } catch (error) {
-        // The account is already anonymized; a leftover picture is cleaned by the next sweep.
-        logger.warn({ customerId: customer.id, err: error }, 'avatar delete failed during purge');
+        // The account is already anonymized; the outbox and the next purge run retry the file.
+        logger.warn({ customerId: customer.id, err: error }, 'avatar removal failed during purge');
       }
     }
     return true;

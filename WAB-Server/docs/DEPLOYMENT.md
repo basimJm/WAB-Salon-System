@@ -117,11 +117,24 @@ ENV_NAME=production ENV_FILE=.env.production IMAGE_TAG=<tag> docker compose -f d
 | `JWT_ACCESS_SECRET`, `PAYOUT_ENCRYPTION_KEY` | dev placeholder | generate (different per environment) | generate (different per environment) |
 | `OTP_PROVIDER` + `ARQAM_*`, `OTP_CODE_SECRET`, `OTP_PROOF_SECRET` | `fake` (+ `OTP_FIXED_CODE`) | `arqam`, ARQAM TEST key + secrets | `arqam`, ARQAM LIVE key + secrets |
 | `NOTIFIER_PROVIDER` + `FCM_SERVICE_ACCOUNT_JSON`, `SMTP_*`, `EMAIL_FROM_*` | `fake` (Mailpit) | `real`, dev service account | `real`, prod service account |
-| `STORAGE_PROVIDER` + `S3_*`, `CDN_BASE_URL` | `fake` or MinIO | `real`, dev buckets + dev CDN | `real`, prod buckets + prod CDN |
+| `STORAGE_PROVIDER` + `R2_*` (fallback `real` + `S3_*`, `CDN_BASE_URL`) | `fake` or MinIO (`real`) | `cloudflare-r2`, dev public + private bucket | `cloudflare-r2`, prod public + private bucket |
 | `PAYMENT_PROVIDER` | `fake` | `disabled` | `disabled` |
 | `CORS_ALLOWED_ORIGINS`, `TRUST_PROXY_HOPS`, `LOG_LEVEL` | localhost | dev admin origin | prod admin origin |
 
 MongoDB Atlas: create one cluster per environment, one database user per environment, allow the server's IP (or the VPC), and copy the `mongodb+srv://` string into `MONGODB_URI`. The server needs a replica set (Atlas has one) because bookings use transactions.
+
+### Files on Cloudflare R2 (SRV-180)
+
+The server is the only holder of the R2 keys; apps get short-lived presigned URLs (upload: PUT, about 5 minutes; private download: GET, short-lived) and public CDN URLs. Per environment:
+
+1. Cloudflare dashboard → R2 → create two buckets, for example `wab-dev-public` and `wab-dev-private` (location hint: Europe or Middle East).
+2. On the **public** bucket only: Settings → Public access → connect a custom domain (recommended, e.g. `files-dev.<domain>`) or allow the `r2.dev` subdomain. That https address is `R2_PUBLIC_URL`. The private bucket keeps public access **off** (license and medical documents live there; they are only reachable through presigned URLs).
+3. R2 → Manage API tokens → create a token with **Object Read & Write** limited to these two buckets. Copy the Access Key ID and Secret Access Key into `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY`, the account ID into `R2_ACCOUNT_ID`, the bucket names into `R2_PUBLIC_BUCKET_NAME` / `R2_PRIVATE_BUCKET_NAME`, and set `STORAGE_PROVIDER=cloudflare-r2`. Leave `R2_ENDPOINT` unset unless the buckets use a jurisdiction (EU) endpoint.
+4. Check the file: `npm run env:check -- <env file>` (names missing keys only).
+5. CORS (the admin panel uploads from the browser): set `CORS_ALLOWED_ORIGINS` to the admin origins, then run `npm run storage:cors` once with the same environment. It writes one rule (exact origins; `GET`, `HEAD`, `PUT`; header `content-type`) on both buckets. Mobile apps do not need CORS.
+6. Start the server. On a development database `SEED_DEMO_ON_START=true` (or `npm run seed:dev`) uploads the demo images into the new buckets.
+
+Existing AWS S3 objects are **not** copied (owner decision 2026-11-01: no migration tool; R2 starts empty and development data is re-seeded). Rows that still point at S3/CloudFront keys show placeholders until their images are uploaded again. `STORAGE_PROVIDER=real` with the `S3_*` keys keeps working as a fallback.
 
 ## 7. How Redis works here, and how to run it
 

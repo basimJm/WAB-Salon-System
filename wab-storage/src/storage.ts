@@ -3,7 +3,7 @@ import { MemoryStorage } from './adapters/memory';
 import { S3Storage } from './adapters/s3';
 import { resolveConfig, type ResolvedConfig, type StorageOptions } from './config/options';
 import { configError } from './errors';
-import type { StorageProvider } from './types';
+import type { BucketCorsRequest, StorageProvider } from './types';
 import {
   createSharpProcessor,
   createVariantsFor,
@@ -42,6 +42,7 @@ const buildProvider = (config: ResolvedConfig): StorageProvider => {
     case 'local-fs':
       return buildLocalFs(config);
     case 's3':
+    case 'r2':
       return buildS3(config);
   }
 };
@@ -66,6 +67,8 @@ export const withVariants = (
     read: (key) => provider.read(key),
     write: (request) => provider.write(request),
     delete: (keys) => provider.delete(keys),
+    copy: (request) => provider.copy(request),
+    stat: (key) => provider.stat(key),
     createVariants,
     variantKey: (key, name) => variantKey(config.variants, key, name),
     variantKeys: (key) => variantKeys(config.variants, key),
@@ -84,6 +87,20 @@ export const createLocalFsStorage = (options: StorageOptions): LocalFsStorage =>
   if (config.provider !== 'local-fs')
     throw configError('provider must be local-fs', { fields: ['provider'] });
   return buildLocalFs(config);
+};
+
+/**
+ * Sets the browser CORS rule on both buckets (S3 or R2; any environment, run by the operator with
+ * the storage credentials). Returns nothing; a vendor refusal rejects with a `StorageError`.
+ */
+export const configureBucketCors = async (
+  options: StorageOptions,
+  request: BucketCorsRequest,
+): Promise<void> => {
+  const config = resolveConfig(options);
+  if (config.provider !== 's3' && config.provider !== 'r2')
+    throw configError('provider must be s3 or r2', { fields: ['provider'] });
+  await buildS3(config).configureCors(request);
 };
 
 /**

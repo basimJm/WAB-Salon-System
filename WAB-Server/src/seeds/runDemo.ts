@@ -34,6 +34,10 @@ import {
   type DemoBranchPhotosResult,
 } from './demo/branchPhotos';
 import { buildDemoDatasetParts } from './demo/dataset';
+import {
+  createMongoDemoBusinessPhotoStore,
+  repairDemoBusinessPhotoKeys,
+} from './demo/businessPhotos';
 import { buildDemoBusinesses } from './demo/businessTypes';
 import {
   toDemoModel,
@@ -101,6 +105,8 @@ export interface DemoDataReport {
   readonly branchStaffPhotos: DemoBranchPhotosResult;
   /** Clinics and the salon for men and women (§5.19), insert-only by id. */
   readonly businesses: DemoWriteResult;
+  /** Demo business staff whose stored photo key was invalid and was replaced (SRV-179). */
+  readonly businessPhotoKeysFixed: number;
   /** The time zone the demo days were built in (the reports use the same days). */
   readonly timeZone: string;
   readonly now: Date;
@@ -139,7 +145,12 @@ export const seedDemoData = async (now: Date = new Date()): Promise<DemoDataRepo
     createMongoDemoStaffPhotoStore(),
   );
   // Clinics and a salon for everyone (§5.19); also reaches a database seeded before clinics.
-  const businesses = await writeDemoDataset(buildDemoBusinesses(context), models);
+  const businessData = buildDemoBusinesses(context);
+  const businesses = await writeDemoDataset(businessData, models);
+  const businessPhotoKeysFixed = await repairDemoBusinessPhotoKeys(
+    businessData,
+    createMongoDemoBusinessPhotoStore(),
+  );
   await syncBranchCounts(sources);
   await syncDemoRatings(sources);
   return {
@@ -149,6 +160,7 @@ export const seedDemoData = async (now: Date = new Date()): Promise<DemoDataRepo
     extraBranches,
     branchStaffPhotos,
     businesses,
+    businessPhotoKeysFixed,
     timeZone: context.timeZone,
     now: context.now,
   };

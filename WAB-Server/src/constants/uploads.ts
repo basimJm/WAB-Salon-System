@@ -3,7 +3,8 @@ import type { StorageVisibility } from './providers';
 
 /** Uploads module (SRV-046, BUSINESS_DOMAIN.md §3.7 `uploads`, wab-storage BRD STO-02..05). */
 export const UPLOADS_COLLECTION = 'uploads';
-export const UPLOAD_STATUSES = ['PENDING', 'CONFIRMED', 'REJECTED'] as const;
+/** `CONSUMED`: a temporary upload that was copied onto a file slot (SRV-181) and is no longer usable. */
+export const UPLOAD_STATUSES = ['PENDING', 'CONFIRMED', 'REJECTED', 'CONSUMED'] as const;
 export type UploadStatus = (typeof UPLOAD_STATUSES)[number];
 export const UPLOAD_OWNER_TYPES = ['CUSTOMER', 'MEMBER', 'ADMIN', 'GUEST'] as const;
 export type UploadOwnerType = (typeof UPLOAD_OWNER_TYPES)[number];
@@ -147,3 +148,49 @@ export const VARIANT_CONTENT_TYPE = 'image/webp';
 export const VARIANT_EXTENSION = 'webp';
 export const VARIANT_QUALITY = 80;
 export const VARIANT_SEPARATOR = '_';
+
+/**
+ * File slots (SRV-181, BUSINESS_DOMAIN §3.7): a single-image field owns one fixed object key; the
+ * stored reference is `<key>?v=<version>` so URLs change when the content does (app + CDN caches).
+ */
+export const FILE_VERSION_SEPARATOR = '?v=';
+export const SLOT_PURPOSES = [
+  'CUSTOMER_AVATAR',
+  'SALON_PROFILE',
+  'SALON_COVER',
+  'MEMBER_PHOTO',
+  'CATALOG_IMAGE',
+  'BANNER_IMAGE',
+] as const;
+export type SlotPurpose = (typeof SLOT_PURPOSES)[number];
+/** Object key of each slot; ids are server ids (ObjectId strings), never client text. */
+export const SLOT_KEYS = {
+  customerAvatar: (customerId: string): string => `customers/${customerId}/profile/avatar`,
+  salonLogo: (salonId: string): string => `salons/${salonId}/logo`,
+  salonCover: (salonId: string): string => `salons/${salonId}/cover`,
+  memberPhoto: (salonId: string, memberId: string): string =>
+    `salons/${salonId}/staff/${memberId}/photo`,
+  catalogImage: (catalogServiceId: string): string => `catalog/${catalogServiceId}/image`,
+  bannerImage: (bannerId: string, language: string): string =>
+    `banners/${bannerId}/image-${language}`,
+} as const;
+/** Redis lock of one slot while its object and reference change (concurrent replacements queue). */
+export const FILE_SLOT_LOCK_PREFIX = 'file-slot';
+/** A replacement copies one object: the lock outlives it; a second request waits up to ~5 s, then 409. */
+export const FILE_SLOT_LOCK = { ttlMs: 30_000, attempts: 50, retryDelayMs: 100 } as const;
+
+/** Cleanup outbox (`storageCleanups`): objects to delete after the database stopped using them. */
+export const STORAGE_CLEANUPS_COLLECTION = 'storageCleanups';
+export const STORAGE_CLEANUP_BATCH_SIZE = 200;
+export const STORAGE_CLEANUP_MAX_ATTEMPTS = 10;
+/** Retry delay = base * 2^(attempts-1), capped (a provider outage must not spin). */
+export const STORAGE_CLEANUP_RETRY_BASE_MS = 60_000;
+export const STORAGE_CLEANUP_RETRY_MAX_MS = 6 * 60 * 60 * 1_000;
+export const STORAGE_CLEANUP_REASONS = [
+  'SLOT_REPLACED_TEMP',
+  'SLOT_REPLACED_LEGACY',
+  'SLOT_REMOVED',
+  'FILE_REMOVED',
+  'OWNER_DELETED',
+] as const;
+export type StorageCleanupReason = (typeof STORAGE_CLEANUP_REASONS)[number];

@@ -235,6 +235,7 @@ describe('team and hours per branch', () => {
       } as never,
       storage: { getPublicUrl: (k: string) => k },
       uploads: {} as never,
+      files: {} as never,
       branches: new BranchesRepository(branches.model as never),
       deactivationConflicts: {
         check: ({ memberId }) =>

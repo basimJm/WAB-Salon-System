@@ -27,6 +27,9 @@ import {
 } from '../permissions/permissions';
 import type { BookingConflict } from '../salons/hoursService';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import type { FileSlots } from '../files/fileSlots.service';
+import { applySlotPatch } from '../files/slotPatch';
+import { SLOT_KEYS } from '../../constants/uploads';
 
 export interface TeamMemberView {
   readonly id: string;
@@ -89,6 +92,8 @@ export interface TeamDeps {
   readonly phones: Pick<PhoneVerifier, 'resolve'>;
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
+  /** Member photos are file slots (SRV-181). */
+  readonly files: Pick<FileSlots, 'replace' | 'remove'>;
   /** Upcoming bookings of the member; deactivation is refused while any exist (SCHEDULE_CONFLICT). */
   readonly deactivationConflicts?: {
     check(input: { salonId: string; memberId: string }): Promise<BookingConflict[]>;
@@ -105,6 +110,7 @@ export const createTeamService = ({
   phones,
   storage,
   uploads,
+  files,
   deactivationConflicts,
   access = noAccessEvents,
   mainBranches,
@@ -170,6 +176,32 @@ export const createTeamService = ({
     });
   };
 
+  /** The member photo is a file slot (SRV-181): replaced in place, removed through the outbox. */
+  const patchPhoto = (
+    salonId: string,
+    member: Entity<MemberRaw>,
+    value: string | null | undefined,
+  ): Promise<void> =>
+    applySlotPatch(files, {
+      target: {
+        purpose: 'MEMBER_PHOTO',
+        key: SLOT_KEYS.memberPhoto(salonId, member.id),
+        ownerType: 'MEMBER',
+        ownerId: member.id,
+        salonId,
+      },
+      current: member.photoKey,
+      value,
+      field: 'body.photoKey',
+      accept: (upload) => upload.salonId === salonId,
+      write: async (ref) => {
+        await members.patch(
+          member.id,
+          ref === null ? { set: {}, unset: ['photoKey'] } : { set: { photoKey: ref } },
+        );
+      },
+    });
+
   return {
     async list({ salonId, params, branchId }) {
       const filter = branchId === undefined ? { salonId } : { salonId, branchId };
@@ -212,13 +244,15 @@ export const createTeamService = ({
           firstName,
           lastName,
           phone: resolved.e164,
-          ...(photoKey === undefined ? {} : { photoKey }),
           role,
           permissions: grant,
           active: true,
           providesServices: false,
         });
-        return view(created);
+        if (photoKey === undefined) return view(created);
+        // The slot key needs the member id: the photo is placed right after the member exists.
+        await patchPhoto(salonId, created, photoKey);
+        return view(await find(salonId, created.id));
       } catch (error) {
         // Two owners adding the same number at once: the unique index decides.
         if (isDuplicateKeyError(error)) throw taken();
@@ -233,15 +267,13 @@ export const createTeamService = ({
       if (current.role === 'OWNER' && touchesAccess) {
         throw new BusinessRuleError({ code: ERROR_CODES.LAST_OWNER });
       }
-      if (typeof patch.photoKey === 'string' && patch.photoKey !== current.photoKey) {
-        await verifyPhoto(salonId, patch.photoKey);
-      }
       const moving = patch.branchId !== undefined && patch.branchId !== current.branchId;
       if (moving && current.role === 'OWNER')
         throw new BusinessRuleError({ code: ERROR_CODES.LAST_OWNER });
       const nextBranch = moving ? await openBranch(salonId, patch.branchId ?? '') : undefined;
       // Moving takes the member away from their branch's bookings: refused while any is upcoming.
       if (moving) await refuseConflicts(salonId, id);
+      await patchPhoto(salonId, current, patch.photoKey);
       const role = patch.role ?? (current.role === 'OWNER' ? undefined : current.role);
       const permissions =
         patch.permissions !== undefined
@@ -253,13 +285,11 @@ export const createTeamService = ({
         set: {
           ...(patch.firstName === undefined ? {} : { firstName: patch.firstName }),
           ...(patch.lastName === undefined ? {} : { lastName: patch.lastName }),
-          ...(typeof patch.photoKey === 'string' ? { photoKey: patch.photoKey } : {}),
           ...(patch.role === undefined || role === undefined ? {} : { role }),
           ...(permissions === undefined ? {} : { permissions }),
           // Skills are services of the old branch: the member picks services of the new one.
           ...(nextBranch === undefined ? {} : { branchId: nextBranch, 'staff.serviceIds': [] }),
         },
-        unset: patch.photoKey === null ? ['photoKey'] : [],
       });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       if (touchesAccess || moving) await access.permissionsChanged(id);

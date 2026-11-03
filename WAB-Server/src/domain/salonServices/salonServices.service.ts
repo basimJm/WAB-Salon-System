@@ -23,6 +23,8 @@ import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { MainBranches } from '../branches/mainBranch';
 import type { SalonStateService } from '../salons/salonState.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import type { StorageCleanup } from '../files/storageCleanup.service';
+import { droppedKeys, storedObjectsOf } from '../files/storedObjects';
 import { brideAllowed, catalogFits, type BusinessKind } from '../businessTypes/rules';
 
 export interface SalonServiceView {
@@ -96,6 +98,8 @@ export interface SalonServicesDeps {
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
   readonly state: Pick<SalonStateService, 'recompute'>;
+  /** Media taken off a service are deleted through the outbox (SRV-182). */
+  readonly cleanup: Pick<StorageCleanup, 'enqueue'>;
   /** Salon-level endpoint: new services belong to the salon's main branch (§5.16). */
   readonly mainBranches?: Pick<MainBranches, 'idOf'>;
   /** An addressed branch must be one of this salon's (`BRANCH_NOT_FOUND`). */
@@ -121,6 +125,7 @@ export const createSalonServicesService = ({
   storage,
   uploads,
   state,
+  cleanup,
   mainBranches,
   branches,
 }: SalonServicesDeps): SalonServicesService => {
@@ -246,6 +251,12 @@ export const createSalonServicesService = ({
         unset: extraDescription === null ? ['extraDescription'] : [],
       });
       if (updated === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
+      // Media the owner took off the service leave storage through the outbox (SRV-182).
+      if (mediaKeys !== undefined)
+        await cleanup.enqueue(
+          storedObjectsOf(droppedKeys(current.mediaKeys, mediaKeys)),
+          'FILE_REMOVED',
+        );
       await state.recompute(salonId);
       const entry = await catalog.findById(updated.catalogServiceId);
       return toView(updated, entry ?? undefined, language);

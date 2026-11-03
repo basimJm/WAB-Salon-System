@@ -24,6 +24,13 @@ import { CatalogServiceModel } from '../src/models/catalogService.model';
 import { RecommendedPlacementModel } from '../src/models/recommendedPlacement.model';
 import { SalonModel } from '../src/models/salon.model';
 import { buildDemoBusinesses, demoBusinessId } from '../src/seeds/demo/businessTypes';
+import {
+  invalidPhotoKeyFilter,
+  repairDemoBusinessPhotoKeys,
+  type DemoBusinessPhoto,
+} from '../src/seeds/demo/businessPhotos';
+import { assertObjectKey } from '../src/providers/storage/validation';
+import { OBJECT_KEY_PATTERN } from '../src/constants/providers';
 import { writeDemoDataset } from '../src/seeds/demo/writer';
 import { DEMO_COLLECTIONS } from '../src/seeds/demo/types';
 import ar from '../src/locales/ar.json';
@@ -240,6 +247,40 @@ describe('demo businesses: clinics and a salon for everyone (§5.19)', () => {
       'CLINIC',
       'SALON',
     ]);
+  });
+
+  it('every stored file key is a valid storage key (SRV-179: no ":" from branch labels)', () => {
+    const keys = [
+      ...data.Member.map((m) => m['photoKey']),
+      ...data.Salon.flatMap((s) => [s['coverKey'], s['profileKey']]),
+      ...data.Upload.map((u) => u['key']),
+    ].filter((key): key is string => typeof key === 'string');
+    expect(keys.length).toBeGreaterThan(data.Member.length);
+    for (const key of keys) {
+      expect(() => {
+        assertObjectKey(key);
+      }).not.toThrow();
+    }
+  });
+
+  it('repairs only invalid stored photo keys of the demo business staff (SRV-179)', async () => {
+    const seen: DemoBusinessPhoto[] = [];
+    const fixed = await repairDemoBusinessPhotoKeys(data, {
+      replaceInvalidPhotoKeys: (rows) => {
+        seen.push(...rows);
+        return Promise.resolve(rows.length);
+      },
+    });
+    const staffWithPhotos = data.Member.filter((m) => typeof m['photoKey'] === 'string');
+    expect(fixed).toBe(staffWithPhotos.length);
+    expect(seen.map((r) => String(r.id))).toEqual(staffWithPhotos.map((m) => String(m._id)));
+    const [first] = staffWithPhotos;
+    if (first === undefined) throw new Error('demo businesses have staff');
+    const filter = invalidPhotoKeyFilter(first._id);
+    const pattern = (filter['photoKey'] as { $not: RegExp }).$not;
+    expect(pattern).toBe(OBJECT_KEY_PATTERN);
+    expect(pattern.test('demo/members/business-glow-clinic-abdoun:staff0.jpg')).toBe(false);
+    expect(pattern.test('demo/members/business-glow-clinic-abdoun-staff0.jpg')).toBe(true);
   });
 
   it('every row is valid and a second run writes nothing', async () => {
