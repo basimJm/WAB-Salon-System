@@ -45,6 +45,9 @@ sealed interface HomeContract {
         val bookAgain: List<BookAgainEntry> = emptyList(),
         val dialog: HomeDialog? = null,
     ) {
+        /** A reload over shown sections (lens switch): the sections stay and only a small indicator shows. */
+        val reloadingContent: Boolean get() = loading && hasContent
+
         /** The sections to draw, in order; empty ones are left out (Near you always shows: list, empty text or location prompt). */
         val blocks: List<HomeBlock>
             get() = HomeBlock.entries.filter { block ->

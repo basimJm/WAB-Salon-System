@@ -30,6 +30,7 @@ import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeCo
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeDependencies
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -112,6 +113,21 @@ class HomeViewModelTest {
         assertEquals(BusinessType.TATTOO, repository.calls.last().lens, "a refresh keeps the lens")
         vm.onEvent(UiAction.OnLensSelect(null))
         assertEquals(null, repository.calls.last().lens)
+    }
+
+    @Test
+    fun lensSwitchKeepsTheShownSectionsWhileTheNewLensLoads() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        val gate = CompletableDeferred<Unit>()
+        repository.gate = gate
+        vm.onEvent(UiAction.OnLensSelect(BusinessType.CLINIC))
+        val loading = vm.state.value
+        assertTrue(loading.hasContent, "no skeleton on a lens switch")
+        assertTrue(loading.reloadingContent, "a small indicator instead")
+        assertEquals("r1", loading.recommended.items.first().id, "the previous sections stay visible")
+        gate.complete(Unit)
+        assertEquals(false, vm.state.value.reloadingContent)
+        assertEquals(BusinessType.CLINIC, repository.calls.last().lens)
     }
 
     @Test

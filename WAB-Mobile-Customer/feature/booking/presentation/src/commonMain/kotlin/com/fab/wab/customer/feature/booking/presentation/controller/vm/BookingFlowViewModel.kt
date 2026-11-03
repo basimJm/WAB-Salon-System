@@ -64,9 +64,7 @@ class BookingFlowViewModel(
 
     private var started = false
     private val drafts = DraftCoordinator(deps, { scope }, { uiState.value }, ::updateState)
-    private val references = ReferenceImageCoordinator(
-        deps, { scope }, { uiState.value }, ::updateState, ::updatePersonAt, ::emitSideEffect,
-    )
+    private val references = ReferenceImageCoordinator(deps, { scope }, { uiState.value }, ::updateState, ::emitSideEffect)
     private val calendar = CalendarCoordinator(salonId, deps, { scope }, { uiState.value }, ::updateState, ::updatePerson)
 
     override fun onStart() {
@@ -158,11 +156,7 @@ class BookingFlowViewModel(
         updateState { withBranch(branchId) }
     }
 
-    private fun updatePerson(transform: DraftPerson.() -> DraftPerson) = updatePersonAt(uiState.value.currentPerson, transform)
-
-    private fun updatePersonAt(person: Int, transform: DraftPerson.() -> DraftPerson) = updateState {
-        copy(persons = persons.mapIndexed { index, p -> if (index == person) p.transform() else p })
-    }
+    private fun updatePerson(transform: DraftPerson.() -> DraftPerson) = updateState { withPerson(currentPerson, transform) }
 
     /** Multi-select (PRD S16 step 1); the selection is per person. */
     private fun toggleService(serviceId: String) {

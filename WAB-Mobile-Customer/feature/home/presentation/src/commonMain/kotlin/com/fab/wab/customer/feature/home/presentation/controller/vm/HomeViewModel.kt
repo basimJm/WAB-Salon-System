@@ -163,7 +163,8 @@ class HomeViewModel(
     private fun selectLens(lens: BusinessType?) {
         if (lens == uiState.value.lens) return
         track(HomeAnalytics.ACTION_LENS, HomeAnalytics.PARAM_TYPE to (lens?.code ?: HomeAnalytics.VALUE_ALL).lowercase())
-        updateState { copy(lens = lens, hasContent = false) }
+        // The sections of the previous lens stay on screen while the new lens loads (a small indicator, no skeleton).
+        updateState { copy(lens = lens) }
         load()
     }
 

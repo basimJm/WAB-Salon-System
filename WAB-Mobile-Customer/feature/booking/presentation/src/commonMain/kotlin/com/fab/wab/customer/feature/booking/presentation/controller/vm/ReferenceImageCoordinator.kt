@@ -23,7 +23,6 @@ internal class ReferenceImageCoordinator(
     private val scope: () -> CoroutineScope,
     private val state: () -> UiState,
     private val update: (UiState.() -> UiState) -> Unit,
-    private val updatePerson: (Int, DraftPerson.() -> DraftPerson) -> Unit,
     private val effect: (SideEffect) -> Unit,
 ) {
     fun pick() {
@@ -41,7 +40,9 @@ internal class ReferenceImageCoordinator(
             }
             update { copy(referenceUploading = true) }
             when (val upload = deps.uploadReference(image.bytes, image.contentType)) {
-                is AppResult.Success -> updatePerson(person) { copy(referenceImage = DraftReferenceImage(upload.data, image.bytes)) }
+                is AppResult.Success -> update {
+                    withPerson(person) { copy(referenceImage = DraftReferenceImage(upload.data, image.bytes)) }
+                }
                 is AppResult.Error -> effect(SideEffect.ShowError(deps.errorText(upload.appError)))
                 AppResult.Loading -> Unit
             }
@@ -52,7 +53,7 @@ internal class ReferenceImageCoordinator(
     fun remove() {
         if (state().person.referenceImage == null) return
         track(BookingAnalytics.VALUE_REMOVE)
-        updatePerson(state().currentPerson) { copy(referenceImage = null) }
+        update { withPerson(currentPerson) { copy(referenceImage = null) } }
     }
 
     private fun track(value: String) {
@@ -60,3 +61,7 @@ internal class ReferenceImageCoordinator(
         deps.analytics.trackAction(AnalyticsAction(BookingAnalytics.ACTION_REFERENCE_IMAGE, params))
     }
 }
+
+/** The state with person [index] transformed (the person index stays fixed while an upload runs). */
+internal fun UiState.withPerson(index: Int, transform: DraftPerson.() -> DraftPerson): UiState =
+    copy(persons = persons.mapIndexed { i, p -> if (i == index) p.transform() else p })

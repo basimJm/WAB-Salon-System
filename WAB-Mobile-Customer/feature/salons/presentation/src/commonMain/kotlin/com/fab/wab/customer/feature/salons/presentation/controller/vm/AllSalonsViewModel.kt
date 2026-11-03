@@ -9,11 +9,9 @@ import com.fab.wab.customer.core.domain.salon.GeneralFilter
 import com.fab.wab.customer.core.domain.salon.SalonFilters
 import com.fab.wab.customer.core.domain.salon.SalonQuery
 import com.fab.wab.customer.core.domain.salon.SalonQueryDefaults
-import com.fab.wab.customer.core.domain.salon.ServiceRef
 import com.fab.wab.customer.core.mvi.BaseViewModel
 import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.core.ui.permission.PermissionOutcome
-import com.fab.wab.customer.feature.salons.domain.model.SearchSuggestions
 import com.fab.wab.customer.feature.salons.presentation.analytics.SalonsAnalytics
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsContract.SalonsDialog
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsContract.SideEffect
@@ -48,8 +46,8 @@ class AllSalonsViewModel(
 
     private var started = false
     private var loadJob: Job? = null
-    private var suggestionsJob: Job? = null
     private val typed = MutableStateFlow("")
+    private val assist = SearchAssistCoordinator(deps, { scope }, { uiState.value }, ::updateState, ::emitSideEffect, ::search)
 
     override fun onStart() {
         if (started) return
@@ -64,37 +62,33 @@ class AllSalonsViewModel(
             typed.drop(1).debounce(deps.debounceMs).distinctUntilChanged().collect { text ->
                 track(SalonsAnalytics.ACTION_SEARCH, SalonsAnalytics.PARAM_HAS_TEXT to text.isNotBlank().toString())
                 load()
-                loadSuggestions(text)
+                assist.loadSuggestions(text)
             }
         }
     }
 
     override fun handle(event: UiAction) {
+        if (!assist.handle(event) && !handleFilters(event)) handleList(event)
+    }
+
+    private fun handleFilters(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnTextChange -> {
                 updateState { copy(text = event.value, suggesting = true) }
                 typed.value = event.value.trim()
-            }
-            UiAction.OnSearchSubmit -> submit(uiState.value.text)
-            is UiAction.OnRecentClick -> submit(event.text, fromRecent = true)
-            UiAction.OnRecentClear -> scope.launch { deps.recentSearches.clear() }
-            is UiAction.OnSuggestedServiceClick -> {
-                track(SalonsAnalytics.ACTION_SUGGESTION, SalonsAnalytics.PARAM_ID to event.service.id)
-                saveRecent(event.service.name)
-                val service = ServiceRef(event.service.id, event.service.name)
-                updateState { copy(suggesting = false, filters = filters.withService(service)) }
-                search("")
-            }
-            is UiAction.OnSuggestedPlaceClick -> {
-                track(SalonsAnalytics.ACTION_SUGGESTION, SalonsAnalytics.PARAM_ID to event.salonId)
-                saveRecent(uiState.value.text)
-                emitSideEffect(SideEffect.OpenSalon(event.salonId))
             }
             UiAction.OnFilterClick -> openFilters()
             is UiAction.OnLensSelect -> applyFilters(uiState.value.filters.withLens(event.type))
             is UiAction.OnQuickChip -> quickChip(event.chip)
             is UiAction.OnChipRemove -> removeChip(event.chip)
             is UiAction.OnFiltersApplied -> applyFilters(event.filters)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleList(event: UiAction) {
+        when (event) {
             is UiAction.OnSalonClick -> {
                 track(SalonsAnalytics.ACTION_SALON_CLICK, SalonsAnalytics.PARAM_ID to event.salonId)
                 emitSideEffect(SideEffect.OpenSalon(event.salonId))
@@ -105,6 +99,7 @@ class AllSalonsViewModel(
             UiAction.OnRetry -> load()
             UiAction.OnDialogConfirm -> confirmDialog()
             UiAction.OnDialogDismiss -> updateState { copy(dialog = null) }
+            else -> Unit
         }
     }
 
@@ -135,35 +130,10 @@ class AllSalonsViewModel(
         applyFilters(uiState.value.filters.without(chip))
     }
 
-    /** Submit (keyboard search or a recent search): hides the suggestions, keeps the text on the device, shows results. */
-    private fun submit(text: String, fromRecent: Boolean = false) {
-        val trimmed = text.trim()
-        updateState { copy(suggesting = false) }
-        saveRecent(trimmed)
-        if (fromRecent) search(trimmed)
-    }
-
     /** Sets the search text at once: the debounced flow loads it; the same text as before reloads directly. */
     private fun search(text: String) {
         updateState { copy(text = text) }
         if (typed.value == text) load() else typed.value = text
-    }
-
-    private fun saveRecent(text: String) {
-        if (text.isBlank()) return
-        scope.launch { deps.recentSearches.add(text) }
-    }
-
-    private fun loadSuggestions(text: String) {
-        suggestionsJob?.cancel()
-        suggestionsJob = scope.launch {
-            when (val result = deps.suggestions(text, uiState.value.filters)) {
-                is AppResult.Success -> updateState { copy(suggestions = result.data) }
-                // Suggestions are an aid: a failure leaves the results list, which shows its own error state.
-                is AppResult.Error -> updateState { copy(suggestions = SearchSuggestions.NONE) }
-                AppResult.Loading -> Unit
-            }
-        }
     }
 
     /** First page (or pull-to-refresh) for the current text + filters; cancels any page in flight. */

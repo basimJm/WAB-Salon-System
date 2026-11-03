@@ -61,6 +61,11 @@ class FilterSheetViewModel(
     }
 
     override fun handle(event: UiAction) {
+        if (!handleScope(event)) handleChoices(event)
+    }
+
+    /** Type, gender and services: they change the catalog or the price bounds. */
+    private fun handleScope(event: UiAction): Boolean {
         when (event) {
             is UiAction.OnBusinessTypeToggle -> selectBusinessTypes(uiState.value.businessTypes.toggled(event.businessType))
             is UiAction.OnGenderSelect -> {
@@ -70,11 +75,19 @@ class FilterSheetViewModel(
             is UiAction.OnServiceToggle -> toggleService(event.service)
             UiAction.OnSeeMoreServices -> if (uiState.value.servicesHasMore) loadServices(uiState.value.servicesPage + 1)
             UiAction.OnRetryServices -> loadServices(uiState.value.servicesPage + 1)
+            else -> return false
+        }
+        return true
+    }
+
+    private fun handleChoices(event: UiAction) {
+        when (event) {
             is UiAction.OnPriceChange -> updateState { copy(priceSelection = event.range) }
             is UiAction.OnGeneralSelect -> updateState { copy(general = if (general == event.general) null else event.general) }
             is UiAction.OnRatingSelect -> updateState { copy(minRating = if (minRating == event.rating) null else event.rating) }
             UiAction.OnReset -> reset()
             UiAction.OnApply -> emitSideEffect(SideEffect.Applied(uiState.value.toFilters()))
+            else -> Unit
         }
     }
 
@@ -155,7 +168,8 @@ class FilterSheetViewModel(
             when (val result = deps.loadPriceBounds(uiState.value.toFilters().copy(priceRange = null))) {
                 is AppResult.Success -> updateState {
                     val bounds = result.data?.takeIf { it.toFloatRange() != null }
-                    copy(priceBounds = bounds, priceSelection = bounds?.toFloatRange()?.let { opened?.within(it) ?: it }, priceLoading = false)
+                    val selection = bounds?.toFloatRange()?.let { opened?.within(it) ?: it }
+                    copy(priceBounds = bounds, priceSelection = selection, priceLoading = false)
                 }
                 is AppResult.Error -> updateState { copy(priceBounds = null, priceSelection = null, priceLoading = false) }
                 AppResult.Loading -> Unit

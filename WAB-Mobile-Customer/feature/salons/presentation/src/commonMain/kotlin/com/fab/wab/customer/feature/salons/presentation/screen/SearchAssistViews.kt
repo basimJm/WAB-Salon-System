@@ -45,6 +45,7 @@ import com.fab.wab.customer.feature.salons.presentation.resources.search_recent
 import com.fab.wab.customer.feature.salons.presentation.resources.search_recent_clear
 import com.fab.wab.customer.feature.salons.presentation.resources.search_suggest_places
 import com.fab.wab.customer.feature.salons.presentation.resources.search_suggest_services
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -107,9 +108,7 @@ internal fun SearchSuggestionList(rows: List<SuggestionRow>, onAction: (UiAction
         items(rows, key = { it.key() }, contentType = { it::class.simpleName }) { row ->
             when (row) {
                 is SuggestionRow.Header -> AppText(
-                    text = stringResource(
-                        if (row.group == SuggestionRow.Group.SERVICES) Res.string.search_suggest_services else Res.string.search_suggest_places,
-                    ),
+                    text = stringResource(row.group.title()),
                     style = discoveryBody(DiscoveryDesign.TEXT_12_5, FontWeight.Bold),
                     color = AppTheme.colors.muted,
                     modifier = Modifier.padding(top = AppTheme.spacing.space12, bottom = AppTheme.spacing.space4),
@@ -150,6 +149,11 @@ private fun SuggestionLine(name: String, detail: String?, badge: @Composable () 
         }
         badge()
     }
+}
+
+private fun SuggestionRow.Group.title(): StringResource = when (this) {
+    SuggestionRow.Group.SERVICES -> Res.string.search_suggest_services
+    SuggestionRow.Group.PLACES -> Res.string.search_suggest_places
 }
 
 private fun SuggestionRow.key(): String = when (this) {

@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.designsystem.components.domain.BusinessTypeLens
+import com.fab.wab.customer.designsystem.components.feedback.AppLoadingIndicator
 import com.fab.wab.customer.designsystem.components.layout.tabBarInset
 import com.fab.wab.customer.designsystem.components.badge.countBadgeLabel
 import com.fab.wab.customer.designsystem.components.dialog.AppGlobalDialog
@@ -86,11 +87,14 @@ private fun HomeReady(state: UiState, onAction: (UiAction) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = spacing.space20 + tabBarInset())) {
         HomeHeader(state, onAction)
         HomeSearchButton(onClick = { onAction(UiAction.OnSearchClick) }, Modifier.padding(horizontal = spacing.space20))
-        BusinessTypeLens(
-            selected = state.lens,
-            onSelect = onLensSelect,
+        Row(
             modifier = Modifier.padding(start = spacing.space20, end = spacing.space20, top = spacing.space14, bottom = spacing.space16),
-        )
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(spacing.space8),
+        ) {
+            BusinessTypeLens(selected = state.lens, onSelect = onLensSelect, modifier = Modifier.weight(1f))
+            if (state.reloadingContent) AppLoadingIndicator()
+        }
         state.blocks.forEach { block ->
             when (block) {
                 HomeBlock.Banners -> HomeBanners(state.banners, onAction, Modifier.padding(horizontal = spacing.space20))

@@ -21,6 +21,7 @@ import com.fab.wab.customer.feature.home.domain.model.HomeContent
 import com.fab.wab.customer.feature.home.domain.model.HomeSection
 import com.fab.wab.customer.feature.home.domain.model.HomeService
 import com.fab.wab.customer.feature.home.domain.repository.HomeRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -47,8 +48,11 @@ internal data class HomeCall(val gender: Gender, val lens: BusinessType?, val lo
 internal class HomeRepositoryFake : HomeRepository {
     val calls = mutableListOf<HomeCall>()
     var result: AppResult<HomeContent> = AppResult.Success(content())
+    /** When set, a load waits for it (to observe the state while a request is in flight). */
+    var gate: CompletableDeferred<Unit>? = null
     override suspend fun load(gender: Gender, lens: BusinessType?, location: LocationData?): AppResult<HomeContent> {
         calls += HomeCall(gender, lens, location)
+        gate?.await()
         return result
     }
 }

@@ -70,7 +70,9 @@ class SalonsNavigation(override val navController: NavHostController) : Navigato
         CollectSideEffect(viewModel.sideEffect) { effect ->
             when (effect) {
                 is AllServicesContract.SideEffect.OpenSalons ->
-                    navigateTo(Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType?.code))
+                    navigateTo(
+                        Screen.AllSalons(gender.code, effect.serviceId, effect.serviceName, businessType = effect.businessType?.code),
+                    )
                 is AllServicesContract.SideEffect.ShowError -> notifications.show(effect.message, style = NotificationStyle.Error)
             }
         }

@@ -131,7 +131,11 @@ internal fun BookAgainSection(entries: List<BookAgainEntry>, onAction: (UiAction
             onAction = {},
         )
         LazyRow(
-            contentPadding = PaddingValues(start = AppTheme.spacing.space20, end = AppTheme.spacing.space20, bottom = AppTheme.spacing.space6),
+            contentPadding = PaddingValues(
+                start = AppTheme.spacing.space20,
+                end = AppTheme.spacing.space20,
+                bottom = AppTheme.spacing.space6,
+            ),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12),
         ) {
             items(entries, key = { it.lastBookingId }, contentType = { SALON_TYPE }) { entry ->
