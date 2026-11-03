@@ -29,6 +29,7 @@ import type { HoldsStore } from '../availability/holds';
 import { calculateAmounts } from '../pricing/pricing';
 import { outstandingAtSalon } from './bookingMoney';
 import type { SettingsService } from '../settings';
+import type { ReferenceImageMover } from './referenceImages';
 
 export interface BookingSummary {
   readonly id: string;
@@ -76,6 +77,8 @@ export interface BookingCreationDeps {
   readonly now?: () => Date;
   /** Reads the draft's branch for the booking's branch snapshot (§3.5). */
   readonly branches?: Pick<BranchesRepository, 'findById'>;
+  /** Moves tattoo design images into their file slots once the booking exists (§5.23). */
+  readonly referenceImages?: ReferenceImageMover;
 }
 
 export const toSummary = (booking: Entity<BookingRaw>): BookingSummary => ({
@@ -298,6 +301,7 @@ export const createBookingCreationService = (deps: BookingCreationDeps): Booking
         holds: draft.holds,
       });
       await drafts.remove(draft.id);
+      await deps.referenceImages?.move(booking);
       await hook.created(booking);
       return toSummary(booking);
     },

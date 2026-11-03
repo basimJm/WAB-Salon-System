@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.13.0"
+    "version": "1.14.0"
   },
   "servers": [
     {
@@ -177,7 +177,8 @@
         "type": "string",
         "enum": [
           "SALON",
-          "CLINIC"
+          "CLINIC",
+          "TATTOO"
         ]
       },
       "Audience": {
@@ -8371,7 +8372,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -8649,7 +8651,8 @@
                     "type": "string",
                     "enum": [
                       "SALON",
-                      "CLINIC"
+                      "CLINIC",
+                      "TATTOO"
                     ]
                   },
                   "audience": {
@@ -9364,7 +9367,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -10720,7 +10724,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -12324,7 +12329,8 @@
                       "LICENSE_DOCUMENT",
                       "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
-                      "BANNER_IMAGE"
+                      "BANNER_IMAGE",
+                      "BOOKING_REFERENCE"
                     ]
                   },
                   "contentType": {
@@ -12687,7 +12693,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -13460,7 +13467,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -14933,7 +14941,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -15034,7 +15043,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "audience": {
@@ -15300,7 +15310,8 @@
                           "type": "string",
                           "enum": [
                             "SALON",
-                            "CLINIC"
+                            "CLINIC",
+                            "TATTOO"
                           ]
                         },
                         "audience": {
@@ -15569,7 +15580,8 @@
                           "type": "string",
                           "enum": [
                             "SALON",
-                            "CLINIC"
+                            "CLINIC",
+                            "TATTOO"
                           ]
                         },
                         "audience": {
@@ -15809,7 +15821,8 @@
                           "type": "string",
                           "enum": [
                             "SALON",
-                            "CLINIC"
+                            "CLINIC",
+                            "TATTOO"
                           ]
                         },
                         "audience": {
@@ -15989,7 +16002,8 @@
                     "type": "string",
                     "enum": [
                       "SALON",
-                      "CLINIC"
+                      "CLINIC",
+                      "TATTOO"
                     ]
                   },
                   "ids": {
@@ -16060,7 +16074,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "audience": {
@@ -16361,7 +16376,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -16909,6 +16925,13 @@
                                   null
                                 ]
                               },
+                              "referenceImageUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "Tattoo design image (§5.23): short-lived signed URL; null when none."
+                              },
                               "start": {
                                 "type": "string"
                               },
@@ -16975,6 +16998,7 @@
                               "name",
                               "isBride",
                               "gender",
+                              "referenceImageUrl",
                               "start",
                               "end",
                               "subtotal",
@@ -23268,7 +23292,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "branchId": {
@@ -23387,7 +23412,8 @@
                             "type": "string",
                             "enum": [
                               "SALON",
-                              "CLINIC"
+                              "CLINIC",
+                              "TATTOO"
                             ]
                           },
                           "audience": {

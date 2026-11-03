@@ -186,4 +186,33 @@ export const DEMO_SERVICES: readonly DemoService[] = [
     name: { ar: 'بلازما', en: 'PRP' },
     description: { ar: 'حقن البلازما للبشرة والشعر', en: 'Platelet-rich plasma for skin and hair' },
   },
+  // Tattoo studio catalog (§5.23): studios serve everyone, so every entry is BOTH.
+  {
+    businessType: 'TATTOO',
+    audience: 'BOTH',
+    image: 'small-tattoo.jpg',
+    name: { ar: 'وشم صغير', en: 'Small tattoo' },
+    description: { ar: 'تصميم صغير حتى ١٠ سم', en: 'A small design up to 10 cm' },
+  },
+  {
+    businessType: 'TATTOO',
+    audience: 'BOTH',
+    image: 'large-tattoo.jpg',
+    name: { ar: 'جلسة وشم كبير', en: 'Large tattoo session' },
+    description: { ar: 'جلسة لتصميم كبير أو مفصل', en: 'A session for a large or detailed design' },
+  },
+  {
+    businessType: 'TATTOO',
+    audience: 'BOTH',
+    image: 'cover-up.jpg',
+    name: { ar: 'تغطية وشم', en: 'Cover-up tattoo' },
+    description: { ar: 'تصميم جديد يغطي وشماً قديماً', en: 'A new design over an old tattoo' },
+  },
+  {
+    businessType: 'TATTOO',
+    audience: 'BOTH',
+    image: 'piercing.jpg',
+    name: { ar: 'ثقب', en: 'Piercing' },
+    description: { ar: 'ثقب الأذن أو الأنف أو غيرها', en: 'Ear, nose or other piercing' },
+  },
 ];

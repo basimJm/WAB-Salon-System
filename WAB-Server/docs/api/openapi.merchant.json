@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Merchant API",
-    "version": "1.10.0"
+    "version": "1.11.0"
   },
   "servers": [
     {
@@ -239,7 +239,8 @@
         "type": "string",
         "enum": [
           "SALON",
-          "CLINIC"
+          "CLINIC",
+          "TATTOO"
         ]
       },
       "Audience": {
@@ -2282,7 +2283,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -2489,7 +2491,8 @@
                         "type": "string",
                         "enum": [
                           "SALON",
-                          "CLINIC"
+                          "CLINIC",
+                          "TATTOO"
                         ]
                       },
                       "audience": {
@@ -3812,7 +3815,8 @@
                       "LICENSE_DOCUMENT",
                       "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
-                      "BANNER_IMAGE"
+                      "BANNER_IMAGE",
+                      "BOOKING_REFERENCE"
                     ]
                   },
                   "contentType": {
@@ -18701,6 +18705,13 @@
                                   null
                                 ]
                               },
+                              "referenceImageUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "Tattoo design image (§5.23): short-lived signed URL; null when none."
+                              },
                               "start": {
                                 "type": "string"
                               },
@@ -18767,6 +18778,7 @@
                               "name",
                               "isBride",
                               "gender",
+                              "referenceImageUrl",
                               "start",
                               "end",
                               "subtotal",

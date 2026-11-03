@@ -293,6 +293,17 @@ describe('customer', () => {
     expect(data.money.total).toBe('12.500');
     expect(data.statusHistory).toHaveLength(1);
     expect(data.actions).toEqual([]);
+    expect((data.persons[0] as { referenceImageUrl?: unknown }).referenceImageUrl).toBeNull();
+  });
+  it('shows a tattoo design image as a signed URL (§5.23)', async () => {
+    const doc = m.bookings.docs.find((d) => String(d['_id']) === ids['b2']?.toHexString());
+    const persons = doc?.['persons'] as Record<string, unknown>[];
+    persons[0] = { ...persons[0], referenceImageKey: 'bookings/b2/persons/0/reference?v=1' };
+    const res = await customer(`/${ids['b2']?.toHexString() ?? ''}`);
+    const data = bodyOf(res).data as { persons: { referenceImageUrl: string | null }[] };
+    expect(data.persons[0]?.referenceImageUrl).toEqual(
+      expect.stringContaining('bookings/b2/persons/0/reference'),
+    );
   });
   it('answers 404 for someone else’s booking, 400 for a bad id, 401 without a token', async () => {
     expect((await customer(`/${ids['b4']?.toHexString() ?? ''}`)).status).toBe(404);

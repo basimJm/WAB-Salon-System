@@ -9,6 +9,7 @@ import { AVAILABILITY_MAX_SERVICES } from '../../../constants/availability';
 import { instantInput } from '../../../utils/time/instantInput';
 import { otpTokenSchema } from '../../shared/auth/auth.schemas';
 import { GENDERS } from '../../../constants/enums';
+import { OBJECT_KEY_PATTERN } from '../../../constants/providers';
 
 const objectId = z.string().regex(OBJECT_ID_PATTERN);
 /** Main person + `booking.maxCompanions` is enforced by the service from settings; this is a sanity cap. */
@@ -41,6 +42,8 @@ export const createDraftBody = z.object({
         staffId: objectId.optional(),
         /** Slot start (ISO instant); must be a slot returned by the availability endpoint. */
         start: instantInput,
+        /** Tattoo studios only (§5.23): a confirmed `BOOKING_REFERENCE` upload key, optional. */
+        referenceImageKey: z.string().regex(OBJECT_KEY_PATTERN).optional(),
       }),
     )
     .min(1)

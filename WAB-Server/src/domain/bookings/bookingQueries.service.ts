@@ -22,6 +22,7 @@ import type {
   MembersRepository,
 } from '../../repositories/identity.repository';
 import type { StorageProvider } from '../../providers/storage';
+import { referenceImageUrl } from './referenceImages';
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
@@ -118,6 +119,8 @@ export interface BookingDetail extends BookingRow {
     isBride: boolean;
     /** §5.19; `null` when unknown (BOTH business without it, or older bookings). */
     gender: Gender | null;
+    /** Tattoo design image (§5.23): short-lived signed URL; `null` when none. */
+    referenceImageUrl: string | null;
     start: string;
     end: string;
     subtotal: string;
@@ -186,7 +189,7 @@ export interface BookingQueriesDeps {
   readonly salons: Pick<SalonsRepository, 'findMany'>;
   readonly settings: Pick<SettingsService, 'get'>;
   /** Staff photo URLs. */
-  readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
+  readonly storage: Pick<StorageProvider, 'getPublicUrl' | 'getSignedUrl'>;
   readonly now?: () => Date;
 }
 
@@ -449,13 +452,17 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
       });
       if (found === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       const l = await lookups([found], audience);
+      const imageUrls = await Promise.all(
+        found.persons.map((p) => referenceImageUrl(storage, p.referenceImageKey)),
+      );
       return {
         ...toRow(found, audience, l, language),
         refundStatus: found.refundStatus,
-        persons: found.persons.map((p) => ({
+        persons: found.persons.map((p, index) => ({
           name: p.name,
           isBride: p.isBride,
           gender: p.gender ?? null,
+          referenceImageUrl: imageUrls[index] ?? null,
           start: iso(p.start),
           end: iso(p.end),
           subtotal: formatJod(p.subtotal),

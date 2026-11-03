@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.10.0"
+    "version": "1.11.0"
   },
   "servers": [
     {
@@ -240,7 +240,8 @@
         "type": "string",
         "enum": [
           "SALON",
-          "CLINIC"
+          "CLINIC",
+          "TATTOO"
         ]
       },
       "Audience": {
@@ -2834,7 +2835,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -3008,7 +3010,8 @@
                       "LICENSE_DOCUMENT",
                       "MEDICAL_LICENSE",
                       "CATALOG_IMAGE",
-                      "BANNER_IMAGE"
+                      "BANNER_IMAGE",
+                      "BOOKING_REFERENCE"
                     ]
                   },
                   "contentType": {
@@ -3372,7 +3375,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -3709,7 +3713,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -8622,6 +8627,10 @@
                         "start": {
                           "type": "string",
                           "format": "date-time"
+                        },
+                        "referenceImageKey": {
+                          "type": "string",
+                          "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
                         }
                       },
                       "required": [
@@ -8743,6 +8752,13 @@
                                   null
                                 ]
                               },
+                              "referenceImageKey": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "Tattoo design image upload key (§5.23); null when none."
+                              },
                               "services": {
                                 "type": "array",
                                 "items": {
@@ -8806,6 +8822,7 @@
                               "isMain",
                               "isBride",
                               "gender",
+                              "referenceImageKey",
                               "services",
                               "staff",
                               "staffSelection",
@@ -9107,6 +9124,13 @@
                                   null
                                 ]
                               },
+                              "referenceImageKey": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "Tattoo design image upload key (§5.23); null when none."
+                              },
                               "services": {
                                 "type": "array",
                                 "items": {
@@ -9170,6 +9194,7 @@
                               "isMain",
                               "isBride",
                               "gender",
+                              "referenceImageKey",
                               "services",
                               "staff",
                               "staffSelection",
@@ -9920,7 +9945,8 @@
               "type": "string",
               "enum": [
                 "SALON",
-                "CLINIC"
+                "CLINIC",
+                "TATTOO"
               ]
             },
             "required": false,
@@ -10692,6 +10718,13 @@
                                   null
                                 ]
                               },
+                              "referenceImageUrl": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ],
+                                "description": "Tattoo design image (§5.23): short-lived signed URL; null when none."
+                              },
                               "start": {
                                 "type": "string"
                               },
@@ -10758,6 +10791,7 @@
                               "name",
                               "isBride",
                               "gender",
+                              "referenceImageUrl",
                               "start",
                               "end",
                               "subtotal",

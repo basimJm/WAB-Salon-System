@@ -14,7 +14,7 @@ import { CustomersRepository, MembersRepository } from '../src/repositories/iden
 import { LeavesRepository } from '../src/repositories/leaves.repository';
 import { SalonServicesRepository } from '../src/repositories/salonServices.repository';
 import { SalonsRepository } from '../src/repositories/salons.repository';
-import { UnauthorizedError } from '../src/utils/errors';
+import { UnauthorizedError, ValidationError } from '../src/utils/errors';
 import { signAccessToken } from '../src/utils/auth/accessToken';
 import { createLogger } from '../src/utils/logger';
 import { connectRedis, disconnectRedis } from '../src/utils/redis/client';
@@ -27,6 +27,10 @@ const SECRET = 'a'.repeat(48);
 let clock = new Date('2026-10-12T08:00:00Z');
 const PHONE = { countryCode: 'JO', dialCode: '+962', number: '791234567', e164: '+962791234567' };
 const resets: string[] = [];
+/** Design-image checks the draft asked for (§5.23); `REFUSED_IMAGE` fails like an unconfirmed upload. */
+const imageChecks: { keys: readonly string[]; purpose: string; accept?: (u: never) => boolean }[] =
+  [];
+const REFUSED_IMAGE = 'bookings/reference/not-confirmed.jpg';
 const m = {
   salons: createFakeModel(),
   members: createFakeModel(),
@@ -82,6 +86,14 @@ beforeAll(async () => {
         otpGate: { reset: (e164) => Promise.resolve(void resets.push(e164)) },
         settings,
         now,
+        uploads: {
+          assertConfirmed: (input) => {
+            imageChecks.push(input);
+            return input.keys.includes(REFUSED_IMAGE)
+              ? Promise.reject(new ValidationError({ code: 'UPLOAD_INVALID' }))
+              : Promise.resolve();
+          },
+        },
       }),
       installations: {
         service: undefined as never,
@@ -169,6 +181,7 @@ const draft = (persons: object[], over: Record<string, unknown> = {}, who = me):
 
 beforeEach(async () => {
   await redis.flushdb();
+  imageChecks.length = 0;
   clock = new Date('2026-10-12T08:00:00Z');
   for (const f of Object.values(m)) f.docs.length = 0;
   m.salons.docs.push({
@@ -338,6 +351,55 @@ describe('creating a draft', () => {
       const res = await draft([person({ isBride: true, gender: 'MALE' })]);
       expect(res.status).toBe(422);
       expect(bodyOf(res).error.code).toBe('GENDER_MISMATCH');
+    });
+
+    describe('tattoo studios (§5.23)', () => {
+      const IMAGE = 'bookings/reference/design.jpg';
+
+      it('take mixed persons, each with an optional design image checked as the customer’s own upload', async () => {
+        asBusiness('TATTOO', 'BOTH');
+        const res = await draft([
+          person({ name: 'Noor', gender: 'FEMALE', referenceImageKey: IMAGE }),
+          person({ name: 'Omar', gender: 'MALE', start: amman(D, '11:00') }),
+        ]);
+        expect(res.status).toBe(201);
+        const persons = bodyOf(res).data.persons as unknown as {
+          referenceImageKey: string | null;
+        }[];
+        expect(persons.map((p) => p.referenceImageKey)).toEqual([IMAGE, null]);
+        const stored = m.drafts.docs[0]?.['persons'] as { referenceImageKey?: string }[];
+        expect(stored.map((p) => p.referenceImageKey)).toEqual([IMAGE, undefined]);
+        expect(imageChecks).toHaveLength(1);
+        expect(imageChecks[0]).toMatchObject({ keys: [IMAGE], purpose: 'BOOKING_REFERENCE' });
+        const accept = imageChecks[0]?.accept;
+        expect(accept?.({ ownerType: 'CUSTOMER', ownerId: me.toHexString() } as never)).toBe(true);
+        expect(accept?.({ ownerType: 'CUSTOMER', ownerId: salonId.toHexString() } as never)).toBe(
+          false,
+        );
+      });
+
+      it('refuse a bride and an unconfirmed design image; nothing is held', async () => {
+        asBusiness('TATTOO', 'BOTH');
+        const bride = await draft([person({ isBride: true, gender: 'FEMALE' })]);
+        expect(bodyOf(bride).error.code).toBe('BRIDE_NOT_ALLOWED');
+        const bad = await draft([person({ gender: 'FEMALE', referenceImageKey: REFUSED_IMAGE })]);
+        expect(bad.status).toBe(400);
+        expect(m.drafts.docs).toHaveLength(0);
+      });
+
+      it('a design image at a salon or clinic is BUSINESS_TYPE_MISMATCH (no upload check)', async () => {
+        for (const [type, audience] of [
+          ['SALON', 'BOTH'],
+          ['CLINIC', 'BOTH'],
+        ] as const) {
+          asBusiness(type, audience);
+          const res = await draft([person({ gender: 'FEMALE', referenceImageKey: IMAGE })]);
+          expect(res.status).toBe(422);
+          expect(bodyOf(res).error.code).toBe('BUSINESS_TYPE_MISMATCH');
+        }
+        expect(imageChecks).toHaveLength(0);
+        expect(m.drafts.docs).toHaveLength(0);
+      });
     });
 
     it('a customer cannot book a business they may not see (404)', async () => {

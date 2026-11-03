@@ -20,6 +20,8 @@ export const MERCHANT_BOOKING_ROUTES = {
 } as const;
 export const REASON_CODE_PATTERN = /^[A-Z][A-Z0-9_]{1,39}$/;
 export const REASON_TEXT_MAX_LENGTH = 300;
+/** Lifetime of the signed URL of a tattoo design image on booking details (§5.23). */
+export const REFERENCE_IMAGE_URL_TTL_SEC = 300;
 
 export const CUSTOMER_BOOKING_ROUTES = { cancel: '/:id/cancel' } as const;
 /** Reason code stored when the customer cancels (no code is asked in the app). */

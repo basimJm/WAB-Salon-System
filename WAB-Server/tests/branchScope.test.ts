@@ -112,7 +112,10 @@ describe('bookings of another branch', () => {
       members: new MembersRepository(createFakeModel().model as never),
       salons: new SalonsRepository(createFakeModel().model as never),
       settings: { get: () => Promise.resolve('Asia/Amman') } as never,
-      storage: { getPublicUrl: (key: string) => key },
+      storage: {
+        getPublicUrl: (key: string) => key,
+        getSignedUrl: ({ key }: { key: string }) => Promise.resolve(key),
+      },
       now: () => new Date('2026-10-30T08:00:00.000Z'),
     });
     const member = {

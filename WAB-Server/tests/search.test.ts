@@ -27,7 +27,9 @@ const recommended: { ids: string[]; clinicIds: string[] } & RecommendedLookup = 
   ids: [],
   clinicIds: [],
   salonIds({ businessType }) {
-    return Promise.resolve(businessType === 'CLINIC' ? this.clinicIds : this.ids);
+    return Promise.resolve(
+      businessType === 'CLINIC' ? this.clinicIds : businessType === 'SALON' ? this.ids : [],
+    );
   },
 };
 const saved: { ids: Set<string>; asked: string[] } = { ids: new Set(), asked: [] };

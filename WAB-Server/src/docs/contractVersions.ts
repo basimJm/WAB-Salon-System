@@ -15,18 +15,18 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.10.0',
-    sha256: '165d6924157ccd7178184be5775480626a5effae53d84aeddce50bd08c6fdbb7',
-    note: 'SRV-177: upload purpose enum gains MEDICAL_LICENSE (merchant-only purpose; no client change)',
+    version: '1.11.0',
+    sha256: 'fb2c8aa0b0ceeee7d44e34d5c0fb0fa12223831f53521c7f8d20deb955479838',
+    note: 'SRV-183: TATTOO business type; persons[].referenceImageKey on drafts, referenceImageUrl on booking details; upload purpose BOOKING_REFERENCE (CUS-104)',
   },
   merchant: {
-    version: '1.10.0',
-    sha256: 'f938c86cd062b9b69ec66e8abd021e1f8b98216839280222e38234855029e392',
-    note: 'Additive: single-image fields (coverKey, profileKey, photoKey) also accept the returned file reference key?v=n (SRV-182); no client change needed',
+    version: '1.11.0',
+    sha256: '103548fe8ac1e4713d77cf6cf5668a116962aabf05980f33c917aaf2e459a667',
+    note: 'SRV-183: TATTOO business type (application, catalog), referenceImageUrl on booking details (MER-084)',
   },
   admin: {
-    version: '1.13.0',
-    sha256: '12f75204c3a159f2a604ebdb9f9b66d1c2ae1eb2f6156eed22d474d9d501c295',
-    note: 'Additive: catalog imageKey, banner imageKey.ar/en, salon coverKey/profileKey also accept the returned file reference key?v=n (SRV-182); no client change needed',
+    version: '1.14.0',
+    sha256: '5726401a9d80b597aa3d255b903b8878bd3b3980a9caff9bc2686951796cf99d',
+    note: 'SRV-183: TATTOO business type in filters/catalog/placements, referenceImageUrl on booking details (ADM-111)',
   },
 };

@@ -79,6 +79,10 @@ const detail = row.extend({
       name: z.string(),
       isBride: z.boolean(),
       gender: z.enum(GENDERS).nullable(),
+      referenceImageUrl: z
+        .string()
+        .nullable()
+        .describe('Tattoo design image (§5.23): short-lived signed URL; null when none.'),
       start: z.string(),
       end: z.string(),
       subtotal: z.string(),

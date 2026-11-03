@@ -105,6 +105,18 @@ export class BookingsRepository
     return updated === null ? null : toEntity<BookingRaw>(updated);
   }
 
+  /** Stores the file-slot reference of one person's design image (§5.23). */
+  async setPersonReference(id: string, personIndex: number, ref: string): Promise<void> {
+    if (!isObjectIdString(id)) return;
+    await this.model
+      .findOneAndUpdate(
+        { _id: id },
+        { $set: { [`persons.${String(personIndex)}.referenceImageKey`]: ref } },
+      )
+      .lean()
+      .exec();
+  }
+
   /** Keeps the booking's refund summary in step with its refunds (`refundedDelta` fils just returned). */
   async recordRefund(
     id: string,

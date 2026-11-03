@@ -27,6 +27,13 @@ import type { PhoneVerifier } from '../auth/phoneVerifier';
 import type { OtpGate } from '../otp/otpGate.service';
 import type { AvailabilityService, PlanPersonInput } from '../availability/availability.service';
 import type { HoldsStore } from '../availability/holds';
+import type { UploadVerifier } from '../uploads/uploads.service';
+import { assertReferenceImages } from './referenceImages';
+
+/** A draft person: the plan input plus an optional tattoo design image (§5.23). */
+export type DraftPersonInput = PlanPersonInput & {
+  readonly referenceImageKey?: string | undefined;
+};
 import { calculateAmounts } from '../pricing/pricing';
 import type { SettingsService } from '../settings';
 import { isVisibleTo } from '../businessTypes/rules';
@@ -46,6 +53,8 @@ export interface DraftView {
     isBride: boolean;
     /** §5.19; `null` when not known (BOTH business, not sent). */
     gender: Gender | null;
+    /** Tattoo design image upload key (§5.23); `null` when none. */
+    referenceImageKey: string | null;
     services: { salonServiceId: string; name: string; price: string; durationMinutes: number }[];
     staff: { id: string; firstName: string };
     staffSelection: 'SPECIFIC' | 'ANY';
@@ -67,7 +76,7 @@ export interface BookingDraftService {
     /** The picked branch (§5.18): required when the salon has several bookable branches. */
     branchId?: string | undefined;
     paymentMethod: PaymentMethod;
-    persons: readonly PlanPersonInput[];
+    persons: readonly DraftPersonInput[];
     language: Language;
   }): Promise<DraftView>;
   get(input: { customerId: string; id: string; language: Language }): Promise<DraftView>;
@@ -101,6 +110,8 @@ export interface BookingDraftDeps {
   readonly now?: () => Date;
   /** Until the branch step exists (SRV-142) a draft is for the salon's main branch. */
   readonly mainBranches?: Pick<MainBranches, 'idOf'>;
+  /** Checks tattoo design image uploads (§5.23); without it keys are not verified (tests). */
+  readonly uploads?: Pick<UploadVerifier, 'assertConfirmed'>;
 }
 
 const toHold = (hold: {
@@ -162,6 +173,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
         isMain: p.isMain,
         isBride: p.isBride,
         gender: p.gender ?? null,
+        referenceImageKey: p.referenceImageKey ?? null,
         services: p.services.map((s) => ({
           salonServiceId: s.salonServiceId,
           name: s.name[language],
@@ -219,6 +231,12 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
           if (!isVisibleTo(plan.salon, customer.gender)) {
             throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
           }
+          await assertReferenceImages({
+            businessType: plan.salon.businessType,
+            keys: persons.map((p) => p.referenceImageKey),
+            verifier: deps.uploads,
+            accept: (upload) => upload.ownerType === 'CUSTOMER' && upload.ownerId === customerId,
+          });
           const policy = plan.salon.policy;
           if (policy === undefined)
             throw new BusinessRuleError({ code: ERROR_CODES.SALON_NOT_BOOKABLE });
@@ -253,6 +271,9 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             start: p.start,
             end: p.end,
             subtotal: amounts.persons[index]?.subtotal ?? 0,
+            ...(persons[index]?.referenceImageKey === undefined
+              ? {}
+              : { referenceImageKey: persons[index].referenceImageKey }),
           }));
           const holdMinutes = await settings.get('booking.paymentHoldMinutes');
           const at = now();

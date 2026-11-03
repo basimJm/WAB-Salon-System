@@ -2,8 +2,9 @@ import type { DemoAreaPoint } from './demoSeed';
 import type { Audience, BusinessType } from './enums';
 
 /**
- * Demo businesses for salons and clinics (owner 2026-10-29, BUSINESS_DOMAIN.md §5.19): two
- * beauty clinics with two branches each and one salon for men and women. Development only; added
+ * Demo businesses for salons, clinics and tattoo studios (owner 2026-10-29 / 2026-11-03,
+ * BUSINESS_DOMAIN.md §5.19, §5.23): two beauty clinics with two branches each, one salon for men
+ * and women and one tattoo studio. Development only; added
  * by the demo seed insert-only (deterministic ids), also to a database seeded before clinics.
  */
 export interface DemoBusinessServiceSpec {
@@ -160,6 +161,35 @@ export const DEMO_BUSINESSES: readonly DemoBusinessSpec[] = [
       },
     ],
     staffPerBranch: 3,
+    recommended: true,
+  },
+  // Tattoo studio (owner 2026-11-03, §5.23): serves everyone, one branch.
+  {
+    key: 'black-needle',
+    name: 'Black Needle Studio',
+    businessType: 'TATTOO',
+    audience: 'BOTH',
+    description: 'Tattoo and piercing studio: custom designs, cover-ups, touch-ups and piercing.',
+    services: [
+      { catalog: 'Small tattoo', audience: 'BOTH', price: 40_000, durationMinutes: 60 },
+      { catalog: 'Large tattoo session', audience: 'BOTH', price: 150_000, durationMinutes: 180 },
+      { catalog: 'Cover-up tattoo', audience: 'BOTH', price: 120_000, durationMinutes: 150 },
+      { catalog: 'Piercing', audience: 'BOTH', price: 15_000, durationMinutes: 30 },
+    ],
+    branches: [
+      {
+        key: 'jabal-amman',
+        name: { ar: 'جبل عمان', en: 'Jabal Amman' },
+        place: { area: 'Jabal Amman', lat: 31.9515, lng: 35.9239 },
+        locationText: 'Jabal Amman, Rainbow Street, Studio 7',
+        phone: '+96265931006',
+        open: '12:00',
+        close: '22:00',
+        offDays: WEEKEND,
+        pricePercent: 100,
+      },
+    ],
+    staffPerBranch: 2,
     recommended: true,
   },
 ];

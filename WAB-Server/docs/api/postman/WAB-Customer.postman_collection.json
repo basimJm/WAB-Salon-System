@@ -1751,7 +1751,7 @@
             "description": "Persons are checked in order and each pick blocks the next. Errors (422): SALON_NOT_BOOKABLE, TOO_MANY_COMPANIONS, GENDER_MISMATCH, SERVICE_UNAVAILABLE, BRIDE_ONLY_SERVICE, STAFF_NOT_ELIGIBLE, SALON_CLOSED, DATE_OUT_OF_RANGE, SLOT_UNAVAILABLE, PAYMENT_OPTION_NOT_ALLOWED.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"salonId\": \"string\",\n  \"branchId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"gender\": \"MALE\",\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\"\n    }\n  ]\n}",
+              "raw": "{\n  \"salonId\": \"string\",\n  \"branchId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"gender\": \"MALE\",\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\",\n      \"referenceImageKey\": \"string\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

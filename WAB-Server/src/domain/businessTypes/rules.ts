@@ -1,7 +1,10 @@
 import type { Audience, BusinessType, Gender } from '../../constants/enums';
 
-/** The audience every business of this type has, when the type fixes it (a CLINIC is always BOTH). */
-export const FIXED_AUDIENCE: Readonly<Partial<Record<BusinessType, Audience>>> = { CLINIC: 'BOTH' };
+/** The audience every business of this type has, when the type fixes it (CLINIC and TATTOO are always BOTH, §5.23). */
+export const FIXED_AUDIENCE: Readonly<Partial<Record<BusinessType, Audience>>> = {
+  CLINIC: 'BOTH',
+  TATTOO: 'BOTH',
+};
 
 /** The audience that serves everyone. */
 export const AUDIENCE_ALL: Audience = 'BOTH';

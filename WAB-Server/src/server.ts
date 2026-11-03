@@ -131,6 +131,7 @@ import { createGalleryService } from './domain/gallery/gallery.service';
 import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
 import { createFileSlots } from './domain/files/fileSlots.service';
+import { createReferenceImageMover } from './domain/bookings/referenceImages';
 import { createStorageCleanup } from './domain/files/storageCleanup.service';
 import { FILE_SLOT_LOCK, FILE_SLOT_LOCK_PREFIX } from './constants/uploads';
 import { lockKey } from './utils/redis/keys';
@@ -536,6 +537,7 @@ const buildServices = (
     phones: createPhoneVerifier(phoneServices),
     otpGate,
     settings,
+    uploads,
   });
   const transactionsRepository = new TransactionsRepository();
   const refundsRepository = new RefundsRepository();
@@ -638,6 +640,11 @@ const buildServices = (
     holds: holdsStore,
     customers: new CustomersRepository(),
     settings,
+    referenceImages: createReferenceImageMover({
+      slots: fileSlots,
+      bookings: bookingsRepository,
+      logger,
+    }),
   });
   const bookingActions = createBookingActionsService({
     hook: bookingChanges,
