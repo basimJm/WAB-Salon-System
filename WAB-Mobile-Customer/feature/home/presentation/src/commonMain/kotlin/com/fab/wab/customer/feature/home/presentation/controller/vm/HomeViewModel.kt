@@ -65,6 +65,9 @@ class HomeViewModel(
     private var started = false
     private var loadJob: Job? = null
 
+    /** The last fix of this screen: later loads (lens, refresh) send it at once instead of waiting for a new one. */
+    private var lastFix: LocationData? = null
+
     override fun onStart() {
         if (started) return
         started = true
@@ -174,9 +177,15 @@ class HomeViewModel(
         loadJob?.cancel()
         loadJob = scope.launch {
             updateState { copy(loading = !refresh, refreshing = refresh, error = null, offline = false) }
-            val location = currentLocationIfAllowed()
-            when (val result = deps.loadHome(gender, lens, location)) {
-                is AppResult.Success -> apply(result.data, located = location != null)
+            // Home never waits for a GPS fix (it may take the whole timeout): the sections load at once with the last
+            // fix of this screen, and Near you fills in when a first fix arrives.
+            val allowed = locationAllowed()
+            val known = lastFix.takeIf { allowed }
+            when (val result = deps.loadHome(gender, lens, known)) {
+                is AppResult.Success -> {
+                    apply(result.data, located = known != null)
+                    if (allowed && known == null) locateThenFillNearYou(gender, lens)
+                }
                 is AppResult.Error -> {
                     val message = deps.errorText(result.appError)
                     val keepContent = uiState.value.hasContent
@@ -192,12 +201,18 @@ class HomeViewModel(
 
     private fun apply(content: HomeContent, located: Boolean) = updateState { withContent(content, located) }
 
+    private suspend fun locationAllowed(): Boolean =
+        deps.permissions.isGranted(AppPermission.LOCATION) && deps.permissions.isLocationServiceEnabled()
+
     private suspend fun currentLocationIfAllowed(): LocationData? =
-        if (deps.permissions.isGranted(AppPermission.LOCATION) && deps.permissions.isLocationServiceEnabled()) {
-            deps.currentLocation()
-        } else {
-            null
-        }
+        if (locationAllowed()) deps.currentLocation()?.also { lastFix = it } else null
+
+    /** Near you shows a placeholder while the first fix comes; a fix reloads Home with it, none = location off. */
+    private suspend fun locateThenFillNearYou(gender: Gender, lens: BusinessType?) {
+        updateState { copy(nearYou = NearestUi.Locating) }
+        val fix = currentLocationIfAllowed() ?: return updateState { copy(nearYou = NearestUi.LocationOff) }
+        (deps.loadHome(gender, lens, fix) as? AppResult.Success)?.let { apply(it.data, located = true) }
+    }
 
     /** Back from the system settings (PRD S03 item 7 "after enabling → loads automatically"). */
     private fun resumeAfterSettings() {

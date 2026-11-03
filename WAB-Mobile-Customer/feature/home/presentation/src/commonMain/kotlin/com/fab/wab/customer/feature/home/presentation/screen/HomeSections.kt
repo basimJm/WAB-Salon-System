@@ -165,6 +165,9 @@ internal fun NearYouSection(nearest: NearestUi, onAction: (UiAction) -> Unit) {
     )
     when (nearest) {
         is NearestUi.Salons -> SalonRow(nearest.items, onAction, showDistance = true)
+        NearestUi.Locating -> Box(Modifier.padding(horizontal = spacing.space20)) {
+            ShimmerRow(DiscoveryDesign.SHIMMER_SALON_WIDTH, DiscoveryDesign.SHIMMER_SALON_HEIGHT, DiscoveryDesign.SALON_CARD_RADIUS)
+        }
         NearestUi.Empty -> NearestEmpty(stringResource(Res.string.home_near_you_empty), Modifier.padding(horizontal = spacing.space20))
         NearestUi.LocationOff -> NearestLocationOff(
             onEnable = { onAction(UiAction.OnEnableLocationClick) },
