@@ -15,6 +15,8 @@ sealed interface HomeContract {
 
     /** Near you states of PRD S03 item 7. */
     sealed interface NearestUi {
+        /** Location is allowed and the first fix is on its way: the rest of Home is already shown. */
+        data object Locating : NearestUi
         data object LocationOff : NearestUi
         data object Empty : NearestUi
         data class Salons(val items: List<SalonSummary>, val hasMore: Boolean) : NearestUi

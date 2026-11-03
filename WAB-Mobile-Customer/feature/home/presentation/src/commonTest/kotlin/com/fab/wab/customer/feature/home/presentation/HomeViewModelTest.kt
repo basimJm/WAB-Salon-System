@@ -53,11 +53,13 @@ class HomeViewModelTest {
     private val realtime = FakeRealtimeClient()
     private val effects = mutableListOf<SideEffect>()
     private var fix: LocationData? = AMMAN
+    /** When set, the GPS answers only once this completes (a slow first fix). */
+    private var slowFix: kotlinx.coroutines.CompletableDeferred<LocationData?>? = null
     private val language = MutableStateFlow(AppLanguage.ARABIC)
 
     private fun kotlinx.coroutines.test.TestScope.viewModel(session: SessionState = GUEST): HomeViewModel {
         val provider = object : DeviceLocationProvider {
-            override suspend fun currentLocation(): LocationData? = fix
+            override suspend fun currentLocation(): LocationData? = slowFix?.await() ?: fix
         }
         val deps = HomeDependencies(
             loadHome = LoadHomeUseCase(repository),
@@ -164,14 +166,16 @@ class HomeViewModelTest {
         repository.result = AppResult.Success(content(nearest = HomeSection(listOf(salon("n1")), hasMore = false)))
         val vm = viewModel(USER)
         assertEquals(USER.user.firstName, vm.state.value.welcomeName)
-        assertEquals(AMMAN, repository.calls.single().location)
-        assertEquals(Gender.MALE, repository.calls.single().gender, "the account's gender picks the banners")
+        // Home loads at once without waiting for GPS, then again with the first fix (Near you).
+        assertEquals(listOf(null, AMMAN), repository.calls.map { it.location })
+        assertEquals(Gender.MALE, repository.calls.last().gender, "the account's gender picks the banners")
         assertEquals(3, vm.state.value.unreadCount)
         assertIs<NearestUi.Salons>(vm.state.value.nearYou)
         realtime.emit(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD, buildJsonObject { put("count", JsonPrimitive(120)) }))
         assertEquals(120, vm.state.value.unreadCount)
         PushSignals.publishReceived(PushNotification("Approved", "Your booking was approved"))
-        assertEquals(2, repository.calls.size, "a foreground push refreshes Home (badge)")
+        assertEquals(3, repository.calls.size, "a foreground push refreshes Home (badge)")
+        assertEquals(AMMAN, repository.calls.last().location, "a refresh sends the last fix at once")
     }
 
     @Test
@@ -267,5 +271,30 @@ class HomeViewModelTest {
         assertEquals("error", state.error)
         assertEquals(false, state.hasContent)
         assertEquals(false, state.loading)
+    }
+
+    @Test
+    fun aSlowGpsFixNeverHoldsHomeBack() = runTest(UnconfinedTestDispatcher()) {
+        permissions.status = PermissionStatus.GRANTED
+        val gps = kotlinx.coroutines.CompletableDeferred<LocationData?>()
+        slowFix = gps
+        repository.result = AppResult.Success(content(nearest = HomeSection(listOf(salon("n1")), hasMore = false)))
+        val vm = viewModel(USER)
+        // The sections are on screen before any fix; Near you shows its placeholder.
+        assertEquals(listOf(null), repository.calls.map { it.location })
+        assertTrue(vm.state.value.hasContent)
+        assertEquals(NearestUi.Locating, vm.state.value.nearYou)
+        gps.complete(AMMAN)
+        assertEquals(AMMAN, repository.calls.last().location)
+        assertIs<NearestUi.Salons>(vm.state.value.nearYou)
+    }
+
+    @Test
+    fun noGpsFixEndsWithLocationOffNotAnEndlessPlaceholder() = runTest(UnconfinedTestDispatcher()) {
+        permissions.status = PermissionStatus.GRANTED
+        fix = null
+        val vm = viewModel(USER)
+        assertEquals(1, repository.calls.size)
+        assertEquals(NearestUi.LocationOff, vm.state.value.nearYou)
     }
 }

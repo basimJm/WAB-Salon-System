@@ -9,6 +9,17 @@
 
 ## Current task
 
+### CUS-105 — Fix: Home no longer waits for a GPS fix (owner 2026-11-03)
+- Branch: `fix/cus-105-home-location-wait`
+- Status: IN REVIEW
+- Acceptance criteria (BUSINESS_DOMAIN §5.22 Near you; PRD S03):
+  - [x] Root cause measured on the emulator (logcat): `/config` + `/installations` answered at 15.0 s, then nothing until `/home` at 25.3 s (answered in 80 ms) = `GetCurrentLocationUseCase` timeout 10 s before the request; server `/home` 15–23 ms
+  - [x] Home calls `/home` at once (last fix of the screen or none); Near you = `NearestUi.Locating` shimmer, filled by a second `/home` with the first fix; no fix → `LocationOff`; refresh / lens send the last fix immediately
+  - [x] After: cold start → `/home` answered 0.75 s after the first frame (14:20:59.356 → 14:21:00.110)
+- Tests: `HomeViewModelTest` (+2: slow GPS never holds Home back, no fix ends with location off; updated: two calls null → fix, refresh sends the last fix); `:feature:home:presentation:testAndroidHostTest` green, detekt clean
+- Loops: 1/1 — measured before/after on the same emulator and server; found and fixed while checking: demo images 404 on the local stack (stack seeds records only; `seed:dev` images step run) — local stack only, no code change
+- Review: PASSED (SE ✔ (one load path, no new timeout), Mobile ✔ (placeholder instead of an empty section; location-off unchanged), Architect ✔ (no contract change), QA ✔ (slow/none/refresh cases tested; device timing)) — DEVIATION: full app test suite not re-run (home module only); iOS not run
+
 ### CUS-104 — Bookings: Upcoming/Past + lens, "Booked by", Rate + Book again; tattoo design image
 - Branch: `feat/cus-104-bookings-tattoo` (from `feat/cus-103-search-filters`)
 - Status: IN REVIEW (committed, not pushed)
