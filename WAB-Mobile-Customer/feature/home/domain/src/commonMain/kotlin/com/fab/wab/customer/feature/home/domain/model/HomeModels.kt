@@ -1,5 +1,6 @@
 package com.fab.wab.customer.feature.home.domain.model
 
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 
 /** What a banner tap does (PRD S03 item 2); unknown server codes degrade to [None]. */
@@ -24,22 +25,35 @@ fun bannerActionOf(type: String?, value: String?): BannerAction = when {
 
 data class HomeBanner(val id: String, val imageUrl: String, val action: BannerAction)
 
-data class HomeService(val id: String, val name: String, val description: String, val imageUrl: String?)
+/** An Explore tile: a most-booked catalog service of one business type (BUSINESS_DOMAIN §5.22). */
+data class HomeService(
+    val id: String,
+    val name: String,
+    val description: String,
+    val imageUrl: String?,
+    val businessType: BusinessType = BusinessType.SALON,
+)
 
-/** A horizontal Home section; `hasMore` is the server's "> 10" decision behind "See more / See all". */
-data class HomeSection<T>(val items: List<T>, val hasMore: Boolean)
+/** A Home section; `hasMore` is the server's "> 10" decision behind "See more / See all". */
+data class HomeSection<T>(val items: List<T>, val hasMore: Boolean) {
+    companion object {
+        fun <T> empty(): HomeSection<T> = HomeSection(emptyList(), hasMore = false)
+    }
+}
+
+/** A *Book again* entry: the business of a completed booking and the services booked then (§5.22). */
+data class BookAgainEntry(val salon: SalonSummary, val lastBookingId: String, val salonServiceIds: List<String>)
 
 /**
- * One `GET /home` answer (PRD S03: one request, one shimmer), sections per business type (BUSINESS_DOMAIN §5.19, in the
- * Home order). The nearest sections are null when no coordinates were sent.
+ * One `GET /home` answer for one type lens (PRD S03: one request, one shimmer), in the Home order of BUSINESS_DOMAIN §5.22:
+ * banners → Explore → Near you → Recommended → Book again. [nearYou] is null when no coordinates were sent; [bookAgain]
+ * is null for guests (and empty for customers without completed bookings).
  */
 data class HomeContent(
     val unreadCount: Int,
     val banners: List<HomeBanner>,
-    val salonServices: HomeSection<HomeService>,
-    val clinicServices: HomeSection<HomeService>,
-    val recommendedSalons: HomeSection<SalonSummary>,
-    val recommendedClinics: HomeSection<SalonSummary>,
-    val nearestSalons: HomeSection<SalonSummary>?,
-    val nearestClinics: HomeSection<SalonSummary>?,
+    val explore: HomeSection<HomeService>,
+    val nearYou: HomeSection<SalonSummary>?,
+    val recommended: HomeSection<SalonSummary>,
+    val bookAgain: HomeSection<BookAgainEntry>?,
 )

@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.luminance
 import com.fab.wab.customer.designsystem.components.badge.StatusTone
 import com.fab.wab.customer.designsystem.components.badge.statusColors
+import com.fab.wab.customer.designsystem.components.domain.businessTypeColors
+import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.designsystem.theme.AppColors
 import com.fab.wab.customer.designsystem.theme.DarkColors
 import com.fab.wab.customer.designsystem.theme.LightColors
@@ -41,6 +43,16 @@ class ColorTokensTest {
                 val (content, container) = statusColors(tone, palette)
                 val opaque = container.compositeOver(palette.card)
                 assertTrue(contrast(content, opaque) >= BODY_CONTRAST, "$tone in dark=${palette.isDark}")
+            }
+        }
+    }
+
+    @Test
+    fun businessTypeLabelsAreReadableOnTheirTint() {
+        listOf(LightColors, DarkColors).forEach { palette ->
+            BusinessType.entries.forEach { type ->
+                val (content, container) = businessTypeColors(type, palette)
+                assertTrue(contrast(content, container.compositeOver(palette.card)) >= BODY_CONTRAST, "$type dark=${palette.isDark}")
             }
         }
     }

@@ -2,6 +2,7 @@ package com.fab.wab.customer.feature.booking.presentation.controller.contract
 
 import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.core.domain.salon.BranchRules
+import com.fab.wab.customer.core.domain.salon.BusinessRules
 import com.fab.wab.customer.core.domain.salon.SalonBranch
 import com.fab.wab.customer.core.domain.salon.SalonDetails
 import com.fab.wab.customer.core.domain.salon.SalonService
@@ -48,7 +49,11 @@ sealed interface BookingFlowContract {
         val draft: BookingDraft? = null,
         val draftLoading: Boolean = false,
         val draftError: String? = null,
+        /** The current person's design image is being uploaded (§5.23). */
+        val referenceUploading: Boolean = false,
     ) {
+        /** Tattoo studios only (§5.23): each person may attach one optional design image. */
+        val allowsReference: Boolean get() = salon?.let { BusinessRules.allowsReferenceImage(it.businessType) } == true
         val canConfirm: Boolean get() = draft != null && !draftLoading
         val hasBranchStep: Boolean get() = fullSalon?.branches.orEmpty().size > BranchRules.SINGLE_BRANCH
         /** Steps of this salon: the branch step only when there is a branch to choose. */
@@ -85,6 +90,9 @@ sealed interface BookingFlowContract {
         data class OnBrideChange(val isBride: Boolean) : UiAction
         data class OnGenderChange(val gender: Gender) : UiAction
         data class OnServiceToggle(val serviceId: String) : UiAction
+        /** Pick the current person's design image from the gallery (compressed on the device, then uploaded). */
+        data object OnReferencePick : UiAction
+        data object OnReferenceRemove : UiAction
         data class OnMonthChange(val delta: Int) : UiAction
         data class OnDateSelect(val date: LocalDate) : UiAction
         data class OnSlotSelect(val start: String) : UiAction

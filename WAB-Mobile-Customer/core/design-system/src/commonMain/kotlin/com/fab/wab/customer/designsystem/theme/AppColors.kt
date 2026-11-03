@@ -43,6 +43,13 @@ data class AppColors(
     val onDangerContainer: Color,
     val onNeutralContainer: Color,
     val onAccentContainer: Color,
+    // Business types (BUSINESS_DOMAIN §5.22 type labels): salon violet, clinic teal, tattoo amber-brown; text on its tint
+    val salonType: Color,
+    val salonTypeContainer: Color,
+    val clinicType: Color,
+    val clinicTypeContainer: Color,
+    val tattooType: Color,
+    val tattooTypeContainer: Color,
     // Auth / hero backdrop (top to bottom)
     val heroStart: Color,
     val heroMiddle: Color,

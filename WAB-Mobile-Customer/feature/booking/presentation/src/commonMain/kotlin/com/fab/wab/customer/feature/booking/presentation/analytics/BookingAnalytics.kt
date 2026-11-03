@@ -10,9 +10,12 @@ object BookingAnalytics {
     const val ACTION_PAYMENT_METHOD = "booking_payment_method"
     const val ACTION_BRANCH = "booking_branch_select"
     const val ACTION_GENDER = "booking_person_gender"
+    const val ACTION_REFERENCE_IMAGE = "booking_reference_image"
     const val PARAM_STEP = "step"
     const val PARAM_ID = "id"
     const val PARAM_VALUE = "value"
+    const val VALUE_ADD = "add"
+    const val VALUE_REMOVE = "remove"
 
     val SCREEN = AnalyticsScreen(SCREEN_NAME)
 }

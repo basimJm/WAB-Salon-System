@@ -1,4 +1,4 @@
-package com.fab.wab.customer.feature.profile.data.remote
+package com.fab.wab.customer.core.data.upload
 
 import com.fab.wab.customer.core.data.BaseResponse
 import com.fab.wab.customer.core.data.contract.generated.CustomerOperations
@@ -6,7 +6,7 @@ import com.fab.wab.customer.core.data.contract.generated.PostUploadsConfirmBody
 import com.fab.wab.customer.core.data.contract.generated.PostUploadsConfirmData
 import com.fab.wab.customer.core.data.contract.generated.PostUploadsPresignBody
 import com.fab.wab.customer.core.data.contract.generated.PostUploadsPresignData
-import com.fab.wab.customer.feature.profile.domain.model.PresignedUpload
+import com.fab.wab.customer.core.domain.upload.PresignedUpload
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.headers

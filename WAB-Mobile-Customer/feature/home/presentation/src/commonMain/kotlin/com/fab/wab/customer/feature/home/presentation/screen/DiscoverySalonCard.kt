@@ -21,7 +21,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.core.domain.salon.SalonSummary
-import com.fab.wab.customer.designsystem.components.domain.businessText
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeBadge
+import com.fab.wab.customer.designsystem.components.domain.audienceLabel
 import com.fab.wab.customer.designsystem.components.domain.hoursLine
 import com.fab.wab.customer.designsystem.components.glass.glassBackground
 import com.fab.wab.customer.designsystem.components.image.AppImage
@@ -160,16 +161,24 @@ internal fun DistancePill(distanceKm: Double, modifier: Modifier = Modifier) {
     )
 }
 
-/** "Salon · Women" / "Beauty clinic · Men & women" in the accent color (BUSINESS_DOMAIN §5.19). */
+/** The type label in its color ("Salon" violet, "Beauty clinic" teal, "Tattoo studio" amber) + the audience (§5.22). */
 @Composable
 internal fun BusinessLine(salon: SalonSummary, modifier: Modifier = Modifier) {
-    AppText(
-        text = businessText(salon.businessType, salon.audience),
-        style = discoveryBody(DiscoveryDesign.TEXT_11_5, FontWeight.SemiBold),
-        color = AppTheme.colors.accent,
-        maxLines = 1,
+    Row(
         modifier = modifier,
-    )
+        horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        BusinessTypeBadge(salon.businessType)
+        salon.audience?.let { audience ->
+            AppText(
+                text = stringResource(audienceLabel(audience)),
+                style = discoveryBody(DiscoveryDesign.TEXT_11_5, FontWeight.SemiBold),
+                color = AppTheme.colors.muted,
+                maxLines = 1,
+            )
+        }
+    }
 }
 
 @Composable

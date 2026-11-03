@@ -17,6 +17,7 @@ class BusinessTypeTest {
         assertEquals(BusinessType.SALON, BusinessType.fromCode("SPA"))
         assertNull(BusinessType.fromCodeOrNull(null))
         assertEquals(BusinessType.CLINIC, BusinessType.fromCodeOrNull("CLINIC"))
+        assertEquals(BusinessType.TATTOO, BusinessType.fromCode("tattoo"))
         assertEquals(Audience.BOTH, Audience.fromCode("both"))
         assertNull(Audience.fromCode("OTHER"))
     }
@@ -29,6 +30,7 @@ class BusinessTypeTest {
         assertNull(BusinessRules.lockedGender(BusinessType.CLINIC, Audience.BOTH))
         assertNull(BusinessRules.lockedGender(BusinessType.CLINIC, Audience.FEMALE), "a clinic never locks, whatever it sends")
         assertNull(BusinessRules.lockedGender(BusinessType.SALON, null))
+        assertNull(BusinessRules.lockedGender(BusinessType.TATTOO, Audience.MALE), "a tattoo studio never locks (§5.23)")
     }
 
     @Test
@@ -38,5 +40,11 @@ class BusinessTypeTest {
         assertFalse(BusinessRules.allowsBride(BusinessType.SALON, Audience.MALE))
         assertFalse(BusinessRules.allowsBride(BusinessType.CLINIC, Audience.BOTH))
         assertFalse(BusinessRules.allowsBride(BusinessType.SALON, null))
+        assertFalse(BusinessRules.allowsBride(BusinessType.TATTOO, Audience.BOTH))
+    }
+
+    @Test
+    fun onlyTattooStudiosTakeADesignImage() {
+        assertEquals(listOf(BusinessType.TATTOO), BusinessType.entries.filter(BusinessRules::allowsReferenceImage))
     }
 }

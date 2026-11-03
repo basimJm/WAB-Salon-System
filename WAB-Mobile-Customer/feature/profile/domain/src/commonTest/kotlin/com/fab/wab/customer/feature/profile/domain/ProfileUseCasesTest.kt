@@ -10,10 +10,10 @@ import com.fab.wab.customer.core.domain.session.SessionState
 import com.fab.wab.customer.core.domain.session.SessionStore
 import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.feature.profile.domain.model.CustomerAccount
-import com.fab.wab.customer.feature.profile.domain.model.PresignedUpload
+import com.fab.wab.customer.core.domain.upload.PresignedUpload
 import com.fab.wab.customer.feature.profile.domain.model.ProfileUpdate
 import com.fab.wab.customer.feature.profile.domain.repository.ProfileRepository
-import com.fab.wab.customer.feature.profile.domain.repository.UploadsRepository
+import com.fab.wab.customer.core.domain.upload.UploadsRepository
 import com.fab.wab.customer.feature.profile.domain.usecase.DeleteAccountUseCase
 import com.fab.wab.customer.feature.profile.domain.usecase.UpdateGuestProfileUseCase
 import com.fab.wab.customer.feature.profile.domain.usecase.UploadAvatarUseCase
