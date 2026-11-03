@@ -8,6 +8,8 @@
     <string name="home_see_all">See all</string>
     <string name="home_nearest_location_off">Enable location services to see places near you</string>
     <string name="home_enable_location">Enable location services</string>
+    <string name="home_location_unavailable">Could not get your location right now. Try again to see places near you.</string>
+    <string name="home_location_retry">Try again</string>
     <string name="home_explore">Explore</string>
     <string name="home_near_you">Near you</string>
     <string name="home_near_you_empty">No places within 10 km of your location right now.</string>

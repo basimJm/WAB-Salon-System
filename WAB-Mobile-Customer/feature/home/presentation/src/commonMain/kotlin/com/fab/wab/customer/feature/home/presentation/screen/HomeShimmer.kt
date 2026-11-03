@@ -43,7 +43,7 @@ internal fun HomeShimmer(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ShimmerRow(width: Dp, height: Dp, radius: Dp) {
+internal fun ShimmerRow(width: Dp, height: Dp, radius: Dp) {
     Row(horizontalArrangement = Arrangement.spacedBy(AppTheme.spacing.space12)) {
         repeat(DiscoveryDesign.SHIMMER_ROW_COUNT) { DiscoveryShimmer(width, height, radius) }
     }
