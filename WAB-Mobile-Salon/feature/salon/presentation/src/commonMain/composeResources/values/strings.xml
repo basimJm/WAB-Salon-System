@@ -7,7 +7,9 @@
     <string name="hub_men">Men’s salon</string>
     <string name="hub_both">Salon for men and women</string>
     <string name="hub_clinic">Beauty clinic · men and women</string>
+    <string name="hub_tattoo">Tattoo studio · men and women</string>
     <string name="hub_title_clinic">Manage clinic</string>
+    <string name="hub_title_tattoo">Manage studio</string>
     <string name="tile_profile">Profile &amp; images</string>
     <string name="tile_profile_sub">Name, description, location, contact</string>
     <string name="tile_gallery">Gallery</string>
@@ -35,6 +37,7 @@
     <string name="profile_logo_hint">Logo</string>
     <string name="profile_name">Salon name</string>
     <string name="profile_name_clinic">Clinic name</string>
+    <string name="profile_name_tattoo">Studio name</string>
     <string name="profile_description">Description</string>
     <string name="profile_count">%1$d / %2$d</string>
     <string name="profile_location">Location on map</string>
@@ -49,6 +52,7 @@
     <string name="profile_type">Business type</string>
     <string name="profile_locked">The type cannot be changed. The owner can choose to serve both men and women.</string>
     <string name="profile_clinic_note">Clinics serve men and women. The type cannot be changed.</string>
+    <string name="profile_tattoo_note">Tattoo studios serve men and women. The type cannot be changed.</string>
     <string name="profile_widen">Serve both men and women</string>
     <string name="profile_widen_title">Serve both men and women?</string>
     <string name="profile_widen_body">Customers of both genders will see your salon and can book right away. Only WAB can change this back.</string>
@@ -154,6 +158,7 @@
     <string name="catalog_note_men">Men’s salon catalog</string>
     <string name="catalog_note_both">Salon catalog for men and women</string>
     <string name="catalog_note_clinic">Beauty clinic catalog</string>
+    <string name="catalog_note_tattoo">Tattoo studio catalog</string>
     <string name="catalog_added">Added</string>
     <string name="catalog_cant_find">Can’t find your service?</string>
     <string name="catalog_request">Request it to be added</string>

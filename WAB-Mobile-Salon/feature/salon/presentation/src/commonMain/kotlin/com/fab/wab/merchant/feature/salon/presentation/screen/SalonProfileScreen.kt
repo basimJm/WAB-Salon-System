@@ -58,6 +58,7 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.profile_save
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_title
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_too_long
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_name_clinic
+import com.fab.wab.merchant.feature.salon.presentation.resources.profile_name_tattoo
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_type
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_unsaved_body
 import com.fab.wab.merchant.feature.salon.presentation.resources.profile_unsaved_title
@@ -112,7 +113,7 @@ private fun Form(state: UiState, onAction: (UiAction) -> Unit, modifier: Modifie
         AppTextField(
             value = form.name,
             onValueChange = { onAction(UiAction.OnName(it)) },
-            label = stringResource(byType(state.salon?.businessType, Res.string.profile_name, Res.string.profile_name_clinic)),
+            label = stringResource(byType(state.salon?.businessType, Res.string.profile_name, Res.string.profile_name_clinic, Res.string.profile_name_tattoo)),
             error = if (ProfileField.NAME in errors) stringResource(Res.string.profile_required) else null,
         )
         AppTextField(

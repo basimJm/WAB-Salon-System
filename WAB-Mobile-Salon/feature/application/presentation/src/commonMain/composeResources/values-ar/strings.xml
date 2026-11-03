@@ -8,12 +8,14 @@
     <string name="reg_business_type">ماذا تريد أن تسجّل؟</string>
     <string name="reg_salon">صالون</string>
     <string name="reg_clinic">عيادة تجميل</string>
+    <string name="reg_tattoo">استوديو وشم</string>
     <string name="reg_type_locked">لا يمكن تغيير نوع النشاط.</string>
     <string name="reg_clinic_name">اسم العيادة</string>
     <string name="reg_clinic_name_hint">مثال: عيادة جلو</string>
     <string name="reg_audience">من يخدم الصالون؟</string>
     <string name="reg_both">الجنسين</string>
     <string name="reg_clinic_unisex">العيادات تخدم الرجال والنساء.</string>
+    <string name="reg_tattoo_unisex">استوديوهات الوشم تخدم الرجال والنساء.</string>
     <string name="reg_audience_men">رجال</string>
     <string name="reg_audience_women">نساء</string>
     <string name="reg_audience_both">رجال ونساء</string>

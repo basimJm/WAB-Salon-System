@@ -103,6 +103,8 @@
     <string name="perm_bookings_respond_sub">Approve or reject new requests and get the real-time alerts</string>
     <string name="perm_bookings_operate">Run bookings</string>
     <string name="perm_bookings_operate_sub">Complete &amp; paid, no-show, cancel approved bookings, reassign staff</string>
+    <string name="perm_bookings_create">Book for customers</string>
+    <string name="perm_bookings_create_sub">Create a booking for a customer with or without the WAB app (approved, pay at the business)</string>
     <string name="perm_salon_profile_manage">Salon profile</string>
     <string name="perm_salon_profile_manage_sub">Profile, images, location and contacts</string>
     <string name="perm_gallery_manage">Gallery</string>
