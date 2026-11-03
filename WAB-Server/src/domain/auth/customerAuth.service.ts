@@ -104,6 +104,16 @@ export interface CustomerAuthDeps {
   readonly settings: Pick<SettingsService, 'get'>;
   readonly accessSecret: string;
   readonly now?: () => Date;
+  /**
+   * Business-made bookings of this number join the account on sign-up and phone change (§5.20);
+   * a failure is logged and never blocks the account.
+   */
+  readonly claims?: BookingClaims;
+}
+
+/** Links business-made bookings made for a phone number to the customer who now owns it. */
+export interface BookingClaims {
+  claim(e164: string, customerId: string): Promise<void>;
 }
 
 const toProfile = (customer: Entity<CustomerRaw>): CustomerProfile => ({
@@ -203,6 +213,7 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
         throw error;
       }
       await otpGate.reset(phone.e164);
+      await deps.claims?.claim(phone.e164, created.id);
       return openSession(created, input.device, input.language);
     },
 
@@ -256,6 +267,7 @@ export const createCustomerAuthService = (deps: CustomerAuthDeps): CustomerAuthS
       }
       if (updated === null) throw new UnauthorizedError();
       await otpGate.reset(phone.e164);
+      await deps.claims?.claim(phone.e164, updated.id);
       return toProfile(updated);
     },
   };

@@ -4,7 +4,7 @@ import {
   REMINDER_EVENT_BY_MINUTES,
 } from '../constants/bookings';
 import { ERROR_CODES } from '../constants/errorCodes';
-import { MS_PER_MINUTE } from '../constants/time';
+import { MS_PER_HOUR, MS_PER_MINUTE } from '../constants/time';
 import type { BookingActionsService } from '../domain/bookings/bookingActions.service';
 import type { BookingCreatedHook } from '../domain/bookings/bookingCreation.service';
 import type { BookingChangedHook } from '../domain/bookings/bookingActions.service';
@@ -17,9 +17,17 @@ import { BaseError } from '../utils/errors';
 import type { Logger } from '../utils/logger';
 import { jobId, type DelayedJob, type JobHandler, type JobScheduler } from './jobs';
 
+/** The admin side of an overdue booking (§5.21): an alert in the panel + email. */
+export type CloseOverdueAlert = (booking: Entity<BookingRaw>) => Promise<void>;
+
 export interface BookingJobsDeps {
   readonly scheduler: Pick<JobScheduler, 'schedule' | 'remove'>;
-  readonly bookings: Pick<BookingsRepository, 'findById' | 'jobCandidates'>;
+  readonly bookings: Pick<
+    BookingsRepository,
+    'findById' | 'jobCandidates' | 'recordCloseReminder' | 'markCloseOverdue'
+  >;
+  /** §5.21: raised once per booking when it is still open after the overdue hours. */
+  readonly alertCloseOverdue?: CloseOverdueAlert;
   readonly actions: Pick<BookingActionsService, 'autoCancel'>;
   readonly notify: NotificationProducers['bookingJobEvent'];
   readonly settings: Pick<SettingsService, 'get'>;
@@ -42,6 +50,12 @@ const reminderId = (bookingId: string, minutes: number): string =>
   jobId('booking', 'reminder', bookingId, minutes);
 const pendingAlertId = (bookingId: string): string => jobId('booking', 'pending-alert', bookingId);
 const autoCancelId = (bookingId: string): string => jobId('booking', 'auto-cancel', bookingId);
+/** One id per round, so a finished round never blocks the next one (§5.21). */
+const closeReminderId = (bookingId: string, round: number): string =>
+  jobId('booking', 'close-reminder', bookingId, round);
+const closeOverdueId = (bookingId: string): string => jobId('booking', 'close-overdue', bookingId);
+/** The next close reminder round of a booking (rounds start at 1). */
+const nextRound = (booking: Entity<BookingRaw>): number => (booking.closeReminders?.count ?? 0) + 1;
 
 const KNOWN_REMINDER_MINUTES = Object.keys(REMINDER_EVENT_BY_MINUTES).map(Number);
 const reminderEventOf = (minutes: number): string | undefined =>
@@ -76,6 +90,27 @@ export const createBookingJobs = (deps: BookingJobsDeps): BookingJobs => {
       });
     }
     if (booking.status === 'APPROVED') {
+      // §5.21: "Did it finish?" each interval after the end until closed; one overdue alert.
+      const interval = await settings.get('booking.closeReminderIntervalMinutes');
+      const round = nextRound(booking);
+      jobs.push({
+        id: closeReminderId(booking.id, round),
+        name: BOOKING_JOB_NAMES.closeReminder,
+        data: { ...data, round },
+        // A round missed while the server was down runs at once.
+        runAt: new Date(
+          Math.max(at, booking.appointmentEnd.getTime() + round * interval * MS_PER_MINUTE),
+        ),
+      });
+      if (booking.closeReminders?.overdueAlertedAt === undefined) {
+        const hours = await settings.get('booking.closeOverdueAlertHours');
+        jobs.push({
+          id: closeOverdueId(booking.id),
+          name: BOOKING_JOB_NAMES.closeOverdue,
+          data,
+          runAt: new Date(Math.max(at, booking.appointmentEnd.getTime() + hours * MS_PER_HOUR)),
+        });
+      }
       for (const minutes of await settings.get('booking.reminderMinutes')) {
         if (reminderEventOf(minutes) === undefined) {
           logger.warn({ minutes }, 'no reminder message exists for this reminderMinutes value');
@@ -102,6 +137,8 @@ export const createBookingJobs = (deps: BookingJobsDeps): BookingJobs => {
     const everyId = [
       pendingAlertId(booking.id),
       autoCancelId(booking.id),
+      closeReminderId(booking.id, nextRound(booking)),
+      closeOverdueId(booking.id),
       ...new Set([...KNOWN_REMINDER_MINUTES, ...configured]).values(),
     ].map((value) => (typeof value === 'number' ? reminderId(booking.id, value) : value));
     await Promise.all(everyId.filter((id) => !wantedIds.has(id)).map((id) => scheduler.remove(id)));
@@ -123,6 +160,25 @@ export const createBookingJobs = (deps: BookingJobsDeps): BookingJobs => {
     typeof data['bookingId'] === 'string' ? bookings.findById(data['bookingId']) : null;
 
   const handlers: Record<string, JobHandler> = {
+    [BOOKING_JOB_NAMES.closeReminder]: async (job) => {
+      const booking = await bookingOf(job.data);
+      const round = Number(job.data['round']);
+      if (booking?.status !== 'APPROVED' || !Number.isInteger(round)) return;
+      if (now().getTime() < booking.appointmentEnd.getTime()) return;
+      // A stale round (the booking moved on meanwhile) does nothing.
+      if (round !== nextRound(booking)) return;
+      await notify('booking.close_reminder', booking, round);
+      const updated = await bookings.recordCloseReminder(booking.id, round, now());
+      // The next round, until someone answers (owner: no cap).
+      if (updated !== null) await sync(updated);
+    },
+    [BOOKING_JOB_NAMES.closeOverdue]: async (job) => {
+      const booking = await bookingOf(job.data);
+      if (booking?.status !== 'APPROVED') return;
+      if (!(await bookings.markCloseOverdue(booking.id, now()))) return;
+      await notify('booking.close_overdue', booking);
+      await deps.alertCloseOverdue?.(booking);
+    },
     [BOOKING_JOB_NAMES.reminder]: async (job) => {
       const booking = await bookingOf(job.data);
       const minutes = Number(job.data['minutes']);
@@ -164,7 +220,7 @@ export const createBookingJobs = (deps: BookingJobsDeps): BookingJobs => {
     async reconcile() {
       let count = 0;
       for (let page = 1; ; page += 1) {
-        const result = await bookings.jobCandidates(now(), {
+        const result = await bookings.jobCandidates({
           page,
           pageSize: JOB_RECONCILE_PAGE_SIZE,
         });

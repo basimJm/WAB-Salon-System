@@ -25,7 +25,6 @@ import { todaysHours } from '../salons/hours';
 import type { SettingsService } from '../settings';
 import type { ReviewView, ReviewsService } from '../reviews/reviews.service';
 import { noFavorites, type FavoriteLookup } from '../search/search.service';
-import { isVisibleTo } from '../businessTypes/rules';
 import type { Gender } from '../../constants/enums';
 import type { CustomersRepository } from '../../repositories/identity.repository';
 
@@ -123,10 +122,7 @@ export interface SalonDetailsService {
     salonId: string;
     language: Language;
     customerId?: string | undefined;
-    /**
-     * The viewer's gender for a guest (the onboarding choice). A signed-in customer's own gender
-     * wins. A business the viewer may not see (§5.19) is not found.
-     */
+    /** @deprecated ignored since §5.22 (every LIVE business is visible to everyone). */
     gender?: Gender | undefined;
     /**
      * The branch the customer selected (§5.17/§5.18): staff, services and the place fields are
@@ -140,7 +136,7 @@ export interface SalonDetailsService {
 
 export interface SalonDetailsDeps {
   readonly salons: Pick<SalonsRepository, 'findById'>;
-  /** The signed-in customer's gender for the visibility rule (§5.19). */
+  /** @deprecated unused since §5.22 (no gender visibility rule). */
   readonly customers?: Pick<CustomersRepository, 'findById'>;
   readonly members: Pick<MembersRepository, 'findMany' | 'findOne'>;
   readonly salonServices: Pick<SalonServicesRepository, 'findMany'>;
@@ -234,13 +230,9 @@ export const createSalonDetailsService = (deps: SalonDetailsDeps): SalonDetailsS
   };
 
   return {
-    async get({ salonId, language, customerId, branchId, gender }) {
+    async get({ salonId, language, customerId, branchId }) {
+      // Every LIVE business is visible to everyone (§5.22); booking still checks the audience.
       const salon = await visible(salonId);
-      const customer = customerId === undefined ? null : await deps.customers?.findById(customerId);
-      const viewer = customer?.gender ?? gender;
-      if (viewer !== undefined && !isVisibleTo(salon, viewer)) {
-        throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-      }
       // Profile views for merchant statistics (M21); tracking never fails the page.
       void deps.events?.track({
         name: SALON_VIEWED_EVENT,

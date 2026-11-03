@@ -143,7 +143,7 @@ describe('member model', () => {
     ]);
   });
 
-  it('knows exactly the 15 permissions of the Merchant PRD', () => {
+  it('knows exactly the 16 permissions (Merchant PRD + BOOKINGS_CREATE, §5.20)', () => {
     expect([...PERMISSIONS].sort()).toEqual(
       [
         'DASHBOARD_VIEW',
@@ -161,6 +161,7 @@ describe('member model', () => {
         'STATISTICS_VIEW',
         'FINANCE_VIEW',
         'SUBSCRIPTION_VIEW',
+        'BOOKINGS_CREATE',
       ].sort(),
     );
   });

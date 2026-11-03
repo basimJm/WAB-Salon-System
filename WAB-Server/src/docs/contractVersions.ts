@@ -15,18 +15,18 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.10.0',
-    sha256: '165d6924157ccd7178184be5775480626a5effae53d84aeddce50bd08c6fdbb7',
-    note: 'SRV-177: upload purpose enum gains MEDICAL_LICENSE (merchant-only purpose; no client change)',
+    version: '1.13.0',
+    sha256: '92ca7c8a190dcd5f094a11f337818cb8f370644d6a6ff12d32d5e42679785e41',
+    note: 'SRV-185: booking rows source (MERCHANT = Booked by the business) + createdBy (always null for customers) (CUS-104)',
   },
   merchant: {
-    version: '1.10.0',
-    sha256: 'f938c86cd062b9b69ec66e8abd021e1f8b98216839280222e38234855029e392',
-    note: 'Additive: single-image fields (coverKey, profileKey, photoKey) also accept the returned file reference key?v=n (SRV-182); no client change needed',
+    version: '1.13.0',
+    sha256: '7057da79969f1412306411a23d31a39dba22aa2806bf1c285db46b7cb6db36d0',
+    note: 'SRV-186: bookings tab TO_CLOSE; the booking\'s own staff may complete / no-show (route accepts BOOKINGS_VIEW_OWN); push booking.close_reminder / close_overdue with actions COMPLETED,NO_SHOW (MER-086)',
   },
   admin: {
-    version: '1.13.0',
-    sha256: '12f75204c3a159f2a604ebdb9f9b66d1c2ae1eb2f6156eed22d474d9d501c295',
-    note: 'Additive: catalog imageKey, banner imageKey.ar/en, salon coverKey/profileKey also accept the returned file reference key?v=n (SRV-182); no client change needed',
+    version: '1.16.0',
+    sha256: '8098cfaed0332e93ae5bd9b4a3c4e17eb201993d42911088a2686802898a4a20',
+    note: 'SRV-186: bookings tab TO_CLOSE; alert kind BOOKING_CLOSE_OVERDUE (entity BOOKING); settings booking.closeReminderIntervalMinutes / closeOverdueAlertHours (ADM-112)',
   },
 };

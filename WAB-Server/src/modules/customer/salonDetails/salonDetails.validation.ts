@@ -9,6 +9,6 @@ export const staffParamsSchema = salonParamsSchema.extend({
 /** Optional branch selection (§5.17/§5.18): staff and services of that branch only. */
 export const salonQuerySchema = z.object({
   branchId: z.string().regex(OBJECT_ID_PATTERN).optional(),
-  /** A guest's onboarding gender (§5.19): a business they may not see answers 404. */
+  /** @deprecated ignored since §5.22: every LIVE business is visible to everyone. */
   gender: z.enum(GENDERS).optional(),
 });

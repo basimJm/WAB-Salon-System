@@ -827,7 +827,7 @@
       "name": "Salon search",
       "item": [
         {
-          "name": "Search LIVE salons and clinics the gender may see (§5.19: own audience, BOTH, every clinic), optionally of one businessType: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended (salons first, then clinics, each in the admin order)",
+          "name": "Search LIVE businesses of every type and audience (§5.22): type lens `businessType` (one or several), optional `gender` filter (businesses serving it: own audience or BOTH), name text, ALL selected services offered, price range (of their sum with services, else of any active service; JOD strings), minimum rating, recommended (each type in the admin order)",
           "request": {
             "method": "GET",
             "header": [
@@ -859,7 +859,8 @@
                 },
                 {
                   "key": "gender",
-                  "value": ""
+                  "value": "",
+                  "disabled": true
                 },
                 {
                   "key": "businessType",
@@ -914,11 +915,11 @@
               ],
               "variable": []
             },
-            "description": "Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating."
+            "description": "Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating. Booking still applies the audience rule (§5.19)."
           }
         },
         {
-          "name": "Price slider bounds for the selected services (min/max of the sums over matching salons)",
+          "name": "Price slider bounds: min/max of the sums of the selected services over matching businesses, or of every active service price when none is selected (§5.22)",
           "request": {
             "method": "GET",
             "header": [
@@ -941,7 +942,8 @@
               "query": [
                 {
                   "key": "gender",
-                  "value": ""
+                  "value": "",
+                  "disabled": true
                 },
                 {
                   "key": "businessType",
@@ -950,7 +952,49 @@
                 },
                 {
                   "key": "serviceIds",
+                  "value": "",
+                  "disabled": true
+                }
+              ],
+              "variable": []
+            }
+          }
+        },
+        {
+          "name": "Typed suggestions (§5.22): matching catalog services with the number of places offering them (most first), then matching places; both follow the lens and the gender filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{language}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customer/v1/salons/suggestions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customer",
+                "v1",
+                "salons",
+                "suggestions"
+              ],
+              "query": [
+                {
+                  "key": "q",
                   "value": ""
+                },
+                {
+                  "key": "gender",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
                 }
               ],
               "variable": []
@@ -1049,7 +1093,7 @@
       "name": "Home",
       "item": [
         {
-          "name": "Home (S03, §5.19): banners, salon + clinic services, Recommended salons + clinics, nearest salons + clinics in one request",
+          "name": "Home (S03, §5.22): banners, Explore, Near you, Recommended, Book again across the type lens (`businessType`), in one request",
           "request": {
             "method": "GET",
             "header": [
@@ -1074,6 +1118,11 @@
                   "value": ""
                 },
                 {
+                  "key": "businessType",
+                  "value": "",
+                  "disabled": true
+                },
+                {
                   "key": "lat",
                   "value": "",
                   "disabled": true
@@ -1086,7 +1135,7 @@
               ],
               "variable": []
             },
-            "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. Only businesses the gender may see (own audience, BOTH, every clinic). `nearestSalons`/`nearestClinics` are null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all."
+            "description": "Public; a valid customer token adds `firstName`, `unreadCount`, `isFavorite` and `bookAgain`. Businesses are never filtered by gender (§5.22; `gender` selects banners only). `explore` = most-booked catalog services of the lens types; `nearYou` = one list of bookable branches by distance (null without `lat`/`lng`); `recommendedAll` = one rail of the lens types' active placements; `bookAgain` = businesses of the customer's completed bookings with that booking's services (null for guests). The per-type keys stay for app versions before CUS-102. Each section holds 10 items; `hasMore` shows See more / See all."
           }
         }
       ]
@@ -1751,7 +1800,7 @@
             "description": "Persons are checked in order and each pick blocks the next. Errors (422): SALON_NOT_BOOKABLE, TOO_MANY_COMPANIONS, GENDER_MISMATCH, SERVICE_UNAVAILABLE, BRIDE_ONLY_SERVICE, STAFF_NOT_ELIGIBLE, SALON_CLOSED, DATE_OUT_OF_RANGE, SLOT_UNAVAILABLE, PAYMENT_OPTION_NOT_ALLOWED.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"salonId\": \"string\",\n  \"branchId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"gender\": \"MALE\",\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\"\n    }\n  ]\n}",
+              "raw": "{\n  \"salonId\": \"string\",\n  \"branchId\": \"string\",\n  \"paymentMethod\": \"PAY_ON_ARRIVAL\",\n  \"persons\": [\n    {\n      \"name\": \"string\",\n      \"isBride\": false,\n      \"gender\": \"MALE\",\n      \"serviceIds\": [\n        \"string\"\n      ],\n      \"staffId\": \"string\",\n      \"start\": \"string\",\n      \"referenceImageKey\": \"string\"\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"

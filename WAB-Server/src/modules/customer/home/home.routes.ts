@@ -21,14 +21,16 @@ export const createHomeRouter = ({ service, optionalAuth, limiter }: HomeRouterO
     optionalAuth,
     validate({ query: homeQuerySchema }),
     asyncHandler(async (req: Request, res: Response) => {
-      const { gender, lat, lng } = (req.validated as { query: z.infer<typeof homeQuerySchema> })
-        .query;
+      const { gender, lat, lng, businessType } = (
+        req.validated as { query: z.infer<typeof homeQuerySchema> }
+      ).query;
       sendSuccess(req, res, {
         data: await service.get({
           gender,
           language: req.language,
           customerId: req.auth?.subjectId,
           position: lat === undefined || lng === undefined ? undefined : { lat, lng },
+          businessTypes: businessType,
         }),
       });
     }),

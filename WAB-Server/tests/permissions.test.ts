@@ -24,15 +24,17 @@ const logger = createLogger({ level: 'silent' });
 const SECRET = 'a'.repeat(48);
 
 describe('role templates', () => {
-  it('has 15 permission keys and no owner-only capability among them', () => {
-    expect(PERMISSIONS).toHaveLength(15);
+  it('has 16 permission keys and no owner-only capability among them', () => {
+    expect(PERMISSIONS).toHaveLength(16);
     for (const capability of OWNER_ONLY_CAPABILITIES) {
       expect(PERMISSIONS as readonly string[]).not.toContain(capability);
     }
   });
 
   it('MANAGER gets every branch permission (not finance, subscription, policy); EMPLOYEE only the two basics', () => {
-    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(12);
+    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(13);
+    // §5.20: managers book for customers by default.
+    expect(ROLE_TEMPLATES.MANAGER).toContain('BOOKINGS_CREATE');
     expect(ROLE_TEMPLATES.MANAGER).not.toContain('FINANCE_VIEW');
     expect(ROLE_TEMPLATES.MANAGER).not.toContain('SUBSCRIPTION_VIEW');
     expect(ROLE_TEMPLATES.MANAGER).not.toContain('POLICIES_MANAGE');
@@ -43,7 +45,7 @@ describe('role templates', () => {
 
   it('hands out copies, so callers cannot change the template', () => {
     defaultPermissionsFor('MANAGER').pop();
-    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(12);
+    expect(ROLE_TEMPLATES.MANAGER).toHaveLength(13);
   });
 });
 

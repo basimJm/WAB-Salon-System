@@ -29,6 +29,8 @@ const DOMAIN_SETTINGS: Readonly<Record<string, unknown>> = {
   'booking.autoCancelAfterStartMinutes': 60,
   'booking.pendingAlertBeforeMinutes': 30,
   'booking.reminderMinutes': [60, 15],
+  'booking.closeReminderIntervalMinutes': 60,
+  'booking.closeOverdueAlertHours': 24,
   'otp.length': 6,
   'otp.resendAfterSec': 60,
   'otp.maxRequests': 5,
@@ -65,9 +67,9 @@ const valid = (key: keyof typeof SETTING_DEFINITIONS, value: unknown): boolean =
   SETTING_DEFINITIONS[key].schema.safeParse(value).success;
 
 describe('settings registry', () => {
-  it('has exactly the 42 keys of BUSINESS_DOMAIN.md §10', () => {
+  it('has exactly the 44 keys of BUSINESS_DOMAIN.md §10', () => {
     expect([...SETTING_KEYS].sort()).toEqual(Object.keys(DOMAIN_SETTINGS).sort());
-    expect(SETTING_KEYS).toHaveLength(42);
+    expect(SETTING_KEYS).toHaveLength(44);
     expect(Object.keys(SETTING_DEFAULTS).sort()).toEqual([...SETTING_KEYS].sort());
   });
 
@@ -159,6 +161,8 @@ describe('settings registry', () => {
     'booking.paymentHoldMinutes',
     'booking.autoCancelAfterStartMinutes',
     'booking.pendingAlertBeforeMinutes',
+    'booking.closeReminderIntervalMinutes',
+    'booking.closeOverdueAlertHours',
     'otp.resendAfterSec',
     'otp.maxRequests',
     'otp.requestWindowSec',

@@ -6,7 +6,6 @@ import type { Gender, Language } from '../../constants/enums';
 import { ERROR_CODES } from '../../constants/errorCodes';
 import { MS_PER_MINUTE } from '../../constants/time';
 import type { BookingDraftRaw, DraftHold } from '../../models/bookingDraft.model';
-import type { BookingPersonRaw } from '../../models/bookingPerson';
 import type { SalonPolicy } from '../../models/salon.model';
 import type { PAYMENT_OPTIONS } from '../../constants/salon';
 import type { BookingDraftsRepository } from '../../repositories/bookingDrafts.repository';
@@ -27,9 +26,16 @@ import type { PhoneVerifier } from '../auth/phoneVerifier';
 import type { OtpGate } from '../otp/otpGate.service';
 import type { AvailabilityService, PlanPersonInput } from '../availability/availability.service';
 import type { HoldsStore } from '../availability/holds';
+import type { UploadVerifier } from '../uploads/uploads.service';
+import { assertReferenceImages } from './referenceImages';
+import { toBookingPersons } from './bookingPersons';
+
+/** A draft person: the plan input plus an optional tattoo design image (§5.23). */
+export type DraftPersonInput = PlanPersonInput & {
+  readonly referenceImageKey?: string | undefined;
+};
 import { calculateAmounts } from '../pricing/pricing';
 import type { SettingsService } from '../settings';
-import { isVisibleTo } from '../businessTypes/rules';
 
 type PaymentMethod = (typeof PAYMENT_OPTIONS)[number];
 
@@ -46,6 +52,8 @@ export interface DraftView {
     isBride: boolean;
     /** §5.19; `null` when not known (BOTH business, not sent). */
     gender: Gender | null;
+    /** Tattoo design image upload key (§5.23); `null` when none. */
+    referenceImageKey: string | null;
     services: { salonServiceId: string; name: string; price: string; durationMinutes: number }[];
     staff: { id: string; firstName: string };
     staffSelection: 'SPECIFIC' | 'ANY';
@@ -67,7 +75,7 @@ export interface BookingDraftService {
     /** The picked branch (§5.18): required when the salon has several bookable branches. */
     branchId?: string | undefined;
     paymentMethod: PaymentMethod;
-    persons: readonly PlanPersonInput[];
+    persons: readonly DraftPersonInput[];
     language: Language;
   }): Promise<DraftView>;
   get(input: { customerId: string; id: string; language: Language }): Promise<DraftView>;
@@ -101,6 +109,8 @@ export interface BookingDraftDeps {
   readonly now?: () => Date;
   /** Until the branch step exists (SRV-142) a draft is for the salon's main branch. */
   readonly mainBranches?: Pick<MainBranches, 'idOf'>;
+  /** Checks tattoo design image uploads (§5.23); without it keys are not verified (tests). */
+  readonly uploads?: Pick<UploadVerifier, 'assertConfirmed'>;
 }
 
 const toHold = (hold: {
@@ -162,6 +172,7 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
         isMain: p.isMain,
         isBride: p.isBride,
         gender: p.gender ?? null,
+        referenceImageKey: p.referenceImageKey ?? null,
         services: p.services.map((s) => ({
           salonServiceId: s.salonServiceId,
           name: s.name[language],
@@ -215,45 +226,29 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             persons,
             draftId: earlier?.id,
           });
-          // The customer books only where they may look (§5.19 visibility).
-          if (!isVisibleTo(plan.salon, customer.gender)) {
-            throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-          }
+          await assertReferenceImages({
+            businessType: plan.salon.businessType,
+            keys: persons.map((p) => p.referenceImageKey),
+            verifier: deps.uploads,
+            accept: (upload) => upload.ownerType === 'CUSTOMER' && upload.ownerId === customerId,
+          });
           const policy = plan.salon.policy;
           if (policy === undefined)
             throw new BusinessRuleError({ code: ERROR_CODES.SALON_NOT_BOOKABLE });
           if (!policy.paymentOptions.includes(paymentMethod)) {
             throw new BusinessRuleError({ code: ERROR_CODES.PAYMENT_OPTION_NOT_ALLOWED });
           }
-          const catalogIds = [
-            ...new Set(plan.persons.flatMap((p) => p.services.map((s) => s.catalogServiceId))),
-          ];
-          const entries = await catalog.findMany({ _id: { $in: catalogIds } });
-          const nameOf = new Map(entries.map((c) => [c.id, c.name]));
-
           const amounts = calculateAmounts({
             persons: plan.persons.map((p) => ({ services: p.services })),
             paymentOption: paymentMethod,
             depositPercentage: policy.depositPercentage,
           });
-          const bookingPersons: BookingPersonRaw[] = plan.persons.map((p, index) => ({
-            name: p.name,
-            isMain: index === 0,
-            isBride: p.isBride,
-            ...(p.gender === undefined ? {} : { gender: p.gender }),
-            services: p.services.map((s) => ({
-              salonServiceId: toObjectId(s.id),
-              catalogServiceId: toObjectId(s.catalogServiceId),
-              name: nameOf.get(s.catalogServiceId) ?? { ar: '', en: '' },
-              price: s.price,
-              durationMinutes: s.durationMinutes,
-            })),
-            staffId: toObjectId(p.staffId),
-            staffSelection: p.staffSelection,
-            start: p.start,
-            end: p.end,
-            subtotal: amounts.persons[index]?.subtotal ?? 0,
-          }));
+          const bookingPersons = await toBookingPersons({
+            plan,
+            subtotals: amounts.persons.map((p) => p.subtotal),
+            references: persons.map((p) => p.referenceImageKey),
+            catalog,
+          });
           const holdMinutes = await settings.get('booking.paymentHoldMinutes');
           const at = now();
           const hold: DraftHold[] = plan.persons.map((p) => ({

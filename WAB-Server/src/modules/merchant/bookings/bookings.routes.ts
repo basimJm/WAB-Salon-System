@@ -143,12 +143,15 @@ export const createMerchantBookingsRouter = (
 
   const simple = (
     path: string,
-    permission: 'BOOKINGS_RESPOND' | 'BOOKINGS_OPERATE',
+    permission: 'BOOKINGS_RESPOND' | 'BOOKINGS_OPERATE' | 'OPERATE_OR_ASSIGNED',
     run: (t: ReturnType<typeof target>) => ReturnType<BookingActionsService['approve']>,
   ): void => {
     router.post(
       path,
-      requirePermission([permission]),
+      // §5.21: the booking's own staff may close it; the state machine checks the assignment.
+      permission === 'OPERATE_OR_ASSIGNED'
+        ? requirePermission(['BOOKINGS_OPERATE', 'BOOKINGS_VIEW_OWN'], 'any')
+        : requirePermission([permission]),
       validate({ params: bookingParams }),
       asyncHandler(async (req: Request, res: Response) => {
         sendSuccess(req, res, { data: presentSummary(await run(target(req))) });
@@ -175,8 +178,8 @@ export const createMerchantBookingsRouter = (
   };
   simple(routes.approve, 'BOOKINGS_RESPOND', (t) => service.approve(t));
   withReason(routes.reject, 'BOOKINGS_RESPOND', (t) => service.reject(t));
-  simple(routes.complete, 'BOOKINGS_OPERATE', (t) => service.complete(t));
-  simple(routes.noShow, 'BOOKINGS_OPERATE', (t) => service.noShow(t));
+  simple(routes.complete, 'OPERATE_OR_ASSIGNED', (t) => service.complete(t));
+  simple(routes.noShow, 'OPERATE_OR_ASSIGNED', (t) => service.noShow(t));
   withReason(routes.cancel, 'BOOKINGS_OPERATE', (t) => service.cancel(t));
   router.post(
     routes.reassign,

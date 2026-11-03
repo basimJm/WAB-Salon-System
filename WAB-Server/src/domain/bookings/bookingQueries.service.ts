@@ -22,6 +22,8 @@ import type {
   MembersRepository,
 } from '../../repositories/identity.repository';
 import type { StorageProvider } from '../../providers/storage';
+import type { BookingSource } from '../../models/booking.model';
+import { referenceImageUrl } from './referenceImages';
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import { toObjectId } from '../../utils/database/ids';
 import type { Entity } from '../../utils/database/plain';
@@ -60,6 +62,8 @@ export interface BookingQuery {
   readonly paymentStatus?: BookingPaymentStatus | undefined;
   /** Salon or clinic bookings only (§5.19 bookings filter: all / salons / clinics). */
   readonly businessType?: BusinessType | undefined;
+  /** Made in the app or by the business (§5.20); bookings before §5.20 count as the app's. */
+  readonly source?: BookingSource | undefined;
   /** Admin only. */
   readonly salonId?: string | undefined;
   readonly customerId?: string | undefined;
@@ -87,7 +91,12 @@ export interface BookingRow {
   readonly salon: { id: string; name: string } | null;
   /** The branch of the appointment, as booked (§3.5 `branchSnapshot`); `null` for older rows. */
   readonly branch: { id: string; name: string; locationText: string | null } | null;
-  readonly customer: { id: string; name: string; phone: string } | null;
+  /** `id` is null for a business-made booking of someone without the app (§5.20). */
+  readonly customer: { id: string | null; name: string; phone: string } | null;
+  /** Who made it (§5.20): the app shows "Booked by <place>" for MERCHANT. */
+  readonly source: BookingSource;
+  /** The member who made a MERCHANT booking; never shown to the customer. */
+  readonly createdBy: { id: string; name: string } | null;
   /** The distinct staff of the booking (customers see first names only). */
   readonly staff: BookingStaffRef[];
   /** The salon's rejection reason (S14 card, M10), `null` unless REJECTED. */
@@ -118,6 +127,8 @@ export interface BookingDetail extends BookingRow {
     isBride: boolean;
     /** §5.19; `null` when unknown (BOTH business without it, or older bookings). */
     gender: Gender | null;
+    /** Tattoo design image (§5.23): short-lived signed URL; `null` when none. */
+    referenceImageUrl: string | null;
     start: string;
     end: string;
     subtotal: string;
@@ -186,7 +197,7 @@ export interface BookingQueriesDeps {
   readonly salons: Pick<SalonsRepository, 'findMany'>;
   readonly settings: Pick<SettingsService, 'get'>;
   /** Staff photo URLs. */
-  readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
+  readonly storage: Pick<StorageProvider, 'getPublicUrl' | 'getSignedUrl'>;
   readonly now?: () => Date;
 }
 
@@ -259,6 +270,9 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
         and.push({ appointmentStart: { $gte: day.start, $lt: day.end } });
         break;
       }
+      case 'TO_CLOSE':
+        and.push({ status: 'APPROVED', appointmentEnd: { $lt: at } });
+        break;
       case 'PAST':
         and.push({
           $or: [{ status: { $in: [...FINAL_STATUSES] } }, { appointmentEnd: { $lt: at } }],
@@ -285,6 +299,8 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     if (query.brideOnly === true) and.push({ hasBride: true });
     if (query.paymentStatus !== undefined) and.push({ paymentStatus: query.paymentStatus });
     if (query.businessType !== undefined) and.push({ businessType: query.businessType });
+    if (query.source === 'MERCHANT') and.push({ source: 'MERCHANT' });
+    if (query.source === 'CUSTOMER_APP') and.push({ source: { $ne: 'MERCHANT' } });
 
     const text = query.q?.trim();
     if (text !== undefined && text !== '') {
@@ -321,7 +337,9 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     staff: Map<string, { firstName: string; fullName: string; photoUrl: string | null }>;
   }> => {
     const salonIds = [...new Set(rows.map((b) => b.salonId))];
-    const customerIds = [...new Set(rows.map((b) => b.customerId))];
+    const customerIds = [
+      ...new Set(rows.flatMap((b) => (b.customerId === undefined ? [] : [b.customerId]))),
+    ];
     const staffIds = [...new Set(rows.flatMap((b) => b.persons.map((p) => p.staffId)))];
     const [salonRows, customerRows, staffRows] = await Promise.all([
       audience.kind === 'MERCHANT' || salonIds.length === 0
@@ -407,11 +425,23 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     customer:
       audience.kind === 'CUSTOMER'
         ? null
-        : {
-            id: b.customerId,
-            name: l.customer.get(b.customerId)?.name ?? '',
-            phone: l.customer.get(b.customerId)?.phone ?? '',
-          },
+        : b.customerId === undefined
+          ? // A business-made booking for someone without the app (§5.20): the contact as entered.
+            {
+              id: null,
+              name: b.customerContact?.name ?? '',
+              phone: b.customerContact?.phone.e164 ?? '',
+            }
+          : {
+              id: b.customerId,
+              name: l.customer.get(b.customerId)?.name ?? '',
+              phone: l.customer.get(b.customerId)?.phone ?? '',
+            },
+    source: b.source ?? 'CUSTOMER_APP',
+    createdBy:
+      b.createdBy === undefined || audience.kind === 'CUSTOMER'
+        ? null
+        : { id: b.createdBy.memberId, name: b.createdBy.name },
     staff: [...new Set(b.persons.map((p) => p.staffId))].map((id) => staffRef(id, audience, l)),
     rejection: decision(b.rejection),
   });
@@ -425,7 +455,12 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
     const can = (key: string): boolean => audience.member.permissions.includes(key);
     const started = at >= b.appointmentStart;
     if (b.status === 'PENDING') return can('BOOKINGS_RESPOND') ? ['APPROVE', 'REJECT'] : [];
-    if (b.status !== 'APPROVED' || !can('BOOKINGS_OPERATE')) return [];
+    if (b.status !== 'APPROVED') return [];
+    if (!can('BOOKINGS_OPERATE')) {
+      // §5.21: the booking's own staff may close it once it has started.
+      const assigned = b.persons.some((p) => p.staffId === audience.member.id);
+      return assigned && started ? ['COMPLETE', 'NO_SHOW'] : [];
+    }
     return started ? ['COMPLETE', 'NO_SHOW', 'REASSIGN'] : ['CANCEL', 'REASSIGN'];
   };
 
@@ -449,13 +484,17 @@ export const createBookingQueriesService = (deps: BookingQueriesDeps): BookingQu
       });
       if (found === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       const l = await lookups([found], audience);
+      const imageUrls = await Promise.all(
+        found.persons.map((p) => referenceImageUrl(storage, p.referenceImageKey)),
+      );
       return {
         ...toRow(found, audience, l, language),
         refundStatus: found.refundStatus,
-        persons: found.persons.map((p) => ({
+        persons: found.persons.map((p, index) => ({
           name: p.name,
           isBride: p.isBride,
           gender: p.gender ?? null,
+          referenceImageUrl: imageUrls[index] ?? null,
           start: iso(p.start),
           end: iso(p.end),
           subtotal: formatJod(p.subtotal),
