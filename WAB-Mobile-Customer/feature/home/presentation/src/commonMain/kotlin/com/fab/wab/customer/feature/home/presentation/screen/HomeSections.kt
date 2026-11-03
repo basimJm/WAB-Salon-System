@@ -42,6 +42,8 @@ import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeCo
 import com.fab.wab.customer.feature.home.presentation.resources.Res
 import com.fab.wab.customer.feature.home.presentation.resources.home_book_again
 import com.fab.wab.customer.feature.home.presentation.resources.home_enable_location
+import com.fab.wab.customer.feature.home.presentation.resources.home_location_retry
+import com.fab.wab.customer.feature.home.presentation.resources.home_location_unavailable
 import com.fab.wab.customer.feature.home.presentation.resources.home_explore
 import com.fab.wab.customer.feature.home.presentation.resources.home_near_you
 import com.fab.wab.customer.feature.home.presentation.resources.home_near_you_empty
@@ -169,8 +171,16 @@ internal fun NearYouSection(nearest: NearestUi, onAction: (UiAction) -> Unit) {
             ShimmerRow(DiscoveryDesign.SHIMMER_SALON_WIDTH, DiscoveryDesign.SHIMMER_SALON_HEIGHT, DiscoveryDesign.SALON_CARD_RADIUS)
         }
         NearestUi.Empty -> NearestEmpty(stringResource(Res.string.home_near_you_empty), Modifier.padding(horizontal = spacing.space20))
-        NearestUi.LocationOff -> NearestLocationOff(
-            onEnable = { onAction(UiAction.OnEnableLocationClick) },
+        NearestUi.LocationOff -> NearestLocationPanel(
+            message = stringResource(Res.string.home_nearest_location_off),
+            button = stringResource(Res.string.home_enable_location),
+            onClick = { onAction(UiAction.OnEnableLocationClick) },
+            Modifier.padding(horizontal = spacing.space20),
+        )
+        NearestUi.Unavailable -> NearestLocationPanel(
+            message = stringResource(Res.string.home_location_unavailable),
+            button = stringResource(Res.string.home_location_retry),
+            onClick = { onAction(UiAction.OnRetryLocationClick) },
             Modifier.padding(horizontal = spacing.space20),
         )
     }
@@ -210,7 +220,7 @@ private fun SalonRow(salons: List<SalonSummary>, onAction: (UiAction) -> Unit, s
 
 /** Dashed surface panel: 54 dp soft pin circle, 13.5 sp muted message (max 260 dp), 44 dp gradient button. */
 @Composable
-private fun NearestLocationOff(onEnable: () -> Unit, modifier: Modifier = Modifier) {
+private fun NearestLocationPanel(message: String, button: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val colors = AppTheme.colors
     val shape = RoundedCornerShape(DiscoveryDesign.SALON_CARD_RADIUS)
     val line = colors.line
@@ -240,15 +250,15 @@ private fun NearestLocationOff(onEnable: () -> Unit, modifier: Modifier = Modifi
             Icon(AppIcons.Location, contentDescription = null, tint = colors.accent, modifier = Modifier.size(AppTheme.sizes.iconLarge))
         }
         AppText(
-            text = stringResource(Res.string.home_nearest_location_off),
+            text = message,
             style = discoveryBody(DiscoveryDesign.TEXT_13_5, lineHeight = DiscoveryDesign.LINE_HEIGHT_1_6),
             color = colors.muted,
             textAlign = TextAlign.Center,
             modifier = Modifier.widthIn(max = DiscoveryDesign.NEAR_OFF_TEXT_MAX_WIDTH),
         )
         DiscoveryGradientButton(
-            text = stringResource(Res.string.home_enable_location),
-            onClick = onEnable,
+            text = button,
+            onClick = onClick,
             height = DiscoveryDesign.NEAR_OFF_BUTTON_HEIGHT,
             paddingHorizontal = DiscoveryDesign.NEAR_OFF_BUTTON_PADDING_H,
             radius = DiscoveryDesign.NEAR_OFF_BUTTON_RADIUS,

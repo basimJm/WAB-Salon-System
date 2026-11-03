@@ -53,7 +53,8 @@ internal object AuthDiscoveryActionEvents {
     fun home(a: HomeContract.UiAction): ActionEvent = when (a) {
         is HomeContract.UiAction.OnLensSelect, is HomeContract.UiAction.OnBannerClick, HomeContract.UiAction.OnSearchClick,
         is HomeContract.UiAction.OnServiceClick, is HomeContract.UiAction.OnSalonClick, is HomeContract.UiAction.OnFavoriteClick,
-        is HomeContract.UiAction.OnBookAgainClick, HomeContract.UiAction.OnEnableLocationClick, -> ActionEvent.ByViewModel
+        is HomeContract.UiAction.OnBookAgainClick, HomeContract.UiAction.OnEnableLocationClick,
+        HomeContract.UiAction.OnRetryLocationClick, -> ActionEvent.ByViewModel
         HomeContract.UiAction.OnNotificationsClick -> ActionEvent.Named(Events.NOTIFICATIONS_OPEN)
         HomeContract.UiAction.OnServicesSeeMore, is HomeContract.UiAction.OnSeeAll -> ActionEvent.Named(Events.HOME_SEE_ALL)
         HomeContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)

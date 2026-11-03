@@ -18,14 +18,17 @@ sealed interface HomeContract {
         /** Location is allowed and the first fix is on its way: the rest of Home is already shown. */
         data object Locating : NearestUi
         data object LocationOff : NearestUi
+
+        /** Location is on but no position came in time (CUS-106): a retry, never the "enable location" prompt. */
+        data object Unavailable : NearestUi
         data object Empty : NearestUi
         data class Salons(val items: List<SalonSummary>, val hasMore: Boolean) : NearestUi
     }
 
     enum class SalonSection { Recommended, Nearest }
 
-    /** The Home sections in the order of BUSINESS_DOMAIN §5.22 (banners → Explore → Near you → Recommended → Book again). */
-    enum class HomeBlock { Banners, Explore, NearYou, Recommended, BookAgain }
+    /** The Home sections in the order of BUSINESS_DOMAIN §5.22 (banners → Explore → Recommended → Book again → Near you). */
+    enum class HomeBlock { Banners, Explore, Recommended, BookAgain, NearYou }
 
     data class UiState(
         val loading: Boolean = true,
@@ -78,6 +81,7 @@ sealed interface HomeContract {
         data class OnFavoriteClick(val salonId: String) : UiAction
         data class OnSeeAll(val section: SalonSection) : UiAction
         data object OnEnableLocationClick : UiAction
+        data object OnRetryLocationClick : UiAction
         data object OnDialogConfirm : UiAction
         data object OnDialogDismiss : UiAction
     }
