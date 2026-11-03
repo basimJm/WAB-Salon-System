@@ -47,3 +47,15 @@ enum class PaymentMethod(val code: String) {
 
 /** S14 tabs (`GET /bookings?tab=`). */
 enum class BookingTab(val code: String) { UPCOMING("UPCOMING"), PAST("PAST") }
+
+/** Who created the booking (BUSINESS_DOMAIN §5.20): the customer in the app or the business for the customer. */
+enum class BookingSource(val code: String) {
+    CUSTOMER_APP("CUSTOMER_APP"),
+    MERCHANT("MERCHANT"),
+    ;
+
+    companion object {
+        /** Unknown or missing codes read as an app booking (every booking before §5.20). */
+        fun fromCode(code: String?): BookingSource = entries.firstOrNull { it.code.equals(code?.trim(), true) } ?: CUSTOMER_APP
+    }
+}

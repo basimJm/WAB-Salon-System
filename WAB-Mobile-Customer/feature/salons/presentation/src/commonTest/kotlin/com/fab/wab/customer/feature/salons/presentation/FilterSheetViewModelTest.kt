@@ -17,6 +17,7 @@ import com.fab.wab.customer.feature.salons.presentation.controller.contract.Filt
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.FilterSheetContract.UiAction
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.toFloatRange
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.toPriceRange
+import com.fab.wab.customer.feature.salons.presentation.controller.contract.toggled
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.FilterSheetDependencies
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.FilterSheetViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,19 +34,21 @@ import kotlin.test.assertTrue
 private class SheetCatalogFake : CatalogRepository {
     val pages = mutableListOf<Int>()
     val types = mutableListOf<BusinessType?>()
+    val genders = mutableListOf<Gender?>()
     var perPage = 10
-    override suspend fun services(gender: Gender, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
+    override suspend fun services(gender: Gender?, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
         pages += page
         types += businessType
+        genders += gender
         val prefix = businessType?.code ?: "all"
         return AppResult.Success(List(perPage) { CatalogService("$prefix-s$page-$it", "Service $page-$it", "", null) })
     }
 }
 
 private class OptionsFake(var bounds: AppResult<PriceRange?> = AppResult.Success(PriceRange("10", "50"))) : SalonFilterOptionsRepository {
-    val calls = mutableListOf<List<String>>()
-    override suspend fun priceBounds(gender: Gender, serviceIds: List<String>): AppResult<PriceRange?> {
-        calls += serviceIds
+    val calls = mutableListOf<SalonFilters>()
+    override suspend fun priceBounds(filters: SalonFilters): AppResult<PriceRange?> {
+        calls += filters
         return bounds
     }
 }
@@ -59,40 +62,57 @@ class FilterSheetViewModelTest {
 
     private fun TestScope.viewModel(initial: SalonFilters = SalonFilters()): FilterSheetViewModel {
         val deps = FilterSheetDependencies(LoadFilterServicesUseCase(catalog), LoadPriceBoundsUseCase(options), errorText = { "error" })
-        val vm = FilterSheetViewModel(initial, Gender.FEMALE, deps, testScope = backgroundScope)
+        val vm = FilterSheetViewModel(initial, deps, testScope = backgroundScope)
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
         return vm
     }
 
     @Test
-    fun theTypeIsChosenFirstAndTheServiceCategoriesFollowIt() = runTest(UnconfinedTestDispatcher()) {
-        val vm = viewModel(SalonFilters(businessType = BusinessType.CLINIC))
-        assertEquals(BusinessType.CLINIC, vm.state.value.businessType)
+    fun typesAreMultiSelectAndTheCatalogFollowsTheOneChosenType() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(SalonFilters(businessTypes = setOf(BusinessType.CLINIC)))
+        assertEquals(setOf(BusinessType.CLINIC), vm.state.value.businessTypes)
         assertEquals(listOf<BusinessType?>(BusinessType.CLINIC), catalog.types, "the clinic catalog is loaded")
+        assertEquals(listOf<Gender?>(null), catalog.genders, "the catalog is never filtered by gender (§5.22)")
         vm.onEvent(UiAction.OnServiceToggle(ServiceRef("CLINIC-s1-0", "Botox")))
-        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
+        vm.onEvent(UiAction.OnBusinessTypeToggle(BusinessType.TATTOO))
         val state = vm.state.value
-        assertEquals(BusinessType.SALON, catalog.types.last(), "switching the type reloads its categories")
-        assertEquals(listOf(1, 1), catalog.pages)
-        assertTrue(state.services.all { it.id.startsWith("SALON-") }, "only the new type's services are listed")
-        assertTrue(state.selectedServices.isEmpty(), "picks of the other type are dropped")
-        assertNull(state.priceBounds)
-        val count = catalog.types.size
-        vm.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.SALON))
-        assertEquals(count, catalog.types.size, "the selected type does not reload")
+        assertEquals(setOf(BusinessType.CLINIC, BusinessType.TATTOO), state.businessTypes)
+        assertEquals(null, catalog.types.last(), "two types: the catalog of every type")
+        assertTrue(state.selectedServices.isEmpty(), "picks of the old scope are dropped")
+        vm.onEvent(UiAction.OnBusinessTypeToggle(BusinessType.CLINIC))
+        assertEquals(BusinessType.TATTOO, catalog.types.last(), "one type left: its catalog")
+        vm.onEvent(UiAction.OnBusinessTypeToggle(null))
+        assertEquals(emptySet(), vm.state.value.businessTypes, "All clears the types")
+        vm.onEvent(UiAction.OnBusinessTypeToggle(BusinessType.SALON))
         vm.onEvent(UiAction.OnApply)
-        assertEquals(BusinessType.SALON, (effects.single() as SideEffect.Applied).filters.businessType)
+        assertEquals(setOf(BusinessType.SALON), (effects.single() as SideEffect.Applied).filters.businessTypes)
     }
 
     @Test
-    fun resetClearsTheTypeAndReloadsEveryCategory() = runTest(UnconfinedTestDispatcher()) {
-        val vm = viewModel(SalonFilters(businessType = BusinessType.CLINIC))
+    fun genderTogglesAndRefreshesThePriceBounds() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        vm.onEvent(UiAction.OnGenderSelect(Gender.MALE))
+        assertEquals(Gender.MALE, vm.state.value.gender)
+        assertEquals(Gender.MALE, options.calls.last().gender)
+        vm.onEvent(UiAction.OnGenderSelect(Gender.MALE))
+        assertNull(vm.state.value.gender, "the chosen gender again clears it")
+        vm.onEvent(UiAction.OnGenderSelect(Gender.FEMALE))
+        vm.onEvent(UiAction.OnApply)
+        assertEquals(Gender.FEMALE, (effects.last() as SideEffect.Applied).filters.gender)
+    }
+
+    @Test
+    fun resetClearsTypesAndGenderAndReloadsEveryCategory() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(SalonFilters(businessTypes = setOf(BusinessType.CLINIC), gender = Gender.FEMALE, openNow = true))
         assertTrue(vm.state.value.canReset, "a chosen type can be reset")
         vm.onEvent(UiAction.OnReset)
-        assertNull(vm.state.value.businessType)
+        assertEquals(emptySet(), vm.state.value.businessTypes)
+        assertNull(vm.state.value.gender)
         assertEquals(null, catalog.types.last())
         assertTrue(vm.state.value.services.all { it.id.startsWith("all-") })
+        vm.onEvent(UiAction.OnApply)
+        assertTrue((effects.last() as SideEffect.Applied).filters.openNow, "open now (a quick chip) is kept")
     }
 
     @Test
@@ -106,7 +126,8 @@ class FilterSheetViewModelTest {
         assertEquals(initial.services, state.selectedServices)
         assertEquals(GeneralFilter.NEAREST, state.general)
         assertEquals(3, state.minRating)
-        assertEquals(listOf(listOf("x")), options.calls)
+        assertEquals(listOf(listOf("x")), options.calls.map { call -> call.services.map { it.id } })
+        assertEquals(PriceRange("12", "30"), state.toFilters().priceRange, "the opened price range is kept")
         assertTrue(state.showPrice)
         assertTrue(state.canReset)
     }
@@ -124,15 +145,18 @@ class FilterSheetViewModelTest {
     }
 
     @Test
-    fun priceAppearsOnlyWithASelectedServiceAndSingleSelectsToggle() = runTest(UnconfinedTestDispatcher()) {
+    fun priceWorksWithoutServicesAndSingleSelectsToggle() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
-        assertFalse(vm.state.value.showPrice)
+        assertTrue(vm.state.value.showPrice, "bounds of every service (§5.22)")
+        assertTrue(options.calls.single().services.isEmpty())
+        vm.onEvent(UiAction.OnPriceChange(20f..30f))
+        vm.onEvent(UiAction.OnApply)
+        assertEquals(PriceRange("20", "30"), (effects.last() as SideEffect.Applied).filters.priceRange)
         val hair = ServiceRef("s1-0", "Service 1-0")
         vm.onEvent(UiAction.OnServiceToggle(hair))
-        assertTrue(vm.state.value.showPrice)
+        assertEquals(listOf("s1-0"), options.calls.last().services.map { it.id })
         assertEquals(10f..50f, vm.state.value.priceSelection)
         vm.onEvent(UiAction.OnServiceToggle(hair))
-        assertFalse(vm.state.value.showPrice)
         assertTrue(vm.state.value.selectedServices.isEmpty())
 
         vm.onEvent(UiAction.OnGeneralSelect(GeneralFilter.RECOMMENDED))
@@ -159,7 +183,6 @@ class FilterSheetViewModelTest {
         )
         vm.onEvent(UiAction.OnReset)
         assertFalse(vm.state.value.canReset)
-        assertFalse(vm.state.value.showPrice)
         vm.onEvent(UiAction.OnApply)
         assertEquals(SideEffect.Applied(SalonFilters()), effects.last())
     }
@@ -169,6 +192,7 @@ class FilterSheetViewModelTest {
         options.bounds = AppResult.Error(AppError.NetworkError("offline"))
         val vm = viewModel(SalonFilters(services = listOf(ServiceRef("x", "Hair"))))
         assertFalse(vm.state.value.showPrice)
+        assertEquals(setOf(BusinessType.SALON), emptySet<BusinessType>().toggled(BusinessType.SALON))
         assertNull(PriceRange("min", "max").toFloatRange())
         assertNull((10f..50f).toPriceRange(PriceRange("10", "50")))
         assertEquals(PriceRange("12", "50"), (12.4f..50f).toPriceRange(PriceRange("10", "50")))

@@ -48,6 +48,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import com.fab.wab.customer.core.domain.upload.PresignedUpload
+import com.fab.wab.customer.core.domain.upload.UploadsRepository
+import com.fab.wab.customer.core.ui.media.FakeImagePicker
+import com.fab.wab.customer.core.ui.media.PickResult
+import com.fab.wab.customer.feature.booking.domain.usecase.UploadReferenceImageUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -144,11 +149,25 @@ class AvailabilityFake : AvailabilityRepository {
 }
 
 
+/** Presign → upload → confirm always succeed unless [fail]; the key is `ref-<n>`. */
+class UploadsFake(var fail: Boolean = false) : UploadsRepository {
+    val purposes = mutableListOf<String>()
+    override suspend fun presign(purpose: String, contentType: String, size: Int): AppResult<PresignedUpload> {
+        purposes += purpose
+        if (fail) return AppResult.Error(AppError.NetworkError("offline"))
+        return AppResult.Success(PresignedUpload("ref-${purposes.size}", "u", "PUT", emptyMap(), Long.MAX_VALUE))
+    }
+    override suspend fun upload(target: PresignedUpload, bytes: ByteArray, contentType: String): AppResult<Unit> = AppResult.Success(Unit)
+    override suspend fun confirm(key: String): AppResult<String?> = AppResult.Success(null)
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class BookingFlowHarness {
     val effects = mutableListOf<SideEffect>()
     val availability = AvailabilityFake()
     var drafts = DraftFake()
+    val picker = FakeImagePicker()
+    val uploads = UploadsFake()
 
     fun TestScope.viewModel(
         gender: Gender = Gender.FEMALE,
@@ -162,7 +181,10 @@ abstract class BookingFlowHarness {
             createDraft = CreateBookingDraftUseCase(drafts),
             deleteDraft = DeleteBookingDraftUseCase(drafts),
             analytics = NoOpAnalyticsTracker,
+            imagePicker = picker,
+            uploadReference = UploadReferenceImageUseCase(uploads),
             errorText = { "error" },
+            pickText = { if (it == PickResult.Cancelled) null else "pick failed" },
             today = { TODAY },
         )
         val vm = BookingFlowViewModel("s1", deps, initialBranchId = branchId, testScope = backgroundScope)

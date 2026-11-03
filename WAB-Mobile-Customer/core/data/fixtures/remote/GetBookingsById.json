@@ -67,7 +67,8 @@
             "durationMinutes": 15
           }
         ],
-        "gender": null
+        "gender": null,
+        "referenceImageUrl": null
       },
       {
         "name": "Yousef +1",
@@ -88,7 +89,8 @@
             "durationMinutes": 45
           }
         ],
-        "gender": null
+        "gender": null,
+        "referenceImageUrl": null
       }
     ],
     "money": {
@@ -127,6 +129,8 @@
     ],
     "cancellation": null,
     "createdAt": "2026-10-24T23:00:00.000Z",
-    "actions": []
+    "actions": [],
+    "source": "CUSTOMER_APP",
+    "createdBy": null
   }
 }

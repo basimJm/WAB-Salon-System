@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.fab.wab.customer.core.analytics.compose.TrackScreen
 import com.fab.wab.customer.core.domain.booking.BookingTab
-import com.fab.wab.customer.designsystem.components.domain.BusinessTypeTabs
+import com.fab.wab.customer.designsystem.components.domain.BusinessTypeLens
 import com.fab.wab.customer.designsystem.components.layout.AppPagedList
 import com.fab.wab.customer.designsystem.components.layout.AppPullToRefresh
 import com.fab.wab.customer.designsystem.components.layout.AppScreen
@@ -27,6 +27,8 @@ import com.fab.wab.customer.designsystem.resources.Res as CoreRes
 import com.fab.wab.customer.designsystem.resources.state_retry
 import com.fab.wab.customer.designsystem.theme.AppTheme
 import com.fab.wab.customer.feature.bookings.presentation.analytics.BookingsAnalytics
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.CardAction
+import com.fab.wab.customer.feature.bookings.presentation.controller.contract.cardActionsOf
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingsContract.UiAction
 import com.fab.wab.customer.feature.bookings.presentation.controller.contract.BookingsContract.UiState
 import com.fab.wab.customer.feature.bookings.presentation.resources.Res
@@ -103,7 +105,7 @@ private fun RegisteredContent(state: UiState, onAction: (UiAction) -> Unit) {
             onSelect = { onAction(UiAction.OnTabSelect(tabs[it])) },
             modifier = Modifier.fillMaxWidth().padding(top = spacing.space12, bottom = spacing.space12),
         )
-        BusinessTypeTabs(
+        BusinessTypeLens(
             selected = state.businessType,
             onSelect = { onAction(UiAction.OnBusinessTypeSelect(it)) },
             modifier = Modifier.fillMaxWidth().padding(bottom = spacing.space12),
@@ -151,7 +153,21 @@ private fun ListContent(state: UiState, onAction: (UiAction) -> Unit) {
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = spacing.space20 + tabBarInset()),
             footer = { BookingsShimmerCard(BookingsDesign.listShimmerHeight) },
-        ) { booking -> BookingCard(booking = booking, onClick = { onAction(UiAction.OnBookingClick(booking.id)) }) }
+        ) { booking ->
+            BookingCard(
+                booking = booking,
+                actions = cardActionsOf(booking, signedIn = state.signedIn == true),
+                onClick = { onAction(UiAction.OnBookingClick(booking.id)) },
+                onCardAction = { action ->
+                    onAction(
+                        when (action) {
+                            CardAction.RATE -> UiAction.OnRateClick(booking.id)
+                            CardAction.BOOK_AGAIN -> UiAction.OnBookAgainClick(booking.id)
+                        },
+                    )
+                },
+            )
+        }
     }
 }
 

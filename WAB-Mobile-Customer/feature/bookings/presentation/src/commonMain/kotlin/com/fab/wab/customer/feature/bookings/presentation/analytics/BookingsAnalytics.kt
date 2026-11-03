@@ -14,6 +14,8 @@ object BookingsAnalytics {
     const val ACTION_SEARCH = "bookings_search"
     const val ACTION_OPEN = "booking_open"
     const val ACTION_BUSINESS_TYPE = "bookings_business_type"
+    const val ACTION_RATE = "booking_card_rate"
+    const val ACTION_BOOK_AGAIN = "booking_book_again"
     const val PARAM_TAB = "tab"
     const val PARAM_ID = "id"
     const val PARAM_HAS_TEXT = "has_text"

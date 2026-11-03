@@ -4,35 +4,25 @@ import com.fab.wab.customer.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.customer.core.domain.AppError
 import com.fab.wab.customer.core.domain.AppLanguage
 import com.fab.wab.customer.core.domain.AppResult
-import com.fab.wab.customer.core.domain.auth.AuthTokens
-import com.fab.wab.customer.core.domain.favorites.FavoritesRepository
 import com.fab.wab.customer.core.domain.model.LocationData
 import com.fab.wab.customer.core.domain.provider.DeviceLocationProvider
 import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.salon.SalonSummary
 import com.fab.wab.customer.core.domain.session.Gender
-import com.fab.wab.customer.core.domain.session.GuestProfile
 import com.fab.wab.customer.core.domain.session.SessionState
-import com.fab.wab.customer.core.domain.session.SessionStore
-import com.fab.wab.customer.core.domain.session.UserProfile
 import com.fab.wab.customer.core.navigation.route.SalonListFilter
 import com.fab.wab.customer.core.notification.push.PushNotification
 import com.fab.wab.customer.core.notification.push.PushSignals
 import com.fab.wab.customer.core.realtime.FakeRealtimeClient
 import com.fab.wab.customer.core.realtime.RealtimeEvent
 import com.fab.wab.customer.core.realtime.RealtimeEvents
-import com.fab.wab.customer.core.ui.permission.AppPermission
 import com.fab.wab.customer.core.ui.permission.PermissionFlow
-import com.fab.wab.customer.core.ui.permission.PermissionManager
 import com.fab.wab.customer.core.ui.permission.PermissionStatus
-import com.fab.wab.customer.feature.home.domain.model.BannerAction
-import com.fab.wab.customer.feature.home.domain.model.HomeBanner
-import com.fab.wab.customer.feature.home.domain.model.HomeContent
+import com.fab.wab.customer.feature.home.domain.model.BookAgainEntry
 import com.fab.wab.customer.feature.home.domain.model.HomeSection
-import com.fab.wab.customer.feature.home.domain.model.HomeService
-import com.fab.wab.customer.feature.home.domain.repository.HomeRepository
 import com.fab.wab.customer.feature.home.domain.usecase.GetCurrentLocationUseCase
 import com.fab.wab.customer.feature.home.domain.usecase.LoadHomeUseCase
+import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.HomeBlock
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.HomeDialog
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.NearestUi
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.SalonSection
@@ -40,8 +30,8 @@ import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeCo
 import com.fab.wab.customer.feature.home.presentation.controller.contract.HomeContract.UiAction
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeDependencies
 import com.fab.wab.customer.feature.home.presentation.controller.vm.HomeViewModel
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -53,77 +43,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-
-private fun salon(id: String, favorite: Boolean = false) = SalonSummary(
-    id = id, name = id, imageUrl = null, rating = 4f, reviewsCount = 1, locationText = null, shortDescription = null,
-    isOpenNow = true, todayHours = null, isFavorite = favorite, distanceKm = null,
-)
-
-private fun content(nearest: HomeSection<SalonSummary>? = null, unread: Int = 3) = HomeContent(
-    unreadCount = unread,
-    banners = listOf(HomeBanner("b1", "img", BannerAction.ExternalUrl("https://example.invalid"))),
-    salonServices = HomeSection(listOf(HomeService("sv1", "Hair", "d", null)), hasMore = true),
-    clinicServices = HomeSection(listOf(HomeService("cv1", "Botox", "d", null)), hasMore = true),
-    recommendedSalons = HomeSection(listOf(salon("r1")), hasMore = true),
-    recommendedClinics = HomeSection(listOf(salon("c1").copy(businessType = BusinessType.CLINIC)), hasMore = true),
-    nearestSalons = nearest,
-    nearestClinics = nearest,
-)
-
-private class HomeRepositoryFake : HomeRepository {
-    val calls = mutableListOf<Pair<Gender, LocationData?>>()
-    var result: AppResult<HomeContent> = AppResult.Success(content())
-    override suspend fun load(gender: Gender, location: LocationData?): AppResult<HomeContent> {
-        calls += gender to location
-        return result
-    }
-}
-
-private class PermissionManagerFake(var status: PermissionStatus, var serviceEnabled: Boolean = true) : PermissionManager {
-    var requests = 0
-    var settingsOpened = 0
-    var requestResult: PermissionStatus = status
-    override suspend fun status(permission: AppPermission): PermissionStatus = status
-    override suspend fun request(permission: AppPermission): PermissionStatus {
-        requests += 1
-        status = requestResult
-        return status
-    }
-    override fun openSettings(permission: AppPermission) {
-        settingsOpened += 1
-    }
-    override fun isLocationServiceEnabled(): Boolean = serviceEnabled
-    override fun openLocationServiceSettings() = Unit
-}
-
-private class FavoritesFake(var result: AppResult<Boolean>? = null) : FavoritesRepository {
-    val calls = mutableListOf<Pair<String, Boolean>>()
-    override suspend fun setFavorite(salonId: String, favorite: Boolean): AppResult<Boolean> {
-        calls += salonId to favorite
-        return result ?: AppResult.Success(favorite)
-    }
-    override suspend fun list(page: Int, pageSize: Int): AppResult<List<SalonSummary>> = AppResult.Success(emptyList())
-}
-
-private class SessionStoreFake(initial: SessionState) : SessionStore {
-    val sessionState = MutableStateFlow(initial)
-    override val state: Flow<SessionState> = sessionState
-    override val onboardingSeen: Flow<Boolean> = MutableStateFlow(true)
-    override val pushEnabled: Flow<Boolean> = MutableStateFlow(true)
-    override suspend fun tokens(): AuthTokens? = null
-    override suspend fun signIn(tokens: AuthTokens, user: UserProfile) = Unit
-    override suspend fun updateTokens(tokens: AuthTokens) = Unit
-    override suspend fun updateUser(user: UserProfile) = Unit
-    override suspend fun setOnboardingSeen(seen: Boolean) = Unit
-    override suspend fun setGuestProfile(profile: GuestProfile) = Unit
-    override suspend fun setPushEnabled(enabled: Boolean) = Unit
-    override suspend fun signOut() = Unit
-    override suspend fun clearAll() = Unit
-}
-
-private val GUEST = SessionState.Guest(GuestProfile("Sara", Gender.FEMALE))
-private val USER = SessionState.SignedIn(UserProfile("c1", "Omar", Gender.MALE))
-private val AMMAN = LocationData(31.95, 35.93)
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -158,16 +77,17 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun guestLoadsHerGenderWithoutLocationAndSeesNoBadge() = runTest(UnconfinedTestDispatcher()) {
+    fun guestLoadsEveryTypeWithHerGenderForBannersWithoutLocationAndSeesNoBadge() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
-        assertEquals(listOf<Pair<Gender, LocationData?>>(Gender.FEMALE to null), repository.calls)
+        assertEquals(listOf(HomeCall(Gender.FEMALE, null, null)), repository.calls, "lens All by default")
         val state = vm.state.value
         assertEquals("Sara", state.welcomeName)
         assertEquals(false, state.signedIn)
         assertEquals(0, state.unreadCount)
-        assertEquals(NearestUi.LocationOff, state.nearestSalons)
+        assertEquals(NearestUi.LocationOff, state.nearYou)
         assertTrue(state.hasContent)
-        assertEquals(true, state.recommendedSalons.hasMore)
+        assertEquals(true, state.recommended.hasMore)
+        assertEquals(null, state.lens)
     }
 
     @Test
@@ -182,12 +102,60 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun genderTabReloadsForThatGender() = runTest(UnconfinedTestDispatcher()) {
+    fun lensChangeReloadsEverySectionWithTheBusinessType() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
-        vm.onEvent(UiAction.OnGenderSelect(Gender.MALE))
-        assertEquals(Gender.MALE, repository.calls.last().first)
-        vm.onEvent(UiAction.OnGenderSelect(Gender.MALE))
-        assertEquals(2, repository.calls.size)
+        vm.onEvent(UiAction.OnLensSelect(BusinessType.TATTOO))
+        assertEquals(HomeCall(Gender.FEMALE, BusinessType.TATTOO, null), repository.calls.last())
+        assertEquals(BusinessType.TATTOO, vm.state.value.lens)
+        vm.onEvent(UiAction.OnLensSelect(BusinessType.TATTOO))
+        assertEquals(2, repository.calls.size, "same lens: no reload")
+        vm.onEvent(UiAction.OnRefresh)
+        assertEquals(BusinessType.TATTOO, repository.calls.last().lens, "a refresh keeps the lens")
+        vm.onEvent(UiAction.OnLensSelect(null))
+        assertEquals(null, repository.calls.last().lens)
+    }
+
+    @Test
+    fun lensSwitchKeepsTheShownSectionsWhileTheNewLensLoads() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel()
+        val gate = CompletableDeferred<Unit>()
+        repository.gate = gate
+        vm.onEvent(UiAction.OnLensSelect(BusinessType.CLINIC))
+        val loading = vm.state.value
+        assertTrue(loading.hasContent, "no skeleton on a lens switch")
+        assertTrue(loading.reloadingContent, "a small indicator instead")
+        assertEquals("r1", loading.recommended.items.first().id, "the previous sections stay visible")
+        gate.complete(Unit)
+        assertEquals(false, vm.state.value.reloadingContent)
+        assertEquals(BusinessType.CLINIC, repository.calls.last().lens)
+    }
+
+    @Test
+    fun sectionsFollowTheMergedHomeOrder() = runTest(UnconfinedTestDispatcher()) {
+        val entry = BookAgainEntry(salon("s9"), "bk1", listOf("ss1"))
+        repository.result = AppResult.Success(content(bookAgain = listOf(entry)))
+        val user = viewModel(USER).state.value
+        assertEquals(
+            listOf(HomeBlock.Banners, HomeBlock.Explore, HomeBlock.NearYou, HomeBlock.Recommended, HomeBlock.BookAgain),
+            user.blocks,
+        )
+        assertEquals(listOf(entry), user.bookAgain)
+    }
+
+    @Test
+    fun guestsNeverSeeBookAgain() = runTest(UnconfinedTestDispatcher()) {
+        repository.result = AppResult.Success(content(bookAgain = listOf(BookAgainEntry(salon("s9"), "bk1", emptyList()))))
+        val guest = viewModel().state.value
+        assertEquals(emptyList(), guest.bookAgain)
+        assertTrue(HomeBlock.BookAgain !in guest.blocks)
+    }
+
+    @Test
+    fun bookAgainOpensTheBusinessOfThatBooking() = runTest(UnconfinedTestDispatcher()) {
+        repository.result = AppResult.Success(content(bookAgain = listOf(BookAgainEntry(salon("s9"), "bk1", listOf("ss1")))))
+        val vm = viewModel(USER)
+        vm.onEvent(UiAction.OnBookAgainClick("s9"))
+        assertEquals(SideEffect.OpenSalon("s9"), effects.last())
     }
 
     @Test
@@ -196,9 +164,10 @@ class HomeViewModelTest {
         repository.result = AppResult.Success(content(nearest = HomeSection(listOf(salon("n1")), hasMore = false)))
         val vm = viewModel(USER)
         assertEquals(USER.user.firstName, vm.state.value.welcomeName)
-        assertEquals(AMMAN, repository.calls.single().second)
+        assertEquals(AMMAN, repository.calls.single().location)
+        assertEquals(Gender.MALE, repository.calls.single().gender, "the account's gender picks the banners")
         assertEquals(3, vm.state.value.unreadCount)
-        assertIs<NearestUi.Salons>(vm.state.value.nearestSalons)
+        assertIs<NearestUi.Salons>(vm.state.value.nearYou)
         realtime.emit(RealtimeEvent(RealtimeEvents.NOTIFICATIONS_UNREAD, buildJsonObject { put("count", JsonPrimitive(120)) }))
         assertEquals(120, vm.state.value.unreadCount)
         PushSignals.publishReceived(PushNotification("Approved", "Your booking was approved"))
@@ -209,7 +178,7 @@ class HomeViewModelTest {
     fun locationGrantedButNoSalonsShowsTheEmptyMessage() = runTest(UnconfinedTestDispatcher()) {
         permissions.status = PermissionStatus.GRANTED
         repository.result = AppResult.Success(content(nearest = HomeSection(emptyList(), hasMore = false)))
-        assertEquals(NearestUi.Empty, viewModel().state.value.nearestSalons)
+        assertEquals(NearestUi.Empty, viewModel().state.value.nearYou)
     }
 
     @Test
@@ -221,7 +190,7 @@ class HomeViewModelTest {
         vm.onEvent(UiAction.OnDialogConfirm)
         assertNull(vm.state.value.dialog)
         assertEquals(1, permissions.requests)
-        assertEquals(AMMAN, repository.calls.last().second)
+        assertEquals(AMMAN, repository.calls.last().location)
     }
 
     @Test
@@ -247,7 +216,7 @@ class HomeViewModelTest {
         val user = viewModel(USER)
         user.onEvent(UiAction.OnFavoriteClick("r1"))
         assertEquals(listOf("r1" to true), favorites.calls)
-        assertEquals(false, user.state.value.recommendedSalons.items.single().isFavorite)
+        assertEquals(false, user.state.value.recommended.items.first().isFavorite)
         assertIs<SideEffect.ShowError>(effects.last())
     }
 
@@ -274,15 +243,18 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun clinicSectionsOpenTheSameScreensFilteredToClinics() = runTest(UnconfinedTestDispatcher()) {
+    fun seeAllKeepsTheLensAndServicesOpenWithTheirType() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
-        vm.onEvent(UiAction.OnSeeAll(SalonSection.Recommended, BusinessType.CLINIC))
-        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, null, null, SalonListFilter.RECOMMENDED, BusinessType.CLINIC), effects.last())
         vm.onEvent(UiAction.OnSeeAll(SalonSection.Nearest))
-        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, null, null, SalonListFilter.NEAREST, BusinessType.SALON), effects.last())
-        vm.onEvent(UiAction.OnServicesSeeMore(BusinessType.CLINIC))
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, null, null, SalonListFilter.NEAREST, null), effects.last(), "lens All")
+        vm.onEvent(UiAction.OnServicesSeeMore)
+        assertEquals(SideEffect.OpenAllServices(Gender.FEMALE, null), effects.last())
+        vm.onEvent(UiAction.OnLensSelect(BusinessType.CLINIC))
+        vm.onEvent(UiAction.OnSeeAll(SalonSection.Recommended))
+        assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, null, null, SalonListFilter.RECOMMENDED, BusinessType.CLINIC), effects.last())
+        vm.onEvent(UiAction.OnServicesSeeMore)
         assertEquals(SideEffect.OpenAllServices(Gender.FEMALE, BusinessType.CLINIC), effects.last())
-        vm.onEvent(UiAction.OnServiceClick("cv1", BusinessType.CLINIC))
+        vm.onEvent(UiAction.OnServiceClick("cv1"))
         assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE, "cv1", "Botox", businessType = BusinessType.CLINIC), effects.last())
         vm.onEvent(UiAction.OnSearchClick)
         assertEquals(SideEffect.OpenAllSalons(Gender.FEMALE), effects.last(), "search lists every business type")

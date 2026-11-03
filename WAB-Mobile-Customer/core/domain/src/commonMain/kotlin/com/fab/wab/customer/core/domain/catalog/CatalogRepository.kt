@@ -4,7 +4,7 @@ import com.fab.wab.customer.core.domain.AppResult
 import com.fab.wab.customer.core.domain.salon.BusinessType
 import com.fab.wab.customer.core.domain.session.Gender
 
-/** One admin-catalog service of a gender and business type (`GET /catalog/services`; S05 chips, S06 list, S04 presets). */
+/** One admin-catalog service (`GET /catalog/services`, optionally per audience gender and type; S05 chips, S06 list, S04 presets). */
 data class CatalogService(val id: String, val name: String, val description: String, val imageUrl: String?)
 
 object CatalogDefaults {
@@ -13,8 +13,9 @@ object CatalogDefaults {
 }
 
 interface CatalogRepository {
+    /** [gender] null = every audience (discovery has no gender filter, §5.22); [businessType] null = every type. */
     suspend fun services(
-        gender: Gender,
+        gender: Gender?,
         businessType: BusinessType? = null,
         page: Int = CatalogDefaults.FIRST_PAGE,
         pageSize: Int = CatalogDefaults.PAGE_SIZE,

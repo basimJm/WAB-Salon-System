@@ -164,4 +164,23 @@ class BookingsViewModelTest {
         vm.onEvent(UiAction.OnBookNowClick)
         assertEquals<SideEffect>(SideEffect.OpenHome, effects.last())
     }
+
+    @Test
+    fun completedCardsOpenTheRatingAndBookAgainOpensTheBookedBranch() = runTest(UnconfinedTestDispatcher()) {
+        val user = viewModel(USER)
+        user.onEvent(UiAction.OnRateClick("1-0"))
+        assertEquals<SideEffect>(SideEffect.OpenRating("1-0"), effects.last())
+        user.onEvent(UiAction.OnBookAgainClick("1-0"))
+        assertEquals<SideEffect>(SideEffect.OpenSalon("s1", null), effects.last())
+        val count = effects.size
+        user.onEvent(UiAction.OnBookAgainClick("missing"))
+        assertEquals(count, effects.size, "an unknown booking opens nothing")
+    }
+
+    @Test
+    fun theLensFiltersTattooBookings() = runTest(UnconfinedTestDispatcher()) {
+        val user = viewModel(USER)
+        user.onEvent(UiAction.OnBusinessTypeSelect(BusinessType.TATTOO))
+        assertEquals(BusinessType.TATTOO, repository.types.last())
+    }
 }

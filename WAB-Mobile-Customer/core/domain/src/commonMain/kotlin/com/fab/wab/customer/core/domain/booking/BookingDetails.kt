@@ -1,6 +1,7 @@
 package com.fab.wab.customer.core.domain.booking
 
 import com.fab.wab.customer.core.domain.salon.BranchRef
+import com.fab.wab.customer.core.domain.salon.BusinessType
 
 /** BUSINESS_DOMAIN `RefundStatus`. */
 enum class RefundStatus(val code: String) {
@@ -45,6 +46,8 @@ data class BookingPerson(
     val staffName: String?,
     val services: List<BookingService>,
     val staffPhotoUrl: String? = null,
+    /** The tattoo design image of this person as a short-lived signed URL (§5.23); null when none. */
+    val referenceImageUrl: String? = null,
 )
 
 /**
@@ -85,4 +88,6 @@ data class BookingDetails(
     val policy: BookingPolicy?,
     val rejection: BookingReason?,
     val cancellation: BookingReason?,
+    val source: BookingSource = BookingSource.CUSTOMER_APP,
+    val businessType: BusinessType = BusinessType.SALON,
 )

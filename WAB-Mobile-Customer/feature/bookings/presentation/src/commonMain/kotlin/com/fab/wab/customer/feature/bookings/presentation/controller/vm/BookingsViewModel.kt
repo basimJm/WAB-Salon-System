@@ -43,7 +43,10 @@ class BookingsDependencies(
     val debounceMs: Long = BookingsDefaults.SEARCH_DEBOUNCE_MS,
 )
 
-/** S14: guest gate, Upcoming | Past, debounced search, paging, instant refresh on `booking.updated`. */
+/**
+ * S14: guest gate, Upcoming | Past, type lens, debounced search, paging, instant refresh on `booking.updated`; completed
+ * cards offer Rate and Book again (BUSINESS_DOMAIN §5.22).
+ */
 @OptIn(FlowPreview::class)
 class BookingsViewModel(
     private val deps: BookingsDependencies,
@@ -87,6 +90,11 @@ class BookingsViewModel(
                 track(BookingsAnalytics.ACTION_OPEN, BookingsAnalytics.PARAM_ID to event.bookingId)
                 emitSideEffect(SideEffect.OpenBooking(event.bookingId))
             }
+            is UiAction.OnRateClick -> {
+                track(BookingsAnalytics.ACTION_RATE, BookingsAnalytics.PARAM_ID to event.bookingId)
+                emitSideEffect(SideEffect.OpenRating(event.bookingId))
+            }
+            is UiAction.OnBookAgainClick -> bookAgain(event.bookingId)
             UiAction.OnLoadMore -> loadMore()
             UiAction.OnRefresh -> load(refresh = true)
             UiAction.OnRetry -> load()
@@ -105,6 +113,14 @@ class BookingsViewModel(
             copy(signedIn = session.isSignedIn, welcomeName = name, bookings = kept, loaded = false)
         }
         if (session.isSignedIn && was != true) load()
+    }
+
+    /** The booking flow has no service preselection yet: Book again opens the business at the booked branch (§5.22). */
+    private fun bookAgain(bookingId: String) {
+        val booking = uiState.value.bookings.firstOrNull { it.id == bookingId } ?: return
+        val salonId = booking.salonId ?: return
+        track(BookingsAnalytics.ACTION_BOOK_AGAIN, BookingsAnalytics.PARAM_ID to bookingId)
+        emitSideEffect(SideEffect.OpenSalon(salonId, booking.branch?.id))
     }
 
     private fun selectTab(tab: BookingTab) {

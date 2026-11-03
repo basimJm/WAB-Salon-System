@@ -5,6 +5,7 @@ import com.fab.wab.customer.core.data.contract.generated.GetProfileData
 import com.fab.wab.customer.core.data.contract.generated.PatchProfileData
 import com.fab.wab.customer.core.data.contract.generated.PostUploadsPresignData
 import com.fab.wab.customer.core.data.mock.decodeFixture
+import com.fab.wab.customer.core.data.upload.toDomain
 import com.fab.wab.customer.feature.profile.data.repository.toDomain
 import kotlin.test.Test
 import kotlin.test.assertEquals

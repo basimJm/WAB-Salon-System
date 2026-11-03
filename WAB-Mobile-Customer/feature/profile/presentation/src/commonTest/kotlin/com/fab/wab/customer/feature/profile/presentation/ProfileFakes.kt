@@ -32,10 +32,10 @@ import com.fab.wab.customer.feature.auth.domain.model.RegisterRequest
 import com.fab.wab.customer.feature.auth.domain.repository.AuthRepository
 import com.fab.wab.customer.feature.auth.domain.repository.InstallationsRepository
 import com.fab.wab.customer.feature.profile.domain.model.CustomerAccount
-import com.fab.wab.customer.feature.profile.domain.model.PresignedUpload
+import com.fab.wab.customer.core.domain.upload.PresignedUpload
 import com.fab.wab.customer.feature.profile.domain.model.ProfileUpdate
 import com.fab.wab.customer.feature.profile.domain.repository.ProfileRepository
-import com.fab.wab.customer.feature.profile.domain.repository.UploadsRepository
+import com.fab.wab.customer.core.domain.upload.UploadsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

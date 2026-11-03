@@ -131,8 +131,10 @@
     <string name="business_type_all">الكل</string>
     <string name="business_type_salons">الصالونات</string>
     <string name="business_type_clinics">العيادات</string>
+    <string name="business_type_tattoo">الوشم</string>
     <string name="business_salon">صالون</string>
     <string name="business_clinic">عيادة تجميل</string>
+    <string name="business_tattoo">استوديو وشم</string>
     <string name="audience_men">رجال</string>
     <string name="audience_women">نساء</string>
     <string name="audience_both">رجال ونساء</string>

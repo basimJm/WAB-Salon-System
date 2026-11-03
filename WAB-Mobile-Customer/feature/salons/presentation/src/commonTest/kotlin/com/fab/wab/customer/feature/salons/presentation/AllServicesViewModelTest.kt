@@ -22,11 +22,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 private class CatalogFake : CatalogRepository {
-    val calls = mutableListOf<Pair<Gender, Int>>()
+    val calls = mutableListOf<Pair<Gender?, Int>>()
     val types = mutableListOf<BusinessType?>()
     var perPage = 10
     var result: AppResult<List<CatalogService>>? = null
-    override suspend fun services(gender: Gender, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
+    override suspend fun services(gender: Gender?, businessType: BusinessType?, page: Int, pageSize: Int): AppResult<List<CatalogService>> {
         calls += gender to page
         types += businessType
         return result ?: AppResult.Success(List(perPage) { CatalogService("s$page-$it", "Service $it", "d", null) })
@@ -39,9 +39,9 @@ class AllServicesViewModelTest {
     private val catalog = CatalogFake()
     private val effects = mutableListOf<SideEffect>()
 
-    private fun TestScope.viewModel(type: BusinessType = BusinessType.SALON): AllServicesViewModel {
+    private fun TestScope.viewModel(type: BusinessType? = BusinessType.SALON): AllServicesViewModel {
         val vm = AllServicesViewModel(
-            Gender.MALE, LoadFilterServicesUseCase(catalog), NoOpAnalyticsTracker, { "error" }, backgroundScope, type,
+            LoadFilterServicesUseCase(catalog), NoOpAnalyticsTracker, { "error" }, backgroundScope, type,
         )
         backgroundScope.launch { vm.state.collect {} }
         backgroundScope.launch { vm.sideEffect.collect { effects += it } }
@@ -49,9 +49,9 @@ class AllServicesViewModelTest {
     }
 
     @Test
-    fun loadsTheGenderCatalogPagesAndOpensSalonsForAService() = runTest(UnconfinedTestDispatcher()) {
+    fun loadsTheCatalogWithoutGenderPagesAndOpensSalonsForAService() = runTest(UnconfinedTestDispatcher()) {
         val vm = viewModel()
-        assertEquals(listOf(Gender.MALE to 1), catalog.calls)
+        assertEquals(listOf<Pair<Gender?, Int>>(null to 1), catalog.calls, "no gender filter in discovery (§5.22)")
         assertTrue(vm.state.value.hasMore)
         catalog.perPage = 2
         vm.onEvent(UiAction.OnLoadMore)
@@ -68,6 +68,14 @@ class AllServicesViewModelTest {
         assertEquals(listOf<BusinessType?>(BusinessType.CLINIC), catalog.types)
         vm.onEvent(UiAction.OnServiceClick("s1-0"))
         assertEquals(SideEffect.OpenSalons("s1-0", "Service 0", BusinessType.CLINIC), effects.last())
+    }
+
+    @Test
+    fun lensAllLoadsEveryTypesCatalog() = runTest(UnconfinedTestDispatcher()) {
+        val vm = viewModel(null)
+        assertEquals(listOf<BusinessType?>(null), catalog.types)
+        vm.onEvent(UiAction.OnServiceClick("s1-0"))
+        assertEquals(SideEffect.OpenSalons("s1-0", "Service 0", null), effects.last())
     }
 
     @Test
