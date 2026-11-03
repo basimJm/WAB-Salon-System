@@ -13,6 +13,7 @@ import { MembersRepository } from '../src/repositories/identity.repository';
 import { signAccessToken } from '../src/utils/auth/accessToken';
 import { ValidationError } from '../src/utils/errors';
 import { createLogger } from '../src/utils/logger';
+import { fileSlotsKit } from './helpers/fileSlots';
 import { createFakeModel } from './helpers/fakeModel';
 
 const logger = createLogger({ level: 'silent' });
@@ -28,6 +29,7 @@ storage.delete = async (keys: readonly string[]): Promise<void> => {
   deleted.push([...keys]);
   await originalDelete(keys);
 };
+const kit = fileSlotsKit(storage);
 const verified: Parameters<UploadVerifier['assertConfirmed']>[0][] = [];
 const verifier: { reject: string[] } & UploadVerifier = {
   reject: [],
@@ -46,6 +48,7 @@ const app = createApp({
       storage,
       uploads: verifier,
       settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
+      cleanup: kit.cleanup,
     }),
     salonProfile: {
       service: undefined as never,
@@ -94,6 +97,7 @@ beforeEach(() => {
   members.docs.length = 0;
   verified.length = 0;
   deleted.length = 0;
+  kit.cleanupsModel.docs.length = 0;
   verifier.reject = [];
 });
 
@@ -256,6 +260,9 @@ describe('gallery', () => {
           .set(auth(owner))
       ).status,
     ).toBe(200);
+    // Queued in the outbox, deleted by its next run (SRV-182).
+    expect(deleted).toHaveLength(0);
+    await kit.cleanup.drain();
     expect(deleted[0]).toEqual([
       'gallery/s/a.jpg',
       'gallery/s/a_thumb.webp',
@@ -268,7 +275,8 @@ describe('gallery', () => {
           .set(auth(owner))
       ).status,
     ).toBe(200);
-    expect(deleted[1]).toEqual(['gallery/s/v.mp4', 'gallery/s/poster.jpg']);
+    await kit.cleanup.drain();
+    expect(deleted[1]).toEqual(expect.arrayContaining(['gallery/s/v.mp4', 'gallery/s/poster.jpg']));
     expect(gallery.docs).toHaveLength(1);
     expect(
       (await request(app).delete('/merchant/v1/salon/gallery/nope').set(auth(owner))).status,

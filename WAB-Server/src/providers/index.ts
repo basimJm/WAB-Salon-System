@@ -1,5 +1,11 @@
 import type { AppConfig } from '../config';
-import { DISABLED_PAYMENT_MODE, REAL_PROVIDER_MODE, ARQAM_OTP_MODE } from '../constants/providers';
+import {
+  ARQAM_OTP_MODE,
+  DISABLED_PAYMENT_MODE,
+  R2_STORAGE_MODE,
+  REAL_PROVIDER_MODE,
+  REAL_STORAGE_MODES,
+} from '../constants/providers';
 import { InternalError } from '../utils/errors';
 import { FakeNotifier, type Notifier } from './notifier';
 import { createRealNotifier, type ClosableNotifier } from './notifier/real';
@@ -45,7 +51,7 @@ export class ProviderUnavailableError extends InternalError {
   }
 }
 
-type Mode = AppConfig['providers']['storage'];
+type Mode = AppConfig['providers']['notifier'];
 
 /**
  * Builds the providers named by the config. Fakes are for development and tests only: they are
@@ -101,19 +107,23 @@ export const createProviders = (
       ...(fixedCode === undefined ? {} : { fixedCode }),
     });
   };
+  // Storage (SRV-180): R2 (`cloudflare-r2`) or AWS S3 (`real`), both through the wab-storage SDK.
+  const pickStorage = (mode: AppConfig['providers']['storage']): StorageProvider => {
+    if (!REAL_STORAGE_MODES.includes(mode)) {
+      if (isProduction)
+        throw new ProviderUnavailableError('storage', 'fakes are not allowed in production');
+      return new FakeStorageProvider();
+    }
+    const settings = deps?.config.storage;
+    if (deps === undefined || settings === undefined)
+      throw new ProviderUnavailableError('storage', 'object store settings missing');
+    if ((mode === R2_STORAGE_MODE) !== (settings.provider === 'r2'))
+      throw new ProviderUnavailableError('storage', 'settings do not match STORAGE_PROVIDER');
+    return createRealStorage({ settings, isProduction, logger: deps.logger });
+  };
   const built = {
     otp: pickOtp(providers.otp),
-    storage: pick(
-      'storage',
-      providers.storage,
-      () => new FakeStorageProvider(),
-      () => {
-        const settings = deps?.config.storage;
-        if (deps === undefined || settings === undefined)
-          throw new ProviderUnavailableError('storage', 'S3 or CDN settings missing');
-        return createRealStorage({ settings, isProduction, logger: deps.logger });
-      },
-    ),
+    storage: pickStorage(providers.storage),
     notifier: pick(
       'notifier',
       providers.notifier,

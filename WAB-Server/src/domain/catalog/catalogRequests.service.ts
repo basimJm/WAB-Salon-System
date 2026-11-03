@@ -17,6 +17,9 @@ import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { AuditWriter } from '../audit/audit.service';
 import type { AdminActor } from '../auth/accountLifecycle.service';
 import type { UploadVerifier } from '../uploads/uploads.service';
+import type { FileSlots } from '../files/fileSlots.service';
+import type { StorageCleanup } from '../files/storageCleanup.service';
+import { SLOT_KEYS } from '../../constants/uploads';
 import { catalogFits } from '../businessTypes/rules';
 import type { BusinessType } from '../../constants/enums';
 import { salonIdFilter } from '../businessTypes/salonFilter';
@@ -93,8 +96,12 @@ export interface CatalogRequestsService {
 export interface CatalogRequestsDeps {
   readonly requests: CatalogRequestsRepository;
   readonly salons: Pick<SalonsRepository, 'findById' | 'findMany'>;
-  readonly catalog: Pick<CatalogServicesRepository, 'create' | 'findById'>;
+  readonly catalog: Pick<CatalogServicesRepository, 'create' | 'findById' | 'updateById'>;
   readonly uploads: UploadVerifier;
+  /** The approved image moves into the new entry's slot (`catalog/{id}/image`, SRV-182). */
+  readonly files?: Pick<FileSlots, 'replace'>;
+  /** A request image no catalog entry uses is deleted through the outbox. */
+  readonly cleanup?: Pick<StorageCleanup, 'enqueue'>;
   readonly audit: AuditWriter;
   readonly notifier: CatalogRequestNotifier;
   readonly logger: Logger;
@@ -116,6 +123,41 @@ const invalid = (field: string): ValidationError =>
 export const createCatalogRequestsService = (deps: CatalogRequestsDeps): CatalogRequestsService => {
   const { requests, salons, catalog, uploads, audit, notifier, logger } = deps;
   const now = deps.now ?? ((): Date => new Date());
+
+  /**
+   * The new entry's picture becomes its file slot. The entry already works with the plain key, so a
+   * failed move is logged and left for the next admin edit instead of undoing the approval.
+   */
+  const placeInSlot = async (
+    catalogServiceId: string,
+    image: string,
+    requestImage: string | undefined,
+    actor: AdminActor,
+  ): Promise<void> => {
+    if (deps.files === undefined) return;
+    try {
+      await deps.files.replace({
+        target: {
+          purpose: 'CATALOG_IMAGE',
+          key: SLOT_KEYS.catalogImage(catalogServiceId),
+          ownerType: 'ADMIN',
+          ownerId: actor.adminId,
+        },
+        current: undefined,
+        incoming: image,
+        field: 'body.imageKey',
+        accept: (upload) => upload.ownerType === 'ADMIN' || upload.key === requestImage,
+        commit: async (ref) => {
+          await catalog.updateById(catalogServiceId, { imageKey: ref });
+        },
+      });
+    } catch (error) {
+      logger.warn(
+        { err: error, catalogServiceId },
+        'approved catalog image not moved into its slot',
+      );
+    }
+  };
 
   const view = (
     r: Entity<CatalogRequestRaw>,
@@ -276,6 +318,7 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
             sortOrder: input.sortOrder,
           });
           serviceId = created.id;
+          await placeInSlot(created.id, finalImage, request.imageKey, actor);
         } catch (error) {
           await requests.updateById(id, { status: 'PENDING' });
           throw error;
@@ -283,6 +326,9 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
       } else {
         throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       }
+      // A request image that no entry uses (mapped to an existing entry, or replaced by the admin's).
+      if (request.imageKey !== undefined && (existing !== null || finalImage !== request.imageKey))
+        await deps.cleanup?.enqueue([request.imageKey], 'FILE_REMOVED');
       const done =
         (await requests.updateById(id, { catalogServiceId: toObjectId(serviceId) })) ?? claimed;
       await record(
@@ -305,6 +351,8 @@ export const createCatalogRequestsService = (deps: CatalogRequestsDeps): Catalog
         decidedAt: now(),
       });
       if (rejected === null) throw new BusinessRuleError({ code: ERROR_CODES.ALREADY_HANDLED });
+      if (rejected.imageKey !== undefined)
+        await deps.cleanup?.enqueue([rejected.imageKey], 'FILE_REMOVED');
       await record('CATALOG_REQUEST_REJECT', id, { status: 'REJECTED' }, reason, actor);
       await tellSalon(rejected, 'rejected', reason);
       return view(rejected);

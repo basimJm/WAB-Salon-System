@@ -24,6 +24,12 @@ export interface UploadRaw {
   maxBytes: number;
   status: UploadStatus;
   expiresAt: Date;
+  /** File slot record (SRV-181): the one row of a fixed object key, kept across replacements. */
+  slot?: boolean;
+  /** Slot content version; the entity stores `<key>?v=<version>`. */
+  version?: number;
+  /** Stored size in bytes (slot records). */
+  size?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,6 +45,9 @@ const uploadSchema = new Schema<UploadRaw>(
     maxBytes: { type: Number, required: true, min: 1 },
     status: { type: String, enum: UPLOAD_STATUSES, default: 'PENDING' },
     expiresAt: { type: Date, required: true },
+    slot: { type: Boolean },
+    version: { type: Number, min: 1 },
+    size: { type: Number, min: 0 },
   },
   { timestamps: true, collection: UPLOADS_COLLECTION },
 );

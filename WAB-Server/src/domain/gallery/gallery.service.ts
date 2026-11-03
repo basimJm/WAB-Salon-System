@@ -8,7 +8,9 @@ import type { UploadRaw } from '../../models/upload.model';
 import type { Entity } from '../../utils/database/plain';
 import { BusinessRuleError, NotFoundError, ValidationError } from '../../utils/errors';
 import type { SettingsService } from '../settings';
-import { variantKey, variantKeys } from '../uploads/variants';
+import { variantKey } from '../uploads/variants';
+import type { StorageCleanup } from '../files/storageCleanup.service';
+import { storedObjectsOf } from '../files/storedObjects';
 import type { UploadVerifier } from '../uploads/uploads.service';
 
 export interface GalleryItem {
@@ -39,9 +41,11 @@ export interface GalleryService {
 
 export interface GalleryDeps {
   readonly gallery: GalleryRepository;
-  readonly storage: Pick<StorageProvider, 'getPublicUrl' | 'delete'>;
+  readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly uploads: UploadVerifier;
   readonly settings: Pick<SettingsService, 'get'>;
+  /** Removed items' files are deleted through the outbox (SRV-182). */
+  readonly cleanup: Pick<StorageCleanup, 'enqueue'>;
 }
 
 const invalid = (field: string): ValidationError =>
@@ -61,6 +65,7 @@ export const createGalleryService = ({
   storage,
   uploads,
   settings,
+  cleanup,
 }: GalleryDeps): GalleryService => {
   const toItem = (item: Entity<GalleryItemRaw>): GalleryItem => ({
     id: item.id,
@@ -123,14 +128,14 @@ export const createGalleryService = ({
       if (item === undefined || !(await gallery.remove(salonId, id))) {
         throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });
       }
-      // Files go with the record (best effort: a leftover file is harmless, a dangling record is not).
-      await storage
-        .delete([
-          item.key,
-          ...(item.type === 'IMAGE' ? variantKeys(item.key) : []),
+      // The record is gone; its files go through the cleanup outbox (retried until deleted).
+      await cleanup.enqueue(
+        [
+          ...storedObjectsOf([item.key]),
           ...(item.thumbnailKey === undefined || item.type === 'IMAGE' ? [] : [item.thumbnailKey]),
-        ])
-        .catch(() => undefined);
+        ],
+        'FILE_REMOVED',
+      );
     },
 
     async reorder({ salonId, ids }) {

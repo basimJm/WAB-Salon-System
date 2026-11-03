@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AUDIT_REASON_MAX_LENGTH } from '../../../constants/audit';
-import { OBJECT_KEY_MAX_LENGTH, OBJECT_KEY_PATTERN } from '../../../constants/providers';
+import { OBJECT_KEY_MAX_LENGTH } from '../../../constants/providers';
+import { FILE_REF_PATTERN } from '../../../constants/salon';
 import {
   BANNER_ACTIONS,
   BANNER_AUDIENCES,
@@ -13,7 +14,7 @@ import { paginationQuery } from '../../../utils/pagination';
 
 const reason = z.string().trim().min(1).max(AUDIT_REASON_MAX_LENGTH);
 /** A stored file path, never a URL: the public URL is built from it. */
-const key = z.string().trim().max(OBJECT_KEY_MAX_LENGTH).regex(OBJECT_KEY_PATTERN);
+const key = z.string().trim().max(OBJECT_KEY_MAX_LENGTH).regex(FILE_REF_PATTERN);
 const imageKey = z.object({ ar: key, en: key });
 const date = z.coerce.date();
 const order = z.number().int().min(0).max(SORT_ORDER_MAX);

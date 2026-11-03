@@ -11,7 +11,7 @@
 
 ### MER-083 — Clinic regression + salon-or-clinic wording
 - Branch: `fix/mer-083-clinic-regression`
-- Status: IN PROGRESS
+- Status: DONE (PR #604)
 - Acceptance criteria (owner 2026-10-30 "fix customer and merchant ... make loop test for customer merchant and admin test full flow regression"; BUSINESS_DOMAIN §5.19; operations `POST /merchant/v1/auth/*`, merchant bookings approve):
   - [x] Regression on the local stack (server with SRV-179): clinic owner (Glow Aesthetic Clinic, demo `+962789020001`, fake OTP) signs in; the customer's clinic booking WAB-C5EC9K (CUS-101 journey) arrives as a new request sheet (person, Botox, Ahmad, 31/10 11:00, 120 JOD, pay on arrival) and Accept shows "booking accepted"
   - [x] Texts seen before sign-in or by any member no longer say "salon" only: login welcome/subtitle, register entry, OTP register mode, not-registered dialog, inactive, access removed, notifications permission (AR + EN)
@@ -22,7 +22,7 @@
 
 ### MER-082 — Animated brand logo on the launch/config screen
 - Branch: `feat/mer-082-animated-logo`
-- Status: IN PROGRESS
+- Status: DONE (PR #604)
 - Acceptance criteria (owner 2026-10-29 "do the same for merchant", same as CUS-100; PRD M01 splash; no API change):
   - [x] Native splash untouched; only the logo of the config screen (`SplashScreen`) becomes the owner's Lottie `files/wab_logo_splash.json` (unmodified), tile 108 dp as the design
   - [x] Played once in `AppTheme.motion.logoReveal` (2000 ms, same as customer) and held on its last frame

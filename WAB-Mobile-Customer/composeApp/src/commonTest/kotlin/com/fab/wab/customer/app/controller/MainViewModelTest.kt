@@ -46,6 +46,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -168,6 +169,22 @@ class MainViewModelTest {
         assertEquals("1.2.3", state.appVersion)
         assertNull(state.error)
         assertEquals(LaunchDestination.Home, state.launch)
+    }
+
+    @Test
+    fun splashWaitsForTheLogoAnimationEvenWhenConfigIsReady() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(FakeConfigRepository(AppResult.Success(CONFIG)))
+        val ready = viewModel.state.first { it.gate == LaunchGate.Ready }
+        assertTrue(ready.showSplash)
+        viewModel.onEvent(UiAction.OnLogoAnimationFinished)
+        assertFalse(viewModel.state.first { it.logoShown }.showSplash)
+    }
+
+    @Test
+    fun logoAnimationAloneDoesNotLeaveTheSplashBeforeConfig() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel(FakeConfigRepository(AppResult.Error(AppError.NetworkError("offline"))))
+        viewModel.onEvent(UiAction.OnLogoAnimationFinished)
+        assertTrue(viewModel.state.first { it.logoShown && !it.loading }.showSplash)
     }
 
     @Test

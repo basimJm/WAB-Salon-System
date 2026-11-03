@@ -8,6 +8,18 @@ export type ProviderMode = (typeof PROVIDER_MODES)[number];
 export const DEFAULT_PROVIDER_MODE: ProviderMode = 'fake';
 export const REAL_PROVIDER_MODE: ProviderMode = 'real';
 
+/**
+ * Storage (SRV-180, owner 2026-11-01): `cloudflare-r2` is the active provider (R2 through its
+ * S3-compatible API); `real` keeps the AWS S3 + CloudFront setup as a fallback; `fake` is dev/test.
+ */
+export const STORAGE_PROVIDER_MODES = ['fake', 'real', 'cloudflare-r2'] as const;
+export type StorageProviderMode = (typeof STORAGE_PROVIDER_MODES)[number];
+export const R2_STORAGE_MODE: StorageProviderMode = 'cloudflare-r2';
+/** Modes that use a real object store (production accepts only these). */
+export const REAL_STORAGE_MODES: readonly StorageProviderMode[] = ['real', 'cloudflare-r2'];
+/** Browsers may cache the CORS preflight answer of the buckets this long (`npm run storage:cors`). */
+export const STORAGE_CORS_MAX_AGE_SEC = 3_600;
+
 /** Payments are paused (owner decision 2026-10-19): no gateway is integrated, so there is no `real` mode. */
 export const PAYMENT_PROVIDER_MODES = ['fake', 'disabled'] as const;
 export type PaymentProviderMode = (typeof PAYMENT_PROVIDER_MODES)[number];

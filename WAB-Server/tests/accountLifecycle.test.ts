@@ -9,6 +9,7 @@ import {
 import { createRefreshTokenService } from '../src/domain/auth/refreshTokens.service';
 import { createAuditWriter } from '../src/domain/audit';
 import { FakeStorageProvider } from '../src/providers/storage';
+import { fileSlotsKit, type FileSlotsKit } from './helpers/fileSlots';
 import { AuditLogsRepository } from '../src/repositories/auditLogs.repository';
 import {
   CustomersRepository,
@@ -35,6 +36,7 @@ interface Rig {
   tokens: FakeModel;
   audit: FakeModel;
   storage: FakeStorageProvider;
+  kit: FileSlotsKit;
   clock: { now: Date };
   revoked: string[];
   issue: (subjectType: 'CUSTOMER' | 'MEMBER', subjectId: string) => Promise<string>;
@@ -48,6 +50,7 @@ const setup = (): Rig => {
   const tokens = createFakeModel();
   const audit = createFakeModel();
   const storage = new FakeStorageProvider();
+  const kit = fileSlotsKit(storage);
   const revoked: string[] = [];
   const refreshTokens = createRefreshTokenService({
     repository: new RefreshTokensRepository(tokens.model as never),
@@ -59,7 +62,7 @@ const setup = (): Rig => {
     members: new MembersRepository(members.model as never),
     installations: new InstallationsRepository(installations.model as never),
     refreshTokens,
-    storage,
+    files: kit.slots,
     audit: createAuditWriter(new AuditLogsRepository(audit.model as never)),
     settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
     logger,
@@ -79,6 +82,7 @@ const setup = (): Rig => {
     tokens,
     audit,
     storage,
+    kit,
     clock,
     revoked,
     issue: async (subjectType, subjectId) =>
@@ -305,7 +309,7 @@ describe('account lifecycle: deletion request', () => {
         repository: new RefreshTokensRepository(rig.tokens.model as never),
         logger,
       }),
-      storage: rig.storage,
+      files: rig.kit.slots,
       audit: createAuditWriter(new AuditLogsRepository(rig.audit.model as never)),
       settings: { get: () => Promise.resolve(7 as never) },
       logger,
@@ -362,11 +366,12 @@ describe('account lifecycle: purge', () => {
     const id = pending(rig, -1, { avatarKey: 'avatars/lina.jpg', lastActiveAt: NOW });
     await rig.issue('CUSTOMER', id);
     rig.installations.docs.push({ _id: new Types.ObjectId(), customerId: new Types.ObjectId(id) });
-    const deleted = jest.spyOn(rig.storage, 'delete');
     await rig.service.purgeDueCustomers();
     expect(doc(rig.customers, id)['avatarKey']).toBeUndefined();
     expect(doc(rig.customers, id)['lastActiveAt']).toBeUndefined();
-    expect(deleted).toHaveBeenCalledWith(['avatars/lina.jpg']);
+    expect(rig.kit.queued()).toEqual(
+      expect.arrayContaining(['avatars/lina.jpg', 'avatars/lina_thumb.webp']),
+    );
     expect(rig.installations.docs[0]?.['customerId']).toBeUndefined();
     expect(allRevoked(rig, id)).toBe(true);
     const everything = JSON.stringify(doc(rig.customers, id));
@@ -377,7 +382,7 @@ describe('account lifecycle: purge', () => {
   it('a failing avatar delete does not undo the anonymization', async () => {
     const rig = setup();
     const id = pending(rig, -1, { avatarKey: 'avatars/lina.jpg' });
-    jest.spyOn(rig.storage, 'delete').mockRejectedValueOnce(new Error('s3 down'));
+    jest.spyOn(rig.kit.slots, 'remove').mockRejectedValueOnce(new Error('mongo down'));
     expect(await rig.service.purgeDueCustomers()).toBe(1);
     expect(doc(rig.customers, id)['status']).toBe('DELETED');
   });

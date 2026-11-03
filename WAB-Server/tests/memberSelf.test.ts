@@ -15,6 +15,7 @@ import { ValidationError } from '../src/utils/errors';
 import { createLogger } from '../src/utils/logger';
 import { updateMeSchema } from '../src/modules/merchant/me/me.validation';
 import { createFakeModel } from './helpers/fakeModel';
+import { fileSlotsKit } from './helpers/fileSlots';
 
 const logger = createLogger({ level: 'silent' });
 const m = {
@@ -30,7 +31,15 @@ const rana = new Types.ObjectId();
 const s = (id: Types.ObjectId): string => id.toHexString();
 const verified: string[] = [];
 const resets: string[] = [];
-const uploaded = new Map<string, { ownerType: string; ownerId: string }>();
+const kitStorage = new FakeStorageProvider();
+const kit = fileSlotsKit(kitStorage);
+const memberUpload = (key: string, ownerId: string): Promise<string> =>
+  kit.confirmed(key, {
+    purpose: 'MEMBER_PHOTO',
+    ownerType: 'MEMBER',
+    ownerId,
+    salonId: salonId.toHexString(),
+  });
 
 const phones: PhoneVerifier = {
   resolve: (phone) =>
@@ -47,16 +56,8 @@ const phones: PhoneVerifier = {
 };
 const service = createMemberSelfService({
   members,
-  storage: new FakeStorageProvider(),
-  uploads: {
-    assertConfirmed: ({ keys, accept }) => {
-      const upload = uploaded.get(keys[0] ?? '');
-      if (upload === undefined || accept?.(upload as never) === false) {
-        return Promise.reject(new ValidationError());
-      }
-      return Promise.resolve();
-    },
-  },
+  storage: kitStorage,
+  files: kit.slots,
   phones,
   otpGate: {
     reset: (e164) => {
@@ -70,7 +71,8 @@ beforeEach(() => {
   for (const f of Object.values(m)) f.docs.length = 0;
   verified.length = 0;
   resets.length = 0;
-  uploaded.clear();
+  kit.uploadsModel.docs.length = 0;
+  kit.cleanupsModel.docs.length = 0;
   const member = (
     _id: Types.ObjectId,
     phone: string,
@@ -106,13 +108,16 @@ describe('my account (M25, SRV-129)', () => {
   });
 
   it('changes my name and photo; only a photo I uploaded; null removes it', async () => {
-    uploaded.set('members/mine.jpg', { ownerType: 'MEMBER', ownerId: s(lina) });
-    uploaded.set('members/hers.jpg', { ownerType: 'MEMBER', ownerId: s(rana) });
+    await memberUpload('members/mine.jpg', s(lina));
+    await memberUpload('members/hers.jpg', s(rana));
     const renamed = await service.update({
       memberId: s(lina),
       patch: { firstName: 'Leena', photoKey: 'members/mine.jpg' },
     });
-    expect(renamed).toMatchObject({ firstName: 'Leena', photoKey: 'members/mine.jpg' });
+    // The photo moved into Lina's slot (SRV-181); her old plain key is queued for deletion.
+    const slot = `salons/${salonId.toHexString()}/staff/${s(lina)}/photo`;
+    expect(renamed).toMatchObject({ firstName: 'Leena', photoKey: `${slot}?v=1` });
+    expect(kit.queued()).toEqual(expect.arrayContaining(['members/mine.jpg', 'members/old.jpg']));
     await expect(
       service.update({ memberId: s(lina), patch: { photoKey: 'members/hers.jpg' } }),
     ).rejects.toBeInstanceOf(ValidationError);

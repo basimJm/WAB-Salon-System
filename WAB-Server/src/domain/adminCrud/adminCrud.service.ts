@@ -23,7 +23,11 @@ export interface AdminCrudService<TRaw extends object> {
     patch: Patch<TRaw>;
     reason: string;
     actor: AdminActor;
+    /** The record as it was before this request (when a wrapper already wrote part of it). */
+    before?: Entity<TRaw>;
   }): Promise<Entity<TRaw>>;
+  /** The cross-field / reference checks of create and update, run on their own. */
+  validate(data: Patch<TRaw>, current?: Entity<TRaw>): Promise<void>;
 }
 
 export interface AdminCrudDeps<TRaw extends object> {
@@ -84,8 +88,11 @@ export const createAdminCrud = <TRaw extends object>({
       );
       return created;
     },
-    async update({ id, patch, reason, actor }) {
-      const before = await get(id);
+    validate: async (data, current) => {
+      await checkReferences?.(data, current);
+    },
+    async update({ id, patch, reason, actor, before: given }) {
+      const before = given ?? (await get(id));
       await checkReferences?.(patch, before);
       const after = await store.updateById(id, patch);
       if (after === null) throw new NotFoundError({ code: ERROR_CODES.NOT_FOUND });

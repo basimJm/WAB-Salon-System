@@ -49,6 +49,7 @@ const DEMO: DemoDataReport = {
   extraBranches: { written: ['lamar:khalda'], skipped: [] },
   branchStaffPhotos: { uploads: { created: 3, existing: 0 }, photoKeysSet: 0 },
   businesses: { Salon: { created: 3, existing: 0 } } as never,
+  businessPhotoKeysFixed: 0,
   timeZone: 'Asia/Amman',
   now: new Date('2026-10-27T09:00:00.000Z'),
 };
