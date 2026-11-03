@@ -38,6 +38,7 @@
     <string name="details_call">Call</string>
     <string name="details_whatsapp">WhatsApp</string>
     <string name="details_persons">People</string>
+    <string name="details_design">Design image</string>
     <string name="details_payment">Payment</string>
     <string name="details_total">Total</string>
     <string name="details_paid_online">Paid online</string>

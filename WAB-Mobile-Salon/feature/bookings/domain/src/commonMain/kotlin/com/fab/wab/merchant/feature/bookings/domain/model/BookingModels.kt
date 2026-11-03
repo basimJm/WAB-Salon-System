@@ -75,6 +75,8 @@ data class BookingPerson(
     val subtotal: String,
     val staff: StaffRef?,
     val services: List<BookedService>,
+    /** Tattoo design image (BUSINESS_DOMAIN §5.23): a short-lived signed URL; null when none. */
+    val referenceImageUrl: String? = null,
 )
 
 /**

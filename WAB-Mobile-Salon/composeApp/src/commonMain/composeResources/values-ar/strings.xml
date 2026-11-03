@@ -23,6 +23,7 @@
     <string name="mock_kind_men">صالون رجالي</string>
     <string name="mock_kind_both">صالون للجنسين</string>
     <string name="mock_kind_clinic">عيادة تجميل</string>
+    <string name="mock_kind_tattoo">استوديو وشم</string>
     <string name="mock_owner">المالك</string>
     <string name="mock_manager">مدير</string>
     <string name="mock_employee">موظف</string>

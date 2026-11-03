@@ -67,7 +67,8 @@
             "durationMinutes": 45
           }
         ],
-        "gender": "FEMALE"
+        "gender": "FEMALE",
+        "referenceImageUrl": null
       },
       {
         "name": "Salma +1",
@@ -88,7 +89,8 @@
             "durationMinutes": 60
           }
         ],
-        "gender": "FEMALE"
+        "gender": "FEMALE",
+        "referenceImageUrl": null
       },
       {
         "name": "Salma +2",
@@ -109,7 +111,8 @@
             "durationMinutes": 30
           }
         ],
-        "gender": "FEMALE"
+        "gender": "FEMALE",
+        "referenceImageUrl": null
       }
     ],
     "money": {
@@ -156,6 +159,8 @@
     "createdAt": "2026-10-25T21:30:00.000Z",
     "actions": [],
     "businessType": "SALON",
-    "salonAudience": "FEMALE"
+    "salonAudience": "FEMALE",
+    "source": "CUSTOMER_APP",
+    "createdBy": null
   }
 }

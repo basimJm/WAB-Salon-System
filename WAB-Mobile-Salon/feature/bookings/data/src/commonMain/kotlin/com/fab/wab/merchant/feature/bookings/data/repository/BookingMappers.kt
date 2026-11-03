@@ -59,6 +59,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
                 name = person.name, isBride = person.isBride, start = instantOf(person.start), end = instantOf(person.end),
                 subtotal = person.subtotal, staff = person.staff?.let { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
                 services = person.services.map { BookedService(it.name, it.price, it.durationMinutes.toInt()) },
+                referenceImageUrl = person.referenceImageUrl,
             )
         },
         money = with(money) { BookingMoney(total, dueOnline, paidOnline, remaining, refunded, paidAtSalon) },

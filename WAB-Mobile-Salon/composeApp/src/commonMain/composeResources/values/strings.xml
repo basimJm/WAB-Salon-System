@@ -23,6 +23,7 @@
     <string name="mock_kind_men">Men’s salon</string>
     <string name="mock_kind_both">Salon for both</string>
     <string name="mock_kind_clinic">Beauty clinic</string>
+    <string name="mock_kind_tattoo">Tattoo studio</string>
     <string name="mock_owner">Owner</string>
     <string name="mock_manager">Manager</string>
     <string name="mock_employee">Employee</string>

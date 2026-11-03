@@ -37,6 +37,7 @@ class BookingMappersTest {
         personsCount = 2.0, businessType = "SALON", salonAudience = "FEMALE",
         total = "45.000", customer = GetBookingsDataItemCustomer("c1", "Sara", "+962791234567"),
         staff = listOf(GetBookingsDataItemStaffItem("s1", "Rana Odeh", "Rana", PHOTO)),
+        source = "CUSTOMER_APP",
     )
 
     private val detailsData = GetBookingsByIdData(
@@ -49,6 +50,7 @@ class BookingMappersTest {
                 "Noor",
                 false,
                 "FEMALE",
+                "https://files.example/design.jpg",
                 START,
                 END,
                 "25.000",
@@ -59,7 +61,7 @@ class BookingMappersTest {
         money = GetBookingsByIdDataMoney("25.000", "0.000", "0.000", "25.000", "0.000", "0.000"),
         policy = JsonObject(mapOf("cancellationWindowHours" to JsonPrimitive(24))),
         statusHistory = listOf(GetBookingsByIdDataStatusHistoryItem("APPROVED", "MEMBER", null, START)),
-        createdAt = START, actions = listOf("CANCEL", "REASSIGN", "UNKNOWN_ACTION"),
+        createdAt = START, actions = listOf("CANCEL", "REASSIGN", "UNKNOWN_ACTION"), source = "CUSTOMER_APP",
     )
 
     @Test
@@ -89,6 +91,8 @@ class BookingMappersTest {
         val details = detailsData.toDomain()
         assertEquals(setOf(BookingAction.CANCEL, BookingAction.REASSIGN), details?.actions)
         assertEquals(45, details?.persons?.single()?.services?.single()?.durationMinutes)
+        // §5.23: the tattoo design image travels as a signed URL.
+        assertEquals("https://files.example/design.jpg", details?.persons?.single()?.referenceImageUrl)
         assertEquals("25.000", details?.money?.remaining)
         assertEquals(false, details?.money?.hasPaidAtSalon)
         assertEquals(24, details?.policy?.windowHours)
