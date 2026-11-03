@@ -10,6 +10,25 @@
 
 ## Current task
 
+### SRV-184 — Discovery across business types without a gender filter (owner 2026-11-03)
+
+- Branch: `feat/srv-184-discovery-merged` (from `feat/srv-183-tattoo`, batch SRV-183…186)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.22, §5.19 visibility superseded, §5.13; operations `GET /customer/v1/home`, `/salons`, `/salons/filters`, `/salons/suggestions` (new), `/salons/{salonId}`, `/favorites`, `POST /bookings/drafts`):
+  - [x] No gender visibility: search/home/nearest/Recommended/favorites (add + list)/details/drafts list every LIVE business; drafts keep the persons rule (`GENDER_MISMATCH` for a woman at a men's salon, men booked fine by anyone)
+  - [x] `gender` on search/filters/suggestions = optional filter (MALE → MALE/BOTH, FEMALE → FEMALE/BOTH); `businessType` = lens of one or several types (`A,B` or repeated) on search, filters, suggestions, home; one helper pair `typeCondition` / `audienceCondition`
+  - [x] Price range without services = at least one active service inside the range; filters bounds without services = every active service price of the matching businesses
+  - [x] Suggestions: matching catalog services with places offering them (most first, only offered ones), then matching places (name/search text), limit 5 each
+  - [x] Home: `explore` (lens types, most-booked first from a cached 90-day aggregate, admin order after), `nearYou` (one list), `recommendedAll` (one rail, each type in admin order, deduplicated), `bookAgain` (newest completed booking per business with its salon service ids; null for guests); per-type keys kept for apps before CUS-102 (no gender filter); `gender` selects banners only
+  - [x] Contract customer 1.12.0 (CUS-102, CUS-103)
+- Tests: `tests/home.test.ts` (rewritten, 10: guest sections + no gender, Explore order, lens on every section, Book again, per-type keys, See more, validation), `tests/homeSources.test.ts` (new, 3: popularity window + cache + failure, Book again per business), `tests/search.test.ts` (+5: every audience + lens, price without services, bounds without services, suggestions, validation), `tests/favorites.test.ts`, `tests/salonDetails.test.ts`, `tests/bookingDrafts.test.ts` (rule changes); 8 affected suites green (139 tests), lint + tsc clean
+- API docs: customer regenerated + bumped
+- Loops: 1/1 — re-read §5.22 bullet by bullet (no gender filter, lens chips, five home sections in order, search suggestions/chips/filter sheet, bookings) against routes and services; Bookings Upcoming/Past is an app concern (the customer list already filters by tab/status and type); found and fixed: Recommended ids duplicated when a lookup returns a salon for two types
+- Review: PASSED (SE ✔ (one condition helper, bounded queries: book-again reads ≤ 50 bookings, Explore one cached aggregate), Mobile ✔ (additive keys; old keys kept for apps before CUS-102), Architect ✔ (customer 1.12.0; no merchant/admin change), PM ✔ (owner decision 10 applied), UX ✔ (sections in the §5.22 order), Marketing ✔ (Book again + Explore popularity), QA ✔ (each criterion tested))
+- Notes: DEVIATIONS — full suite deferred to the batch gate (SRV-186); `explore` popularity counts bookings of every status created in the window (not only completed); the lens takes the types the customer picks, `All` = omit.
+
+## Last blocks
+
 ### SRV-183 — Tattoo studios (owner 2026-11-03)
 
 - Branch: `feat/srv-183-tattoo` (batch SRV-183…186, rules §3.13: commit per task, next task branches from this one)
@@ -30,8 +49,6 @@
 - Review: PASSED (SE ✔ (one helper module for the image rule, mover and URL; repository update only), Mobile ✔ (additive fields; CUS-104 / MER-084 named), Architect ✔ (three contracts bumped; storage through FileSlots + outbox), PM ✔ (owner answers 1–4 applied), UX N/A, Marketing N/A, QA ✔ (rule, refusal, ownership, failure, demo tests))
 - Notes: DEVIATION — the full suite was not re-run after the two fixture fixes (affected suites only; the next task's gate runs it). Design images are not deleted when an account is purged (bookings are kept for history; retention not decided). The merchant cannot upload a design image yet (SRV-185 adds the merchant scope with `BOOKINGS_CREATE`).
 
-## Last blocks
-
 ### SRV-182 — Every module on the file lifecycle (owner 2026-11-01)
 
 - Branch: `feat/srv-180-r2-storage` (batch SRV-180…182 on one branch)
@@ -48,17 +65,3 @@
 - Loops: 1/1 — re-checked the owner's spec point by point (R2, central service, CRUD lifecycle, per-module prefixes, metadata, entity integration, consistency, security, tests); found and fixed during the loop: slot fields refused the returned `?v=` reference (contract break for apps that echo values), the first FILE_REF pattern refused dotted single-segment keys (banners), the admin image wrapper ran rules after copying (now before)
 - Review: PASSED (SE ✔ (one FileSlots + one outbox, DB written before objects are queued, locks per slot, idempotent deletes), Mobile ✔ (no app change: same request/response shapes, URLs gain `?v=`), Architect ✔ (additive contracts, R2/S3 by env, demo assets protected, Phase 2 untouched), QA ✔ (spec tests 1–12; migration test not applicable))
 - Notes: DEVIATIONS / LIMITS — (1) temporary upload keys keep the existing prefixes (`customers/`, `salons/cover/`, `gallery/`, `services/`, `licenses/`…); only slot keys follow the new per-entity layout, multi-file items keep one key per file (no `documents/{ownerType}/{ownerId}/` move); (2) `originalName` is not stored (the presign request has no file name; adding it is an API change); (3) there are no booking attachments in the product, so nothing to integrate; (4) salon deletion only takes a salon offline (history kept), so it deletes no files; exports are never deleted (retention not decided); (5) if the entity write fails after the copy, the slot already holds the new content while the entity keeps the previous version number (same key: the image is right, only a cache may be stale); (6) slot rows of salon-owned images record `ownerType: MEMBER`, `ownerId = salonId` (+ `salonId`), admin images `ADMIN`; (7) no S3→R2 migration tool (owner) and no run against real R2 (no credentials).
-
-### SRV-181 — File slots: same-key replacement + reliable cleanup (owner 2026-11-01)
-
-- Branch: `feat/srv-180-r2-storage` (batch)
-- Status: DONE (PR #605)
-- Acceptance criteria (BUSINESS_DOMAIN §3.7, updated in this batch):
-  - [x] `uploads` rows: `slot`, `version`, `size`, status `CONSUMED`; one row per slot key, kept across replacements (file id stable)
-  - [x] `FileSlots.replace`: ownership via `assertConfirmed`, server-side copy temp → slot key under a per-slot Redis lock, `stat` for size/type, version $inc, variants regenerated, entity commit, temp `CONSUMED` + queued, older plain key queued; `remove`: entity first, then record + objects queued
-  - [x] References `key?v=n`: the provider builds versioned public URLs, strips the version for reads/deletes/signing, `variantKey` keeps it
-  - [x] `storageCleanups` outbox + `periodic.storage-cleanup` (every 5 min) + drain after enqueue: batch delete, backoff retries (no give-up), live slots skipped, `demo/` keys never queued, malformed keys refused
-- Tests: see SRV-182 (`tests/fileSlots.test.ts`)
-- Loops: 1/1 — covered by the SRV-182 batch loop
-- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — see SRV-182
-- Notes: lock = 30 s TTL, waits up to ~5 s, then 409.

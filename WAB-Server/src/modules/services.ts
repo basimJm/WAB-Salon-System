@@ -658,6 +658,7 @@ export const unavailableSearch: SearchService = {
   cards: unavailable,
   priceBounds: unavailable,
   nearestBranches: unavailable,
+  suggest: unavailable,
 };
 
 export const unavailableAdminBranches: AdminBranchesService = {

@@ -105,6 +105,52 @@ export class BookingsRepository
     return updated === null ? null : toEntity<BookingRaw>(updated);
   }
 
+  /** Catalog service ids by bookings since `from`, most booked first (home *Explore*, §5.22). */
+  async catalogPopularity(from: Date, limit: number): Promise<string[]> {
+    const rows = await this.model
+      .aggregate<{ _id: unknown }>([
+        { $match: { createdAt: { $gte: from } } },
+        { $unwind: '$persons' },
+        { $unwind: '$persons.services' },
+        { $group: { _id: '$persons.services.catalogServiceId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: limit },
+      ])
+      .exec();
+    return rows.map((row) => String(row._id));
+  }
+
+  /** The customer's newest completed booking per business, newest first (*Book again*, §5.22). */
+  async recentVisits(
+    customerId: string,
+    statuses: readonly string[],
+    limit: number,
+    /** How many of the newest bookings are read to find `limit` different businesses. */
+    scan: number,
+  ): Promise<{ salonId: string; bookingId: string; salonServiceIds: string[] }[]> {
+    if (!isObjectIdString(customerId)) return [];
+    const { items: found } = await this.findPage(
+      { customerId, status: { $in: [...statuses] } } as never,
+      { page: 1, pageSize: scan },
+      { appointmentStart: -1 },
+    );
+    const seen = new Set<string>();
+    const visits: { salonId: string; bookingId: string; salonServiceIds: string[] }[] = [];
+    for (const booking of found) {
+      if (seen.has(booking.salonId)) continue;
+      seen.add(booking.salonId);
+      visits.push({
+        salonId: booking.salonId,
+        bookingId: booking.id,
+        salonServiceIds: [
+          ...new Set(booking.persons.flatMap((p) => p.services.map((s) => s.salonServiceId))),
+        ],
+      });
+      if (visits.length >= limit) break;
+    }
+    return visits;
+  }
+
   /** Stores the file-slot reference of one person's design image (§5.23). */
   async setPersonReference(id: string, personIndex: number, ref: string): Promise<void> {
     if (!isObjectIdString(id)) return;

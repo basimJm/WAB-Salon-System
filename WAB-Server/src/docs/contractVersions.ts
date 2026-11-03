@@ -15,9 +15,9 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.11.0',
-    sha256: 'fb2c8aa0b0ceeee7d44e34d5c0fb0fa12223831f53521c7f8d20deb955479838',
-    note: 'SRV-183: TATTOO business type; persons[].referenceImageKey on drafts, referenceImageUrl on booking details; upload purpose BOOKING_REFERENCE (CUS-104)',
+    version: '1.12.0',
+    sha256: 'fcc4ab522896f22fe0fdb60ddd2270d569f700eb68883162e1f88b068358a7ee',
+    note: 'SRV-184: discovery without a gender filter; businessType lens (several types) on search/filters/home; home explore, nearYou, recommendedAll, bookAgain; GET /salons/suggestions; price range without services (CUS-102, CUS-103)',
   },
   merchant: {
     version: '1.11.0',

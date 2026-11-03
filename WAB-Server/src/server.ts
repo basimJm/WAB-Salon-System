@@ -132,6 +132,7 @@ import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
 import { createFileSlots } from './domain/files/fileSlots.service';
 import { createReferenceImageMover } from './domain/bookings/referenceImages';
+import { createCatalogPopularity, createPastVisits } from './domain/home/homeSources';
 import { createStorageCleanup } from './domain/files/storageCleanup.service';
 import { FILE_SLOT_LOCK, FILE_SLOT_LOCK_PREFIX } from './constants/uploads';
 import { lockKey } from './utils/redis/keys';
@@ -827,6 +828,7 @@ const buildServices = (
     recommended: placements,
     salons: new SalonsRepository(),
     salonServices,
+    catalog: new CatalogServicesRepository(),
     closures: new ClosuresRepository(),
     storage: providers.storage,
     settings,
@@ -1220,6 +1222,8 @@ const buildServices = (
       search,
       customers: new CustomersRepository(),
       unread: { count: (customerId) => notificationService.unreadCount('CUSTOMER', customerId) },
+      popularity: createCatalogPopularity({ bookings: bookingsRepository, logger }),
+      pastVisits: createPastVisits(bookingsRepository),
     }),
     adminBanners: withAdminImageSlots<BannerRaw>({
       crud: createAdminBannerService(bannersStore, audit),

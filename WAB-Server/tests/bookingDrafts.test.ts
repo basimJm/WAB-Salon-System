@@ -402,12 +402,14 @@ describe('creating a draft', () => {
       });
     });
 
-    it('a customer cannot book a business they may not see (404)', async () => {
+    it('any customer may book a men’s salon for men; a woman as a person is GENDER_MISMATCH (§5.22)', async () => {
       asBusiness('SALON', 'MALE');
-      const res = await draft([person({ gender: 'MALE' })]);
-      expect(res.status).toBe(404);
-      expect(bodyOf(res).error.code).toBe('SALON_NOT_FOUND');
+      const woman = await draft([person({ gender: 'FEMALE' })]);
+      expect(woman.status).toBe(422);
+      expect(bodyOf(woman).error.code).toBe('GENDER_MISMATCH');
       expect(m.drafts.docs).toHaveLength(0);
+      const res = await draft([person({ name: 'Omar', gender: 'MALE' })]);
+      expect(res.status).toBe(201);
     });
   });
 

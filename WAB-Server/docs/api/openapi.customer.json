@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Customer API",
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   "servers": [
     {
@@ -3332,8 +3332,8 @@
         "tags": [
           "Salon search"
         ],
-        "summary": "Search LIVE salons and clinics the gender may see (§5.19: own audience, BOTH, every clinic), optionally of one businessType: name text, ALL selected services offered, price range of their sum (JOD strings), minimum rating, recommended (salons first, then clinics, each in the admin order)",
-        "description": "Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating.",
+        "summary": "Search LIVE businesses of every type and audience (§5.22): type lens `businessType` (one or several), optional `gender` filter (businesses serving it: own audience or BOTH), name text, ALL selected services offered, price range (of their sum with services, else of any active service; JOD strings), minimum rating, recommended (each type in the admin order)",
+        "description": "Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating. Booking still applies the audience rule (§5.19).",
         "security": [],
         "parameters": [
           {
@@ -3366,17 +3366,22 @@
                 "FEMALE"
               ]
             },
-            "required": true,
+            "required": false,
             "name": "gender",
             "in": "query"
           },
           {
             "schema": {
-              "type": "string",
-              "enum": [
-                "SALON",
-                "CLINIC",
-                "TATTOO"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
               ]
             },
             "required": false,
@@ -3693,7 +3698,7 @@
         "tags": [
           "Salon search"
         ],
-        "summary": "Price slider bounds for the selected services (min/max of the sums over matching salons)",
+        "summary": "Price slider bounds: min/max of the sums of the selected services over matching businesses, or of every active service price when none is selected (§5.22)",
         "security": [],
         "parameters": [
           {
@@ -3704,17 +3709,22 @@
                 "FEMALE"
               ]
             },
-            "required": true,
+            "required": false,
             "name": "gender",
             "in": "query"
           },
           {
             "schema": {
-              "type": "string",
-              "enum": [
-                "SALON",
-                "CLINIC",
-                "TATTOO"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
               ]
             },
             "required": false,
@@ -3735,7 +3745,7 @@
                 }
               ]
             },
-            "required": true,
+            "required": false,
             "name": "serviceIds",
             "in": "query"
           },
@@ -3795,6 +3805,203 @@
                       },
                       "required": [
                         "priceRange"
+                      ]
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "data"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid access token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "A dependency is unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customer/v1/salons/suggestions": {
+      "get": {
+        "tags": [
+          "Salon search"
+        ],
+        "summary": "Typed suggestions (§5.22): matching catalog services with the number of places offering them (most first), then matching places; both follow the lens and the gender filter",
+        "security": [],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "required": true,
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "MALE",
+                "FEMALE"
+              ]
+            },
+            "required": false,
+            "name": "gender",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "required": false,
+            "name": "businessType",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ar",
+                "en"
+              ],
+              "description": "Response language; default ar."
+            },
+            "required": false,
+            "description": "Response language; default ar.",
+            "name": "Accept-Language",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Suggestions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "services": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "businessType": {
+                                "$ref": "#/components/schemas/BusinessType"
+                              },
+                              "placesCount": {
+                                "type": "number"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "businessType",
+                              "placesCount"
+                            ]
+                          }
+                        },
+                        "places": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "businessType": {
+                                "$ref": "#/components/schemas/BusinessType"
+                              },
+                              "audience": {
+                                "$ref": "#/components/schemas/Audience"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name",
+                              "businessType",
+                              "audience"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "services",
+                        "places"
                       ]
                     },
                     "meta": {
@@ -4875,8 +5082,8 @@
         "tags": [
           "Home"
         ],
-        "summary": "Home (S03, §5.19): banners, salon + clinic services, Recommended salons + clinics, nearest salons + clinics in one request",
-        "description": "Public; a valid customer token adds `firstName`, `unreadCount` and `isFavorite`. Only businesses the gender may see (own audience, BOTH, every clinic). `nearestSalons`/`nearestClinics` are null unless `lat` and `lng` are sent; it lists one entry per bookable branch (§5.17). Each section holds 10 items; `hasMore` shows See more / See all.",
+        "summary": "Home (S03, §5.22): banners, Explore, Near you, Recommended, Book again across the type lens (`businessType`), in one request",
+        "description": "Public; a valid customer token adds `firstName`, `unreadCount`, `isFavorite` and `bookAgain`. Businesses are never filtered by gender (§5.22; `gender` selects banners only). `explore` = most-booked catalog services of the lens types; `nearYou` = one list of bookable branches by distance (null without `lat`/`lng`); `recommendedAll` = one rail of the lens types' active placements; `bookAgain` = businesses of the customer's completed bookings with that booking's services (null for guests). The per-type keys stay for app versions before CUS-102. Each section holds 10 items; `hasMore` shows See more / See all.",
         "security": [],
         "parameters": [
           {
@@ -4889,6 +5096,24 @@
             },
             "required": true,
             "name": "gender",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "required": false,
+            "name": "businessType",
             "in": "query"
           },
           {
@@ -4991,6 +5216,460 @@
                               "actionType"
                             ]
                           }
+                        },
+                        "explore": {
+                          "type": "object",
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "description": {
+                                    "type": "string"
+                                  },
+                                  "imageUrl": {
+                                    "type": "string"
+                                  },
+                                  "businessType": {
+                                    "$ref": "#/components/schemas/BusinessType"
+                                  },
+                                  "audience": {
+                                    "$ref": "#/components/schemas/Audience"
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "description",
+                                  "imageUrl",
+                                  "businessType",
+                                  "audience"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
+                        },
+                        "nearYou": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "businessType": {
+                                    "$ref": "#/components/schemas/BusinessType"
+                                  },
+                                  "audience": {
+                                    "$ref": "#/components/schemas/Audience"
+                                  },
+                                  "profileImageUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "rating": {
+                                    "type": "number"
+                                  },
+                                  "reviewsCount": {
+                                    "type": "number"
+                                  },
+                                  "locationText": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "shortDescription": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "isOpenNow": {
+                                    "type": "boolean"
+                                  },
+                                  "todayHours": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "open": {
+                                        "type": "string"
+                                      },
+                                      "close": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "open",
+                                      "close"
+                                    ]
+                                  },
+                                  "isFavorite": {
+                                    "type": "boolean"
+                                  },
+                                  "distanceKm": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  },
+                                  "branchCount": {
+                                    "type": "number",
+                                    "description": "Bookable branches of the salon (§5.17)."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the place, hours and distance come from: the nearest, else the main one."
+                                  },
+                                  "title": {
+                                    "type": "string",
+                                    "description": "\"Salon - Branch\" for a salon with several branches, else the salon name."
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "businessType",
+                                  "audience",
+                                  "profileImageUrl",
+                                  "rating",
+                                  "reviewsCount",
+                                  "locationText",
+                                  "shortDescription",
+                                  "isOpenNow",
+                                  "todayHours",
+                                  "isFavorite",
+                                  "distanceKm",
+                                  "branchCount",
+                                  "branch",
+                                  "title"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
+                        },
+                        "recommendedAll": {
+                          "type": "object",
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "businessType": {
+                                    "$ref": "#/components/schemas/BusinessType"
+                                  },
+                                  "audience": {
+                                    "$ref": "#/components/schemas/Audience"
+                                  },
+                                  "profileImageUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "rating": {
+                                    "type": "number"
+                                  },
+                                  "reviewsCount": {
+                                    "type": "number"
+                                  },
+                                  "locationText": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "shortDescription": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "isOpenNow": {
+                                    "type": "boolean"
+                                  },
+                                  "todayHours": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "open": {
+                                        "type": "string"
+                                      },
+                                      "close": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "open",
+                                      "close"
+                                    ]
+                                  },
+                                  "isFavorite": {
+                                    "type": "boolean"
+                                  },
+                                  "distanceKm": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  },
+                                  "branchCount": {
+                                    "type": "number",
+                                    "description": "Bookable branches of the salon (§5.17)."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the place, hours and distance come from: the nearest, else the main one."
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "businessType",
+                                  "audience",
+                                  "profileImageUrl",
+                                  "rating",
+                                  "reviewsCount",
+                                  "locationText",
+                                  "shortDescription",
+                                  "isOpenNow",
+                                  "todayHours",
+                                  "isFavorite",
+                                  "distanceKm",
+                                  "branchCount",
+                                  "branch"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
+                        },
+                        "bookAgain": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "properties": {
+                            "items": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "businessType": {
+                                    "$ref": "#/components/schemas/BusinessType"
+                                  },
+                                  "audience": {
+                                    "$ref": "#/components/schemas/Audience"
+                                  },
+                                  "profileImageUrl": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "rating": {
+                                    "type": "number"
+                                  },
+                                  "reviewsCount": {
+                                    "type": "number"
+                                  },
+                                  "locationText": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "shortDescription": {
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "isOpenNow": {
+                                    "type": "boolean"
+                                  },
+                                  "todayHours": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "open": {
+                                        "type": "string"
+                                      },
+                                      "close": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "open",
+                                      "close"
+                                    ]
+                                  },
+                                  "isFavorite": {
+                                    "type": "boolean"
+                                  },
+                                  "distanceKm": {
+                                    "type": [
+                                      "number",
+                                      "null"
+                                    ]
+                                  },
+                                  "branchCount": {
+                                    "type": "number",
+                                    "description": "Bookable branches of the salon (§5.17)."
+                                  },
+                                  "branch": {
+                                    "type": [
+                                      "object",
+                                      "null"
+                                    ],
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "name": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "name"
+                                    ],
+                                    "description": "The branch the place, hours and distance come from: the nearest, else the main one."
+                                  },
+                                  "lastBooking": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "salonServiceIds": {
+                                        "type": "array",
+                                        "items": {
+                                          "type": "string"
+                                        }
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "salonServiceIds"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "id",
+                                  "name",
+                                  "businessType",
+                                  "audience",
+                                  "profileImageUrl",
+                                  "rating",
+                                  "reviewsCount",
+                                  "locationText",
+                                  "shortDescription",
+                                  "isOpenNow",
+                                  "todayHours",
+                                  "isFavorite",
+                                  "distanceKm",
+                                  "branchCount",
+                                  "branch",
+                                  "lastBooking"
+                                ]
+                              }
+                            },
+                            "hasMore": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "items",
+                            "hasMore"
+                          ]
                         },
                         "salonServices": {
                           "type": "object",
@@ -5918,6 +6597,10 @@
                         "firstName",
                         "unreadCount",
                         "banners",
+                        "explore",
+                        "nearYou",
+                        "recommendedAll",
+                        "bookAgain",
                         "salonServices",
                         "clinicServices",
                         "recommendedSalons",

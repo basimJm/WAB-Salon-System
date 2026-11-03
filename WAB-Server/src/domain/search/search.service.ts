@@ -17,8 +17,9 @@ import {
   type BusinessType,
   type Gender,
 } from '../../constants/enums';
-import { visibleAudiences } from '../businessTypes/rules';
+import { audienceCondition, typeCondition } from '../businessTypes/rules';
 import {
+  SEARCH_SUGGESTION_LIMIT,
   DISTANCE_DECIMALS,
   EARTH_RADIUS_KM,
   SHORT_DESCRIPTION_LENGTH,
@@ -29,6 +30,7 @@ import type { SalonRaw } from '../../models/salon.model';
 import type { StorageProvider } from '../../providers/storage';
 import type { ClosuresRepository } from '../../repositories/closures.repository';
 import type { SalonServicesRepository } from '../../repositories/salonServices.repository';
+import type { CatalogServicesRepository } from '../../repositories/catalog.repository';
 import type { SalonsRepository } from '../../repositories/salons.repository';
 import type { Entity } from '../../utils/database/plain';
 import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
@@ -65,14 +67,18 @@ export interface BranchCard extends SalonCard {
 }
 
 export interface SearchQuery {
-  readonly gender: Gender;
-  /** Only salons or only clinics (§5.19); omitted = both. */
-  readonly businessType?: BusinessType | undefined;
+  /** Search filter "gender" (§5.22): businesses serving it (own audience or BOTH); omitted = all. */
+  readonly gender?: Gender | undefined;
+  /** The type lens (§5.22): one or several types; omitted or empty = every type. */
+  readonly businessTypes?: readonly BusinessType[] | undefined;
   /** Part of the salon name or location text. */
   readonly q?: string | undefined;
   /** Catalog service ids; a salon must offer ALL of them. */
   readonly serviceIds?: readonly string[] | undefined;
-  /** Range for the SUM of the salon's prices of the selected services (integer fils). */
+  /**
+   * Integer fils. With `serviceIds`: range of the SUM of the salon's prices of those services;
+   * without: the business offers at least one active service priced inside the range (§5.22).
+   */
   readonly minPrice?: number | undefined;
   readonly maxPrice?: number | undefined;
   /** "X stars and above". */
@@ -86,8 +92,11 @@ export interface SearchQuery {
 
 /** Which salons are currently recommended for an audience (placements arrive with SRV-066). */
 export interface RecommendedLookup {
-  /** Active placements of one business type a customer of this gender may see, in order (§5.13). */
-  salonIds(input: { businessType: BusinessType; gender: Gender }, at: Date): Promise<string[]>;
+  /** Active placements of one business type (serving `gender` when given), in order (§5.13). */
+  salonIds(
+    input: { businessType: BusinessType; gender?: Gender | undefined },
+    at: Date,
+  ): Promise<string[]>;
 }
 export const noRecommendations: RecommendedLookup = { salonIds: () => Promise.resolve([]) };
 
@@ -118,8 +127,8 @@ export interface SearchService {
    * a salon with several branches reads "Salon - Branch".
    */
   nearestBranches(input: {
-    gender: Gender;
-    businessType?: BusinessType | undefined;
+    gender?: Gender | undefined;
+    businessTypes?: readonly BusinessType[] | undefined;
     lat: number;
     lng: number;
     params: PaginationParams;
@@ -128,15 +137,38 @@ export interface SearchService {
   }): Promise<{ items: BranchCard[]; meta: PaginationMeta }>;
   /** Slider bounds for the price filter: min/max of the sums over salons offering all services. */
   priceBounds(input: {
-    gender: Gender;
-    businessType?: BusinessType | undefined;
-    serviceIds: readonly string[];
+    gender?: Gender | undefined;
+    businessTypes?: readonly BusinessType[] | undefined;
+    /** Omitted or empty: bounds of every active service price of the matching businesses. */
+    serviceIds?: readonly string[] | undefined;
   }): Promise<{ min: number; max: number } | null>;
+  /**
+   * Typed suggestions (§5.22): catalog services matching the text with the number of places
+   * offering them, then places whose name matches; both follow the lens and the gender filter.
+   */
+  suggest(input: {
+    q: string;
+    businessTypes?: readonly BusinessType[] | undefined;
+    gender?: Gender | undefined;
+    language: Language;
+  }): Promise<SearchSuggestions>;
+}
+
+export interface SearchSuggestions {
+  readonly services: {
+    id: string;
+    name: string;
+    businessType: BusinessType;
+    placesCount: number;
+  }[];
+  readonly places: { id: string; name: string; businessType: BusinessType; audience: Audience }[];
 }
 
 export interface SearchDeps {
   readonly salons: SalonsRepository;
   readonly salonServices: Pick<SalonServicesRepository, 'findMany'>;
+  /** Catalog lookups for suggestions (§5.22); without it no service suggestions. */
+  readonly catalog?: Pick<CatalogServicesRepository, 'findMany'>;
   readonly closures: Pick<ClosuresRepository, 'findMany'>;
   readonly storage: Pick<StorageProvider, 'getPublicUrl'>;
   readonly settings: Pick<SettingsService, 'get'>;
@@ -187,6 +219,19 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     const rows = await salonServices.findMany({ catalogServiceId: { $in: unique }, active: true });
     // With branches a salon matches when one of its branches offers them all (cheapest branch).
     return deps.branches === undefined ? priceSums(rows, unique) : cheapestSums(rows, unique);
+  };
+
+  /** Businesses with at least one active service priced inside the range (fils, §5.22). */
+  const pricedWithin = async (
+    min: number | undefined,
+    max: number | undefined,
+  ): Promise<string[]> => {
+    const price = {
+      ...(min === undefined ? {} : { $gte: min }),
+      ...(max === undefined ? {} : { $lte: max }),
+    };
+    const rows = await salonServices.findMany({ active: true, price });
+    return [...new Set(rows.map((r) => r.salonId))];
   };
 
   /** Bookable branches (ACTIVE and complete) of these salons, by salon. */
@@ -280,11 +325,11 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     });
   };
 
-  /** Salons a customer of this gender may see, by id (LIVE, complete, audience fits, §5.19). */
+  /** LIVE, complete businesses by id, within the lens and the gender filter (§5.22). */
   const visibleSalons = async (
     ids: readonly string[],
-    gender: Gender,
-    businessType?: BusinessType,
+    gender: Gender | undefined,
+    businessTypes: readonly BusinessType[] | undefined,
   ): Promise<Map<string, Entity<SalonRaw>>> => {
     const found =
       ids.length === 0
@@ -293,8 +338,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
             _id: { $in: [...ids] },
             state: 'LIVE',
             'completeness.isComplete': true,
-            audience: { $in: visibleAudiences(gender) },
-            ...(businessType === undefined ? {} : { businessType }),
+            ...audienceCondition(gender),
+            ...typeCondition(businessTypes),
           });
     return new Map(found.map((salon) => [salon.id, salon]));
   };
@@ -325,14 +370,23 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
               (query.maxPrice === undefined || sum <= query.maxPrice),
           )
           .map(([salonId]) => salonId);
+      } else if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+        allowed = await pricedWithin(query.minPrice, query.maxPrice);
       }
       let placementOrder: string[] | undefined;
       if (query.general === 'RECOMMENDED') {
-        // Recommended salons, then recommended clinics, each in the admin's order (§5.13).
-        const types = query.businessType === undefined ? BUSINESS_TYPES : [query.businessType];
+        // One rail across the lens' types (§5.22), each type in the admin's order (§5.13).
+        const types =
+          query.businessTypes === undefined || query.businessTypes.length === 0
+            ? BUSINESS_TYPES
+            : query.businessTypes;
         const ids: string[] = [];
         for (const businessType of types) {
-          ids.push(...(await recommended.salonIds({ businessType, gender: query.gender }, now())));
+          for (const id of await recommended.salonIds(
+            { businessType, gender: query.gender },
+            now(),
+          ))
+            if (!ids.includes(id)) ids.push(id);
         }
         placementOrder = ids;
         allowed = allowed === undefined ? ids : allowed.filter((id) => ids.includes(id));
@@ -364,8 +418,8 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       const filter: QueryFilter<SalonRaw> = {
         state: 'LIVE',
         'completeness.isComplete': true,
-        audience: { $in: visibleAudiences(query.gender) },
-        ...(query.businessType === undefined ? {} : { businessType: query.businessType }),
+        ...audienceCondition(query.gender),
+        ...typeCondition(query.businessTypes),
         ...(allowed === undefined ? {} : { _id: { $in: allowed } }),
         ...(query.minRating === undefined ? {} : { 'rating.avg': { $gte: query.minRating } }),
         ...(query.q === undefined || query.q === ''
@@ -429,7 +483,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
 
     async nearestBranches({
       gender,
-      businessType,
+      businessTypes,
       lat,
       lng,
       params,
@@ -441,7 +495,7 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
       const visible = await visibleSalons(
         [...new Set(near.map((b) => b.salonId))],
         gender,
-        businessType,
+        businessTypes,
       );
       const entries = near
         .filter((b) => visible.has(b.salonId))
@@ -493,25 +547,98 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
         _id: { $in: [...ids] },
         state: 'LIVE',
         'completeness.isComplete': true,
-        ...(gender === undefined ? {} : { audience: { $in: visibleAudiences(gender) } }),
+        ...audienceCondition(gender),
       });
       const byId = new Map(found.map((s) => [s.id, s]));
       const ordered = ids.flatMap((id) => byId.get(id) ?? []);
       return toCards(ordered, { customerId, distances: new Map(), here: null, language });
     },
 
-    async priceBounds({ gender, businessType, serviceIds }) {
-      const sums = await offering(serviceIds);
+    async priceBounds({ gender, businessTypes, serviceIds }) {
+      const wanted = serviceIds ?? [];
+      // Without services: the price range of any active service (§5.22 price filter).
+      const sums =
+        wanted.length > 0
+          ? await offering(wanted)
+          : new Map<string, number>(
+              (await salonServices.findMany({ active: true })).reduce<[string, number][]>(
+                (all, row) => [...all, [`${row.salonId}:${row.id}`, row.price]],
+                [],
+              ),
+            );
       if (sums.size === 0) return null;
-      const live = await salons.findMany({
-        _id: { $in: [...sums.keys()] },
-        state: 'LIVE',
-        'completeness.isComplete': true,
-        audience: { $in: visibleAudiences(gender) },
-        ...(businessType === undefined ? {} : { businessType }),
-      });
-      const values = live.map((s) => sums.get(s.id) ?? 0);
+      const salonOf = (key: string): string => key.split(':')[0] ?? key;
+      const live = await visibleSalons(
+        [...new Set([...sums.keys()].map(salonOf))],
+        gender,
+        businessTypes,
+      );
+      const values = [...sums].filter(([key]) => live.has(salonOf(key))).map(([, v]) => v);
       return values.length === 0 ? null : { min: Math.min(...values), max: Math.max(...values) };
+    },
+
+    async suggest({ q, businessTypes, gender, language }) {
+      const text = q.trim();
+      if (text === '') return { services: [], places: [] };
+      const pattern = { $regex: escapeRegex(text), $options: 'i' };
+      const [entries, places] = await Promise.all([
+        deps.catalog === undefined
+          ? []
+          : deps.catalog.findMany({
+              active: true,
+              ...typeCondition(businessTypes),
+              ...audienceCondition(gender),
+              $or: [{ 'name.ar': pattern }, { 'name.en': pattern }],
+            }),
+        salons.findMany(
+          {
+            state: 'LIVE',
+            'completeness.isComplete': true,
+            ...audienceCondition(gender),
+            ...typeCondition(businessTypes),
+            searchText: pattern,
+          } as never,
+          { 'rating.avg': -1, 'rating.count': -1 },
+        ),
+      ]);
+      const offered =
+        entries.length === 0
+          ? []
+          : await salonServices.findMany({
+              catalogServiceId: { $in: entries.map((e) => e.id) },
+              active: true,
+            });
+      const live = await visibleSalons(
+        [...new Set(offered.map((o) => o.salonId))],
+        gender,
+        businessTypes,
+      );
+      const placesOf = new Map<string, Set<string>>();
+      for (const row of offered) {
+        if (!live.has(row.salonId)) continue;
+        placesOf.set(
+          row.catalogServiceId,
+          (placesOf.get(row.catalogServiceId) ?? new Set()).add(row.salonId),
+        );
+      }
+      return {
+        services: entries
+          .map((e) => ({
+            id: e.id,
+            name: e.name[language],
+            businessType: e.businessType,
+            placesCount: placesOf.get(e.id)?.size ?? 0,
+          }))
+          .filter((e) => e.placesCount > 0)
+          .sort((a, b) => b.placesCount - a.placesCount)
+          .slice(0, SEARCH_SUGGESTION_LIMIT),
+        places: places.slice(0, SEARCH_SUGGESTION_LIMIT).map((p) => ({
+          id: p.id,
+          name: p.name,
+          businessType: p.businessType,
+          audience: p.audience,
+        })),
+      };
     },
   };
 };

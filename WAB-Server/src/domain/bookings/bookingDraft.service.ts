@@ -36,7 +36,6 @@ export type DraftPersonInput = PlanPersonInput & {
 };
 import { calculateAmounts } from '../pricing/pricing';
 import type { SettingsService } from '../settings';
-import { isVisibleTo } from '../businessTypes/rules';
 
 type PaymentMethod = (typeof PAYMENT_OPTIONS)[number];
 
@@ -227,10 +226,6 @@ export const createBookingDraftService = (deps: BookingDraftDeps): BookingDraftS
             persons,
             draftId: earlier?.id,
           });
-          // The customer books only where they may look (§5.19 visibility).
-          if (!isVisibleTo(plan.salon, customer.gender)) {
-            throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
-          }
           await assertReferenceImages({
             businessType: plan.salon.businessType,
             keys: persons.map((p) => p.referenceImageKey),
