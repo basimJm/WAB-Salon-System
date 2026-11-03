@@ -7,7 +7,7 @@
 | Package | `wab-storage` |
 | Type | Node.js package (TypeScript, npm), server only |
 | BRD | `docs/WAB_Package_Storage_BRD.md` |
-| Version | 0.1.0 (SDK built; real AWS/MinIO/CloudFront calls not verified — see §11) |
+| Version | 0.2.0 (SDK built; Cloudflare R2 via the S3 adapter; real AWS/R2/MinIO/CloudFront calls not verified — see §11) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
 | Server counterpart in WAB | `WAB-Server/src/providers/storage` (interface already in WAB-Server, fake only today) |
 
@@ -40,15 +40,19 @@ interface StorageProvider {
   read(key): Promise<Buffer|null>;
   write(r:{key;body;contentType;visibility}): Promise<void>;
   delete(keys: readonly string[]): Promise<void>;
+  copy(r:{fromKey;toKey;visibility}): Promise<void>;   // same bucket, replaces the target in one step
+  stat(key): Promise<{visibility;size;contentType|null;updatedAt|null} | null>;
   createVariants(key): Promise<VariantKeys>;
 }
 createStorage(options): StorageProvider
+configureBucketCors(options, {allowedOrigins, maxAgeSec}): Promise<void>  // s3 | r2, both buckets
 ```
 
 ## 4. Configuration
 | Option / env key | Dev | Prod | Notes |
 |---|---|---|---|
-| `provider` | `local-fs`/`s3`(MinIO)/`memory` | `s3` | |
+| `provider` | `local-fs`/`s3`(MinIO)/`memory`/`r2` | `s3` or `r2` | `r2` = Cloudflare R2 through the S3 adapter |
+| `r2.accountId`, `r2.publicBucket`, `r2.privateBucket`, `r2.credentials`, `r2.endpoint?` | R2 dev buckets | R2 prod buckets | region `auto`; endpoint defaults to `https://<accountId>.r2.cloudflarestorage.com`; buckets must differ; checksums only when required |
 | `environment` | `dev` | `prod` | |
 | `s3.region`, `s3.publicBucket`, `s3.privateBucket` | MinIO values | real | no hardcoding |
 | `s3.endpoint`, `s3.forcePathStyle` | `http://localhost:9000` (consumer) | unset | dev only |
@@ -150,3 +154,4 @@ Implementation notes: `createStorage(options)` returns `Storage` = port + `creat
 | 2026-10-18 | 0.1.0 | STO-010: prepared for publish as @wab/storage (package.json, .npmrc, CHANGELOG); not published |
 | 2026-10-18 | 0.1.0 | FIX-STO-CJS: CJS builds load AWS SDK/sharp via require; smoke covers both formats |
 | 2026-10-18 | 0.1.0 | Fix: the CJS build now loads the AWS SDK and sharp with `require()` (a native `import()` cannot run under Jest/ts-node); ESM keeps `import()`; package smoke covers both. Found while wiring WAB-Server. |
+| 2026-11-01 | 0.2.0 | STO-011: Cloudflare R2 provider on the S3 adapter (region auto, account endpoint, checksums when required, two buckets), `copy` + `stat` on every adapter, `configureBucketCors`; tests `tests/r2.test.ts` (fake S3 + AWS SDK presign, no network) |

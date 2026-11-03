@@ -36,6 +36,31 @@ export type ConfirmUploadResult =
   | { readonly status: 'CONFIRMED'; readonly size: number; readonly contentType: string }
   | { readonly status: 'REJECTED'; readonly reason: RejectionReason };
 
+/** Server-side copy inside one location (public or private); the target is overwritten. */
+export interface CopyObjectRequest {
+  readonly fromKey: string;
+  readonly toKey: string;
+  readonly visibility: Visibility;
+}
+
+/** What is stored under a key (`stat`); `contentType` / `updatedAt` are null when the adapter does not keep them. */
+export interface ObjectInfo {
+  readonly visibility: Visibility;
+  readonly size: number;
+  readonly contentType: string | null;
+  readonly updatedAt: Date | null;
+}
+
+/**
+ * Browser access to both buckets: presigned PUT uploads and GETs from the given web origins only
+ * (the admin panel). Mobile apps do not need CORS.
+ */
+export interface BucketCorsRequest {
+  readonly allowedOrigins: readonly string[];
+  /** How long browsers may cache the preflight answer. */
+  readonly maxAgeSec: number;
+}
+
 export interface SignedUrlRequest {
   readonly key: string;
   readonly expiresInSec: number;
@@ -59,4 +84,11 @@ export interface StorageProvider {
   write(request: WriteObjectRequest): Promise<void>;
   /** Deletes the objects (any number; batched); keys that do not exist are ignored. */
   delete(keys: readonly string[]): Promise<void>;
+  /**
+   * Copies an object onto another key of the same location, replacing it in one step (readers see
+   * the old or the new object, never a partial one). A missing source rejects with NOT_FOUND.
+   */
+  copy(request: CopyObjectRequest): Promise<void>;
+  /** Size, type and time of a stored object; `null` when nothing is stored under the key. */
+  stat(key: string): Promise<ObjectInfo | null>;
 }

@@ -28,12 +28,12 @@ const PRODUCTION_VALUES: Readonly<Record<string, string>> = {
   SMTP_PASS: 'not-a-real-password',
   EMAIL_FROM_ADDRESS: 'sender@example.com',
   EMAIL_FROM_NAME: 'WAB',
-  S3_REGION: 'eu-central-1',
-  S3_PUBLIC_BUCKET: 'wab-prod-public',
-  S3_PRIVATE_BUCKET: 'wab-prod-private',
-  S3_ACCESS_KEY_ID: 'AKIAEXAMPLE',
-  S3_SECRET_ACCESS_KEY: 'not-a-real-secret-key',
-  CDN_BASE_URL: 'https://cdn.example.com',
+  R2_ACCOUNT_ID: 'acc123',
+  R2_ACCESS_KEY_ID: 'not-a-real-r2-key',
+  R2_SECRET_ACCESS_KEY: 'not-a-real-r2-secret',
+  R2_PUBLIC_BUCKET_NAME: 'wab-prod-public',
+  R2_PRIVATE_BUCKET_NAME: 'wab-prod-private',
+  R2_PUBLIC_URL: 'https://files.example.com',
 };
 
 const fill = (template: string, values: Readonly<Record<string, string>>): string =>

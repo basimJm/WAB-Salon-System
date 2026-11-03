@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "WAB Admin API",
-    "version": "1.12.0"
+    "version": "1.13.0"
   },
   "servers": [
     {
@@ -7619,12 +7619,12 @@
                       "ar": {
                         "type": "string",
                         "maxLength": 1024,
-                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                       },
                       "en": {
                         "type": "string",
                         "maxLength": 1024,
-                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                       }
                     },
                     "required": [
@@ -8099,12 +8099,12 @@
                       "ar": {
                         "type": "string",
                         "maxLength": 1024,
-                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                       },
                       "en": {
                         "type": "string",
                         "maxLength": 1024,
-                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                       }
                     },
                     "required": [
@@ -8643,7 +8643,7 @@
                   "imageKey": {
                     "type": "string",
                     "maxLength": 1024,
-                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                   },
                   "businessType": {
                     "type": "string",
@@ -9126,7 +9126,7 @@
                   "imageKey": {
                     "type": "string",
                     "maxLength": 1024,
-                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*$"
+                    "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                   },
                   "active": {
                     "type": "boolean"
@@ -30428,7 +30428,7 @@
                           "null"
                         ],
                         "maxLength": 1024,
-                        "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                       },
                       "profileKey": {
                         "type": [
@@ -30436,7 +30436,7 @@
                           "null"
                         ],
                         "maxLength": 1024,
-                        "pattern": "^[A-Za-z0-9_-]+(\\/[A-Za-z0-9._-]+)*$"
+                        "pattern": "^[A-Za-z0-9_-][A-Za-z0-9._-]*(\\/[A-Za-z0-9_-][A-Za-z0-9._-]*)*(\\?v=[1-9]\\d{0,9})?$"
                       },
                       "location": {
                         "type": [

@@ -34,11 +34,14 @@ import { optionalAuth, requireAuth } from './middlewares/auth';
 import { createContentService } from './domain/content';
 import { ContentPagesRepository, FaqsRepository } from './repositories/content.repository';
 import { createAdminBannerService } from './domain/adminCrud/banners';
+import { withAdminImageSlots } from './domain/adminCrud/imageSlots';
+import { BANNER_IMAGE_FIELDS, CATALOG_IMAGE_FIELDS } from './domain/adminCrud/imageFields';
 import { createBannersService } from './domain/banners';
 import { BannersRepository } from './repositories/banners.repository';
 import { createAdminCrud } from './domain/adminCrud/adminCrud.service';
 import { createCatalogService } from './domain/catalog';
 import type { CatalogServiceRaw } from './models/catalogService.model';
+import type { BannerRaw } from './models/banner.model';
 import { CatalogServicesRepository } from './repositories/catalog.repository';
 import { createSalonApplicationService } from './domain/salons/salonApplication.service';
 import { SalonsRepository } from './repositories/salons.repository';
@@ -127,6 +130,12 @@ import { ClosuresRepository } from './repositories/closures.repository';
 import { createGalleryService } from './domain/gallery/gallery.service';
 import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
+import { createFileSlots } from './domain/files/fileSlots.service';
+import { createStorageCleanup } from './domain/files/storageCleanup.service';
+import { FILE_SLOT_LOCK, FILE_SLOT_LOCK_PREFIX } from './constants/uploads';
+import { lockKey } from './utils/redis/keys';
+import { withLock } from './utils/redis/lock';
+import { StorageCleanupsRepository } from './repositories/storageCleanups.repository';
 import { UploadsRepository } from './repositories/uploads.repository';
 import { createSalonReviewService } from './domain/salons/salonReview.service';
 import { SubscriptionsRepository } from './repositories/subscriptions.repository';
@@ -387,8 +396,9 @@ const buildServices = (
   const pages = new ContentPagesRepository();
   const adminGuard = requireAuth('admin', config.auth.accessSecret);
   const variants = createImageVariants({ storage: providers.storage, logger });
+  const uploadsRepository = new UploadsRepository();
   const uploads = createUploadsService({
-    uploads: new UploadsRepository(),
+    uploads: uploadsRepository,
     storage: providers.storage,
     settings,
     afterConfirm: ({ key }) => {
@@ -397,6 +407,27 @@ const buildServices = (
         logger.error({ err: error, key }, 'image variants failed');
       });
     },
+  });
+  // File lifecycle (SRV-181): objects are deleted through the outbox after the database lets go of
+  // them; single-image fields are slots replaced in place under a per-slot Redis lock.
+  const storageCleanup = createStorageCleanup({
+    cleanups: new StorageCleanupsRepository(),
+    uploads: uploadsRepository,
+    storage: providers.storage,
+    logger,
+    drainOnEnqueue: true,
+  });
+  const catalogStore = new CatalogServicesRepository();
+  const bannersStore = new BannersRepository();
+  const fileSlots = createFileSlots({
+    uploads: uploadsRepository,
+    verifier: uploads,
+    storage: providers.storage,
+    cleanup: storageCleanup,
+    variants,
+    logger,
+    lock: (slotKey, task) =>
+      withLock(redis, lockKey(FILE_SLOT_LOCK_PREFIX, slotKey), () => task(), FILE_SLOT_LOCK),
   });
   const salonServices = new SalonServicesRepository();
   // Bookings come with the booking module (SRV-071); until then the checks find nothing.
@@ -459,7 +490,7 @@ const buildServices = (
     members: new MembersRepository(),
     installations: new InstallationsRepository(),
     refreshTokens: phoneServices.refreshTokens,
-    storage: providers.storage,
+    files: fileSlots,
     audit,
     settings,
     logger,
@@ -468,7 +499,7 @@ const buildServices = (
     customers: new CustomersRepository(),
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
-    uploads,
+    files: fileSlots,
     storage: providers.storage,
     lifecycle: accountLifecycle,
     logger,
@@ -747,6 +778,7 @@ const buildServices = (
       adminEvents.overviewTick();
     },
     onDelayedRefunds: (delayed) => adminAlerts.refundsDelayed(delayed),
+    cleanupStorage: () => storageCleanup.drain(),
     logger,
   });
   Object.assign(jobs.handlers, periodic.handlers);
@@ -818,6 +850,7 @@ const buildServices = (
     storage: providers.storage,
     uploads,
     settings,
+    cleanup: storageCleanup,
   });
   const salonProfileService = createSalonProfileService({
     branchEditor: branchesService,
@@ -828,6 +861,7 @@ const buildServices = (
     storage: providers.storage,
     state: salonState,
     uploads,
+    files: fileSlots,
   });
   const policyService = createPolicyService({ salons: new SalonsRepository(), state: salonState });
   const staffService = createStaffService({
@@ -851,6 +885,7 @@ const buildServices = (
     storage: providers.storage,
     uploads,
     state: salonState,
+    cleanup: storageCleanup,
   });
   const hoursService = createHoursService({
     branches: branchesRepository,
@@ -870,6 +905,7 @@ const buildServices = (
     phones: createPhoneVerifier(phoneServices),
     storage: providers.storage,
     uploads,
+    files: fileSlots,
     deactivationConflicts: conflictFinder.deactivation,
   });
   const salonDeletionService = createSalonDeletionService({
@@ -1025,7 +1061,7 @@ const buildServices = (
     memberSelf: createMemberSelfService({
       members: new MembersRepository(),
       storage: providers.storage,
-      uploads,
+      files: fileSlots,
       phones: createPhoneVerifier(phoneServices),
       otpGate,
       lifecycle: accountLifecycle,
@@ -1087,6 +1123,8 @@ const buildServices = (
       salons: new SalonsRepository(),
       catalog: new CatalogServicesRepository(),
       uploads,
+      files: fileSlots,
+      cleanup: storageCleanup,
       audit,
       logger,
       notifier: producers.catalogRequestNotifier,
@@ -1146,6 +1184,7 @@ const buildServices = (
           adminEvents.applicationCreated(salon);
         },
         uploads,
+        cleanup: storageCleanup,
         salons: new SalonsRepository(),
         members: new MembersRepository(),
         installations: new InstallationsRepository(),
@@ -1155,11 +1194,17 @@ const buildServices = (
       guard: requireAuth('merchant', config.auth.accessSecret),
     },
     catalog: catalogService,
-    adminCatalog: createAdminCrud<CatalogServiceRaw>({
-      name: 'CATALOG_SERVICE',
-      entityType: 'catalogService',
-      store: new CatalogServicesRepository(),
-      audit,
+    adminCatalog: withAdminImageSlots<CatalogServiceRaw>({
+      crud: createAdminCrud<CatalogServiceRaw>({
+        name: 'CATALOG_SERVICE',
+        entityType: 'catalogService',
+        store: catalogStore,
+        audit,
+      }),
+      store: catalogStore,
+      files: fileSlots,
+      fields: CATALOG_IMAGE_FIELDS,
+      logger,
     }),
     banners: bannersService,
     home: createHomeService({
@@ -1169,7 +1214,13 @@ const buildServices = (
       customers: new CustomersRepository(),
       unread: { count: (customerId) => notificationService.unreadCount('CUSTOMER', customerId) },
     }),
-    adminBanners: createAdminBannerService(new BannersRepository(), audit),
+    adminBanners: withAdminImageSlots<BannerRaw>({
+      crud: createAdminBannerService(bannersStore, audit),
+      store: bannersStore,
+      files: fileSlots,
+      fields: BANNER_IMAGE_FIELDS,
+      logger,
+    }),
     adminContent: createAdminContentServices({
       pages: new ContentPagesRepository(),
       faqs,

@@ -23,6 +23,7 @@ sealed interface FilterChipId {
     data object Price : FilterChipId
     data object General : FilterChipId
     data object Rating : FilterChipId
+    data object Type : FilterChipId
 }
 
 sealed interface AllSalonsContract {
@@ -31,7 +32,6 @@ sealed interface AllSalonsContract {
 
     data class UiState(
         val gender: Gender? = null,
-        val businessType: BusinessType? = null,
         val text: String = "",
         val filters: SalonFilters = SalonFilters(),
         val loading: Boolean = true,
@@ -46,13 +46,12 @@ sealed interface AllSalonsContract {
         val dialog: SalonsDialog? = null,
     ) {
         val generalFilter: GeneralFilter? get() = filters.general
+        val businessType: BusinessType? get() = filters.businessType
     }
 
     sealed interface UiAction {
         data class OnTextChange(val value: String) : UiAction
         data object OnFilterClick : UiAction
-        /** All / Salons / Clinics (null = all). */
-        data class OnBusinessTypeSelect(val businessType: BusinessType?) : UiAction
         data class OnChipRemove(val chip: FilterChipId) : UiAction
         data class OnSalonClick(val salonId: String) : UiAction
         data class OnFavoriteClick(val salonId: String) : UiAction

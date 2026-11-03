@@ -22,6 +22,7 @@ import { CountriesRepository } from '../src/repositories/locations.repository';
 import { signAccessToken } from '../src/utils/auth/accessToken';
 import { ValidationError } from '../src/utils/errors';
 import { createLogger } from '../src/utils/logger';
+import { fileSlotsKit } from './helpers/fileSlots';
 import { createFakeModel } from './helpers/fakeModel';
 
 const logger = createLogger({ level: 'silent' });
@@ -39,6 +40,8 @@ const refreshTokens = createRefreshTokenService({
   repository: new RefreshTokensRepository(tokensM.model as never),
   logger,
 });
+const kitStorage = new FakeStorageProvider();
+const kit = fileSlotsKit(kitStorage);
 const permissionEvents: string[] = [];
 const checks: Parameters<UploadVerifier['assertConfirmed']>[0][] = [];
 const verifier: { reject: string[] } & UploadVerifier = {
@@ -72,7 +75,7 @@ const app = createApp({
         members,
         installations: new InstallationsRepository(installationsM.model as never),
         refreshTokens,
-        storage: new FakeStorageProvider(),
+        files: { remove: () => Promise.resolve() },
         audit: { record: () => Promise.reject(new Error('unused')) },
         settings: { get: (key: string) => Promise.resolve(SETTING_DEFAULTS[key as never]) },
         logger,
@@ -82,8 +85,9 @@ const app = createApp({
         otp: new FakeOtpProvider(),
         otpGate: gate,
       }),
-      storage: new FakeStorageProvider(),
+      storage: kitStorage,
       uploads: verifier,
+      files: kit.slots,
     }),
     salonProfile: {
       service: undefined as never,
@@ -134,7 +138,16 @@ beforeEach(() => {
   for (const f of [membersM, installationsM, tokensM]) f.docs.length = 0;
   checks.length = 0;
   verifier.reject = [];
+  kit.uploadsModel.docs.length = 0;
+  kit.cleanupsModel.docs.length = 0;
 });
+const memberPhoto = (key: string, ownerId: string): Promise<string> =>
+  kit.confirmed(key, {
+    purpose: 'MEMBER_PHOTO',
+    ownerType: 'MEMBER',
+    ownerId,
+    salonId: salonId.toHexString(),
+  });
 
 describe('team: access', () => {
   it('reading needs STAFF_MANAGE; everything else is owner-only, even for a fully granted manager', async () => {
@@ -285,6 +298,7 @@ describe('team: add member', () => {
           .send({ ...NEW, photoKey: 'members/bad.jpg' })
       ).status,
     ).toBe(400);
+    await memberPhoto('members/good.jpg', owner.id);
     const ok = await request(app)
       .post('/merchant/v1/team/members')
       .set(owner.headers)
@@ -293,7 +307,12 @@ describe('team: add member', () => {
     expect(checks.at(-1)).toMatchObject({ purpose: 'MEMBER_PHOTO' });
     expect(checks.at(-1)?.accept?.({ salonId: salonId.toHexString() } as never)).toBe(true);
     expect(checks.at(-1)?.accept?.({ salonId: 'x' } as never)).toBe(false);
-    expect(String(bodyOf(ok).data['photoUrl'])).toContain('members/good.jpg');
+    // The photo lives in the member's slot (SRV-181); the temporary upload is queued for deletion.
+    const created = String(bodyOf(ok).data['id']);
+    expect(String(bodyOf(ok).data['photoUrl'])).toContain(
+      `salons/${salonId.toHexString()}/staff/${created}/photo?v=1`,
+    );
+    expect(kit.queued()).toContain('members/good.jpg');
   });
 });
 
@@ -321,10 +340,17 @@ describe('team: change member', () => {
       .set(owner.headers)
       .send({ role: 'EMPLOYEE', permissions: ['REVIEWS_VIEW'] });
     expect(bodyOf(both).data['permissions']).toEqual(['REVIEWS_VIEW']);
+    await memberPhoto('members/p.jpg', owner.id);
     await request(app).patch(url).set(owner.headers).send({ photoKey: 'members/p.jpg' });
-    expect(membersM.docs[1]?.['photoKey']).toBe('members/p.jpg');
+    const slot = `salons/${salonId.toHexString()}/staff/${member.id}/photo`;
+    expect(membersM.docs[1]?.['photoKey']).toBe(`${slot}?v=1`);
+    await memberPhoto('members/p2.jpg', owner.id);
+    await request(app).patch(url).set(owner.headers).send({ photoKey: 'members/p2.jpg' });
+    expect(membersM.docs[1]?.['photoKey']).toBe(`${slot}?v=2`);
+    expect(kit.uploadsModel.docs.filter((d) => d['key'] === slot)).toHaveLength(1);
     await request(app).patch(url).set(owner.headers).send({ photoKey: null });
     expect(membersM.docs[1]?.['photoKey']).toBeUndefined();
+    expect(kit.queued()).toContain(slot);
   });
 
   it('tells the member’s live app only when role or permissions change', async () => {

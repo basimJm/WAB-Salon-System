@@ -2,6 +2,8 @@ import { z } from 'zod';
 import {
   ENVIRONMENTS,
   PROVIDERS,
+  R2_REGION,
+  r2Endpoint,
   SIGNED_URL_MODES,
   type Environment,
   type ProviderName,
@@ -46,6 +48,21 @@ const s3Schema = z
   })
   .strict();
 
+/**
+ * Cloudflare R2: one bucket is public (served from `cdn.baseUrl`, the bucket's public domain) and one
+ * is private (no public access; presigned URLs only). R2 has no IAM roles, so keys are required.
+ */
+const r2Schema = z
+  .object({
+    accountId: text,
+    publicBucket: text,
+    privateBucket: text,
+    /** Unset = `https://<accountId>.r2.cloudflarestorage.com` (a jurisdiction endpoint may be given). */
+    endpoint: z.url().optional(),
+    credentials: credentialsSchema,
+  })
+  .strict();
+
 const localFsSchema = z.object({ rootDir: text, baseUrl: z.url() }).strict();
 
 const retrySchema = z
@@ -76,6 +93,7 @@ const optionsSchema = z
     environment: z.enum(ENVIRONMENTS),
     provider: z.enum(PROVIDERS),
     s3: s3Schema.optional(),
+    r2: r2Schema.optional(),
     localFs: localFsSchema.optional(),
     /** Base URL public objects are served from (CDN domain). */
     cdn: z.object({ baseUrl: z.url() }).strict(),
@@ -111,6 +129,11 @@ export interface S3Config {
   readonly endpoint?: string | undefined;
   readonly forcePathStyle: boolean;
   readonly credentials?: z.infer<typeof credentialsSchema> | undefined;
+  /**
+   * `when-required`: the client adds request checksums only where the API requires them (R2 does not
+   * accept every checksum algorithm, and presigned PUTs must not carry checksum parameters).
+   */
+  readonly checksums?: 'when-required' | undefined;
 }
 
 export interface VariantConfig {
@@ -155,6 +178,9 @@ const crossFieldIssues = (
     issues.push({ path, message });
   };
   if (o.provider === 's3' && !o.s3) add('s3', 'required for provider s3');
+  if (o.provider === 'r2' && !o.r2) add('r2', 'required for provider r2');
+  if (o.r2 && o.r2.publicBucket === o.r2.privateBucket)
+    add('r2.privateBucket', 'must differ from publicBucket (R2 public access is per bucket)');
   if (o.provider === 'local-fs' && !o.localFs) add('localFs', 'required for provider local-fs');
   if (o.s3 && o.s3.publicBucket === o.s3.privateBucket && o.environment === 'prod')
     add('s3.privateBucket', 'must differ from publicBucket in prod');
@@ -169,12 +195,40 @@ const crossFieldIssues = (
       add('signedUrl.cloudfront.baseUrl', 'prod requires https');
   }
   if (o.environment === 'prod') {
-    if (o.provider !== 's3') add('provider', 'prod requires the s3 provider');
+    if (o.provider !== 's3' && o.provider !== 'r2')
+      add('provider', 'prod requires the s3 or r2 provider');
     if (!isHttps(o.cdn.baseUrl)) add('cdn.baseUrl', 'prod requires https');
     if (o.s3?.endpoint !== undefined && !isHttps(o.s3.endpoint))
       add('s3.endpoint', 'prod requires https');
+    if (o.r2?.endpoint !== undefined && !isHttps(o.r2.endpoint))
+      add('r2.endpoint', 'prod requires https');
   }
   return issues;
+};
+
+/** The S3 client settings: AWS / S3-compatible as given, or R2 mapped onto its S3 API. */
+const resolveS3 = (o: z.infer<typeof optionsSchema>): S3Config | undefined => {
+  if (o.provider === 'r2' && o.r2) {
+    return {
+      region: R2_REGION,
+      publicBucket: o.r2.publicBucket,
+      privateBucket: o.r2.privateBucket,
+      endpoint: o.r2.endpoint ?? r2Endpoint(o.r2.accountId),
+      forcePathStyle: false,
+      credentials: o.r2.credentials,
+      checksums: 'when-required',
+    };
+  }
+  return (
+    o.s3 && {
+      region: o.s3.region,
+      publicBucket: o.s3.publicBucket,
+      privateBucket: o.s3.privateBucket,
+      endpoint: o.s3.endpoint,
+      forcePathStyle: o.s3.forcePathStyle ?? false,
+      credentials: o.s3.credentials,
+    }
+  );
 };
 
 /** Validates the options once; the error names fields only, never values. */
@@ -206,14 +260,7 @@ export const resolveConfig = (options: StorageOptions): ResolvedConfig => {
   return {
     environment: o.environment,
     provider: o.provider,
-    s3: o.s3 && {
-      region: o.s3.region,
-      publicBucket: o.s3.publicBucket,
-      privateBucket: o.s3.privateBucket,
-      endpoint: o.s3.endpoint,
-      forcePathStyle: o.s3.forcePathStyle ?? false,
-      credentials: o.s3.credentials,
-    },
+    s3: resolveS3(o),
     localFs: o.localFs && { ...o.localFs, baseUrl: trimSlash(o.localFs.baseUrl) },
     cdnBaseUrl: trimSlash(o.cdn.baseUrl),
     uploadMaxTtlSec: o.upload?.maxTtlSec ?? DEFAULT_UPLOAD_MAX_TTL_SEC,

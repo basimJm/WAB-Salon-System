@@ -19,8 +19,11 @@ data class SalonFilters(
     val priceRange: PriceRange? = null,
     val general: GeneralFilter? = null,
     val minRating: Int? = null,
+    /** Salons or clinics only, chosen first in S05 (owner 2026-10-30); null = both (BUSINESS_DOMAIN §5.19). */
+    val businessType: BusinessType? = null,
 ) {
-    val isEmpty: Boolean get() = services.isEmpty() && priceRange == null && general == null && minRating == null
+    val isEmpty: Boolean
+        get() = services.isEmpty() && priceRange == null && general == null && minRating == null && businessType == null
 }
 
 /** One `GET /salons` page; `location` only when the user allowed it (needed by [GeneralFilter.NEAREST]); `businessType` null = all. */

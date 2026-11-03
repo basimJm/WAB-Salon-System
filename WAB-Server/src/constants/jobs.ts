@@ -38,6 +38,8 @@ export const PERIODIC_JOBS = {
   alertsEmail: { name: 'periodic.alerts-email', cron: '*/5 * * * *' },
   alertsEvaluate: { name: 'periodic.alerts-evaluate', cron: '*/5 * * * *' },
   bookingJobsReconcile: { name: 'periodic.booking-jobs-reconcile', cron: '15 * * * *' },
+  /** Deletes the objects queued in `storageCleanups` (SRV-181). */
+  storageCleanup: { name: 'periodic.storage-cleanup', cron: '*/5 * * * *' },
   /** Tells open admin panels to refresh the overview (`overview.tick`, §7). */
   overviewTick: { name: 'periodic.overview-tick', cron: '* * * * *' },
 } as const;

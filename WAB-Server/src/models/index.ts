@@ -39,6 +39,7 @@ import { RefreshTokenModel } from './refreshToken.model';
 import { PushCampaignModel } from './pushCampaign.model';
 import { ServerEventModel } from './serverEvent.model';
 import { SettingModel } from './setting.model';
+import { StorageCleanupModel } from './storageCleanup.model';
 
 /**
  * Every Mongoose model of the server. Start-up creates their indexes (SRV-017a), so a new model
@@ -46,6 +47,7 @@ import { SettingModel } from './setting.model';
  */
 export const ALL_MODELS = [
   SettingModel,
+  StorageCleanupModel,
   CountryModel,
   CityModel,
   AreaModel,

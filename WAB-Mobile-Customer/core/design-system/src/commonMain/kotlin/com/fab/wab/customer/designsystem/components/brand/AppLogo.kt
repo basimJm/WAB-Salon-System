@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import com.fab.wab.customer.designsystem.components.text.AppText
@@ -25,7 +27,7 @@ import org.jetbrains.compose.resources.stringResource
 /** The app icon as the design draws it: a rounded square (radius = 1/4 of the size) with a violet glow. */
 @Composable
 fun AppLogo(modifier: Modifier = Modifier, size: Dp = AppTheme.sizes.logo, shadow: Boolean = true) {
-    val shape = androidx.compose.foundation.shape.RoundedCornerShape(size / LOGO_RADIUS_RATIO)
+    val shape = logoShape(size)
     val glow = AppTheme.colors.gradientStart.copy(alpha = AppTheme.elevation.logoShadowAlpha)
     val shadowModifier = if (shadow) Modifier.softShadow(AppTheme.elevation.overlay, glow, shape) else Modifier
     Image(
@@ -36,15 +38,28 @@ fun AppLogo(modifier: Modifier = Modifier, size: Dp = AppTheme.sizes.logo, shado
     )
 }
 
-/** Logo + "WAB" serif wordmark + letter-spaced tagline (S11 login, S02 nickname, S24 system screens). */
+/**
+ * Logo + "WAB" serif wordmark + letter-spaced tagline (S11 login, S02 nickname, S24 system screens).
+ * With [onLogoAnimationFinish] the logo is the brand Lottie ([AppAnimatedLogo]), and the callback fires once it has
+ * played (launch/config screen only); without it the static icon is shown.
+ */
 @Composable
-fun AppBrandHeader(modifier: Modifier = Modifier, size: Dp = AppTheme.sizes.logo, tagline: Boolean = true) {
+fun AppBrandHeader(
+    modifier: Modifier = Modifier,
+    size: Dp = AppTheme.sizes.logo,
+    tagline: Boolean = true,
+    onLogoAnimationFinish: (() -> Unit)? = null,
+) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(AppTheme.spacing.space6),
     ) {
-        AppLogo(size = size)
+        if (onLogoAnimationFinish != null) {
+            AppAnimatedLogo(onFinish = onLogoAnimationFinish, size = size)
+        } else {
+            AppLogo(size = size)
+        }
         Spacer(Modifier.height(AppTheme.spacing.space6))
         AppText(
             text = stringResource(Res.string.brand_name),
@@ -59,5 +74,8 @@ fun AppBrandHeader(modifier: Modifier = Modifier, size: Dp = AppTheme.sizes.logo
         }
     }
 }
+
+/** The logo tile: a rounded square, radius = 1/4 of the size. */
+internal fun logoShape(size: Dp): Shape = RoundedCornerShape(size / LOGO_RADIUS_RATIO)
 
 private const val LOGO_RADIUS_RATIO = 4

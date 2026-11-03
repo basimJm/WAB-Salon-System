@@ -1,8 +1,11 @@
 export { SDK_NAME } from './constants/defaults';
 export {
   ERROR_CODES,
+  PROVIDERS,
+  R2_REGION,
   REJECTION_REASONS,
   VISIBILITIES,
+  r2Endpoint,
   type ErrorCode,
   type Environment,
   type ProviderName,
@@ -15,6 +18,7 @@ export { noopLogger, type Logger, type LogFields } from './logger';
 export {
   createLocalFsStorage,
   createStorage,
+  configureBucketCors,
   ensureDevBuckets,
   withVariants,
   type Storage,
@@ -33,8 +37,11 @@ export { MemoryStorage } from './adapters/memory';
 export { S3Storage } from './adapters/s3';
 export { detectContentType } from './fileType';
 export type {
+  BucketCorsRequest,
   ConfirmUploadRequest,
   ConfirmUploadResult,
+  CopyObjectRequest,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,

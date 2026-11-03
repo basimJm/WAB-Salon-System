@@ -36,6 +36,24 @@ export type ConfirmUploadResult =
   | { readonly status: 'CONFIRMED'; readonly size: number; readonly contentType: string }
   | { readonly status: 'REJECTED'; readonly reason: StorageRejectionReason };
 
+/** Server-side copy inside one location (public or private bucket); the target is replaced. */
+export interface CopyObjectRequest {
+  readonly fromKey: string;
+  readonly toKey: string;
+  readonly visibility: StorageVisibility;
+}
+
+/** `SOURCE_MISSING`: nothing was stored under `fromKey`, so nothing changed. */
+export type CopyObjectResult = 'COPIED' | 'SOURCE_MISSING';
+
+/** What is stored under a key; `contentType` / `updatedAt` are null when the store does not keep them. */
+export interface ObjectInfo {
+  readonly visibility: StorageVisibility;
+  readonly size: number;
+  readonly contentType: string | null;
+  readonly updatedAt: Date | null;
+}
+
 export interface SignedUrlRequest {
   readonly key: string;
   readonly expiresInSec: number;
@@ -60,4 +78,11 @@ export interface StorageProvider {
   write(request: WriteObjectRequest): Promise<void>;
   /** Deletes the objects; keys that do not exist are ignored. */
   delete(keys: readonly string[]): Promise<void>;
+  /**
+   * Copies an object onto another key of the same bucket in one step (readers see the old or the
+   * new object, never a partial one): the same-key replacement of a file slot (SRV-181).
+   */
+  copy(request: CopyObjectRequest): Promise<CopyObjectResult>;
+  /** Size, type and time of a stored object; `null` when nothing is stored under the key. */
+  stat(key: string): Promise<ObjectInfo | null>;
 }

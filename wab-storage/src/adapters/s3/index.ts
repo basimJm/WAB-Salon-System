@@ -1,5 +1,8 @@
 import {
   CONTENT_TYPE_HEADER,
+  CORS_ALLOWED_HEADERS,
+  CORS_EXPOSED_HEADERS,
+  CORS_METHODS,
   ERROR_CODES,
   UPLOAD_METHOD,
   type Visibility,
@@ -10,8 +13,11 @@ import { judgeUpload } from '../../confirm';
 import { StorageError, validationError } from '../../errors';
 import { realRetryDeps, withRetry, type RetryDeps } from '../../retry';
 import type {
+  BucketCorsRequest,
   ConfirmUploadRequest,
   ConfirmUploadResult,
+  CopyObjectRequest,
+  ObjectInfo,
   SignedUrlRequest,
   StorageProvider,
   UploadTarget,
@@ -20,10 +26,12 @@ import type {
 } from '../../types';
 import {
   assertConfirmRequest,
+  assertCopyRequest,
   assertKey,
   assertSignedRequest,
   assertUploadRequest,
   assertWriteRequest,
+  encodeKey,
 } from '../../validation';
 import { createCloudFrontSigner, publicUrlOf } from '../../urls';
 import { createAwsDeps, type S3Command, type S3Deps, type S3Output } from './deps';
@@ -185,6 +193,82 @@ export class S3Storage implements StorageProvider {
       throw new StorageError(ERROR_CODES.VENDOR_ERROR, 'Some objects could not be deleted', {
         details: { failed: failures.length, codes: [...new Set(failures)] },
       });
+  }
+
+  /**
+   * Same-bucket CopyObject (an atomic overwrite of the target). The metadata is replaced so the copy
+   * keeps the source's content type and public objects get the configured Cache-Control.
+   */
+  async copy(request: CopyObjectRequest): Promise<void> {
+    assertCopyRequest(request);
+    const deps = await this.getDeps();
+    const bucket = this.bucketOf(request.visibility);
+    const head = await this.exec(
+      new deps.commands.Head({ Bucket: bucket, Key: request.fromKey }),
+      true,
+    );
+    if (head === null)
+      throw new StorageError(ERROR_CODES.OBJECT_NOT_FOUND, 'Source object does not exist');
+    await this.exec(
+      new deps.commands.Copy({
+        Bucket: bucket,
+        Key: request.toKey,
+        CopySource: `${bucket}/${encodeKey(request.fromKey)}`,
+        MetadataDirective: 'REPLACE',
+        ...(head.ContentType === undefined ? {} : { ContentType: head.ContentType }),
+        ...(request.visibility === 'PUBLIC'
+          ? { CacheControl: this.settings.publicCacheControl }
+          : {}),
+      }),
+    );
+  }
+
+  async stat(key: string): Promise<ObjectInfo | null> {
+    assertKey(key);
+    const deps = await this.getDeps();
+    for (const visibility of VISIBILITY_ORDER) {
+      const head = await this.exec(
+        new deps.commands.Head({ Bucket: this.bucketOf(visibility), Key: key }),
+        true,
+      );
+      if (head === null) continue;
+      return {
+        visibility,
+        size: head.ContentLength ?? 0,
+        contentType: head.ContentType ?? null,
+        updatedAt: head.LastModified ?? null,
+      };
+    }
+    return null;
+  }
+
+  /** Sets the same CORS rule on the public and the private bucket (replaces any earlier rule). */
+  async configureCors(request: BucketCorsRequest): Promise<void> {
+    if (request.allowedOrigins.length === 0)
+      throw validationError('allowedOrigins must name at least one origin');
+    if (
+      request.allowedOrigins.some((origin) => origin === '*' || !/^https?:\/\/[^/]+$/.test(origin))
+    )
+      throw validationError('allowedOrigins must be exact origins (scheme://host[:port])');
+    const deps = await this.getDeps();
+    for (const bucket of [this.settings.s3.publicBucket, this.settings.s3.privateBucket]) {
+      await this.exec(
+        new deps.commands.PutBucketCors({
+          Bucket: bucket,
+          CORSConfiguration: {
+            CORSRules: [
+              {
+                AllowedOrigins: [...request.allowedOrigins],
+                AllowedMethods: [...CORS_METHODS],
+                AllowedHeaders: [...CORS_ALLOWED_HEADERS],
+                ExposeHeaders: [...CORS_EXPOSED_HEADERS],
+                MaxAgeSeconds: request.maxAgeSec,
+              },
+            ],
+          },
+        }),
+      );
+    }
   }
 
   /**

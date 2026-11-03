@@ -65,6 +65,7 @@ const app = createApp({
       services: new SalonServicesRepository(m.services.model as never),
       storage: { getPublicUrl: (k: string) => k },
       uploads: { assertConfirmed: () => Promise.resolve() },
+      cleanup: { enqueue: () => Promise.resolve() },
       state,
       mainBranches,
       branches,

@@ -262,6 +262,7 @@ const unavailableCrud: AdminCrudService<never> = {
   get: unavailable,
   create: unavailable,
   update: unavailable,
+  validate: unavailable,
 };
 
 export const unavailableAdminLocations: AdminLocationServices = {
