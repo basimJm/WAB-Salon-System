@@ -11,6 +11,7 @@ import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingDetails
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingMoney
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingPerson
+import com.fab.wab.merchant.feature.bookings.domain.model.BookingSource
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingSummary
 import com.fab.wab.merchant.feature.bookings.domain.model.BranchRef
 import com.fab.wab.merchant.feature.bookings.domain.model.StaffRef
@@ -39,6 +40,9 @@ fun GetBookingsDataItem.toDomain(): BookingSummary? {
         customerPhone = customer?.phone,
         staff = staff.map { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
         branch = branch?.let { BranchRef(it.id, it.name, it.locationText?.takeIf(String::isNotBlank)) },
+        source = BookingSource.fromCode(source),
+        createdByName = createdBy?.name?.takeIf(String::isNotBlank),
+        customerHasAccount = customer?.let { it.id != null } ?: true,
     )
 }
 
@@ -50,6 +54,8 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
         respondBy = instantOf(respondBy), personsCount = personsCount.toInt(), total = total, customerName = customer?.name.orEmpty(),
         customerPhone = customer?.phone, staff = staff.map { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
         branch = branch?.let { BranchRef(it.id, it.name, it.locationText?.takeIf(String::isNotBlank)) },
+        source = BookingSource.fromCode(source), createdByName = createdBy?.name?.takeIf(String::isNotBlank),
+        customerHasAccount = customer?.let { it.id != null } ?: true,
     )
     return BookingDetails(
         summary = summary,
@@ -59,6 +65,7 @@ fun GetBookingsByIdData.toDomain(): BookingDetails? {
                 name = person.name, isBride = person.isBride, start = instantOf(person.start), end = instantOf(person.end),
                 subtotal = person.subtotal, staff = person.staff?.let { StaffRef(it.id, it.name, photoUrl = it.photoUrl) },
                 services = person.services.map { BookedService(it.name, it.price, it.durationMinutes.toInt()) },
+                referenceImageUrl = person.referenceImageUrl,
             )
         },
         money = with(money) { BookingMoney(total, dueOnline, paidOnline, remaining, refunded, paidAtSalon) },

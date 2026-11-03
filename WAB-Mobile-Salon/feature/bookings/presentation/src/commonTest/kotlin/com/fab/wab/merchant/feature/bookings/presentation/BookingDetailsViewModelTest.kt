@@ -4,6 +4,7 @@ import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.domain.AppError
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.ErrorCode
+import com.fab.wab.merchant.core.domain.booking.BookingStatus
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsDefaults
 import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
@@ -53,6 +54,20 @@ class BookingDetailsViewModelTest {
         assertEquals(setOf(BookingAction.APPROVE, BookingAction.REJECT), state.actions)
         changes.emit(Unit)
         assertEquals(2, repository.detailsCalls)
+    }
+
+    @Test
+    fun assignedStaffSeesAndRunsCompleteAndNoShowWhenTheServerSendsThem() = runTest(UnconfinedTestDispatcher()) {
+        // MER-086 (§5.21): the booking's own staff (BOOKINGS_VIEW_OWN only) gets COMPLETE / NO_SHOW in `actions`.
+        repository.detailsResult = AppResult.Success(
+            details(actions = setOf(BookingAction.COMPLETE, BookingAction.NO_SHOW), status = BookingStatus.APPROVED),
+        )
+        val viewModel = viewModel()
+        assertEquals(setOf(BookingAction.COMPLETE, BookingAction.NO_SHOW), viewModel.state.first { !it.loading }.actions)
+        viewModel.onEvent(UiAction.OnActionClick(BookingAction.NO_SHOW))
+        assertEquals(DetailsDialog.Confirm(BookingAction.NO_SHOW), viewModel.state.first().dialog)
+        viewModel.onEvent(UiAction.OnDialogConfirm)
+        assertEquals("noShow", repository.actions.last())
     }
 
     @Test

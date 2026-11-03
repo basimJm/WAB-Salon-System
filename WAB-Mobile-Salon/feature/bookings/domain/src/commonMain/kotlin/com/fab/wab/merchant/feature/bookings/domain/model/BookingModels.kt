@@ -7,8 +7,8 @@ import com.fab.wab.merchant.core.domain.policy.PolicyTerms
 import kotlinx.datetime.LocalDate
 import kotlin.time.Instant
 
-/** PRD M08 tabs (`GET /bookings?tab`). */
-enum class BookingsTab { PENDING, UPCOMING, TODAY, PAST }
+/** PRD M08 tabs (`GET /bookings?tab`); TO_CLOSE = approved bookings whose end passed, oldest first (§5.21). */
+enum class BookingsTab { PENDING, UPCOMING, TODAY, TO_CLOSE, PAST }
 
 /**
  * A staff member; [branchId] = the member's branch (null for the owner or an older server); [photoUrl] = the member's
@@ -35,7 +35,26 @@ data class BookingSummary(
     val customerPhone: String?,
     val staff: List<StaffRef>,
     val branch: BranchRef? = null,
-)
+    /** Who created it (BUSINESS_DOMAIN §5.20): the customer in the app, or a member for the customer. */
+    val source: BookingSource = BookingSource.CUSTOMER_APP,
+    /** The member who created a MERCHANT booking (`createdBy.name`); null for app bookings. */
+    val createdByName: String? = null,
+    /** False when the customer has no WAB account (`customer.id` null, §5.20). */
+    val customerHasAccount: Boolean = true,
+) {
+    val isCreatedByBusiness: Boolean get() = source == BookingSource.MERCHANT
+}
+
+/** `source` of a booking (contract 1.13.0). */
+enum class BookingSource {
+    CUSTOMER_APP,
+    MERCHANT,
+    ;
+
+    companion object {
+        fun fromCode(code: String?): BookingSource = entries.firstOrNull { it.name == code } ?: CUSTOMER_APP
+    }
+}
 
 /** PRD M08 filter sheet: date range, staff (multi), status (multi), bride only, payment status. */
 data class BookingFilter(
@@ -75,6 +94,8 @@ data class BookingPerson(
     val subtotal: String,
     val staff: StaffRef?,
     val services: List<BookedService>,
+    /** Tattoo design image (BUSINESS_DOMAIN §5.23): a short-lived signed URL; null when none. */
+    val referenceImageUrl: String? = null,
 )
 
 /**

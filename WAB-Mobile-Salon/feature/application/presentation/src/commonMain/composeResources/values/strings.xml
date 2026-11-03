@@ -8,12 +8,14 @@
     <string name="reg_business_type">What are you registering?</string>
     <string name="reg_salon">Salon</string>
     <string name="reg_clinic">Beauty clinic</string>
+    <string name="reg_tattoo">Tattoo studio</string>
     <string name="reg_type_locked">The business type cannot be changed.</string>
     <string name="reg_clinic_name">Clinic name</string>
     <string name="reg_clinic_name_hint">e.g. Glow Clinic</string>
     <string name="reg_audience">Who does the salon serve?</string>
     <string name="reg_both">Both</string>
     <string name="reg_clinic_unisex">Clinics serve both men and women.</string>
+    <string name="reg_tattoo_unisex">Tattoo studios serve both men and women.</string>
     <string name="reg_audience_men">Men</string>
     <string name="reg_audience_women">Women</string>
     <string name="reg_audience_both">Men and women</string>

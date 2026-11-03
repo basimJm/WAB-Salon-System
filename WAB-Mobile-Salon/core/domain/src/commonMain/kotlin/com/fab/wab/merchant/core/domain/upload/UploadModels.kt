@@ -19,6 +19,9 @@ enum class UploadPurpose {
 
     /** A clinic's medical license (BUSINESS_DOMAIN §5.19): the same public license flow with this purpose. */
     MEDICAL_LICENSE,
+
+    /** A tattoo design attached by a member to a booking they create (BUSINESS_DOMAIN §5.20, §5.23); private file. */
+    BOOKING_REFERENCE,
     ;
 
     /** Uploaded through the public license routes (the applicant has no salon session yet). */

@@ -24,6 +24,8 @@ class RealApplicationFixturesTest {
         assertEquals(MemberRole.OWNER, session.member.role)
         assertEquals(registered.member.salonId, session.member.salonId)
         assertEquals(registered.application.salonId, session.member.salonId)
-        assertEquals(Permission.entries.map { it.name }.toSet(), session.permissions)
+        // The answer was captured before BOOKINGS_CREATE (contract 1.13.0, §5.20); every other key is there.
+        val known = (Permission.entries - Permission.BOOKINGS_CREATE).map { it.name }.toSet()
+        assertEquals(known, session.permissions - Permission.BOOKINGS_CREATE.name)
     }
 }

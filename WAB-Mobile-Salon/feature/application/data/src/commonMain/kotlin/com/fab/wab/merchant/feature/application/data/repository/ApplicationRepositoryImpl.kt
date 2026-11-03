@@ -13,6 +13,7 @@ import com.fab.wab.merchant.core.data.contract.generated.PostSalonApplicationsDa
 import com.fab.wab.merchant.core.domain.AppResult
 import com.fab.wab.merchant.core.domain.auth.AuthTokens
 import com.fab.wab.merchant.core.domain.mapSuccess
+import com.fab.wab.merchant.core.domain.salon.BusinessType
 import com.fab.wab.merchant.core.domain.session.MemberProfile
 import com.fab.wab.merchant.core.domain.session.MemberRole
 import com.fab.wab.merchant.core.domain.session.SalonState
@@ -73,8 +74,8 @@ fun RegistrationForm.toApplyBody(phone: PhoneNumber, otpToken: String, installat
     ),
 )
 
-/** A clinic's audience is not sent (the server keeps it BOTH, §5.19); a salon sends the one it chose. */
-private val RegistrationForm.salonAudience: String? get() = kind.audience.name.takeUnless { kind.isClinic }
+/** Only a salon sends its audience; clinics and tattoo studios are always BOTH on the server (§5.19, §5.23). */
+private val RegistrationForm.salonAudience: String? get() = kind.audience.name.takeIf { kind.type == BusinessType.SALON }
 
 /** A resubmission keeps the medical license on file unless the clinic added new files. */
 fun RegistrationForm.toResubmitBody() = PostSalonApplicationResubmitBody(

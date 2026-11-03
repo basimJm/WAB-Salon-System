@@ -44,6 +44,7 @@ import com.fab.wab.merchant.feature.salon.presentation.resources.hub_missing
 import com.fab.wab.merchant.feature.salon.presentation.resources.hub_no_access
 import com.fab.wab.merchant.feature.salon.presentation.resources.hub_title
 import com.fab.wab.merchant.feature.salon.presentation.resources.hub_title_clinic
+import com.fab.wab.merchant.feature.salon.presentation.resources.hub_title_tattoo
 import org.jetbrains.compose.resources.stringResource
 
 private const val HEADER_KEY = "hub-header"
@@ -86,7 +87,7 @@ fun SalonHubScreen(state: UiState, available: Set<HubTile>, onAction: (UiAction)
 private fun Header(state: UiState) {
     val spacing = AppTheme.spacing
     Column(verticalArrangement = Arrangement.spacedBy(spacing.space12)) {
-        val title = byType(state.salon?.businessType, Res.string.hub_title, Res.string.hub_title_clinic)
+        val title = byType(state.salon?.businessType, Res.string.hub_title, Res.string.hub_title_clinic, Res.string.hub_title_tattoo)
         AppText(text = stringResource(title), style = AppTheme.typography.headlineMedium)
         state.salon?.let { SalonRow(it) }
         if (state.noAccess) AppText(

@@ -63,7 +63,7 @@ fun registrationErrors(input: RegistrationInput, requireTerms: Boolean = true, r
 private fun outOfRange(count: Int, uploading: Boolean, min: Int): Boolean =
     uploading || count < min || count > RegistrationLimits.DOCUMENTS_MAX
 
-/** §5.19: the type is chosen, a salon chose its audience, a clinic uploaded its medical license. */
+/** §5.19/§5.23: the type is chosen, a salon chose its audience, a clinic uploaded its medical license; a tattoo studio needs the trade license only. */
 private fun typeErrors(input: RegistrationInput, requireMedical: Boolean): Set<RegistrationField> = buildSet {
     when (input.businessType) {
         null -> add(RegistrationField.BUSINESS_TYPE)
@@ -72,6 +72,7 @@ private fun typeErrors(input: RegistrationInput, requireMedical: Boolean): Set<R
             val min = if (requireMedical) RegistrationLimits.DOCUMENTS_MIN else 0
             if (outOfRange(input.medicalLicenseKeys.size, input.medicalUploading, min)) add(RegistrationField.MEDICAL_LICENSE)
         }
+        BusinessType.TATTOO -> Unit
     }
 }
 

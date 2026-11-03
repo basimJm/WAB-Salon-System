@@ -4,6 +4,7 @@ import { LANGUAGES } from '../../constants/i18n';
 import {
   NOTIFICATION_EVENTS,
   PUSH_RESULTS,
+  CLOSE_PUSH,
   REQUEST_PUSH,
   type Audience,
   type EventDefinition,
@@ -104,6 +105,58 @@ const text = (key: string, params: NotifyInput['params'], language: Language): s
   return translate(language, key, resolved);
 };
 
+/**
+ * Close pushes (§5.21, SRV-187): Android gets a data message so the app draws Completed / No-show; iOS a
+ * time-sensitive alert with the `BOOKING_CLOSE` category. One per booking on screen (collapse key).
+ */
+const closePushes = (
+  recipient: Pick<Recipient, 'app' | 'id' | 'tokens' | 'platforms'>,
+  input: NotifyInput,
+  data: Record<string, string>,
+  shown: { title: string; body: string },
+  priority: Pick<PushRequest['message'], 'priority'>,
+): PushRequest[] => {
+  const android = recipient.tokens.filter((t) => recipient.platforms.get(t) !== 'IOS');
+  const ios = recipient.tokens.filter((t) => recipient.platforms.get(t) === 'IOS');
+  const collapse = input.data?.bookingId === undefined ? {} : { collapseKey: input.data.bookingId };
+  const withActions = { ...data, actions: CLOSE_PUSH.actions };
+  return [
+    ...(android.length === 0
+      ? []
+      : [
+          {
+            target: { tokens: android },
+            message: {
+              app: recipient.app,
+              kind: 'DATA_ONLY' as const,
+              data: { ...withActions, ...shown },
+              ...priority,
+              ...collapse,
+            },
+            idempotencyKey: `${input.key}:${recipient.id}:android`,
+          },
+        ]),
+    ...(ios.length === 0
+      ? []
+      : [
+          {
+            target: { tokens: ios },
+            message: {
+              app: recipient.app,
+              kind: 'VISIBLE' as const,
+              ...shown,
+              data: withActions,
+              ...priority,
+              interruption: 'TIME_SENSITIVE' as const,
+              actionCategory: CLOSE_PUSH.iosActionCategory,
+              ...collapse,
+            },
+            idempotencyKey: `${input.key}:${recipient.id}:ios`,
+          },
+        ]),
+  ];
+};
+
 export const createNotificationService = (deps: NotificationDeps): NotificationService => {
   const { notifications, customers, members, installations, notifier, access, logger } = deps;
 
@@ -195,7 +248,10 @@ export const createNotificationService = (deps: NotificationDeps): NotificationS
     const priority = definition.priority === undefined ? {} : { priority: definition.priority };
     const requests: PushRequest[] = [];
     const isRequest = definition.request === true && recipient.app === 'MERCHANT';
-    if (isRequest) {
+    const isClose = definition.closeActions === true && recipient.app === 'MERCHANT';
+    if (isClose) {
+      requests.push(...closePushes(recipient, input, data, shown, priority));
+    } else if (isRequest) {
       // Android: a data message wakes the app so it can draw the overlay / full-screen alert.
       // iOS cannot run code for a visible alert: a time-sensitive notification with action buttons.
       const android = recipient.tokens.filter((t) => recipient.platforms.get(t) !== 'IOS');

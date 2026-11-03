@@ -38,10 +38,10 @@ class PermissionsTest {
 
     @Test
     fun defaultTemplatesFollowPrd63() {
-        assertEquals(12, PermissionTemplates.MANAGER.size)
+        assertEquals(13, PermissionTemplates.MANAGER.size)
         assertFalse(Permission.FINANCE_VIEW in PermissionTemplates.MANAGER)
         assertFalse(Permission.POLICIES_MANAGE in PermissionTemplates.MANAGER)
         assertEquals(setOf(Permission.BOOKINGS_VIEW_OWN, Permission.REVIEWS_VIEW), PermissionTemplates.forRole(MemberRole.EMPLOYEE))
-        assertEquals(15, PermissionTemplates.forRole(MemberRole.OWNER).size)
+        assertEquals(16, PermissionTemplates.forRole(MemberRole.OWNER).size)
     }
 }

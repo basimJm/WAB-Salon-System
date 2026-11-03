@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,8 @@ import com.fab.wab.merchant.core.domain.booking.BookingTimers
 import com.fab.wab.merchant.designsystem.components.booking.AppBookingCard
 import com.fab.wab.merchant.designsystem.components.booking.BookingCardUi
 import com.fab.wab.merchant.designsystem.components.branch.AppBranchSwitcher
+import com.fab.wab.merchant.designsystem.components.button.AppButton
+import com.fab.wab.merchant.designsystem.components.button.ButtonKind
 import com.fab.wab.merchant.designsystem.components.chip.ActiveFilterChip
 import com.fab.wab.merchant.designsystem.components.chip.AppFilterChipRow
 import com.fab.wab.merchant.designsystem.components.feedback.AppEmptyState
@@ -29,6 +32,7 @@ import com.fab.wab.merchant.designsystem.components.selector.AppSegmentedTabs
 import com.fab.wab.merchant.designsystem.components.shimmer.AppShimmerList
 import com.fab.wab.merchant.designsystem.components.text.AppText
 import com.fab.wab.merchant.designsystem.components.textfield.AppSearchBar
+import com.fab.wab.merchant.designsystem.icons.AppIcons
 import com.fab.wab.merchant.designsystem.theme.AppTheme
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingSummary
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingsTab
@@ -41,6 +45,8 @@ import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_no_
 import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_no_results_body
 import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_search
 import com.fab.wab.merchant.feature.bookings.presentation.resources.bookings_title
+import com.fab.wab.merchant.feature.bookings.presentation.resources.new_booking
+import com.fab.wab.merchant.feature.bookings.presentation.resources.source_business
 import org.jetbrains.compose.resources.stringResource
 
 /** PRD M08 (design 03 `on.list`): search, tabs, filter chips, paged booking cards. */
@@ -54,7 +60,21 @@ fun BookingsScreen(state: UiState, onAction: (UiAction) -> Unit, modifier: Modif
                 modifier = Modifier.padding(horizontal = spacing.space16, vertical = spacing.space12),
                 verticalArrangement = Arrangement.spacedBy(spacing.space10),
             ) {
-                AppText(text = stringResource(Res.string.bookings_title), style = AppTheme.typography.headlineMedium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AppText(
+                        text = stringResource(Res.string.bookings_title),
+                        style = AppTheme.typography.headlineMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (state.canCreate) {
+                        AppButton(
+                            text = stringResource(Res.string.new_booking),
+                            onClick = { onAction(UiAction.OnNewBooking) },
+                            kind = ButtonKind.Secondary,
+                            leadingIcon = AppIcons.Add,
+                        )
+                    }
+                }
                 if (state.branchScope.showsSwitcher) {
                     AppBranchSwitcher(
                         branches = state.branchScope.branches,
@@ -139,6 +159,7 @@ internal fun BookingSummary.toCard(nowMs: Long, showBranch: Boolean = false): Bo
             pending && nowMs > 0
         }?.let { BookingTimers.autoCancelRemaining(it.toEpochMilliseconds(), nowMs) },
         branch = branch?.name?.takeIf { showBranch },
+        sourceLabel = if (isCreatedByBusiness) stringResource(Res.string.source_business) else null,
     )
 }
 
