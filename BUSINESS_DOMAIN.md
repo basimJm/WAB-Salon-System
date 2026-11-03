@@ -4,7 +4,7 @@
 > **Who uses it:** WAB-Server (schemas, services, rules), the generated OpenAPI contract (`INTEGRATION.md` §3), and all clients for shared enums/rules.
 > **Sources:** consolidated from the Customer, Merchant and Admin PRDs and BRDs, the Backend BRD, the package BRDs and `CLAUDE.md`. If this file conflicts with a PRD on **screen behavior**, the PRD wins. If it conflicts on **data/rules**, raise it and fix both.
 > **Branches (owner decisions 2026-10-25):** a salon (the brand) has one or more **branches**; location, contacts, hours, closures, services/prices and staff belong to a branch; name, gender, logo/cover/gallery, description, policy, subscription, payouts, rating and Recommended placement stay salon-wide. See §3.3a, §5.2, §5.16–§5.18 and decision log §12.
-> **Business types (owner decisions 2026-10-29):** a business is a **SALON** or a **CLINIC** (beauty clinic: botox, filler, laser…). Salons serve men, women or **both** (`audience`); clinics are always for everyone (`audience = BOTH`). Clinics work exactly like salons (branches, staff, services, booking flow, subscription, placements) but have their own catalog categories, home sections and a required medical license. See §3.3, §5.4, §5.17, §5.19 and decision log §12.10.
+> **Business types (owner decisions 2026-10-29):** a business is a **SALON** or a **CLINIC** (beauty clinic: botox, filler, laser…). Salons serve men, women or **both** (`audience`); clinics are always for everyone (`audience = BOTH`). Clinics work exactly like salons (branches, staff, services, booking flow, subscription, placements) but have their own catalog categories, home sections and a required medical license. See §3.3, §5.4, §5.17, §5.19 and decision log §12.10. **Tattoo studios (owner 2026-11-03)** are the third type (`TATTOO`, always BOTH, §5.23); salons can also **book for customers** with or without the app (§5.20); finished bookings are **closed by reminders** (§5.21); discovery lists every type and audience together, without a gender filter (§5.22).
 > **Conventions:** MongoDB + Mongoose; `_id` ObjectId; timestamps `createdAt`/`updatedAt` (UTC) on every collection; money stored as **integer fils** (1 JOD = 1000 fils) to avoid float errors and exposed in the API as a decimal string with 3 decimals; localized admin-managed text as `{ ar, en }`; files stored as **storage keys** (never full URLs); soft-delete via status fields, not physical deletes, unless stated.
 
 ---
@@ -27,8 +27,8 @@ A phone number belongs to at most one customer and, separately, at most one memb
 
 ```
 Gender                 = MALE | FEMALE                       // a person (customer, booking person)
-BusinessType           = SALON | CLINIC                      // what the business is (immutable after the application)
-Audience               = MALE | FEMALE | BOTH                // who a business serves; CLINIC is always BOTH
+BusinessType           = SALON | CLINIC | TATTOO             // what the business is (immutable after the application)
+Audience               = MALE | FEMALE | BOTH                // who a business serves; CLINIC and TATTOO are always BOTH
 Language               = ar | en
 AppKind                = CUSTOMER | MERCHANT
 Platform               = ANDROID | IOS | WEB
@@ -39,6 +39,7 @@ BranchStatus           = ACTIVE | OFFLINE | CLOSED      // CLOSED = deactivated,
 Permission             = DASHBOARD_VIEW | BOOKINGS_VIEW_ALL | BOOKINGS_VIEW_OWN | BOOKINGS_RESPOND | BOOKINGS_OPERATE
                        | SALON_PROFILE_MANAGE | GALLERY_MANAGE | WORKING_HOURS_MANAGE | SERVICES_MANAGE | STAFF_MANAGE
                        | POLICIES_MANAGE | REVIEWS_VIEW | STATISTICS_VIEW | FINANCE_VIEW | SUBSCRIPTION_VIEW
+                       | BOOKINGS_CREATE                                  // 16 grantable keys (§5.20)
 OwnerOnlyCapability    = TEAM_MANAGE | PAYOUT_DETAILS_MANAGE | SALON_DELETE_REQUEST   // never stored in permissions[]
 PaymentOption          = PAY_ON_ARRIVAL | DEPOSIT | FULL_ONLINE
 BookingStatus          = PENDING | APPROVED | REJECTED | CANCELLED_BY_CUSTOMER | CANCELLED_BY_SALON
@@ -57,7 +58,9 @@ PayoutStatus           = PENDING | TRANSFERRED
 CatalogRequestStatus   = PENDING | APPROVED | REJECTED
 UploadPurpose          = CUSTOMER_AVATAR | MEMBER_PHOTO | SALON_COVER | SALON_PROFILE | GALLERY_IMAGE | GALLERY_VIDEO
                        | SERVICE_MEDIA | LICENSE_DOCUMENT | MEDICAL_LICENSE | CATALOG_IMAGE | BANNER_IMAGE | EXPORT
+                       | BOOKING_REFERENCE                                // tattoo design image (§5.23)
 BannerAction           = NONE | SALON | EXTERNAL_URL
+BookingSource          = CUSTOMER_APP | MERCHANT                          // who created the booking (§5.20)
 FullPaymentRefundRule  = FULL | MINUS_DEPOSIT
 NoShowDepositRule      = KEEP | REFUND
 NoShowFullPaymentRule  = KEEP | REFUND_MINUS_DEPOSIT | REFUND_FULL
@@ -158,7 +161,7 @@ Index: `{businessType, audience, active, sortOrder}`; text on names.
 ```
 name: String (1–80)
 businessType: BusinessType (chosen in the application; immutable)
-audience: Audience (SALON: MALE | FEMALE | BOTH chosen in the application; CLINIC: always BOTH)
+audience: Audience (SALON: MALE | FEMALE | BOTH chosen in the application; CLINIC and TATTOO: always BOTH)
 // `gender` (MALE|FEMALE) is migrated to `audience` with businessType = SALON (§5.19); audience changes: §5.19
 state: SalonState
 description?: String (≤1000)
@@ -260,6 +263,10 @@ TTL index on `expiresAt`.
 ```
 referenceNumber: String (unique, human-friendly, e.g. "WAB-" + 6–8 base32 chars)
 customerId → customers   salonId → salons   businessType: BusinessType   salonAudience: Audience   // snapshots (replace salonGender)
+// customerId is optional for source MERCHANT: set when the phone belongs to a registered customer, or later by the claim (§5.20)
+source: BookingSource (default CUSTOMER_APP)   createdBy?: { memberId → members, name (snapshot) }   // MERCHANT only
+customerContact?: { name, phone: { dialCode, number, e164 }, gender: Gender }   // MERCHANT only, as entered by the member
+closeReminders: { count: Int (default 0), lastAt?: Date, overdueAlertedAt?: Date }   // §5.21
 branchId → branches   branchSnapshot: { name: {ar,en}, locationText, phone }   // copied at creation
 persons: [ BookingPerson ]  (1 main + ≤ settings.booking.maxCompanions)
 appointmentStart: Date (min person start)   appointmentEnd: Date (max person end)
@@ -280,9 +287,10 @@ ratingPromptSent: Boolean
 name: String   isMain: Boolean   isBride: Boolean
 services: [ { salonServiceId, catalogServiceId, name{ar,en} (snapshot), price: Int (snapshot), durationMinutes (snapshot) } ]
 staffId → members   staffSelection: SPECIFIC | ANY
+referenceImageKey?: String   // TATTOO only, optional, private (`BOOKING_REFERENCE` upload, file slot §3.7) (§5.23)
 start: Date   end: Date (start + Σ durations)   subtotal: Int
 ```
-Indexes: `referenceNumber` unique; `{customerId, appointmentStart}`; `{salonId, appointmentStart}`; `{branchId, appointmentStart}`; `{branchId, status}`; `{salonId, status}`; `{"persons.staffId", "persons.start", status}` (overlap checks); `{status, respondBy}`.
+Indexes: `referenceNumber` unique; `{customerId, appointmentStart}`; `{salonId, appointmentStart}`; `{branchId, appointmentStart}`; `{branchId, status}`; `{salonId, status}`; `{"persons.staffId", "persons.start", status}` (overlap checks); `{status, respondBy}`; `{status, appointmentEnd}` (to close, §5.21); partial `{"customerContact.phone.e164"}` where `customerId` is absent (claim, §5.20).
 
 **transactions** (every payment attempt)
 ```
@@ -429,14 +437,15 @@ Input: salonId, **branchId**, date D, services per person (services of that bran
 | From | To | Actor (permission) | Preconditions | Side effects |
 |---|---|---|---|---|
 | — | PENDING | CUSTOMER | §5.6 | notify customer + members(BOOKINGS_RESPOND); jobs |
+| — | APPROVED | MEMBER (BOOKINGS_CREATE) | §5.20 | notify the customer when registered ("Booked by …"); reminders + close jobs |
 | PENDING | APPROVED | MEMBER (BOOKINGS_RESPOND) / ADMIN | re-check staff free | notify customer; schedule reminders |
 | PENDING | REJECTED | MEMBER (BOOKINGS_RESPOND) / ADMIN | reasonCode required | full refund of paidOnline; notify |
 | PENDING | CANCELLED_BY_CUSTOMER | CUSTOMER | any time | full refund; notify salon |
 | PENDING | AUTO_CANCELLED | SYSTEM | now ≥ respondBy | full refund; notify both |
 | APPROVED | CANCELLED_BY_CUSTOMER | CUSTOMER | now < appointmentStart − cancellationWindowHours | refund per §5.8; notify salon |
 | APPROVED | CANCELLED_BY_SALON | MEMBER (BOOKINGS_OPERATE) / ADMIN | now < appointmentStart; reason required | full refund; notify customer |
-| APPROVED | COMPLETED | MEMBER (BOOKINGS_OPERATE) / ADMIN | now ≥ appointmentStart | paymentStatus = PAID; increment staff customersCount; prompt rating |
-| APPROVED | NO_SHOW | MEMBER (BOOKINGS_OPERATE) / ADMIN | now ≥ appointmentStart | refund per §5.9; notify customer |
+| APPROVED | COMPLETED | MEMBER (BOOKINGS_OPERATE, or the assigned staff of the booking) / ADMIN | now ≥ appointmentStart | paymentStatus = PAID; increment staff customersCount; prompt rating |
+| APPROVED | NO_SHOW | MEMBER (BOOKINGS_OPERATE, or the assigned staff of the booking) / ADMIN | now ≥ appointmentStart | refund per §5.9; notify customer |
 | any | any | ADMIN | reason required; warning if irregular | audit log; notify both |
 
 Every transition appends to `statusHistory`, emits socket `booking.updated`, writes a server event, and cancels/reschedules jobs. Reassign staff (APPROVED, MEMBER BOOKINGS_OPERATE/ADMIN): new staff must pass §5.4 for that person; notify customer + old/new staff.
@@ -488,19 +497,49 @@ Customer: `DELETION_PENDING`, tokens revoked, `deletionScheduledAt` = +30 days; 
 - Favorites, banners (action SALON) and deep links point at the salon; a deep link may carry `branchId` to preselect a branch.
 
 ### 5.19 Business types and audience (owner decisions 2026-10-29)
-- **Visibility:** a customer of gender G sees SALONs whose audience is G or BOTH, and every CLINIC. Lists, search, nearest, Recommended, favorites and deep links follow this rule; a guest without a gender sees what the onboarding gender selects (unchanged).
-- **Booking persons:** for a SALON with audience MALE or FEMALE every person must match it (`GENDER_MISMATCH`, unchanged); for a SALON with audience BOTH and for every CLINIC the customer and up to `booking.maxCompanions` companions may be any gender in one booking.
+- **Visibility:** ~~a customer of gender G sees SALONs whose audience is G or BOTH~~ — replaced 2026-11-03 by §5.22: every LIVE business of every type and audience is listed for everyone; gender is a search filter only.
+- **Booking persons:** for a SALON with audience MALE or FEMALE every person must match it (`GENDER_MISMATCH`, unchanged); for a SALON with audience BOTH and for every CLINIC and TATTOO studio the customer and up to `booking.maxCompanions` companions may be any gender in one booking.
 - **Bride:** bride bookings, `brideOnly` services and `brideQualified` staff exist only for SALONs with audience FEMALE or BOTH; never for clinics (`BRIDE_NOT_ALLOWED`).
 - **Catalog:** catalog services carry `businessType` + `audience`; admin manages them per business type; a business offers (and requests) only services of its own type that fit its audience (`BUSINESS_TYPE_MISMATCH`). Search by service and the home services sections are per type.
-- **Application:** the merchant chooses SALON or CLINIC. SALON → audience MALE, FEMALE or BOTH; CLINIC → audience BOTH (not asked) and a **medical license** document (`UploadPurpose MEDICAL_LICENSE`) is required besides the trade license; admin sees both before approval.
+- **Application:** the merchant chooses SALON, CLINIC or TATTOO (TATTOO: §5.23). SALON → audience MALE, FEMALE or BOTH; CLINIC → audience BOTH (not asked) and a **medical license** document (`UploadPurpose MEDICAL_LICENSE`) is required besides the trade license; admin sees both before approval.
 - **Audience change after approval:** the OWNER can widen a SALON MALE→BOTH or FEMALE→BOTH instantly (audit + admin notification `salon.audience_widened`); narrowing BOTH→MALE/FEMALE only by admin with a reason (conflicting future bookings/services follow §5.12); a CLINIC's audience never changes; businessType never changes (`AUDIENCE_CHANGE_NOT_ALLOWED`).
-- **Customer home:** sections in order — banners, services (salon services, then clinic services), Recommended salons, **Recommended clinics**, nearest salons, **nearest clinics**; "See more" of the clinic sections opens the same list screens filtered to CLINIC. Bookings list filter: all / salons / clinics.
+- **Customer home:** ~~per-type sections~~ — replaced 2026-11-03 by the merged home of §5.22.
 - **Admin:** every business list, application queue, booking list, review list, placement list, catalog, banner, campaign, report and export can be filtered by businessType; catalog categories are managed per business type.
 - **Migration:** existing salons get `businessType = SALON`, `audience = gender`; catalog services `businessType = SALON`, `audience = gender`; bookings `businessType = SALON`, `salonAudience = salonGender`; placements copy from their salon. API: `gender` on salon/catalog payloads is replaced by `businessType` + `audience` (contracts bumped; clients re-sync).
 
 ### 5.18 Booking with branches
 - **Step 1 = choose branch** when the salon has more than one bookable branch (skipped and auto-selected when it has exactly one). Every later step (services, staff, slots) uses that branch only; a draft and its booking keep `branchId` + `branchSnapshot`.
 - Booking requests go to the owner and to members **of that branch** with `BOOKINGS_RESPOND` (socket + FCM); jobs and reminders follow the same recipients.
+
+
+### 5.20 Bookings created by the business (owner decisions 2026-11-03)
+- **Who:** the OWNER or a member with `BOOKINGS_CREATE`, for their own branch (branch scope §6); every business type.
+- **Customer:** the member enters a mobile number. `GET /merchant/v1/customers/lookup?phone=` answers `{registered, firstName?, gender?}` (rate-limited, server event logged). Registered → the booking gets `customerId` (name and gender from the account; a BLOCKED customer → `ACCOUNT_BLOCKED`). Not registered → `customerContact {name, phone, gender}` is stored; no account is created and no message is sent (no WhatsApp/SMS).
+- **Rules:** the same persons (main + ≤ `booking.maxCompanions`), audience (§5.19), bride, services, staff eligibility and slot rules (§5.4) as the app; created in one step under the same Redis staff locks and Mongo transaction with the overlap re-check of §5.6 step 4 (no draft, no OTP, no online payment). `paymentMethod = PAY_ON_ARRIVAL`; status starts **APPROVED** (`statusHistory[0]` actor MEMBER); `source = MERCHANT`, `createdBy` = member; reminders (§9) and close jobs (§5.21) are scheduled.
+- **Registered customer:** receives every status notification of that booking like an app booking, each naming **"Booked by <Salon - Branch>"** (§8); the booking appears in their app with the same label and can be cancelled by them under the snapshotted policy (§5.8).
+- **Claim:** when a customer registers (or changes phone) with a number that has MERCHANT bookings without `customerId`, those bookings get the new `customerId` (history is not re-notified).
+- **Reviews:** only registered customers review; a booking without `customerId` sends no rating prompt and cannot be reviewed (a claimed, completed booking follows §12 point 11).
+- **Admin:** booking lists/details/exports show `source` and `createdBy` and filter by source.
+
+### 5.21 Closing finished bookings (owner decisions 2026-11-03)
+- A booking still **APPROVED** after its `appointmentEnd` is *to close*. At `appointmentEnd + booking.closeReminderIntervalMinutes` and then every interval, **until it is COMPLETED or NO_SHOW** (no cap; owner), the assigned staff of each person, the branch members with `BOOKINGS_OPERATE` and the owner get `booking.close_reminder` (push with actions Completed / No-show + in-app + socket); `closeReminders.count/lastAt` updated.
+- At `appointmentEnd + booking.closeOverdueAlertHours` (once): `booking.close_overdue` to the same merchant recipients **and the admin** (email + admin alerts list); reminders continue.
+- The **assigned staff** may mark their own booking COMPLETED or NO_SHOW (no `BOOKINGS_OPERATE` needed); `TOO_EARLY_TO_COMPLETE` before `appointmentStart` (unchanged).
+- Merchant list *To close*: `GET /merchant/v1/bookings?toClose=true` (permission-scoped like the bookings list). The customer sees COMPLETED at once (socket `booking.updated` + push `booking.completed`).
+
+### 5.22 Discovery across business types (customer, owner decisions 2026-11-03)
+- **No gender filter in discovery:** gender is still asked in guest onboarding and registration, but home, nearest, Recommended, favorites, deep links and search list every LIVE business of every type and audience. Booking rules are unchanged: a Men/Women salon still takes only persons of its audience (`GENDER_MISMATCH`); cards and details show the audience label.
+- **Type lens:** chips **All · Salons · Clinics · Tattoo** (default All) on Home, Search and Bookings; on Home the lens filters every section at once. Each card shows a type label.
+- **Home sections, in order:** banners; *Explore* (most-booked catalog services across the lens' types, each with its type); *Near you* (one list of the lens' types ranked by distance); *Recommended* (one rail of the lens' active placements, §5.13); *Book again* (registered customers with completed bookings). "See all" opens the list screen with the same lens.
+- **Search:** typed suggestions grouped *Services* (with the number of places offering them) then *Places*; recent searches kept on the device; quick chips Open now · Nearest · rating · price; the filter sheet filters by **business type** (multi), **services** (catalog of the chosen types), **gender** (Men = audience MALE or BOTH, Women = FEMALE or BOTH), **price** (min–max of the business' service prices, fils) and **minimum rating**.
+- **Bookings:** segments **Upcoming / Past** with the type lens as filter; MERCHANT bookings labelled "Booked by …"; completed cards offer **Rate** (registered, §5.20) and **Book again** (opens the business with the same services preselected).
+
+### 5.23 Tattoo studios (owner decisions 2026-11-03)
+- `BusinessType TATTOO` — "Tattoo studio" / "استوديو وشم"; audience always **BOTH** (not asked, never changes); mixed-gender persons; **no bride** (`BRIDE_NOT_ALLOWED`); **no age check** (owner).
+- Branches, staff, schedules, policies, subscription, placements and the booking flow are the same as salons and clinics; admin manages TATTOO catalog categories and Recommended per type.
+- **Catalog:** a service (e.g. piercing) exists for a type only when admin adds it to that type's catalog; salons, clinics and tattoo studios each offer only their own type's services (`BUSINESS_TYPE_MISMATCH`).
+- **Reference image:** in a TATTOO booking each person may attach **one optional design image** (`BOOKING_REFERENCE` upload by the customer, or by the member for §5.20; private bucket; moved into the slot `bookings/{bookingId}/persons/{index}/reference`; shown through short-lived signed URLs to the customer and to members who can view that booking). Any other business type → `BUSINESS_TYPE_MISMATCH`.
+- **Application:** trade license documents as for salons; no medical license (§12 point 11).
 
 ---
 
@@ -512,7 +551,8 @@ Customer: `DELETION_PENDING`, tokens revoked, `deletionScheduledAt` = +30 days; 
 | List/view all bookings, full calendar | BOOKINGS_VIEW_ALL |
 | List/view own bookings, own calendar column | BOOKINGS_VIEW_OWN |
 | Approve/reject + receive request alerts | BOOKINGS_RESPOND |
-| Complete, no-show, salon cancel, reassign | BOOKINGS_OPERATE |
+| Complete, no-show, salon cancel, reassign | BOOKINGS_OPERATE (the assigned staff may complete / no-show their own booking, §5.21) |
+| Create a booking for a customer (with or without the app, §5.20) | BOOKINGS_CREATE |
 | Profile, location, contacts | SALON_PROFILE_MANAGE |
 | Gallery | GALLERY_MANAGE |
 | Weekly hours, closures | WORKING_HOURS_MANAGE |
@@ -557,7 +597,10 @@ Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON
 | booking.reminder_1h / reminder_15m | ✔ | ✔ assigned staff (1h) | — |
 | booking.pending_30m | ✔ | ✔ (RESPOND) | — |
 | salon.audience_widened (owner widened to BOTH, §5.19) | — | ✔ owner (confirmation) | ✔ |
-| booking.completed (rate) / no_show | ✔ | — | — |
+| booking.completed (rate) / no_show | ✔ (rate: registered only) | — | — |
+| booking.created_by_merchant (§5.20) | ✔ if registered ("Booked by …") | — | — |
+| booking.close_reminder (every interval after the end, §5.21) | — | ✔ assigned staff + OPERATE | — |
+| booking.close_overdue (§5.21) | — | ✔ assigned staff + OPERATE | ✔ |
 | booking.reassigned | ✔ | ✔ old/new staff | — |
 | refund.pending / refunded | ✔ | in-app (FINANCE_VIEW) | refund failed/delayed |
 | review.published | — | ✔ (REVIEWS_VIEW / staff) | review.created → pending |
@@ -568,7 +611,7 @@ Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON
 | payment.failed spike, 5xx/crash spike | — | — | ✔ |
 | promotion | ✔ | — | — |
 
-Merchant recipients are the owner plus members **of the booking's branch** with the permission shown. Push respects `pushEnabled`; in-app notification is always stored.
+Merchant recipients are the owner plus members **of the booking's branch** with the permission shown. Push respects `pushEnabled`; in-app notification is always stored. MERCHANT bookings (§5.20) notify the customer only while it has a `customerId`, and every booking notification of such a booking names "Booked by <place>".
 Booking notifications name the place like §5.17: **"Salon - Branch"** (branch name as booked, in the recipient's language) for every branch of a salon with more than one non-closed branch, the main branch included; the salon name alone for a single-branch salon (SRV-172).
 
 ---
@@ -580,6 +623,8 @@ Booking notifications name the place like §5.17: **"Salon - Branch"** (branch n
 | `booking:reminder:{id}:60` | start − 60 min (APPROVED) | notify customer + staff |
 | `booking:reminder:{id}:15` | start − 15 min (APPROVED) | notify customer |
 | `booking:pending-alert:{id}` | start − 30 min (if PENDING) | notify customer + RESPOND members |
+| `booking:close-reminder:{id}` | appointmentEnd + `booking.closeReminderIntervalMinutes`, repeating every interval (if APPROVED) | notify assigned staff + OPERATE (§5.21) |
+| `booking:close-overdue:{id}` | appointmentEnd + `booking.closeOverdueAlertHours` (if APPROVED) | merchant + admin alert (§5.21) |
 | `booking:auto-cancel:{id}` | respondBy (if PENDING) | AUTO_CANCELLED + full refund |
 | `draft:expire` | TTL | release holds |
 | `refund:retry:{id}` | backoff | retry refund |
@@ -602,6 +647,7 @@ booking.slotMinutes = 15                    booking.maxDaysAhead = 90
 booking.maxCompanions = 5                   booking.minLeadMinutes = 0
 booking.paymentHoldMinutes = 10             booking.autoCancelAfterStartMinutes = 60
 booking.pendingAlertBeforeMinutes = 30      booking.reminderMinutes = [60, 15]
+booking.closeReminderIntervalMinutes = 60   booking.closeOverdueAlertHours = 24
 otp.length = 6                              otp.resendAfterSec = 60
 otp.maxRequests = 5   otp.requestWindowSec = 300   otp.maxWrong = 5   otp.blockSec = 900
 otp.codeTtlSec = 300   otp.proofTtlSec = 600   otp.channel = WHATSAPP
@@ -645,3 +691,4 @@ MAINTENANCE  UPDATE_REQUIRED
 7. Branches (owner decisions 2026-10-25): per branch = location & contacts, hours & closures, services & prices, staff (one branch per member); salon-wide = name, gender, logo/cover/gallery, description, policy, subscription (3 free months per salon), payouts (one bank account), rating, Recommended placement. No admin approval for new branches (live when complete). Managers: one or more per branch, branch data only, no finance/subscription/policy; team members and permissions stay owner-only. Search card = nearest branch; nearest list = one entry per branch, "Salon - Branch". Closing a branch is blocked while it has upcoming bookings; branch or whole salon can go offline; existing salons migrate to one main branch; reviews show their branch; branch limit = setting `salon.maxBranches`.
 8. Phone OTP (owner decisions 2026-10-26): server-generated codes delivered over WhatsApp by ARQAM OTP (AR + EN authentication templates; the direct Meta Cloud API channel, its delivery webhook and status polling were dropped) (§3.1a); Firebase Phone Auth removed from the server and both apps (Firebase stays for push, analytics, crash reporting). Users without WhatsApp cannot receive a code (no SMS fallback).
 10. Business types (owner decisions 2026-10-29): SALON or CLINIC (immutable); salons serve MALE, FEMALE or BOTH, clinics always BOTH; BOTH salons and clinics are visible to everyone and take mixed-gender bookings; owner may widen a salon to BOTH, narrowing only by admin; clinics need a medical license; bride only for FEMALE/BOTH salons; catalog per business type; home adds Recommended clinics + nearest clinics; bookings filter salon/clinic; admin filters everything by business type (§5.19).
+11. Tattoo, business bookings, closing, discovery (owner decisions 2026-11-03): TATTOO type (BOTH, no bride, no age check, optional design image per person); piercing and similar services exist per type when admin adds them; businesses book for registered and unregistered customers (all types; registered get every status notification with "Booked by"; unregistered get nothing; reviews only by registered customers); close reminders every hour until answered, merchant + admin alert after 24 h; discovery without a gender filter (gender kept in onboarding/registration, search filter by type, services, gender, price, rating). **Assumptions in use, confirm or change:** tattoo applications need the trade license only; a claimed MERCHANT booking that is COMPLETED can be reviewed after the claim; women see men's salons in discovery but cannot book them for themselves (`GENDER_MISMATCH`).
