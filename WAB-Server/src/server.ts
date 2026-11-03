@@ -131,6 +131,12 @@ import { createGalleryService } from './domain/gallery/gallery.service';
 import { GalleryRepository } from './repositories/gallery.repository';
 import { createUploadsService } from './domain/uploads/uploads.service';
 import { createFileSlots } from './domain/files/fileSlots.service';
+import { createReferenceImageMover } from './domain/bookings/referenceImages';
+import {
+  createBookingClaims,
+  createMerchantBookingService,
+} from './domain/bookings/merchantBooking.service';
+import { createCatalogPopularity, createPastVisits } from './domain/home/homeSources';
 import { createStorageCleanup } from './domain/files/storageCleanup.service';
 import { FILE_SLOT_LOCK, FILE_SLOT_LOCK_PREFIX } from './constants/uploads';
 import { lockKey } from './utils/redis/keys';
@@ -371,6 +377,7 @@ const buildServices = (
     installations: new InstallationsRepository(),
     cities: new CitiesRepository(),
     areas: new AreasRepository(),
+    claims: createBookingClaims({ bookings: new BookingsRepository(), logger }),
   });
   const installationService = createInstallationService({
     installations: new InstallationsRepository(),
@@ -536,6 +543,7 @@ const buildServices = (
     phones: createPhoneVerifier(phoneServices),
     otpGate,
     settings,
+    uploads,
   });
   const transactionsRepository = new TransactionsRepository();
   const refundsRepository = new RefundsRepository();
@@ -601,6 +609,21 @@ const buildServices = (
     notify: producers.bookingJobEvent,
     settings,
     logger,
+    // §5.21: the admin side of a booking still open after the overdue hours (panel + email).
+    alertCloseOverdue: async (booking) => {
+      await adminAlerts.raise({
+        kind: 'BOOKING_CLOSE_OVERDUE',
+        severity: 'WARNING',
+        dedupeKey: `booking-close-overdue:${booking.id}`,
+        entityType: 'BOOKING',
+        entityId: booking.id,
+        data: {
+          referenceNumber: booking.referenceNumber,
+          salonId: booking.salonId,
+          appointmentEnd: booking.appointmentEnd.toISOString(),
+        },
+      });
+    },
   });
   Object.assign(jobs.handlers, bookingJobs.handlers);
   jobs.reconcilers.push(() => bookingJobs.reconcile());
@@ -638,6 +661,36 @@ const buildServices = (
     holds: holdsStore,
     customers: new CustomersRepository(),
     settings,
+    referenceImages: createReferenceImageMover({
+      slots: fileSlots,
+      bookings: bookingsRepository,
+      logger,
+    }),
+  });
+  // The business books for a customer (§5.20): approved at once, so an update, never a request.
+  const merchantBooking = createMerchantBookingService({
+    redis,
+    bookings: bookingsRepository,
+    availability,
+    catalog: new CatalogServicesRepository(),
+    customers: new CustomersRepository(),
+    members: new MembersRepository(),
+    phones: createPhoneVerifier(phoneServices),
+    settings,
+    branches: branchesRepository,
+    uploads,
+    referenceImages: createReferenceImageMover({
+      slots: fileSlots,
+      bookings: bookingsRepository,
+      logger,
+    }),
+    hook: {
+      created: async (booking) => {
+        await bookingEvents.changed(booking, booking.status);
+        await producers.bookingCreatedByMerchant.created(booking);
+        await bookingJobs.hook.created(booking);
+      },
+    },
   });
   const bookingActions = createBookingActionsService({
     hook: bookingChanges,
@@ -820,6 +873,7 @@ const buildServices = (
     recommended: placements,
     salons: new SalonsRepository(),
     salonServices,
+    catalog: new CatalogServicesRepository(),
     closures: new ClosuresRepository(),
     storage: providers.storage,
     settings,
@@ -1079,6 +1133,7 @@ const buildServices = (
       actions: bookingActions,
     }),
     bookingQueries,
+    merchantBooking,
     bookingReassign,
     customerProfile,
     salonDetails: createSalonDetailsService({
@@ -1213,6 +1268,8 @@ const buildServices = (
       search,
       customers: new CustomersRepository(),
       unread: { count: (customerId) => notificationService.unreadCount('CUSTOMER', customerId) },
+      popularity: createCatalogPopularity({ bookings: bookingsRepository, logger }),
+      pastVisits: createPastVisits(bookingsRepository),
     }),
     adminBanners: withAdminImageSlots<BannerRaw>({
       crud: createAdminBannerService(bannersStore, audit),

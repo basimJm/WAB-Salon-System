@@ -1,3 +1,4 @@
+import { BOOKING_SOURCES } from '../../../models/booking.model';
 import { z } from 'zod';
 import {
   BOOKING_FILTER_MAX_ITEMS,
@@ -68,6 +69,8 @@ export const adminBookingsQuery = paginationQuery(ADMIN_PAGE_SIZE).extend({
   branchId: id.optional(),
   /** Salon or clinic bookings only (§5.19). */
   businessType: z.enum(BUSINESS_TYPES).optional(),
+  /** Made in the app or by the business (§5.20). */
+  source: z.enum(BOOKING_SOURCES).optional(),
 });
 
 export type MerchantBookingsQuery = z.infer<typeof merchantBookingsQuery>;

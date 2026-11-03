@@ -219,7 +219,7 @@ describe('demo businesses: clinics and a salon for everyone (§5.19)', () => {
     for (const salon of salons) {
       expect(salon['state']).toBe('LIVE');
       expect(salon['completeness']).toEqual({ missing: [], isComplete: true });
-      if (salon['businessType'] === 'CLINIC') expect(salon['audience']).toBe('BOTH');
+      if (salon['businessType'] !== 'SALON') expect(salon['audience']).toBe('BOTH');
     }
     for (const spec of DEMO_BUSINESSES.filter((s) => s.businessType === 'CLINIC')) {
       const branches = data.Branch.filter(
@@ -241,11 +241,12 @@ describe('demo businesses: clinics and a salon for everyone (§5.19)', () => {
     for (const member of data.Member) {
       const salon = data.Salon.find((s) => String(s['_id']) === String(member['salonId']));
       const staff = member['staff'] as { brideQualified: boolean } | undefined;
-      if (salon?.['businessType'] === 'CLINIC') expect(staff?.brideQualified ?? false).toBe(false);
+      if (salon?.['businessType'] !== 'SALON') expect(staff?.brideQualified ?? false).toBe(false);
     }
     expect(data.RecommendedPlacement.map((p) => p['businessType']).sort()).toEqual([
       'CLINIC',
       'SALON',
+      'TATTOO',
     ]);
   });
 

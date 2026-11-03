@@ -1,8 +1,16 @@
 /** Salon search for customers (SRV-057, Customer PRD S04-S05). */
-export const SEARCH_ROUTES = { base: '/salons', filters: '/filters' } as const;
+export const SEARCH_ROUTES = {
+  base: '/salons',
+  filters: '/filters',
+  suggestions: '/suggestions',
+} as const;
 export const SEARCH_GENERAL_FILTERS = ['RECOMMENDED'] as const;
 export type SearchGeneralFilter = (typeof SEARCH_GENERAL_FILTERS)[number];
 export const SEARCH_MAX_SERVICE_FILTERS = 20;
+/** Services and places shown while the customer types (§5.22), each. */
+export const SEARCH_SUGGESTION_LIMIT = 5;
+/** Business types in one lens query (`businessType=SALON,TATTOO`). */
+export const SEARCH_MAX_BUSINESS_TYPES = 10;
 export const SEARCH_TEXT_MAX_LENGTH = 80;
 export const SEARCH_RATING_MIN = 1;
 export const SEARCH_RATING_MAX = 5;

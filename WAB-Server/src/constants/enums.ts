@@ -4,10 +4,10 @@ export const GENDERS = ['MALE', 'FEMALE'] as const;
 export type Gender = (typeof GENDERS)[number];
 
 /** What a business is (BUSINESS_DOMAIN.md §2, §5.19); chosen in the application, never changes. */
-export const BUSINESS_TYPES = ['SALON', 'CLINIC'] as const;
+export const BUSINESS_TYPES = ['SALON', 'CLINIC', 'TATTOO'] as const;
 export type BusinessType = (typeof BUSINESS_TYPES)[number];
 
-/** Who a business (or a catalog service) serves (§5.19); a CLINIC is always BOTH. */
+/** Who a business (or a catalog service) serves (§5.19); a CLINIC or TATTOO studio is always BOTH. */
 export const AUDIENCES = ['MALE', 'FEMALE', 'BOTH'] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
@@ -49,6 +49,8 @@ export const PERMISSIONS = [
   'STATISTICS_VIEW',
   'FINANCE_VIEW',
   'SUBSCRIPTION_VIEW',
+  /** Book for a customer with or without the app (§5.20). */
+  'BOOKINGS_CREATE',
 ] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 

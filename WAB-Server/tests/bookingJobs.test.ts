@@ -49,14 +49,21 @@ const jobs = createBookingJobs({
   scheduler,
   bookings: repo,
   actions,
-  notify: (event, booking) => {
-    sent.push(`${event}:${booking.id}`);
+  notify: (event, booking, round) => {
+    sent.push(
+      round === undefined ? `${event}:${booking.id}` : `${event}:${booking.id}:${String(round)}`,
+    );
     return Promise.resolve();
   },
   settings,
   logger,
   now: () => clock,
+  alertCloseOverdue: (booking) => {
+    adminAlerts.push(booking.id);
+    return Promise.resolve();
+  },
 });
+const adminAlerts: string[] = [];
 
 const salonId = new Types.ObjectId();
 const seed = (over: Record<string, unknown> = {}, startInMin = 24 * 60): string => {
@@ -103,6 +110,7 @@ beforeEach(() => {
   queued.clear();
   sent.length = 0;
   changes.length = 0;
+  adminAlerts.length = 0;
   clock = new Date('2026-10-12T08:00:00Z');
 });
 
@@ -120,15 +128,24 @@ describe('planning jobs by status', () => {
     expect(queued.get(`booking.auto-cancel.${id.id}`)?.runAt).toEqual(id.respondBy);
   });
 
-  it('an APPROVED booking gets reminders at 60 and 15 minutes and loses the pending jobs', async () => {
+  it('an APPROVED booking gets reminders at 60 and 15 minutes, the close jobs, and loses the pending jobs', async () => {
     const booking = await load(seed());
     await jobs.sync(booking);
     setStatus('APPROVED');
     await jobs.sync(await load(booking.id));
     expect([...queued.keys()].sort()).toEqual([
+      `booking.close-overdue.${booking.id}`,
+      `booking.close-reminder.${booking.id}.1`,
       `booking.reminder.${booking.id}.15`,
       `booking.reminder.${booking.id}.60`,
     ]);
+    // §5.21: first round one interval after the end; the overdue alert 24 h after it.
+    expect(queued.get(`booking.close-reminder.${booking.id}.1`)?.runAt).toEqual(
+      new Date(booking.appointmentEnd.getTime() + HOUR),
+    );
+    expect(queued.get(`booking.close-overdue.${booking.id}`)?.runAt).toEqual(
+      new Date(booking.appointmentEnd.getTime() + 24 * HOUR),
+    );
     expect(queued.get(`booking.reminder.${booking.id}.60`)?.runAt).toEqual(
       new Date(booking.appointmentStart.getTime() - HOUR),
     );
@@ -193,10 +210,59 @@ describe('planning jobs by status', () => {
     const pending = await load(seed());
     const approved = await load(seed({ status: 'APPROVED' }));
     seed({ status: 'COMPLETED' });
-    seed({ status: 'APPROVED' }, -120); // approved and already started: nothing to plan
-    expect(await jobs.reconcile()).toBe(2);
+    // Approved and already over: still needs its close reminders (§5.21).
+    const over = seed({ status: 'APPROVED' }, -120);
+    expect(await jobs.reconcile()).toBe(3);
     expect(queued.has(`booking.auto-cancel.${pending.id}`)).toBe(true);
     expect(queued.has(`booking.reminder.${approved.id}.15`)).toBe(true);
+    expect(queued.has(`booking.close-reminder.${over}.1`)).toBe(true);
+    expect(queued.has(`booking.reminder.${over}.15`)).toBe(false);
+  });
+});
+
+describe('closing finished bookings (§5.21)', () => {
+  it('reminds each interval after the end until closed, one round per job', async () => {
+    const id = seed({ status: 'APPROVED' }, -120); // ended an hour ago
+    await jobs.sync(await load(id));
+    await run('booking.close-reminder', { bookingId: id, round: 1 });
+    expect(sent).toEqual([`booking.close_reminder:${id}:1`]);
+    expect((await load(id)).closeReminders).toMatchObject({ count: 1, lastAt: clock });
+    // The next round is queued one interval later, the first one is gone from the plan.
+    expect(queued.get(`booking.close-reminder.${id}.2`)?.runAt).toEqual(
+      new Date((await load(id)).appointmentEnd.getTime() + 2 * HOUR),
+    );
+    // A repeated or stale round sends nothing.
+    await run('booking.close-reminder', { bookingId: id, round: 1 });
+    expect(sent).toHaveLength(1);
+    clock = new Date(clock.getTime() + HOUR);
+    await run('booking.close-reminder', { bookingId: id, round: 2 });
+    expect(sent).toEqual([`booking.close_reminder:${id}:1`, `booking.close_reminder:${id}:2`]);
+  });
+
+  it('stops once completed and never runs before the end', async () => {
+    const early = seed({ status: 'APPROVED' }, 30);
+    await run('booking.close-reminder', { bookingId: early, round: 1 });
+    expect(sent).toEqual([]);
+    m.bookings.docs.length = 0;
+    const id = seed({ status: 'APPROVED' }, -120);
+    await jobs.sync(await load(id));
+    setStatus('COMPLETED');
+    await jobs.sync(await load(id));
+    expect(queued.size).toBe(0);
+    await run('booking.close-reminder', { bookingId: id, round: 1 });
+    expect(sent).toEqual([]);
+  });
+
+  it('alerts the merchant and the admin once when still open after the overdue hours', async () => {
+    const id = seed({ status: 'APPROVED' }, -26 * 60);
+    await run('booking.close-overdue', { bookingId: id });
+    await run('booking.close-overdue', { bookingId: id });
+    expect(sent).toEqual([`booking.close_overdue:${id}`]);
+    expect(adminAlerts).toEqual([id]);
+    // Once alerted, planning no longer queues the overdue job; reminders go on.
+    await jobs.sync(await load(id));
+    expect(queued.has(`booking.close-overdue.${id}`)).toBe(false);
+    expect(queued.has(`booking.close-reminder.${id}.1`)).toBe(true);
   });
 });
 

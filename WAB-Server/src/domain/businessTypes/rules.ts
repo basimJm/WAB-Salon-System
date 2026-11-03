@@ -1,7 +1,10 @@
 import type { Audience, BusinessType, Gender } from '../../constants/enums';
 
-/** The audience every business of this type has, when the type fixes it (a CLINIC is always BOTH). */
-export const FIXED_AUDIENCE: Readonly<Partial<Record<BusinessType, Audience>>> = { CLINIC: 'BOTH' };
+/** The audience every business of this type has, when the type fixes it (CLINIC and TATTOO are always BOTH, §5.23). */
+export const FIXED_AUDIENCE: Readonly<Partial<Record<BusinessType, Audience>>> = {
+  CLINIC: 'BOTH',
+  TATTOO: 'BOTH',
+};
 
 /** The audience that serves everyone. */
 export const AUDIENCE_ALL: Audience = 'BOTH';
@@ -13,12 +16,13 @@ export interface BusinessKind {
 }
 
 /**
- * The audiences a customer of this gender sees (§5.19): their own and BOTH. CLINICs are always
- * BOTH, so this alone also shows every clinic.
+ * The audiences that serve a gender: its own and BOTH (clinics and tattoo studios are always
+ * BOTH). Since §5.22 (owner 2026-11-03) discovery is not filtered by the customer's gender; this
+ * is the search filter "gender" (Men = MALE or BOTH, Women = FEMALE or BOTH).
  */
 export const visibleAudiences = (gender: Gender): Audience[] => [gender, AUDIENCE_ALL];
 
-/** Whether a customer of this gender may see (and book) the business. */
+/** Whether the business serves this gender (the search "gender" filter, §5.22). */
 export const isVisibleTo = (business: Pick<BusinessKind, 'audience'>, gender: Gender): boolean =>
   visibleAudiences(gender).includes(business.audience);
 
@@ -64,3 +68,18 @@ export const isWidening = (from: Audience, to: Audience): boolean =>
 /** The gender every person of a single-gender business has; `undefined` for BOTH (mixed). */
 export const impliedGender = (business: Pick<BusinessKind, 'audience'>): Gender | undefined =>
   business.audience === 'MALE' || business.audience === 'FEMALE' ? business.audience : undefined;
+
+/** Mongo condition for an optional business-type lens (§5.22): none, one, or several types. */
+export const typeCondition = (
+  types: BusinessType | readonly BusinessType[] | undefined,
+): { businessType?: BusinessType | { $in: BusinessType[] } } => {
+  if (types === undefined) return {};
+  if (typeof types === 'string') return { businessType: types };
+  return types.length === 0 ? {} : { businessType: { $in: [...types] } };
+};
+
+/** Mongo condition for the optional search "gender" filter (§5.22). */
+export const audienceCondition = (
+  gender: Gender | undefined,
+): { audience?: { $in: Audience[] } } =>
+  gender === undefined ? {} : { audience: { $in: visibleAudiences(gender) } };

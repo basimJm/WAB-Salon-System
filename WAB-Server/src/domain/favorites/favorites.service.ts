@@ -7,7 +7,6 @@ import { toObjectId } from '../../utils/database/ids';
 import { NotFoundError } from '../../utils/errors';
 import type { PaginationMeta, PaginationParams } from '../../utils/pagination';
 import type { SalonCard, SearchService } from '../search/search.service';
-import { isVisibleTo } from '../businessTypes/rules';
 import type { CustomersRepository } from '../../repositories/identity.repository';
 
 export interface FavoritesService {
@@ -27,7 +26,7 @@ export interface FavoritesDeps {
   readonly favorites: Pick<FavoritesRepository, 'create' | 'exists' | 'remove' | 'findPage'>;
   readonly salons: Pick<SalonsRepository, 'findById'>;
   readonly search: Pick<SearchService, 'cards'>;
-  /** The customer's gender for the visibility rule (§5.19); without it no audience filter. */
+  /** @deprecated unused since §5.22 (discovery is not filtered by the customer's gender). */
   readonly customers?: Pick<CustomersRepository, 'findById'>;
 }
 
@@ -35,16 +34,10 @@ export const createFavoritesService = ({
   favorites,
   salons,
   search,
-  customers,
 }: FavoritesDeps): FavoritesService => ({
   async add({ customerId, salonId }) {
     const salon = await salons.findById(salonId);
-    const gender = (await customers?.findById(customerId))?.gender;
-    if (
-      salon?.state !== 'LIVE' ||
-      !salon.completeness.isComplete ||
-      (gender !== undefined && !isVisibleTo(salon, gender))
-    ) {
+    if (salon?.state !== 'LIVE' || !salon.completeness.isComplete) {
       throw new NotFoundError({ code: ERROR_CODES.SALON_NOT_FOUND });
     }
     if (await favorites.exists({ customerId, salonId })) return;
@@ -65,10 +58,8 @@ export const createFavoritesService = ({
 
   async list({ customerId, params, language }) {
     const page = await favorites.findPage({ customerId }, params, { createdAt: -1 });
-    const gender = (await customers?.findById(customerId))?.gender;
     const items = await search.cards({
       ids: page.items.map((f) => f.salonId),
-      ...(gender === undefined ? {} : { gender }),
       customerId,
       language,
     });

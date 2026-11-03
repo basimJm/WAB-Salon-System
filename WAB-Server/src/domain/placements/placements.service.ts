@@ -1,4 +1,4 @@
-import type { Audience, BusinessType } from '../../constants/enums';
+import { AUDIENCES, type Audience, type BusinessType } from '../../constants/enums';
 import { visibleAudiences } from '../businessTypes/rules';
 import { ERROR_CODES, errorMessageKey } from '../../constants/errorCodes';
 import type { PlacementStatus } from '../../constants/placements';
@@ -177,9 +177,8 @@ export const createPlacementsService = (deps: PlacementsDeps): PlacementsService
 
   return {
     async salonIds({ businessType, gender }, at) {
-      return (await placements.activeAt(businessType, visibleAudiences(gender), at)).map(
-        (p) => p.salonId,
-      );
+      const audiences = gender === undefined ? [...AUDIENCES] : visibleAudiences(gender);
+      return (await placements.activeAt(businessType, audiences, at)).map((p) => p.salonId);
     },
 
     async list({ businessType, audience, status, salonId, params }) {

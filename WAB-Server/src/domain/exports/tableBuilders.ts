@@ -174,6 +174,7 @@ export const createTableBuilders = (deps: {
       paymentStatus: params['paymentStatus'] as never,
       salonId: params['salonId'] as string | undefined,
       businessType: params['businessType'] as never,
+      source: params['source'] as never,
       branchId: params['branchId'] as string | undefined,
       customerId: params['customerId'] as string | undefined,
       from: typeof params['from'] === 'string' ? params['from'] : undefined,
@@ -202,6 +203,8 @@ export const createTableBuilders = (deps: {
         'Payment',
         'Payment status',
         'Total (JOD)',
+        'Source',
+        'Created by',
       ],
       rows: items.map((b): Cell[] => [
         b.referenceNumber,
@@ -215,6 +218,8 @@ export const createTableBuilders = (deps: {
         b.paymentMethod,
         b.paymentStatus,
         b.total,
+        b.source,
+        b.createdBy?.name ?? null,
       ]),
     };
   },

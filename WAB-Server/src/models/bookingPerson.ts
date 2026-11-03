@@ -32,6 +32,11 @@ export interface BookingPersonRaw {
   end: Date;
   /** Integer fils: the sum of the service prices. */
   subtotal: number;
+  /**
+   * Optional tattoo design image (§5.23, TATTOO bookings only): a confirmed private
+   * `BOOKING_REFERENCE` upload on drafts, the person's file slot (`key?v=n`) once booked.
+   */
+  referenceImageKey?: string;
 }
 
 const serviceSnapshotSchema = new Schema<BookingServiceSnapshot>(
@@ -57,6 +62,7 @@ export const bookingPersonSchema = new Schema<BookingPersonRaw>(
     start: { type: Date, required: true },
     end: { type: Date, required: true },
     subtotal: { type: Number, required: true, min: 0, validate: Number.isInteger },
+    referenceImageKey: { type: String },
   },
   { _id: false },
 );

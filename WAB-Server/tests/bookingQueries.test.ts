@@ -293,6 +293,17 @@ describe('customer', () => {
     expect(data.money.total).toBe('12.500');
     expect(data.statusHistory).toHaveLength(1);
     expect(data.actions).toEqual([]);
+    expect((data.persons[0] as { referenceImageUrl?: unknown }).referenceImageUrl).toBeNull();
+  });
+  it('shows a tattoo design image as a signed URL (§5.23)', async () => {
+    const doc = m.bookings.docs.find((d) => String(d['_id']) === ids['b2']?.toHexString());
+    const persons = doc?.['persons'] as Record<string, unknown>[];
+    persons[0] = { ...persons[0], referenceImageKey: 'bookings/b2/persons/0/reference?v=1' };
+    const res = await customer(`/${ids['b2']?.toHexString() ?? ''}`);
+    const data = bodyOf(res).data as { persons: { referenceImageUrl: string | null }[] };
+    expect(data.persons[0]?.referenceImageUrl).toEqual(
+      expect.stringContaining('bookings/b2/persons/0/reference'),
+    );
   });
   it('answers 404 for someone else’s booking, 400 for a bad id, 401 without a token', async () => {
     expect((await customer(`/${ids['b4']?.toHexString() ?? ''}`)).status).toBe(404);
@@ -423,6 +434,19 @@ describe('calendar', () => {
   });
 });
 
+describe('to close (§5.21)', () => {
+  it('lists approved bookings whose end passed, oldest first; the own staff may close them', async () => {
+    const doc = m.bookings.docs.find((d) => String(d['_id']) === ids['b3']?.toHexString());
+    if (doc === undefined) throw new Error('fixture b3 missing');
+    doc['status'] = 'APPROVED';
+    const res = await merchant('?tab=TO_CLOSE');
+    expect(refsOf(res)).toEqual([refs.b3]);
+    // b3's staff (staffA) without BOOKINGS_OPERATE: may complete / no-show their own booking.
+    const own = await merchant(`/${ids['b3']?.toHexString() ?? ''}`, 'BOOKINGS_VIEW_OWN', staffA);
+    expect((bodyOf(own).data as { actions: string[] }).actions).toEqual(['COMPLETE', 'NO_SHOW']);
+  });
+});
+
 describe('admin', () => {
   const admin = (path: string): request.Test => request(app).get(`/admin/v1/bookings${path}`);
   it('lists every salon, with salon and customer, 25 per page', async () => {
@@ -441,6 +465,33 @@ describe('admin', () => {
     expect(refsOf(await admin('?tab=UPCOMING&businessType=CLINIC'))).toEqual([refs.b2]);
     expect(refsOf(await admin('?tab=UPCOMING&businessType=SALON'))).not.toContain(refs.b2);
     expect((await admin('?businessType=SPA')).status).toBe(400);
+  });
+  it('shows and filters business-made bookings, with the contact of someone without the app (§5.20)', async () => {
+    const doc = m.bookings.docs.find((d) => String(d['_id']) === ids['b5']?.toHexString());
+    if (doc === undefined) throw new Error('fixture b5 missing');
+    delete doc['customerId'];
+    Object.assign(doc, {
+      source: 'MERCHANT',
+      createdBy: { memberId: staffA, name: 'Dina M' },
+      customerContact: {
+        name: 'Hiba Saleh',
+        phone: { dialCode: '+962', number: '791112222', e164: '+962791112222' },
+        gender: 'FEMALE',
+      },
+    });
+    expect(refsOf(await admin('?source=MERCHANT'))).toEqual([refs.b5]);
+    expect(refsOf(await admin('?tab=UPCOMING&source=CUSTOMER_APP'))).not.toContain(refs.b5);
+    expect((await admin('?source=PHONE')).status).toBe(400);
+    const row = (bodyOf(await admin('?source=MERCHANT')).data as Record<string, unknown>[])[0];
+    expect(row).toMatchObject({
+      source: 'MERCHANT',
+      createdBy: { id: staffA.toHexString(), name: 'Dina M' },
+      customer: { id: null, name: 'Hiba Saleh', phone: '+962791112222' },
+    });
+  });
+  it('an app booking reads source CUSTOMER_APP and no creator', async () => {
+    const row = (bodyOf(await admin('?status=COMPLETED')).data as Record<string, unknown>[])[0];
+    expect(row).toMatchObject({ source: 'CUSTOMER_APP', createdBy: null });
   });
   it('SRV-171 S5: q finds full and partial references, with or without the prefix', async () => {
     expect(refsOf(await admin('?q=PQR345'))).toEqual([refs.b5]);
