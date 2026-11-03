@@ -9,6 +9,21 @@
 
 ## Current task
 
+### CUS-103 — Search redesign: suggestions, recent searches, quick chips, multi-type + gender filters
+- Branch: `feat/cus-103-search-filters` (from `feat/cus-102-merged-home`)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.22; contract 1.13.0: `GET /salons` (businessType comma list, optional gender), `GET /salons/filters`, NEW `GET /salons/suggestions`):
+  - [x] No gender in discovery unless chosen: `SalonQuery` has no gender/type of its own; `SalonFilters.gender` (Men/Women) + `businessTypes` (multi) + `openNow`; S04 entry/route gender no longer filters; catalog (S05 chips, S06) loaded without gender
+  - [x] Typed suggestions (debounced with the search, one request per settled text) grouped Services (with places count, plural AR/EN) then Places, each with the type badge; service → service filter, place → salon details; failure = no suggestions
+  - [x] Recent searches on the device: `RecentSearchesStore` (core/domain) + `DataStoreRecentSearchesStore` (core/storage, DataStore preferences); newest first, case-insensitive dedupe, max `RecentSearchRules.MAX_ITEMS` (8); shown when the text is empty, Clear
+  - [x] Type lens chips on S04 + quick chips Open now (device-side filter) · Nearest · 4★ & up (`SearchQuickDefaults.TOP_RATED_MIN`) · Price (opens S05)
+  - [x] S05: business type multi-select (All clears), gender Men/Women, services of the one chosen type (else every type), price range from `/salons/filters` without services, minimum rating; Reset clears types + gender
+  - [x] Results rows keep the type label (CUS-102 `BusinessLine`); empty / error / loading states unchanged
+- Tests: `SalonSearchApiTest` (filter → query: multi type comma list, gender only when chosen, price without services, rating, sort/general, bounds/suggestion scopes), `SuggestionsMapperTest` (mapping + grouping), `RecentSearchRulesTest` + `DataStoreRecentSearchesStoreTest` (dedupe, max, clear, encoding), `SearchAssistViewModelTest` (suggestions, recent, quick chips, lens), `AllSalonsViewModelTest`, `FilterSheetViewModelTest` (multi type, gender, price without services), `AllServicesViewModelTest`; `./gradlew testAndroidHostTest` green; `policy_checks.py all` ok
+- Loops: 0/1
+- Review: PENDING
+- Notes: DEVIATIONS: "Open now" filters the loaded pages on the device (the contract has no open-now filter; a page can look short); the Price quick chip opens the filter sheet (no price sort in the contract); S04 has no screen previews added; the route still carries the gender string (ignored by S04/S06; the home still passes it); no device run, no detekt, no assemble (batch rule §3.13).
+
 ### CUS-102 — Merged home: type lens, Explore / Near you / Recommended / Book again, tattoo type
 - Branch: `feat/cus-102-merged-home`
 - Status: IN REVIEW (committed, not pushed)

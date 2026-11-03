@@ -1,12 +1,12 @@
 <resources>
-    <string name="salons_title">Salons &amp; clinics</string>
+    <string name="salons_title">Search</string>
     <string name="salons_title_salons">Salons</string>
     <string name="salons_title_clinics">Beauty clinics</string>
     <string name="salons_title_tattoo">Tattoo studios</string>
-    <string name="salons_search_hint">Search salons and clinics</string>
+    <string name="salons_search_hint">Salons, clinics, tattoo studios or services</string>
     <string name="salons_filter">Filter</string>
     <string name="salons_chip_remove">Remove %1$s</string>
-    <string name="salons_empty">No salons match your search</string>
+    <string name="salons_empty">No places match your search</string>
     <string name="salons_empty_body">Try other keywords or adjust the filters.</string>
     <string name="salons_chip_recommended">Recommended</string>
     <string name="salons_chip_nearest">Nearest</string>
@@ -26,4 +26,18 @@
     <string name="filter_rating">Rating</string>
     <string name="services_title">All Services</string>
     <string name="services_empty">No services yet</string>
+    <string name="filter_gender">Gender</string>
+    <string name="search_suggest_services">Services</string>
+    <string name="search_suggest_places">Places</string>
+    <string name="search_recent">Recent searches</string>
+    <string name="search_recent_clear">Clear</string>
+    <string name="search_quick_open_now">Open now</string>
+    <string name="search_quick_top_rated">4★ &amp; up</string>
+    <string name="search_quick_price">Price</string>
+    <string name="search_open_now_chip">Open now</string>
+    <plurals name="search_places_count">
+        <item quantity="one">%1$d place</item>
+        <item quantity="many">%1$d places</item>
+        <item quantity="other">%1$d places</item>
+    </plurals>
 </resources>

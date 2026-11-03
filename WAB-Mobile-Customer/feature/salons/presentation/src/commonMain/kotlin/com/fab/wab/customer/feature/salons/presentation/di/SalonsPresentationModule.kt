@@ -1,7 +1,6 @@
 package com.fab.wab.customer.feature.salons.presentation.di
 
 import com.fab.wab.customer.core.domain.salon.SalonFilters
-import com.fab.wab.customer.core.domain.session.Gender
 import com.fab.wab.customer.feature.salons.presentation.controller.contract.AllSalonsEntry
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllSalonsDependencies
 import com.fab.wab.customer.feature.salons.presentation.controller.vm.AllSalonsViewModel
@@ -16,6 +15,8 @@ val salonsPresentationModule = module {
     factory {
         AllSalonsDependencies(
             searchSalons = get(),
+            suggestions = get(),
+            recentSearches = get(),
             currentLocation = get(),
             sessionStore = get(),
             permissions = get(),
@@ -25,8 +26,8 @@ val salonsPresentationModule = module {
     }
     viewModel { (entry: AllSalonsEntry) -> AllSalonsViewModel(entry, deps = get()) }
     factory { FilterSheetDependencies(loadServices = get(), loadPriceBounds = get()) }
-    viewModel { (initial: SalonFilters, gender: Gender) -> FilterSheetViewModel(initial, gender, deps = get()) }
+    viewModel { (initial: SalonFilters) -> FilterSheetViewModel(initial, deps = get()) }
     viewModel { (entry: AllServicesEntry) ->
-        AllServicesViewModel(entry.gender, loadServices = get(), analytics = get(), businessType = entry.businessType)
+        AllServicesViewModel(loadServices = get(), analytics = get(), businessType = entry.businessType)
     }
 }

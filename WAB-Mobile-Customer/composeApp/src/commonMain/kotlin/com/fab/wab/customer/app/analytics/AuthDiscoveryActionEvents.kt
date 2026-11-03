@@ -64,11 +64,14 @@ internal object AuthDiscoveryActionEvents {
     fun allSalons(a: AllSalonsContract.UiAction): ActionEvent = when (a) {
         is AllSalonsContract.UiAction.OnTextChange, AllSalonsContract.UiAction.OnFilterClick, is AllSalonsContract.UiAction.OnChipRemove,
         is AllSalonsContract.UiAction.OnSalonClick, is AllSalonsContract.UiAction.OnFavoriteClick,
-        is AllSalonsContract.UiAction.OnFiltersApplied,
+        is AllSalonsContract.UiAction.OnFiltersApplied, is AllSalonsContract.UiAction.OnSuggestedServiceClick,
+        is AllSalonsContract.UiAction.OnSuggestedPlaceClick, is AllSalonsContract.UiAction.OnQuickChip,
+        is AllSalonsContract.UiAction.OnLensSelect,
         -> ActionEvent.ByViewModel
         AllSalonsContract.UiAction.OnDialogConfirm -> ActionEvent.Named(Events.LOCATION_PERMISSION_RESULT)
         AllSalonsContract.UiAction.OnLoadMore, AllSalonsContract.UiAction.OnRefresh, AllSalonsContract.UiAction.OnRetry,
-        AllSalonsContract.UiAction.OnDialogDismiss, -> ActionEvent.Silent
+        AllSalonsContract.UiAction.OnDialogDismiss, AllSalonsContract.UiAction.OnSearchSubmit,
+        is AllSalonsContract.UiAction.OnRecentClick, AllSalonsContract.UiAction.OnRecentClear, -> ActionEvent.Silent
     }
     fun salonDetails(a: SalonDetailsContract.UiAction): ActionEvent = when (a) {
         SalonDetailsContract.UiAction.OnShareClick, SalonDetailsContract.UiAction.OnFavoriteClick,
