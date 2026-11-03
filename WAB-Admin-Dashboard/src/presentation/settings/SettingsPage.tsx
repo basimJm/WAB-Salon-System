@@ -1,5 +1,7 @@
 import { useState, type SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SETTINGS_STRINGS } from '@/locales/lazy/settings';
+import { useLazyStrings } from '../hooks/useLazyStrings';
 import { SETTING_TABS } from '@/constants/settings';
 import { READ_ONLY_SETTING_KEYS } from '@/domain/settings/registry';
 import { settingToText } from '@/domain/settings/validate';
@@ -40,6 +42,8 @@ function PlatformFacts({
 
 /** Admin PRD A28 (core): discovery, booking rules and OTP. Every save asks for a reason and is audited. */
 export default function SettingsPage() {
+  // Settings labels are a lazy locale area (kept out of the entry bundle).
+  useLazyStrings(SETTINGS_STRINGS);
   const { t } = useTranslation();
   const toast = useToast();
   const { query, save } = useSettingsController();

@@ -50,6 +50,8 @@
       "booking_paymentHoldMinutes": "مدة حجز الموعد أثناء الدفع",
       "booking_autoCancelAfterStartMinutes": "إلغاء الطلب المعلّق تلقائيًا بعد وقت البدء",
       "booking_pendingAlertBeforeMinutes": "تنبيه الصالون قبل الموعد المعلّق",
+      "booking_closeReminderIntervalMinutes": "تذكير إغلاق الحجز كل",
+      "booking_closeOverdueAlertHours": "تنبيه الحجز المفتوح بعد",
       "booking_reminderMinutes": "التذكيرات قبل الموعد (مفصولة بفاصلة)",
       "otp_length": "طول الرمز",
       "otp_resendAfterSec": "مدة الانتظار قبل إعادة الإرسال",

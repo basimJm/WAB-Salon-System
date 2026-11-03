@@ -6,7 +6,6 @@ import errors from './ar/errors.json';
 import designKits from './ar/designKits.json';
 import design from './ar/design.json';
 import forms from './ar/forms.json';
-import settings from './ar/settings.json';
 import locations from './ar/locations.json';
 import appConfig from './ar/appConfig.json';
 import content from './ar/content.json';
@@ -74,7 +73,6 @@ const ar = {
   ...content,
   ...appConfig,
   ...locations,
-  ...settings,
 };
 
 export default ar;

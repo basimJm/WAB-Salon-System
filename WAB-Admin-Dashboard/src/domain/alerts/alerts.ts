@@ -14,6 +14,8 @@ export const ALERT_KINDS = [
   'SALON_DELETION_REQUEST',
   // The owner widened a salon's audience to men & women (§5.19, `salon.audience_widened`).
   'SALON_AUDIENCE_WIDENED',
+  // A finished booking still open after the overdue hours (§5.21, SRV-186).
+  'BOOKING_CLOSE_OVERDUE',
 ] as const;
 export type AlertStatus = (typeof ALERT_STATUSES)[number];
 export type AlertKind = (typeof ALERT_KINDS)[number];

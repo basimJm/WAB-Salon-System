@@ -16,7 +16,8 @@
       "REVIEW_PENDING": "تقييم بانتظار المراجعة",
       "CATALOG_REQUEST": "طلب خدمة للكتالوج",
       "SALON_DELETION_REQUEST": "طلب حذف صالون",
-      "SALON_AUDIENCE_WIDENED": "توسيع فئة صالون"
+      "SALON_AUDIENCE_WIDENED": "توسيع فئة صالون",
+      "BOOKING_CLOSE_OVERDUE": "حجز ما زال مفتوحاً"
     }
   }
 }
