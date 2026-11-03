@@ -360,7 +360,7 @@
 ### T-150 — Tattoo studios, business-made bookings, closing reminders, merged discovery (owner decisions 2026-11-03)
 - Project: repo root (`BUSINESS_DOMAIN.md`, `INTEGRATION.md`, `CLAUDE.md`, the four backlogs)
 - Branch: `docs/tattoo-merchant-bookings` (from `server`; reaches the other masters through `server` → `main` → masters)
-- Status: IN REVIEW
+- Status: DONE (PR #611)
 - Acceptance criteria:
   - [x] Owner shown a design proposal with phone mockups (artifact "WAB Discovery Redesign"); 10 questions answered
   - [x] BUSINESS_DOMAIN: `TATTOO`, `BOOKINGS_CREATE`, `BOOKING_REFERENCE`, `BookingSource`; bookings `source`/`createdBy`/`customerContact`/`closeReminders`, person `referenceImageKey`; state machine rows; new §5.20 business-made bookings, §5.21 closing, §5.22 merged discovery (no gender filter), §5.23 tattoo; §6, §8, §9, §10 updated; §5.19 visibility/home superseded; §12 point 11 with the assumptions still to confirm
@@ -368,3 +368,15 @@
 - Tests: `python3 scripts/tasks.py check`
 - Loops: 1/1 — re-read each owner answer (1–10) against §5.20–§5.23 and the task rows; the three points not answered are written as assumptions in §12 point 11, not as decisions
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, PM ✔, UX ✔, Marketing ✔, QA ✔) — docs and backlog only. DEVIATION: the customer/merchant/admin PRDs are not edited; tasks point at BUSINESS_DOMAIN §5.20–§5.23.
+
+### T-151 — 2026-11-03 round merged: SRV-183…187, ADM-111/112, MER-084…086; masters synced
+- Project: repo root
+- Branch: `chore/sync-masters-into-main-17` (PR into `main`), then `main` → each master
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Merged: SRV-183…186 (#617), ADM-111/112 (#623), MER-084…086 (#624), SRV-187 (#625); admin → main (#626)
+  - [x] `merchant` + `server` merged into one branch from `main`; conflicts = backlog status cells (kept the more advanced status per row) + generated board (regenerated); statuses DONE
+  - [ ] main → every master; customer tasks CUS-102…104 next
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges + backlog statuses only, no product code written.

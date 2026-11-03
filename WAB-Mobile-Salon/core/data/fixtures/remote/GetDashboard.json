@@ -54,7 +54,9 @@
           ],
           "rejection": null,
           "businessType": "SALON",
-          "salonAudience": "FEMALE"
+          "salonAudience": "FEMALE",
+          "source": "CUSTOMER_APP",
+          "createdBy": null
         },
         {
           "id": "0f8a7121b242ff9c108d869b",
@@ -102,7 +104,9 @@
           ],
           "rejection": null,
           "businessType": "SALON",
-          "salonAudience": "FEMALE"
+          "salonAudience": "FEMALE",
+          "source": "CUSTOMER_APP",
+          "createdBy": null
         },
         {
           "id": "d1103ee9ea5694d040ecd0fc",
@@ -138,7 +142,9 @@
           ],
           "rejection": null,
           "businessType": "SALON",
-          "salonAudience": "FEMALE"
+          "salonAudience": "FEMALE",
+          "source": "CUSTOMER_APP",
+          "createdBy": null
         },
         {
           "id": "e54d30ae1a5c023e7070aa17",
@@ -174,7 +180,9 @@
           ],
           "rejection": null,
           "businessType": "SALON",
-          "salonAudience": "FEMALE"
+          "salonAudience": "FEMALE",
+          "source": "CUSTOMER_APP",
+          "createdBy": null
         },
         {
           "id": "5c2e8cd3917ba37f01b1b97f",
@@ -210,7 +218,9 @@
           ],
           "rejection": null,
           "businessType": "SALON",
-          "salonAudience": "FEMALE"
+          "salonAudience": "FEMALE",
+          "source": "CUSTOMER_APP",
+          "createdBy": null
         }
       ]
     },
@@ -251,7 +261,9 @@
         ],
         "rejection": null,
         "businessType": "SALON",
-        "salonAudience": "FEMALE"
+        "salonAudience": "FEMALE",
+        "source": "CUSTOMER_APP",
+        "createdBy": null
       },
       "timeline": [
         {
@@ -288,7 +300,9 @@
           ],
           "rejection": null,
           "businessType": "SALON",
-          "salonAudience": "FEMALE"
+          "salonAudience": "FEMALE",
+          "source": "CUSTOMER_APP",
+          "createdBy": null
         }
       ]
     },

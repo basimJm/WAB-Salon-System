@@ -9,6 +9,60 @@
 
 ## Current task
 
+### MER-086 — Close finished bookings (owner 2026-11-03)
+
+- Branch: `feat/mer-086-close-bookings` (from `feat/mer-085-new-booking`; batch MER-084…086)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.21; SRV-186; `GET /merchant/v1/bookings?tab=TO_CLOSE`, `POST …/bookings/{id}/complete|no-show`):
+  - [x] Bookings tab "To close" (`TO_CLOSE`, between Today and Past) with AR + EN label and empty state
+  - [x] `booking.close_reminder` / `booking.close_overdue` parsed (`bookingId`, `reference`, `actions=COMPLETED,NO_SHOW`; missing actions = both)
+  - [x] Android: a close push reaching `onMessageReceived` in the background → notification (channel "Bookings to close") with Completed / No-show (broadcast to `RequestActionReceiver`), tap = booking details; the outcome replaces it ("marked completed / no-show", "already closed", or "could not update — tap to open")
+  - [x] iOS: category `BOOKING_CLOSE` (Completed / No-show, background) registered with the request category; the action answers in the background, the outcome replaces the alert, the fallback publishes the booking link
+  - [x] `CloseBookingUseCase`: reads the details' server `actions` first (permission + own-staff rule), not allowed → open details, final status / ALREADY_HANDLED / INVALID_TRANSITION → already closed, other failures → open details; never retries
+  - [x] A tapped close push opens the booking details (`bookings/<id>` on the web base; the server's relative `deepLink` is not accepted by the link store)
+  - [x] Assigned staff: the details screen shows COMPLETE / NO_SHOW whenever the server sends them (test)
+- Tests: `CloseBookingUseCaseTest` (5), `BookingClosePushTest` (5: parse, non-close, identifiers, tap link, outcome texts), `BookingsViewModelTest` (TO_CLOSE query), `BookingDetailsViewModelTest` (+1 own staff COMPLETE / NO_SHOW); `./gradlew testAndroidHostTest` green (all modules); `:androidApp:assembleDevDebug` and `:composeApp:compileKotlinIosSimulatorArm64` green; `policy_checks.py all` ok
+- Loops: 1/1 — batch loop (MER-084…086): re-read §5.21 against the tab, push parsing/routing and the details actions; `testAndroidHostTest` all modules green (691 tests), `:androidApp:assembleDevDebug` + iOS compile green. Found: close pushes have no iOS category / are not data-only on Android → server follow-up SRV-187
+- Review: PASSED (SE ✔ (close use case checks the server actions first, no blind retry), Mobile ✔ (Android notification actions + iOS category; deep-link fallback), Architect ✔ (needs SRV-187 for the push shape), QA ✔ (payload/routing + tab tests)) — DEVIATIONS: no device run (rules §3.13, end of backlog); no Home "To close (n)" shortcut; 5 tabs not checked at 200% font
+- Notes: DEVIATIONS — the server sends close reminders as VISIBLE pushes without an iOS `actionCategory`: on iOS the actions appear only once the server sets `aps.category = BOOKING_CLOSE` (server follow-up), and on Android a visible push in the background is drawn by the system without actions (the actionable notification shows only when the message reaches the app: data-only delivery); in the foreground the usual in-app banner shows. Android 12+ blocks opening an activity from a notification action, so the "open details" fallback is the replaced notification's tap. No "To close (n)" shortcut on Home. A fifth tab in `AppSegmentedTabs` (designed for 2–4) not measured at 200 % font scale. Detekt and the device run deferred to the batch / end of backlog.
+
+### MER-085 — New booking for a customer (owner 2026-11-03)
+
+- Branch: `feat/mer-085-new-booking` (from `feat/mer-084-tattoo`; batch MER-084…086)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.20; SRV-185; merchant contract 1.13.0 `getCustomersLookup`, `postBookings`, `getSalonServices`, `getTeamMembers`):
+  - [x] `Permission.BOOKINGS_CREATE` (16 keys; MANAGER template = 13); team editor group + AR/EN copy; mock presets (owner, manager)
+  - [x] "New booking" button on the bookings screen only with `BOOKINGS_CREATE` (live from the session; hidden, not disabled)
+  - [x] Form: phone (`AppPhoneField` + country picker, trunk zero dropped) → Check → lookup; registered: first name shown, nothing asked; not registered (or blocked without name): name (≤ 50) + gender Men/Women required; a changed number needs a new check
+  - [x] One person: active salon services multi-select (every page) with total duration + JOD total (integer fils), staff "Any available" (no `staffId`) or a provider, date today..+90 days, start every 15 min (today only future slots), Asia/Amman → UTC ISO `start`
+  - [x] Tattoo studio: optional design image per person (picker → `BOOKING_REFERENCE` upload → `referenceImageKey`); `UploadPurpose.BOOKING_REFERENCE` added
+  - [x] Branch: owner sends the branch chosen in the bookings switcher (`BranchScope.filter`), branch members send none; server errors (BRANCH_REQUIRED, SLOT_TAKEN, SLOT_UNAVAILABLE, STAFF_NOT_ELIGIBLE, GENDER_MISMATCH, ACCOUNT_BLOCKED, VALIDATION_ERROR …) shown through `appErrorText`
+  - [x] Success: form closes, the new booking's details open, "Booking created" banner
+  - [x] Lists: "Created by the business" on MERCHANT cards; details: "Created by the business · <member>" and "No WAB account" for `customer.id == null` (call/WhatsApp kept, the phone is always there); `source`/`createdBy`/nullable customer id mapped
+  - [x] Mock mode: generated fixtures answer lookup + create; `patchCustomerLookup` makes `791234567` a registered customer (Rana), every other number unknown; create returns `id-1` (the details fixture answers any id)
+- Tests: `NewBookingViewModelTest` (10: load, registered / unregistered / invalid phone / lookup error, services totals, 90-day dates, submit success → OpenBooking, submit error → error text, tattoo design upload + key), `BookingsViewModelTest` (+1 permission entry), `NewBookingMappersTest` (3: body with customer/persons/UTC start/staff null, registered body, lookup/services/created), `BookingMappersTest` (+1 source/createdBy/no account), `NewBookingRulesTest` (3), `MockLookupTest` (2); `PermissionsTest`/`MockWorldTest` counts 16/13; `RealApplicationFixturesTest` excludes BOOKINGS_CREATE (captured before 1.13.0). `./gradlew testAndroidHostTest` green (all modules); `policy_checks.py all` ok
+- Loops: 1/1 — batch loop: re-read §5.20 against lookup, required name/gender, body building (Amman → UTC, any staff = no id), branch rule, errors, source labels; unit tests green (see MER-086)
+- Review: PASSED (SE ✔ (domain/data/presentation slices, mapper tested), Mobile ✔ (AR/EN strings, permission-gated entry), Architect ✔ (contract 1.13.0 ops only), QA ✔ (VM + mapper + rules tests)) — DEVIATIONS: main person only (no companions/bride), times every 15 min without an availability endpoint (server refuses busy slots), salon-level services list, no device run yet
+- Notes: DEVIATIONS — companions not supported (one main person only; the contract allows up to `maxCompanions`); no bride toggle; start times are every 15-minute slot of the day (no merchant availability endpoint, the server refuses closed/busy slots with SLOT_UNAVAILABLE / SLOT_TAKEN); services from `GET /salon/services` (salon level, not per branch); entry only on the bookings screen (not home); no previews (feature screens have none); detekt, device run (AR/EN, light/dark) deferred to the batch / end of backlog.
+
+### MER-084 — Tattoo studios in the merchant app (owner 2026-11-03)
+
+- Branch: `feat/mer-084-tattoo` (batch MER-084…086; commit per task, next branches from this one)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.23, §5.19; SRV-183; merchant contract 1.13.0):
+  - [x] `./gradlew apiSync` → merchant 1.13.0 (TATTOO, `referenceImageUrl`, `source`/`createdBy`, new endpoints)
+  - [x] `BusinessType.TATTOO`; `BusinessKind.of(TATTOO, …)` = BOTH, `isTattoo`, no bride, no widening, no catalog gender
+  - [x] Registration: Salon / Clinic / Tattoo studio cards (icon per type), tattoo = no audience question ("serve both" note), trade license only (no medical license rule, not sent); resubmission keeps the type; audience sent for salons only
+  - [x] Wording: hub label + title, profile name label, type note, catalog note for tattoo studios (AR + EN); mock world preset "Tattoo studio"
+  - [x] Booking details: per person "Design image" (signed URL, `AppImage` fitted, card image height, medium shape)
+  - [x] Mock fixtures (`core/data/fixtures/remote` + dashboard mock) carry `source`/`createdBy`/`referenceImageUrl` (the contract marks them required)
+- Tests: `BusinessKindTest` (+1 tattoo), `RegistrationRulesTest` (+1 tattoo), `BookingMappersTest` (design URL mapped; DTO fixtures updated); `./gradlew testAndroidHostTest` green (all modules)
+- Loops: 1/1 — batch loop: re-read §5.23 against type rules, registration, wording, design image; unit tests green (see MER-086)
+- Review: PASSED (SE ✔, Mobile ✔ (AR/EN wording, RTL-safe), Architect ✔, QA ✔) — DEVIATION: no device run yet (end of backlog)
+- Notes: detekt, device run deferred to the batch / end of backlog (rules §3.13).
+
+## Last blocks
+
 ### MER-083 — Clinic regression + salon-or-clinic wording
 - Branch: `fix/mer-083-clinic-regression`
 - Status: DONE (PR #604)
@@ -33,34 +87,3 @@
 - Loops: 1/1 — re-checked every criterion; found and fixed: detekt MaxLineLength on the LaunchGateContent KDoc, wrong backlog dependency (MER-008 → MER-019)
 - Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — port of CUS-100 into the merchant design system (own package, token, test); no literals; brand mark not mirrored in RTL; content description kept; no contract change
 - Notes: DEVIATIONS: iOS checked by the framework link only (no simulator run); one cold-start frame showed the logo slot empty for a moment before even the static fallback drew; dark mode not captured separately.
-
-### MER-081 — Clinic and audience in the merchant app
-- Branch: `feat/mer-081-clinic-audience`
-- Status: IN REVIEW
-- Acceptance criteria (BUSINESS_DOMAIN §5.19, §6; operations `PATCH /salon/audience`, `GET /catalog/services`):
-  - [x] Salon profile shows type + audience ("Women's salon", "Men's salon", "Salon for men and women", "Beauty clinic · men and women"); hub header label and title ("Manage clinic") follow the type
-  - [x] Owner-only "Serve both men and women" (confirm dialog → `PATCH /salon/audience` BOTH → shared salon reloaded, success banner); hidden for clinics, BOTH salons and non-owners; `AUDIENCE_CHANGE_NOT_ALLOWED` shows the error and reloads the salon
-  - [x] Services + catalog: catalog of the business's own type (+ `gender` for MALE/FEMALE salons), catalog note per kind (women / men / both / clinic)
-  - [x] Bride options (brideOnly service, bride-qualified staff) only for salons serving women (`brideAllowed`, FEMALE or BOTH); refused in the VMs otherwise
-  - [x] Clinic wording: hub title, profile name label, type note, catalog note; AR + EN
-  - [x] Mock: DEV switcher "Business type" (women / men / both salon, clinic) patches `businessType` / `audience` / `salonAudience` of every fixture; mock `PATCH /salon/audience` widens to BOTH
-- Tests: `SalonProfileViewModelTest` (+3: owner widens after confirm, hidden for member/clinic/BOTH, refused → error + reload), `ServicesViewModelTest` (+2: clinic catalog + no bride, men/both bride), `StaffProfileViewModelTest` (+1: men salon hides bride-qualified), `MockWorldTest` (+1), `BusinessKindTest`
-- Loops: 1/1 — Batch gate (rules §3.13, both tasks on `feat/mer-081-clinic-audience`): `policy_checks.py all` ok, `scripts/ci/tests` 116 OK, `run_detekt.sh` ok (empty baseline), `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green (190 suites / 653 tests / 0 failures, no `w:`), `api_sync --check` ok, `contract_gaps` 0; device (own Pixel 8 Pro emulator, mock, AR): clinic hub/profile/catalog ("Beauty clinic catalog"), new clinic service and men-salon service without the bride switch, BOTH salon with it, owner widening Men → Both (dialog, banner, hub label, button gone), manager has no profile tile
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: widening in its own `AudienceWidening` (VM stays < 300 lines), owner from the session permission set, shared salon refreshed after widening, no hardcoded text; mock overrides only in mock builds
-- Notes: DEVIATIONS — wording "salon" stays where the type is unknown or generic (login/registration entry, bookings, team, finance, design-system error texts, services empty state); widening not run on iOS; services already saved as brideOnly keep their badge (data). Temporary `local.properties` (`DEV_DATA_SOURCE=mock`) removed after the device run.
-
-### MER-080 — Register as salon or clinic (contract 1.9.0)
-- Branch: `feat/mer-080-business-type-register`
-- Status: IN REVIEW
-- Acceptance criteria (owner 2026-10-29; BUSINESS_DOMAIN §5.19, §2, §3.3, §12.10; INTEGRATION §5a; operations `POST /salon/applications`, `POST /salon/application/resubmit`, `POST /uploads/license/presign` purpose `MEDICAL_LICENSE`, `GET /catalog/services?businessType=&gender=`):
-  - [x] `apiSync` to merchant contract 1.9.0 (`api_sync --check` ok); generator fixed: a `$ref` to a scalar enum component (`BusinessType`, `Audience`) is inlined as `String` with its enum doc (it emitted undefined Kotlin types); captured remote fixtures migrated per §5.19 Migration (salon/catalog `gender` → `businessType` SALON + `audience`; bookings `businessType` + `salonAudience` + person `gender`) → `contract_gaps` 0
-  - [x] core: `BusinessType`, `Audience`, `BusinessKind` (brideAllowed, canWidenAudience, catalogGender, clinic = BOTH), `SalonProfile.businessType/audience/kind`, `SalonRepository.currentKind()`; `UploadPurpose.MEDICAL_LICENSE` through the public license routes (`purpose` sent)
-  - [x] M04 first step Salon / Clinic; Salon → audience Men / Women / Both; Clinic → no audience question (unisex note) + required medical license (1–5 files, camera / photo / files picker of MER-076, own list, retry/remove); name label Salon/Clinic name; review card with type, audience and medical license; type warning
-  - [x] Resubmission: type read from `GET /salon` and locked; salon audience editable; clinic medical license optional (kept on file unless replaced, server rule)
-  - [x] Error codes `BUSINESS_TYPE_MISMATCH`, `AUDIENCE_CHANGE_NOT_ALLOWED`, `BRIDE_NOT_ALLOWED` (ErrorCode + AR/EN + ErrorHandling)
-  - [x] Contract compile fallout: catalog by `businessType` (+ `gender` for MALE/FEMALE salons), bride flags from `brideAllowed` (UI follow-up in MER-081)
-  - [x] AR + EN strings; mock: generated fixtures serve 1.9.0 (captured salon = FEMALE SALON)
-- Tests: `BusinessKindTest` (5), `SalonMapperTest` (+1), `RegistrationRulesTest` (+3), `ApplicationMappersTest` (+1), `RegistrationViewModelTest` (+2: clinic medical license, locked resubmission type), `ServicesMappersTest`, `test_api_sync.py` (+1, 11 OK); `policy_checks.py all` ok
-- Loops: 1/1 — Batch gate (rules §3.13, both tasks on `feat/mer-081-clinic-audience`): `policy_checks.py all` ok, `scripts/ci/tests` 116 OK, `run_detekt.sh` ok (empty baseline), `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green (190 suites / 653 tests / 0 failures, no `w:`), `api_sync --check` ok, `contract_gaps` 0; device (own Pixel 8 Pro emulator, mock): AR clinic registration (type, unisex note, medical license via camera → "Uploaded" in review), EN salon registration (Men → Both, review "Men and women")
-- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — read the diff: rules in core `BusinessKind` (no UI logic), clinic audience never sent, medical license through the public license routes with `purpose`, resubmission type locked; detekt complexity fix of `allErrors` landed in the MER-081 commit
-- Notes: PRD M04 is still the single-screen form (no PRD section for clinics yet): "first step" = the first card of the form, "review step" = a review card above Submit. DEVIATION: captured fixtures were migrated by script, not re-captured (needs the local stack with SRV-174…178). Not done on device: a full submit (keyboard covered the lower fields in the scripted run; submit is covered by `RegistrationViewModelTest`); iOS simulator not run (framework link only).

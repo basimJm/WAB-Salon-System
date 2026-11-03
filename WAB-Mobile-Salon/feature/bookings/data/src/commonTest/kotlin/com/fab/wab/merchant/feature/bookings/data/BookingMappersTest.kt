@@ -1,6 +1,7 @@
 package com.fab.wab.merchant.feature.bookings.data
 
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdData
+import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataCreatedBy
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataCustomer
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataMoney
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataPersonsItem
@@ -10,6 +11,7 @@ import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataReje
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsByIdDataStatusHistoryItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItem
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemBranch
+import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemCreatedBy
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemCustomer
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemRejection
 import com.fab.wab.merchant.core.data.contract.generated.GetBookingsDataItemStaffItem
@@ -19,6 +21,7 @@ import com.fab.wab.merchant.core.domain.booking.PaymentStatus
 import com.fab.wab.merchant.feature.bookings.data.repository.toDomain
 import com.fab.wab.merchant.feature.bookings.data.repository.toStaff
 import com.fab.wab.merchant.feature.bookings.domain.model.BookingAction
+import com.fab.wab.merchant.feature.bookings.domain.model.BookingSource
 import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -37,6 +40,7 @@ class BookingMappersTest {
         personsCount = 2.0, businessType = "SALON", salonAudience = "FEMALE",
         total = "45.000", customer = GetBookingsDataItemCustomer("c1", "Sara", "+962791234567"),
         staff = listOf(GetBookingsDataItemStaffItem("s1", "Rana Odeh", "Rana", PHOTO)),
+        source = "CUSTOMER_APP",
     )
 
     private val detailsData = GetBookingsByIdData(
@@ -49,6 +53,7 @@ class BookingMappersTest {
                 "Noor",
                 false,
                 "FEMALE",
+                "https://files.example/design.jpg",
                 START,
                 END,
                 "25.000",
@@ -59,7 +64,7 @@ class BookingMappersTest {
         money = GetBookingsByIdDataMoney("25.000", "0.000", "0.000", "25.000", "0.000", "0.000"),
         policy = JsonObject(mapOf("cancellationWindowHours" to JsonPrimitive(24))),
         statusHistory = listOf(GetBookingsByIdDataStatusHistoryItem("APPROVED", "MEMBER", null, START)),
-        createdAt = START, actions = listOf("CANCEL", "REASSIGN", "UNKNOWN_ACTION"),
+        createdAt = START, actions = listOf("CANCEL", "REASSIGN", "UNKNOWN_ACTION"), source = "CUSTOMER_APP",
     )
 
     @Test
@@ -89,6 +94,8 @@ class BookingMappersTest {
         val details = detailsData.toDomain()
         assertEquals(setOf(BookingAction.CANCEL, BookingAction.REASSIGN), details?.actions)
         assertEquals(45, details?.persons?.single()?.services?.single()?.durationMinutes)
+        // §5.23: the tattoo design image travels as a signed URL.
+        assertEquals("https://files.example/design.jpg", details?.persons?.single()?.referenceImageUrl)
         assertEquals("25.000", details?.money?.remaining)
         assertEquals(false, details?.money?.hasPaidAtSalon)
         assertEquals(24, details?.policy?.windowHours)
@@ -136,5 +143,26 @@ class BookingMappersTest {
         assertEquals("Abdoun", summary?.branch?.name)
         assertNull(summary?.branch?.locationText)
         assertNull(item.toDomain()?.branch)
+    }
+
+    @Test
+    fun merchantBookingsCarrySourceCreatorAndCustomerWithoutAccount() {
+        val app = item.toDomain()
+        assertEquals(BookingSource.CUSTOMER_APP, app?.source)
+        assertEquals(false, app?.isCreatedByBusiness)
+        assertEquals(true, app?.customerHasAccount)
+        val merchant = item.copy(
+            source = "MERCHANT",
+            createdBy = GetBookingsDataItemCreatedBy("m1", "Huda"),
+            customer = GetBookingsDataItemCustomer(null, "Walk-in", "+962790000001"),
+        ).toDomain()
+        assertEquals(true, merchant?.isCreatedByBusiness)
+        assertEquals("Huda", merchant?.createdByName)
+        assertEquals(false, merchant?.customerHasAccount)
+        assertEquals("+962790000001", merchant?.customerPhone)
+        val details = detailsData.copy(source = "MERCHANT", createdBy = GetBookingsByIdDataCreatedBy("m2", "Owner")).toDomain()
+        assertEquals(BookingSource.MERCHANT, details?.summary?.source)
+        assertEquals("Owner", details?.summary?.createdByName)
+        assertEquals(BookingSource.CUSTOMER_APP, BookingSource.fromCode("SOMETHING_NEW"))
     }
 }

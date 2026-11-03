@@ -36,7 +36,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "a7f908fa3ea86a5dade4d23f",
@@ -78,7 +80,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "6e484f368c336684ad444753",
@@ -114,7 +118,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "7465488b4e44ddcaf2787630",
@@ -150,7 +156,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "f6f7997b6985ea68e4a38ae8",
@@ -186,7 +194,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "c27cb1bcaf1715c362c865ef",
@@ -228,7 +238,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "0f8a7121b242ff9c108d869b",
@@ -276,7 +288,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "d1103ee9ea5694d040ecd0fc",
@@ -312,7 +326,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "e54d30ae1a5c023e7070aa17",
@@ -348,7 +364,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     },
     {
       "id": "2860cfaa6addb4a3a2719a9a",
@@ -390,7 +408,9 @@
       ],
       "rejection": null,
       "businessType": "SALON",
-      "salonAudience": "FEMALE"
+      "salonAudience": "FEMALE",
+      "source": "CUSTOMER_APP",
+      "createdBy": null
     }
   ],
   "meta": {
