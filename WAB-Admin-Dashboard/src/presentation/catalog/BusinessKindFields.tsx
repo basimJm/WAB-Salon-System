@@ -14,7 +14,7 @@ export interface BusinessKindFieldsProps {
   onChange: (value: BusinessKind) => void;
 }
 
-/** Business type + audience of a catalog service (§5.19): a CLINIC service is always for everyone. */
+/** Business type + audience of a catalog service (§5.19, §5.23): CLINIC and TATTOO services are always for everyone. */
 export function BusinessKindFields({ value, locked, onChange }: BusinessKindFieldsProps) {
   const { t } = useTranslation();
   const audiences = audiencesFor(value.businessType);
@@ -42,7 +42,7 @@ export function BusinessKindFields({ value, locked, onChange }: BusinessKindFiel
           })
         }
       />
-      {value.businessType === 'CLINIC' ? (
+      {value.businessType !== 'SALON' ? (
         <p className="wab-field__hint" role="note">
           {t('business.clinicAudience')}
         </p>

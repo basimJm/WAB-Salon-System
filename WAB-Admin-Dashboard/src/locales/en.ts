@@ -6,7 +6,6 @@ import errors from './en/errors.json';
 import designKits from './en/designKits.json';
 import design from './en/design.json';
 import forms from './en/forms.json';
-import settings from './en/settings.json';
 import locations from './en/locations.json';
 import appConfig from './en/appConfig.json';
 import content from './en/content.json';
@@ -74,7 +73,6 @@ const en = {
   ...content,
   ...appConfig,
   ...locations,
-  ...settings,
 };
 
 export default en;

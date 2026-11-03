@@ -94,7 +94,8 @@
     },
     "businessType": {
       "SALON": "Salon",
-      "CLINIC": "Clinic"
+      "CLINIC": "Clinic",
+      "TATTOO": "Tattoo studio"
     },
     "audience": {
       "FEMALE": "Women",

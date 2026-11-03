@@ -73,7 +73,7 @@ describe('CatalogPage', () => {
     expect(within(dialog).getByLabelText('Audience')).toBeEnabled();
     await userEvent.selectOptions(within(dialog).getByLabelText('Business type'), 'CLINIC');
     expect(within(dialog).getByLabelText('Audience')).toBeDisabled();
-    expect(within(dialog).getByRole('note')).toHaveTextContent('Clinics serve everyone');
+    expect(within(dialog).getByRole('note')).toHaveTextContent('Always for everyone');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
     await userEvent.click(screen.getByRole('radio', { name: 'Clinics' }));
     await userEvent.click(screen.getByRole('button', { name: 'Add a service' }));

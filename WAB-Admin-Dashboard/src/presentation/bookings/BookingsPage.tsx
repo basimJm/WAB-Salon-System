@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useContainer } from '@/app/ContainerContext';
 import { ROUTES } from '@/constants/routes';
 import {
+  BOOKING_SOURCES,
   BOOKING_STATUSES,
   BOOKING_TABS,
   PAYMENT_STATUSES,
@@ -58,6 +59,12 @@ export default function BookingsPage() {
       key: 'customer',
       header: t('bookings.customer'),
       render: (r) => (r.customer ? <EntityCell name={r.customer.name} /> : '—'),
+    },
+    // §5.20: made in the customer app or by the business.
+    {
+      key: 'source',
+      header: t('bookings.source'),
+      render: (r) => t(`bookings.sources.${r.source}`),
     },
     {
       key: 'salon',
@@ -132,6 +139,7 @@ export default function BookingsPage() {
       t('bookings.payment'),
       f('payment') && t(`bookings.paymentStatus.${f('payment')}`, { defaultValue: f('payment') }),
     ),
+    ...chip('source', t('bookings.source'), f('source') && t(`bookings.sources.${f('source')}`)),
     ...chip('bride', t('bookings.bride'), f('bride') ? t('bookings.brideOnly') : ''),
     ...chip('from', t('bookings.from'), f('from')),
     ...chip('to', t('bookings.to'), f('to')),
@@ -208,6 +216,15 @@ export default function BookingsPage() {
                 })),
               ]}
               onChange={(e) => list.setFilter('payment', e.target.value ? [e.target.value] : [])}
+            />
+            <Select
+              label={t('bookings.source')}
+              value={f('source')}
+              options={[
+                all,
+                ...BOOKING_SOURCES.map((s) => ({ value: s, label: t(`bookings.sources.${s}`) })),
+              ]}
+              onChange={(e) => list.setFilter('source', e.target.value ? [e.target.value] : [])}
             />
             <Select
               label={t('bookings.bride')}

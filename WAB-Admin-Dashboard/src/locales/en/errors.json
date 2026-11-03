@@ -36,7 +36,7 @@
       "SALON_CLOSED": "The salon is closed at that time.",
       "GENDER_MISMATCH": "The salon and the customers must be of the same gender.",
       "BUSINESS_TYPE_MISMATCH": "This catalog service is for another business type or audience.",
-      "AUDIENCE_CHANGE_NOT_ALLOWED": "This audience change is not allowed: a clinic always serves everyone and the business type never changes.",
+      "AUDIENCE_CHANGE_NOT_ALLOWED": "This audience change is not allowed: only a salon's audience can change.",
       "BRIDE_NOT_ALLOWED": "Bride bookings are only for women's and mixed salons.",
       "TOO_MANY_COMPANIONS": "Too many companions for one booking.",
       "SERVICE_UNAVAILABLE": "A selected service is not available.",

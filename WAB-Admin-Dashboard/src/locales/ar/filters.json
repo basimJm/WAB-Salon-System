@@ -49,9 +49,10 @@
     "filter": {
       "ALL": "الكل",
       "SALON": "الصالونات",
-      "CLINIC": "العيادات"
+      "CLINIC": "العيادات",
+      "TATTOO": "استوديوهات الوشم"
     },
-    "clinicAudience": "العيادات تخدم الجميع",
+    "clinicAudience": "دائمًا للجميع",
     "gender": "الجنس"
   }
 }

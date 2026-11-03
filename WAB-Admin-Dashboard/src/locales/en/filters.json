@@ -49,9 +49,10 @@
     "filter": {
       "ALL": "All",
       "SALON": "Salons",
-      "CLINIC": "Clinics"
+      "CLINIC": "Clinics",
+      "TATTOO": "Tattoo studios"
     },
-    "clinicAudience": "Clinics serve everyone",
+    "clinicAudience": "Always for everyone",
     "gender": "Gender"
   }
 }

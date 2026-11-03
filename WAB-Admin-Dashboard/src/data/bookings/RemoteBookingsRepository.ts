@@ -52,6 +52,7 @@ export class RemoteBookingsRepository implements BookingsRepository {
         branchId: q.branchId,
         customerId: q.customerId,
         businessType: q.businessType,
+        source: q.source,
       }),
     });
 

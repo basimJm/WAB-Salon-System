@@ -8,8 +8,10 @@ import {
 } from '@/domain/settings/registry';
 import { parseSetting, sameSettingValue, settingToText } from '@/domain/settings/validate';
 import { MOCK_SETTING_DEFAULTS } from '@/data/mock/settingsFixture';
-import en from '@/locales/en';
-import ar from '@/locales/ar';
+import { SETTINGS_STRINGS } from '@/locales/lazy/settings';
+
+const { en } = SETTINGS_STRINGS;
+const { ar } = SETTINGS_STRINGS;
 
 const def = (key: string) => SETTING_DEFINITIONS.find((d) => d.key === key)!;
 

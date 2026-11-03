@@ -6,10 +6,20 @@
       "PENDING": "قيد الانتظار",
       "UPCOMING": "القادمة",
       "TODAY": "اليوم",
-      "PAST": "السابقة"
+      "PAST": "السابقة",
+      "TO_CLOSE": "بحاجة إلى إغلاق"
     },
     "reference": "المرجع",
     "customer": "العميل",
+    "design": "التصميم",
+    "viewDesign": "عرض صورة التصميم",
+    "source": "أنشأه",
+    "createdBy": "أنشأه الموظف",
+    "noAccount": "بدون حساب في WAB",
+    "sources": {
+      "CUSTOMER_APP": "تطبيق العميل",
+      "MERCHANT": "النشاط التجاري"
+    },
     "salon": "الصالون",
     "appointment": "الموعد",
     "persons": "الأشخاص",
