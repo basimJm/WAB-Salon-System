@@ -50,6 +50,8 @@
       "booking_paymentHoldMinutes": "Slot hold while paying",
       "booking_autoCancelAfterStartMinutes": "Auto-cancel a pending request after the start time",
       "booking_pendingAlertBeforeMinutes": "Alert salon before a pending appointment",
+      "booking_closeReminderIntervalMinutes": "Close-booking reminder every",
+      "booking_closeOverdueAlertHours": "Open-booking alert after",
       "booking_reminderMinutes": "Reminders before the appointment (comma separated)",
       "otp_length": "Code length",
       "otp_resendAfterSec": "Wait before resending",

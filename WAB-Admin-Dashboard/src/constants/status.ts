@@ -90,7 +90,7 @@ export const STATUS_TONES = {
     CRITICAL: 'rose',
   },
   // BUSINESS_DOMAIN §5.19: what a business is and who it serves (type + audience badges on rows and details).
-  businessType: { SALON: 'violet', CLINIC: 'purple' },
+  businessType: { SALON: 'violet', CLINIC: 'purple', TATTOO: 'amber' },
   audience: { FEMALE: 'rose', MALE: 'grey', BOTH: 'green' },
   export: {
     QUEUED: 'grey',

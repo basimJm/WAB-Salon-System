@@ -11,7 +11,11 @@ export const BOOKING_STATUSES = [
   'COMPLETED',
   'NO_SHOW',
 ] as const;
-export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST'] as const;
+/** `TO_CLOSE` (§5.21): approved bookings whose end passed, oldest first. */
+export const BOOKING_TABS = ['PENDING', 'UPCOMING', 'TODAY', 'PAST', 'TO_CLOSE'] as const;
+/** Who made the booking (§5.20): the customer in the app, or the business for a customer. */
+export const BOOKING_SOURCES = ['CUSTOMER_APP', 'MERCHANT'] as const;
+export type BookingSource = (typeof BOOKING_SOURCES)[number];
 export const PAYMENT_STATUSES = ['PAY_ON_ARRIVAL', 'DEPOSIT_PAID', 'FULLY_PAID', 'PAID'] as const;
 export type BookingStatus = (typeof BOOKING_STATUSES)[number];
 export type BookingTab = (typeof BOOKING_TABS)[number];
@@ -56,7 +60,15 @@ export interface BookingSummary {
     readonly name: string;
     readonly locationText: string | null;
   } | null;
-  readonly customer: { readonly id: string; readonly name: string; readonly phone: string } | null;
+  /** `id` is null for a business-made booking of someone without the app (§5.20): the contact as entered. */
+  readonly customer: {
+    readonly id: string | null;
+    readonly name: string;
+    readonly phone: string;
+  } | null;
+  readonly source: BookingSource;
+  /** The member who made a business booking (§5.20); null for app bookings. */
+  readonly createdBy: { readonly id: string; readonly name: string } | null;
   readonly staff: readonly BookingStaff[];
   /** Set when the booking was rejected (list rows and details). */
   readonly rejection: BookingReason | null;
@@ -66,6 +78,8 @@ export interface BookingPerson {
   readonly isBride: boolean;
   /** A BOTH salon or a clinic may book men and women together (§5.19); null when unknown. */
   readonly gender: PersonGender | null;
+  /** Tattoo design image (§5.23): short-lived signed link; null when none. */
+  readonly referenceImageUrl: string | null;
   readonly start: string;
   readonly end: string;
   readonly subtotal: string;
@@ -111,6 +125,7 @@ export interface BookingQuery extends PageQuery {
   branchId?: string;
   customerId?: string;
   businessType?: BusinessType;
+  source?: BookingSource;
 }
 export interface StatusChangeResult {
   readonly referenceNumber: string;
