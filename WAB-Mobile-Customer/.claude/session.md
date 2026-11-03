@@ -11,7 +11,7 @@
 
 ### CUS-101 — Search + filter by business type; clinic details/booking regression
 - Branch: `fix/cus-101-clinics-search-filter`
-- Status: IN PROGRESS
+- Status: DONE (PR #603)
 - Acceptance criteria (owner 2026-10-30: "i cannot find clinics and search look ugly and filtering should be when open filter select salon or clinic then categories filter changes based on filter business type and booking and details for the clinic not work"; BUSINESS_DOMAIN §5.19; operations `GET /salons`, `GET /catalog/services?businessType`, `GET /salons/{id}`, booking drafts):
   - [x] S04: the All/Salons/Clinics tabs are gone; title follows the type ("Salons & clinics" / "Salons" / "Beauty clinics"); hint "Search salons and clinics"; the type is a removable chip like every other filter (removing it keeps the other filters)
   - [x] S05: "Show" All/Salons/Clinics is the first section; choosing a type reloads the service categories from that type's catalog and drops picks of the other type; Reset clears the type; Apply returns it in `SalonFilters.businessType`
@@ -26,7 +26,7 @@
 
 ### CUS-100 — Animated brand logo on the launch/config screen
 - Branch: `feat/cus-100-animated-logo`
-- Status: IN PROGRESS
+- Status: DONE (PR #603)
 - Acceptance criteria (owner 2026-10-29: "use in the initial screen that call app configuration api not native splash", "use this for logo just", "faster in 1 sec"; PRD §4.2 splash; no API change):
   - [x] Native splash untouched (earlier native-splash attempt rolled back); only the logo of the config screen (`SplashScreen`) becomes the owner's Lottie `files/wab_logo_splash.json` (unmodified)
   - [x] Played once in `AppTheme.motion.logoReveal` (speed = file length / token; token now 2000 ms, owner edit after the 1 s request) and held on its last frame; same tile size/shape as `AppLogo`

@@ -13,7 +13,7 @@
 ### SRV-182 — Every module on the file lifecycle (owner 2026-11-01)
 
 - Branch: `feat/srv-180-r2-storage` (batch SRV-180…182 on one branch)
-- Status: IN PROGRESS (committed, not pushed)
+- Status: DONE (PR #605)
 - Acceptance criteria (BUSINESS_DOMAIN §3.7 file slots + storageCleanups; operations PUT/DELETE `/customer/v1/profile/avatar`, PATCH `/merchant/v1/salon/profile`, `/merchant/v1/team/members[/{id}]`, PATCH `/merchant/v1/me`, `/merchant/v1/salon/services/{id}`, DELETE `/merchant/v1/salon/gallery/{id}`, `/merchant/v1/salon/application/resubmit`, admin catalog / banners / catalog requests / salon edit):
   - [x] Slots (same key + version, replaced in place): customer avatar, salon cover + logo (`profileKey`, merchant and admin edit), member photo (team create/update + own profile), catalog image (admin create/update + approved catalog request), banner image per language
   - [x] Lists queue what they drop: service media, gallery item files (now through the outbox instead of a best-effort delete), license + medical-license documents replaced on resubmit, catalog-request images (rejected, mapped to an existing entry, or replaced by the admin's)
@@ -30,7 +30,7 @@
 ### SRV-181 — File slots: same-key replacement + reliable cleanup (owner 2026-11-01)
 
 - Branch: `feat/srv-180-r2-storage` (batch)
-- Status: IN PROGRESS (committed, not pushed)
+- Status: DONE (PR #605)
 - Acceptance criteria (BUSINESS_DOMAIN §3.7, updated in this batch):
   - [x] `uploads` rows: `slot`, `version`, `size`, status `CONSUMED`; one row per slot key, kept across replacements (file id stable)
   - [x] `FileSlots.replace`: ownership via `assertConfirmed`, server-side copy temp → slot key under a per-slot Redis lock, `stat` for size/type, version $inc, variants regenerated, entity commit, temp `CONSUMED` + queued, older plain key queued; `remove`: entity first, then record + objects queued
@@ -45,7 +45,7 @@
 
 - Branch: `feat/srv-180-r2-storage`
 - Branched: from `origin/server` (SRV-179 is on its own unmerged branch)
-- Status: IN PROGRESS (batch SRV-180…182, rules §3.13)
+- Status: DONE (PR #605)
 - Owner decisions 2026-11-01: two R2 buckets (public + private), same-key replacement with a version in the URL (SRV-181), no S3→R2 migration tool
 - Acceptance criteria (BUSINESS_DOMAIN §3.7 uploads, §2 visibility; BRD storage NFRs; no API change):
   - [x] Inspected first: storage already central (server `StorageProvider` → `@wab/storage` SDK S3 adapter; `uploads` collection = file metadata; presign → confirm → `assertConfirmed`); gaps recorded for SRV-181/182 (replacement leaves old objects for salon cover/profile, member photo, service media, catalog, banners, licenses)

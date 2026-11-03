@@ -4,15 +4,15 @@
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | SRV-180…182 R2 storage + file slots (IN PROGRESS, `feat/srv-180-r2-storage`, not pushed); SRV-179 (`fix/srv-179-demo-photo-keys`, not pushed) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
+| server | `server` | none (SRV-179 #602; SRV-180…182 R2 storage + file slots #605) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
 | admin | `admin` | ADM-109 + ADM-110 business types (IN REVIEW, `feat/adm-110-catalog-types` on `feat/adm-109-business-types`, not pushed) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | none (CUS-093 #519) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
-| merchant | `merchant` | MER-080 + MER-081 salons/clinics (IN REVIEW, `feat/mer-081-clinic-audience`, not pushed) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
+| customer | `customer` | none (CUS-100 + CUS-101 #603) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
+| merchant | `merchant` | none (MER-080…083; #604) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | OTP-012 ARQAM channel (IN REVIEW, 0.3.0, branch `feat/srv-158-arqam-otp`) | none | SRV-158 server adoption (same branch) | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
 | analytics | `server` | none | ANA-001 scaffold | — | `wab-analytics/.claude/session.md` |
-| storage | `server` | none | STO-001 scaffold | — | `wab-storage/.claude/session.md` |
+| storage | `server` | none (STO-011 R2 #605) | STO-001 scaffold | — | `wab-storage/.claude/session.md` |
 
 ## Repo-level task (this branch)
 
@@ -343,3 +343,16 @@
 - Tests: `python3 scripts/tasks.py check`
 - Loops: 1/1 — re-read the user stories (home sections order, see-more, services section, unisex clinics, same booking flow, bookings filter, register salon/clinic, gender choice, clinic = branches/staff, widen to both, admin per type) against §5.19 and the task rows
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — docs and backlog only. DEVIATION: PRDs (customer/merchant/admin) not edited; tasks point at BUSINESS_DOMAIN §5.19.
+
+### T-149 — Last pre-production branches merged; masters synced through main (owner request 2026-11-03)
+- Project: repo root
+- Branch: `chore/sync-masters-into-main-16` (PR into `main`), then `main` → each master
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Merged into masters: SRV-179 (#602), CUS-100 + CUS-101 (#603), MER-082 + MER-083 (#604), SRV-180…182 + STO-011 (#605; SRV-179 merged into it first, conflicts = server backlog rows + session blocks, both kept; tsc + affected suites green)
+  - [x] `server`, `admin`, `customer`, `merchant` merged into one branch from `main` (no conflicts); statuses DONE; board regenerated
+  - [x] Roles: Product Manager, UI/UX/CX Design Expert, Senior Marketing Manager added to `.claude/roles.md` (owner request)
+  - [ ] `main` → every master; all 0 behind `main`
+- Tests: `tasks.py check` (only the known CUS-047 note)
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog statuses and the roles table only; no product code written.
