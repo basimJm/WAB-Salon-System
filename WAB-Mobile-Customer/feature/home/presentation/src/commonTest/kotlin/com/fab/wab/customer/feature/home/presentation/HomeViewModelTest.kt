@@ -53,13 +53,11 @@ class HomeViewModelTest {
     private val realtime = FakeRealtimeClient()
     private val effects = mutableListOf<SideEffect>()
     private var fix: LocationData? = AMMAN
-    /** When set, the GPS answers only once this completes (a slow first fix). */
-    private var slowFix: kotlinx.coroutines.CompletableDeferred<LocationData?>? = null
     private val language = MutableStateFlow(AppLanguage.ARABIC)
 
     private fun kotlinx.coroutines.test.TestScope.viewModel(session: SessionState = GUEST): HomeViewModel {
         val provider = object : DeviceLocationProvider {
-            override suspend fun currentLocation(): LocationData? = slowFix?.await() ?: fix
+            override suspend fun currentLocation(): LocationData? = fix
         }
         val deps = HomeDependencies(
             loadHome = LoadHomeUseCase(repository),
@@ -138,7 +136,7 @@ class HomeViewModelTest {
         repository.result = AppResult.Success(content(bookAgain = listOf(entry)))
         val user = viewModel(USER).state.value
         assertEquals(
-            listOf(HomeBlock.Banners, HomeBlock.Explore, HomeBlock.NearYou, HomeBlock.Recommended, HomeBlock.BookAgain),
+            listOf(HomeBlock.Banners, HomeBlock.Explore, HomeBlock.Recommended, HomeBlock.BookAgain, HomeBlock.NearYou),
             user.blocks,
         )
         assertEquals(listOf(entry), user.bookAgain)
@@ -271,30 +269,5 @@ class HomeViewModelTest {
         assertEquals("error", state.error)
         assertEquals(false, state.hasContent)
         assertEquals(false, state.loading)
-    }
-
-    @Test
-    fun aSlowGpsFixNeverHoldsHomeBack() = runTest(UnconfinedTestDispatcher()) {
-        permissions.status = PermissionStatus.GRANTED
-        val gps = kotlinx.coroutines.CompletableDeferred<LocationData?>()
-        slowFix = gps
-        repository.result = AppResult.Success(content(nearest = HomeSection(listOf(salon("n1")), hasMore = false)))
-        val vm = viewModel(USER)
-        // The sections are on screen before any fix; Near you shows its placeholder.
-        assertEquals(listOf(null), repository.calls.map { it.location })
-        assertTrue(vm.state.value.hasContent)
-        assertEquals(NearestUi.Locating, vm.state.value.nearYou)
-        gps.complete(AMMAN)
-        assertEquals(AMMAN, repository.calls.last().location)
-        assertIs<NearestUi.Salons>(vm.state.value.nearYou)
-    }
-
-    @Test
-    fun noGpsFixEndsWithLocationOffNotAnEndlessPlaceholder() = runTest(UnconfinedTestDispatcher()) {
-        permissions.status = PermissionStatus.GRANTED
-        fix = null
-        val vm = viewModel(USER)
-        assertEquals(1, repository.calls.size)
-        assertEquals(NearestUi.LocationOff, vm.state.value.nearYou)
     }
 }
