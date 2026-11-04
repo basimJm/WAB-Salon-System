@@ -29,7 +29,7 @@ npm run build && npm start            # API on the PORT from .env.development
 
 ## External providers
 
-OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `STORAGE_PROVIDER` and `NOTIFIER_PROVIDER` choose `fake` (in-repo stand-in, the default outside production) or `real` (the `wab-*` SDKs); production must set them to `real`. `OTP_PROVIDER` is `whatsapp` (production) or `fake`. Payments are paused: `PAYMENT_PROVIDER` is `fake` (dev/test) or `disabled` (production; every gateway call answers 503). Server analytics run on the server's own MongoDB events; there is no analytics provider.
+OTP, file storage, push/email, payments and analytics sit behind interfaces in `src/providers`. `NOTIFIER_PROVIDER` chooses `fake` (in-repo stand-in, the default outside production) or `real` (`@wab/notifications`: FCM push + SMTP email); production must set `real`. `STORAGE_PROVIDER` is `cloudflare-r2` (the active provider), `real` (AWS S3 + CDN, a fallback) or `fake`; production accepts only the first two. `OTP_PROVIDER` is `arqam` (production) or `fake`. Payments are paused: `PAYMENT_PROVIDER` is `fake` (dev/test) or `disabled` (production; every gateway call answers 503). Server analytics run on the server's own MongoDB events; there is no analytics provider.
 
 ### Phone OTP (WhatsApp through ARQAM OTP, BUSINESS_DOMAIN §3.1a)
 

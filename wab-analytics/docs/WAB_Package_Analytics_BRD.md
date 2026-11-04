@@ -4,27 +4,30 @@
 | Field | Value |
 |---|---|
 | Document | BRD — `wab-analytics` package |
-| Version | 1.0 |
-| Date | October 2026 |
-| Repository | Separate repository `wab-analytics` |
+| Version | 1.1 (status: built, not used) |
+| Date | 2026-11-04 |
+| Repository | Monorepo folder `wab-analytics/` |
 | Deliverable | **Node.js package (TypeScript, npm)** — server only |
-| Consumers | WAB backend (admin analytics APIs, reports, alerts); future projects |
-| Related | Backend BRD, Admin BRD & PRD (A01–A11, A26, A27), Customer/Merchant PRDs (§14) |
+| Consumers | None today (WAB-Server does not use it); future projects |
+| Related | Backend BRD, Admin BRD & PRD (A01–A11, A26, A27), Customer/Merchant PRDs (§14). Root `BUSINESS_DOMAIN.md` holds the rules; this package holds none of the business rules |
+| Status | **Built, not used** (see below) |
 
 ---
 
 ## 1. Executive Summary
-`wab-analytics` gives the backend one **interface** to (1) record **server-side events** and (2) **query analytics** for the admin panel. Data sources:
+**Status (2026-11-04): built but not used.** WAB-Server does not depend on this package: it records its own events in MongoDB (`serverEvents`) and has no analytics provider. BigQuery was dropped by the owner on 2026-10-19 (SRV-110, SRV-127 and ADM-074…077 stay PENDING as dropped). The apps send screens and actions to Firebase Analytics and crashes to Crashlytics. The code and this document are kept for a later decision. The requirements below describe the package as built.
+
+`wab-analytics` gives a backend one **interface** to (1) record **server-side events** and (2) **query analytics** for the admin panel. Data sources:
 - **App events** — tracked by **Firebase Analytics** in the customer and merchant apps, exported by Firebase to **BigQuery** and kept **forever**.
 - **Crashes** — **Firebase Crashlytics**, exported to BigQuery.
 - **Server events** — produced by the backend (OTP, payments, refunds, jobs, API errors, admin actions), stored in **MongoDB**.
 
-The package turns these sources into the admin features the business asked for: live overview, funnels, cohorts, search analytics, payment attempts, errors, merchant analytics, **per-user journeys** (including guest history linked after registration), and daily/weekly/monthly reports.
+The package turns these sources into admin features: live overview, funnels, cohorts, search analytics, payment attempts, errors, merchant analytics, **per-user journeys** (including guest history linked after registration), and daily/weekly/monthly reports.
 
 ---
 
 ## 2. Business Context
-The admin's top priority is **complete visibility**: every screen any user visits, every action, every payment attempt, every error and every customer/merchant journey — retained permanently and exportable.
+The package was built for **complete visibility**: every screen any user visits, every action, every payment attempt, every error and every customer/merchant journey — retained permanently and exportable. WAB's admin today reads the server's own MongoDB events instead (Backend BRD BE-61).
 
 ---
 
@@ -86,7 +89,7 @@ The admin's top priority is **complete visibility**: every screen any user visit
 | ANA-09 | Search analytics including zero-result queries. | M |
 | ANA-10 | Payment attempt analytics with gateway response codes/messages. | M |
 | ANA-11 | Error analytics: API errors by endpoint/status/latency, crash-free users, OTP and push failures. | M |
-| ANA-12 | All queries filterable by date range, app, platform, app version, user type, gender scope, city, salon. | M |
+| ANA-12 | All queries filterable by date range, app, platform, app version, user type, gender scope, city, business. | M |
 | ANA-13 | Report datasets for daily/weekly/monthly reports. | M |
 | ANA-14 | Scheduled aggregations and caching so common dashboards load fast. | M |
 | ANA-15 | Cost guards on BigQuery queries. | M |
@@ -109,7 +112,7 @@ The admin's top priority is **complete visibility**: every screen any user visit
 ## 7. Success Metrics
 - Admin can open any user's complete journey in ≤3 s.
 - Dashboards load in ≤2 s for common ranges.
-- Monthly BigQuery cost within budget.
+- Monthly BigQuery cost within budget (if a project adopts the warehouse).
 - No gaps between app events and server events in journeys.
 
 ---
@@ -127,6 +130,6 @@ The admin's top priority is **complete visibility**: every screen any user visit
 ## 9. Open Items
 | # | Item |
 |---|---|
-| 1 | Firebase Blaze plan + BigQuery export (daily + streaming) setup |
-| 2 | BigQuery monthly budget |
+| 1 | Whether WAB ever adopts this package. BigQuery export setup is dropped by the owner (2026-10-19) |
+| 2 | BigQuery monthly budget: not applicable while BigQuery is dropped |
 | 3 | Final event list per app (from PRDs §14) |

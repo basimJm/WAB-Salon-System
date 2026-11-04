@@ -1,5 +1,7 @@
 # HyperPay — full integration flow for WAB (server, mobile SDKs, statuses, refunds, subscriptions, settlement, payouts)
 
+> **Status (2026-11-04):** online payment is paused, no gateway is chosen and HyperPay is only a candidate; this flow is not in use.
+
 > Written 2026-10-26 from HyperPay's developer docs (OPPWA platform, <https://hyperpay.docs.oppwa.com/>) and the current WAB code. **✅** = stated in HyperPay docs (link in §13) · **⚠️** = not in the docs / must be confirmed with HyperPay before go-live (§12). Business rules stay in `BUSINESS_DOMAIN.md`; this file is the gateway design. Owner decisions are marked **[DECIDE]**.
 
 ---

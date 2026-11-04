@@ -1,6 +1,6 @@
 # wab-analytics — Integration (technical implementation document)
 
-> Not used by the server (owner decision 2026-10-19): WAB-Server no longer depends on this package.
+> **Status (2026-11-04): built but not used.** WAB-Server does not depend on this package: it records its own events in MongoDB (`serverEvents`) and has no analytics provider. BigQuery was dropped by the owner on 2026-10-19 (SRV-110, SRV-127 and ADM-074…077 stay PENDING as dropped). The apps send screens and actions to Firebase Analytics and crashes to Crashlytics. The code and this document are kept for a later decision.
 
 > Single source of truth for **how this package is built and how any project uses it**. Updated after every commit/push that changes the implementation (Rules.md §14). Status legend: ✅ done · 🚧 in progress · ⬜ not started.
 
@@ -11,7 +11,7 @@
 | BRD | `docs/WAB_Package_Analytics_BRD.md` |
 | Version | 0.1.0 (feature complete; publish = ANA-010, owner) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds with `.d.ts` |
-| Server counterpart in WAB | `WAB-Server/src/providers/analytics` (port `AnalyticsProvider`: `track`, `linkIdentity`, `countEvents`) |
+| Server counterpart in WAB | None: `WAB-Server/src/providers/analytics/mongo.ts` is the server's own code over `serverEvents` and does not use this package |
 
 ## 1. Purpose and boundaries
 Server events recorded with a common schema; analytics queries for admin APIs with date-range limits and max-bytes-billed guards; installation↔account identity links so journeys, funnels and cohorts merge guest and registered history; cached results.
@@ -108,7 +108,7 @@ const analytics = createAnalytics({ environment: 'dev', timeZone: 'Asia/Amman' }
 await analytics.track({ name: 'payment.failed', actorType: 'CUSTOMER', actorId, params: { code } });
 const rows = await analytics.countEvents({ from, to, groupBy: 'DAY' });
 ```
-**WAB-Server:** `ANALYTICS_PROVIDER=real` builds the package with `provider: 'mongo'` over the `serverEvents` collection (ObjectId codec) and, when `ANALYTICS_BIGQUERY_*` is set, the BigQuery warehouse (`WAB-Server/src/providers/analytics/real.ts`). The server keeps its own Mongo `AnalyticsProvider` port (`track`, `linkIdentity`, `countEvents`); funnels/cohorts/journey/overview are reachable through `sdk` for the admin analytics tasks.
+**WAB-Server:** does not use this package. There is no `ANALYTICS_PROVIDER` or `ANALYTICS_BIGQUERY_*` key and no `real` adapter; the server reads its own `serverEvents` through `createMongoAnalytics`.
 
 ### Event contract (ANA-16)
 Names are dotted lower case (`family.action`), at most 80 characters. Params carry IDs and codes only — never phone numbers, names, tokens, OTPs, card data (keys that look secret are redacted; 8 KB limit).
@@ -131,7 +131,7 @@ Common fields: `actorType` (`CUSTOMER`, `MEMBER`, `ADMIN`, `SYSTEM`), `actorId`,
 - Firebase `user_id` equals our account id (apps set it at login); unlinked installations stay separate guests until the app sends the link.
 - Event retention (none specified), PII review of params, archival strategy.
 - Funnel/cohort definitions beyond the predefined list: callers pass step names; predefined funnels live in the consumer.
-- Which producers emit `payment.*`, `booking.*`, `api.error` (WAB-Server must add the `track` calls).
+- Which producers emit `payment.*`, `booking.*`, `api.error` (only relevant if a project adopts this package).
 - Scheduled aggregation tables in BigQuery (ANA-14) are not created by this package; the result cache is the first line of speed.
 
 ## 12. Implementation status

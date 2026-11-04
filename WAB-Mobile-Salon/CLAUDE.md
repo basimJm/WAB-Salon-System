@@ -8,7 +8,7 @@
 
 ## 0. Per task (nothing else is read up front)
 1. `python3 scripts/tasks.py next merchant` → the task row (ID, branch from `origin/merchant`, needs, PRD screens, operations).
-2. Only the `docs/WAB_Merchant_App_PRD.md` screens/sections (M01–M26) and the `WAB-Server/docs/api/openapi.merchant.json` operations the row names (grep the heading, read that range); the `docs/WAB_Merchant_Design_Script.md` section and the matching `design/WAB Merchant 0x *.dc.html` for UI work (visual reference only; the PRD wins).
+2. Only the `docs/WAB_Merchant_App_PRD.md` screens/sections (M01–M32) and the `WAB-Server/docs/api/openapi.merchant.json` operations the row names (grep the heading, read that range); the `docs/WAB_Merchant_Design_Script.md` section and the matching `design/WAB Merchant 0x *.dc.html` for UI work (visual reference only; the PRD wins).
 3. `.claude/Integration.md` when the task touches the API, Firebase, realtime, push or the mock; `BUSINESS_DOMAIN.md` (root) sections the row names (permissions, booking state machine, error codes §11).
 
 ## 1. Non-Negotiable Rules

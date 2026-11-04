@@ -1,13 +1,13 @@
 # WAB — Session Index (all projects at a glance)
 
-> One line per project. The working task block of a project lives in **its own** `.claude/session.md` (loaded only in that folder). This index is for an agent that needs the whole picture; update a project's line when its current task changes. Live counts: `python3 scripts/tasks.py board`; next task: `python3 scripts/tasks.py next <project>`. Updated 2026-10-18.
+> One line per project. The working task block of a project lives in **its own** `.claude/session.md` (loaded only in that folder). This index is for an agent that needs the whole picture; update a project's line when its current task changes. Live counts: `python3 scripts/tasks.py board`; next task: `python3 scripts/tasks.py next <project>`. Updated 2026-11-04.
 
 | Project (`tasks.py` key) | Master | Current task | Next ready task | Blocked on | Session file |
 |---|---|---|---|---|---|
-| server | `server` | none (SRV-179 #602; SRV-180…182 R2 storage + file slots #605) | none ready | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/112/127 analytics + SDK publish | `WAB-Server/.claude/session.md` |
-| admin | `admin` | ADM-109 + ADM-110 business types (IN REVIEW, `feat/adm-110-catalog-types` on `feat/adm-109-business-types`, not pushed) | none ready | ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics; ADM-080 e2e; ADM-082 error tracking; ADM-100…106 server gaps SRV-162…168 | `WAB-Admin-Dashboard/.claude/session.md` |
-| customer | `customer` | none (CUS-100 + CUS-101 #603) | none ready | CUS-061/063 owner Firebase iOS plist, SHA, APNs, `OTP_PROVIDER=real` on dev; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
-| merchant | `merchant` | none (MER-080…083; #604) | none ready | MER-004 owner Firebase → MER-012/055/056; dev merchant maintenance ON (owner); MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
+| server | `server` | none (through SRV-188) | SRV-162…168 admin design gaps; SRV-189…191 (documents T-153) | SRV-011/059/115/116/152 owner hosting/config; SRV-159 owner ARQAM setup; SRV-092 payments; SRV-110/127 analytics dropped; SRV-112 SDK publish | `WAB-Server/.claude/session.md` |
+| admin | `admin` | none (through ADM-112) | ADM-113, ADM-115 (documents T-153) | ADM-100…106 wait on SRV-162…168; ADM-002/005/083 owner hosting/CI; ADM-074…077 analytics dropped; ADM-080 e2e; ADM-082 error tracking | `WAB-Admin-Dashboard/.claude/session.md` |
+| customer | `customer` | none (through CUS-106 #647) | CUS-107…109 (documents T-153) | CUS-061/063 owner Firebase iOS plist, SHA, APNs, ARQAM setup; CUS-047/062 payments paused; CUS-066/067 stores | `WAB-Mobile-Customer/.claude/session.md` |
+| merchant | `merchant` | none (through MER-086) | MER-087…091 (documents T-153) | MER-004 owner Firebase → MER-012/055/056; MER-059/060 stores | `WAB-Mobile-Salon/.claude/session.md` |
 | payments | `server` | none | PAY-001 scaffold | — | `wab-payments/.claude/session.md` |
 | otp | `server` | OTP-012 ARQAM channel (IN REVIEW, 0.3.0, branch `feat/srv-158-arqam-otp`) | none | SRV-158 server adoption (same branch) | `wab-otp/.claude/session.md` |
 | notifications | `server` | none (SDK built, wired in the server) | NOT-010 publish | NOT-011 owner App Password | `wab-notifications/.claude/session.md` |
@@ -392,3 +392,17 @@
 - Tests: `tasks.py check` (only the known CUS-047 note)
 - Loops: 1/1
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog statuses and a memory note only; no product code written.
+
+### T-153 — Every PRD, BRD, Design Script and integration file matches the current business (owner request 2026-11-04)
+- Project: repo root + every project's `docs/` and `.claude/Integration.md`
+- Branch: `docs/sync-all-requirements`
+- Flow: from `server`; reaches the other masters through `server` → `main` → masters
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Customer, merchant and admin PRD + BRD + Design Script describe branches, the three business types, merged discovery, business-made bookings, closing, WhatsApp OTP through ARQAM, R2 storage, paused payments, rewritten in place; existing IDs unchanged, new ones take the next free number (M27–M32, A30–A31, new BR/MBR/ABR ids)
+  - [x] Backend BRD, package BRDs/READMEs and `.claude/Integration.md` files say the same; legacy `WAB-Server/BRD.md` removed
+  - [x] Root `CLAUDE.md`, `INTEGRATION.md`, `BUSINESS_DOMAIN.md` (header, §5.13, §8 three events, §9 real job list, §12.10), rule files, root memory and this index corrected
+  - [x] Differences between built code and the rules are marked "Not built yet" and tracked: SRV-189…191, CUS-107…111, MER-087…091, ADM-113…115; statuses SRV-158 + OTP-012 DONE, OTP-010 PENDING (owner publish)
+- Tests: `scripts/test_tasks.py`, hook tests, admin docs/errorCatalog/status/business-types tests, server docs/securityChecklist/contractGuard tests, server + README prettier, customer + merchant policy checks: all 13 green. `tasks.py check`: only the known CUS-047 note
+- Loops: 1/1 — stale-claim scan on all ten main documents + repo-wide Markdown sweep (remaining hits are correct statements, such as "no SMS"); screen IDs checked present; numbers cross-checked across documents (auto-cancel, companions, trial, OTP length, slots, permissions); "Not built yet" claims spot-checked against code. Found and fixed: admin PRD wrongly said the new-address sign-in email was not built (it is); M29 services claim confirmed as a real bug (MER-090)
+- Review: PASSED (SE ✔ (no code changed), Mobile ✔ (S/M screens read against routes and strings by the document agents, samples read by the lead), Architect ✔ (contract counts and versions from the generated OpenAPI; §9 from `constants/jobs.ts`), QA ✔ (checks above)) — DEVIATIONS: documents only, nothing run on a device or against hosted services; each document was checked by scan and samples, not re-read line by line; `design/*.dc.html` not updated (visual reference, PRD wins, stated in each Design Script); user-facing strings that still say "salon" are tasks, not fixed here; the Stop hook's "no tests" complaint comes from the owner's untracked `marketing/*.js`, this branch changes no source

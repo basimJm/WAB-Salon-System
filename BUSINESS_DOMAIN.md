@@ -3,8 +3,8 @@
 > **What this is:** the whole business consolidated into one implementable spec: entities and fields, enums, relations, indexes, state machines, algorithms, money rules, permissions, notifications, jobs, settings and error codes.
 > **Who uses it:** WAB-Server (schemas, services, rules), the generated OpenAPI contract (`INTEGRATION.md` §3), and all clients for shared enums/rules.
 > **Sources:** consolidated from the Customer, Merchant and Admin PRDs and BRDs, the Backend BRD, the package BRDs and `CLAUDE.md`. If this file conflicts with a PRD on **screen behavior**, the PRD wins. If it conflicts on **data/rules**, raise it and fix both.
-> **Branches (owner decisions 2026-10-25):** a salon (the brand) has one or more **branches**; location, contacts, hours, closures, services/prices and staff belong to a branch; name, gender, logo/cover/gallery, description, policy, subscription, payouts, rating and Recommended placement stay salon-wide. See §3.3a, §5.2, §5.16–§5.18 and decision log §12.
-> **Business types (owner decisions 2026-10-29):** a business is a **SALON** or a **CLINIC** (beauty clinic: botox, filler, laser…). Salons serve men, women or **both** (`audience`); clinics are always for everyone (`audience = BOTH`). Clinics work exactly like salons (branches, staff, services, booking flow, subscription, placements) but have their own catalog categories, home sections and a required medical license. See §3.3, §5.4, §5.17, §5.19 and decision log §12.10. **Tattoo studios (owner 2026-11-03)** are the third type (`TATTOO`, always BOTH, §5.23); salons can also **book for customers** with or without the app (§5.20); finished bookings are **closed by reminders** (§5.21); discovery lists every type and audience together, without a gender filter (§5.22).
+> **Branches (owner decisions 2026-10-25):** a business (the brand) has one or more **branches**; location, contacts, hours, closures, services/prices and staff belong to a branch; name, audience, logo/cover/gallery, description, policy, subscription, payouts, rating and Recommended placement stay business-wide. See §3.3a, §5.2, §5.16–§5.18 and decision log §12. Collections and fields keep the name `salon` for every business type.
+> **Business types (owner decisions 2026-10-29 and 2026-11-03):** a business is a **SALON**, a **CLINIC** (beauty clinic: botox, filler, laser…) or a **TATTOO** studio. Salons serve men, women or **both** (`audience`); clinics and tattoo studios are always for everyone (`audience = BOTH`). All types work the same way (branches, staff, services, booking flow, subscription, placements) with their own catalog; clinics also need a medical license (§5.19), tattoo bookings can carry a design image (§5.23). Businesses can **book for customers** with or without the app (§5.20); finished bookings are **closed by reminders** (§5.21); discovery lists every type and audience together, without a gender filter (§5.22).
 > **Conventions:** MongoDB + Mongoose; `_id` ObjectId; timestamps `createdAt`/`updatedAt` (UTC) on every collection; money stored as **integer fils** (1 JOD = 1000 fils) to avoid float errors and exposed in the API as a decimal string with 3 decimals; localized admin-managed text as `{ ar, en }`; files stored as **storage keys** (never full URLs); soft-delete via status fields, not physical deletes, unless stated.
 
 ---
@@ -476,7 +476,7 @@ Before saving a branch's weekly hours or closures, leaves, staff deactivation, *
 - Daily job: TRIAL past end with no period → EXPIRED; ACTIVE past `currentPeriodEnd` → EXPIRED; alert admin at T−7 days and on expiry. Admin decides OFFLINE (not automatic).
 - Recording a payment sets ACTIVE and `currentPeriodEnd` = max(existing, periodTo).
 - One subscription per **salon** covers all its branches (trial starts at salon approval).
-- Recommended placements are bought per **salon/clinic** (not per branch); the Recommended salons section = active SALON placements whose audience fits the customer's gender (§5.19), the Recommended clinics section = active CLINIC placements; each ordered by `order`, businesses must be customer-visible; booking from it starts at branch choice.
+- Recommended placements are bought per **salon/clinic** (not per branch); the Home Recommended section is one rail of the active placements of the chosen type lens (§5.22), ordered by `order` within each type; businesses must be customer-visible; a placement counts as active from its dates (no expiry job); booking from it starts at branch choice.
 
 ### 5.14 Payouts (manual, Phase 1)
 One bank account and one payout per **salon** (all branches); ledger, transactions and refunds carry `branchId` so the owner and admin can filter by branch. Net due = Σ ledger since last payout. Admin creates payout (period, computed gross/fees/refunds/net), records transfer → ledger `PAYOUT −net`, status TRANSFERRED, notify owner + FINANCE_VIEW members.
@@ -597,6 +597,7 @@ Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON
 | booking.reminder_1h / reminder_15m | ✔ | ✔ assigned staff (1h) | — |
 | booking.pending_30m | ✔ | ✔ (RESPOND) | — |
 | salon.audience_widened (owner widened to BOTH, §5.19) | — | ✔ owner (confirmation) | ✔ |
+| salon.audience_changed (admin narrowed the audience), salon.edited_by_admin, salon.deletion_rejected | — | ✔ owner | — |
 | booking.completed (rate) / no_show | ✔ (rate: registered only) | — | — |
 | booking.created_by_merchant (§5.20) | ✔ if registered ("Booked by …") | — | — |
 | booking.close_reminder (every interval after the end, §5.21) | — | ✔ assigned staff + OPERATE | — |
@@ -618,21 +619,37 @@ Booking notifications name the place like §5.17: **"Salon - Branch"** (branch n
 
 ## 9. Scheduled Jobs (BullMQ; job IDs deterministic so they can be removed)
 
+**Per booking** (ids use `.` because BullMQ forbids `:`, for example `booking.reminder.{id}.60`):
+
 | Job | When | Action |
 |---|---|---|
-| `booking:reminder:{id}:60` | start − 60 min (APPROVED) | notify customer + staff |
-| `booking:reminder:{id}:15` | start − 15 min (APPROVED) | notify customer |
-| `booking:pending-alert:{id}` | start − 30 min (if PENDING) | notify customer + RESPOND members |
-| `booking:close-reminder:{id}` | appointmentEnd + `booking.closeReminderIntervalMinutes`, repeating every interval (if APPROVED) | notify assigned staff + OPERATE (§5.21) |
-| `booking:close-overdue:{id}` | appointmentEnd + `booking.closeOverdueAlertHours` (if APPROVED) | merchant + admin alert (§5.21) |
-| `booking:auto-cancel:{id}` | respondBy (if PENDING) | AUTO_CANCELLED + full refund |
-| `draft:expire` | TTL | release holds |
-| `refund:retry:{id}` | backoff | retry refund |
-| daily `subscriptions:check` | 09:00 Amman | trial/expiry transitions + alerts |
-| daily `placements:expire` | 00:05 Amman | hide expired recommended |
-| daily `accounts:purge` | 03:00 Amman | anonymize customers past grace |
-| every 5 min `alerts:evaluate` | — | thresholds (§10) |
-| nightly `reports:aggregate` | 02:00 Amman | daily aggregates |
+| `booking.reminder.{id}.60` | start − 60 min (APPROVED) | notify customer + staff |
+| `booking.reminder.{id}.15` | start − 15 min (APPROVED) | notify customer |
+| `booking.pending-alert.{id}` | start − 30 min (if PENDING) | notify customer + RESPOND members |
+| `booking.auto-cancel.{id}` | respondBy (if PENDING) | AUTO_CANCELLED + full refund |
+| `booking.close-reminder.{id}.{round}` | appointmentEnd + `booking.closeReminderIntervalMinutes`, repeating every interval (if APPROVED) | notify assigned staff + OPERATE (§5.21) |
+| `booking.close-overdue.{id}` | appointmentEnd + `booking.closeOverdueAlertHours` (if APPROVED) | merchant + admin alert (§5.21) |
+| `campaign.send` | the campaign's `scheduledAt` | deliver a push campaign |
+| `export.run` | on request | build an admin export file |
+
+**Recurring** (cron in `settings.timezone`, Asia/Amman):
+
+| Job | When | Action |
+|---|---|---|
+| `periodic.subscriptions-check` | daily 09:00 | trial/expiry transitions + alerts |
+| `periodic.accounts-purge` | daily 03:00 | anonymize customers past grace |
+| `periodic.reports-aggregate` | daily 02:00 | daily aggregates |
+| `periodic.ledger-reconcile` | daily 02:20 | check ledger against transactions |
+| `periodic.refunds-retry` | every 5 min | retry due refunds (`refund.maxRetries`) |
+| `periodic.refunds-delayed` | hourly | alert on refunds pending > `refund.delayAlertHours` |
+| `periodic.payments-reconcile` | every 5 min | settle pending payments, refund orphans |
+| `periodic.alerts-evaluate` | every 5 min | thresholds (§10) |
+| `periodic.alerts-email` | every 5 min | email new alerts to the admin |
+| `periodic.booking-jobs-reconcile` | hourly at :15 | re-create missing booking jobs |
+| `periodic.storage-cleanup` | every 5 min | delete objects queued in `storageCleanups` |
+| `periodic.overview-tick` | every minute | socket `overview.tick` to open admin panels |
+
+No job on purpose: draft expiry (hold keys carry their own expiry, a TTL index deletes the draft) and placement expiry (a placement's status comes from its dates).
 
 On any status change: remove jobs that no longer apply; schedule new ones.
 
@@ -690,5 +707,5 @@ MAINTENANCE  UPDATE_REQUIRED
 6. Reference number format `WAB-XXXXXX` (base32, no ambiguous chars).
 7. Branches (owner decisions 2026-10-25): per branch = location & contacts, hours & closures, services & prices, staff (one branch per member); salon-wide = name, gender, logo/cover/gallery, description, policy, subscription (3 free months per salon), payouts (one bank account), rating, Recommended placement. No admin approval for new branches (live when complete). Managers: one or more per branch, branch data only, no finance/subscription/policy; team members and permissions stay owner-only. Search card = nearest branch; nearest list = one entry per branch, "Salon - Branch". Closing a branch is blocked while it has upcoming bookings; branch or whole salon can go offline; existing salons migrate to one main branch; reviews show their branch; branch limit = setting `salon.maxBranches`.
 8. Phone OTP (owner decisions 2026-10-26): server-generated codes delivered over WhatsApp by ARQAM OTP (AR + EN authentication templates; the direct Meta Cloud API channel, its delivery webhook and status polling were dropped) (§3.1a); Firebase Phone Auth removed from the server and both apps (Firebase stays for push, analytics, crash reporting). Users without WhatsApp cannot receive a code (no SMS fallback).
-10. Business types (owner decisions 2026-10-29): SALON or CLINIC (immutable); salons serve MALE, FEMALE or BOTH, clinics always BOTH; BOTH salons and clinics are visible to everyone and take mixed-gender bookings; owner may widen a salon to BOTH, narrowing only by admin; clinics need a medical license; bride only for FEMALE/BOTH salons; catalog per business type; home adds Recommended clinics + nearest clinics; bookings filter salon/clinic; admin filters everything by business type (§5.19).
+10. Business types (owner decisions 2026-10-29): SALON or CLINIC (TATTOO added in point 11; immutable); salons serve MALE, FEMALE or BOTH, clinics always BOTH; BOTH salons and clinics take mixed-gender bookings; owner may widen a salon to BOTH, narrowing only by admin; clinics need a medical license; bride only for FEMALE/BOTH salons; catalog per business type; admin filters everything by business type (§5.19). Visibility by gender and per-type home sections were replaced by point 11 (§5.22).
 11. Tattoo, business bookings, closing, discovery (owner decisions 2026-11-03): TATTOO type (BOTH, no bride, no age check, optional design image per person); piercing and similar services exist per type when admin adds them; businesses book for registered and unregistered customers (all types; registered get every status notification with "Booked by"; unregistered get nothing; reviews only by registered customers); close reminders every hour until answered, merchant + admin alert after 24 h; discovery without a gender filter (gender kept in onboarding/registration, search filter by type, services, gender, price, rating). **Confirmed by the owner (2026-11-03):** tattoo applications need the trade license only; a claimed MERCHANT booking that is COMPLETED can be reviewed after the claim; women see men's salons in discovery but cannot book them for themselves (`GENDER_MISMATCH`; cards show the audience label).

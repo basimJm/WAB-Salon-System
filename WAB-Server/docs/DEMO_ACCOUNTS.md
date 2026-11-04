@@ -8,7 +8,7 @@ Loaded by `npm run seed:dev` (or `seed:demo` for the data alone) or, on the host
 - **Render dev:** env `SEED_DEMO_ON_START=true` + `SEED_DEMO_DATABASE=<dev database name>` (the service runs `NODE_ENV=production`) and the storage keys; on a fresh database also `ADMIN_EMAIL` / `ADMIN_PASSWORD`. Every start runs the same seed in the background. Or Render Shell: `npm run seed:dev`.
 - No storage configured: the data is seeded, images are skipped with a warning (URLs answer 404 until a run with storage).
 
-**All numbers are invented test numbers.** Jordan has no reserved fictional mobile range and the API accepts only `7[789]xxxxxxx`, so the demo uses fixed blocks that look nothing like a person's number: `+962 78900 0xxx` (salon staff), `+962 78901 0xxx` (branch staff), `+962 79900 0xxx` (customers). Do not reuse them outside dev.
+**All numbers are invented test numbers.** Jordan has no reserved fictional mobile range and the API accepts only `7[789]xxxxxxx`, so the demo uses fixed blocks that look nothing like a person's number: `+962 78900 0xxx` (salon staff), `+962 78901 0xxx` (branch staff), `+962 78902 0xxx` (clinics, Unity Salon, tattoo studio), `+962 79900 0xxx` (customers). Do not reuse them outside dev.
 
 **Signing in (merchant app):** enter the number, request the code, then:
 - hosted dev with an ARQAM **TEST** key: the code goes to the key's own test phone, whatever number was entered;
@@ -43,6 +43,10 @@ Roles: the **owner** sees every branch and has every permission; a **branch mana
 | Rose Bridal Studio | Jabal Amman | MANAGER | Nada Saleh | +962789010013 | yes |
 | Rose Bridal Studio | Jabal Amman | EMPLOYEE | Dima Odeh | +962789010014 | no |
 | Rose Bridal Studio | Jabal Amman | EMPLOYEE | Rasha Abbadi | +962789010015 | no |
+| Joury Ladies Salon | all branches | OWNER | Tala Bataineh | +962789000011 | — |
+| Joury Ladies Salon | Khalda (main) | MANAGER | Leen Qasem | +962789000012 | yes |
+| Joury Ladies Salon | Khalda (main) | EMPLOYEE | Jana Smadi | +962789000013 | yes |
+| Joury Ladies Salon | Khalda (main) | EMPLOYEE | Yara Khoury | +962789000014 | no |
 
 ## Men's salons
 
@@ -68,6 +72,24 @@ Roles: the **owner** sees every branch and has every permission; a **branch mana
 | Gentlemen's Corner | Um Uthaina | MANAGER | Yazan Smadi | +962789010022 |
 | Gentlemen's Corner | Um Uthaina | EMPLOYEE | Fadi Fayez | +962789010023 |
 | Gentlemen's Corner | Um Uthaina | EMPLOYEE | Saif Haddad | +962789010024 |
+| Classic Cuts Jubeiha | all branches | OWNER | Yousef Obeidat | +962789000024 |
+| Classic Cuts Jubeiha | Jubeiha (main) | MANAGER | Omar Odeh | +962789000025 |
+| Classic Cuts Jubeiha | Jubeiha (main) | EMPLOYEE | Khaled Rawashdeh | +962789000026 |
+| Classic Cuts Jubeiha | Jubeiha (main) | EMPLOYEE | Ahmad Nasser | +962789000027 |
+
+## Salons in the other states (customers do not see them)
+
+One owner each; only Nour Hair Studio has staff. Use them to test the offline state, the completeness checklist and the application queue.
+
+| Salon | Gender | State | Role | Name | Phone |
+|---|---|---|---|---|---|
+| Nour Hair Studio | women | OFFLINE (subscription expired) | OWNER | Hala Abbadi | +962789000028 |
+| Nour Hair Studio | women | OFFLINE | MANAGER | Sara Bataineh | +962789000029 |
+| Nour Hair Studio | women | OFFLINE | EMPLOYEE | Maya Qasem | +962789000030 |
+| Nour Hair Studio | women | OFFLINE | EMPLOYEE | Noor Smadi | +962789000031 |
+| Fade Masters | men | APPROVED_INCOMPLETE | OWNER | Zaid Khoury | +962789000032 |
+| Bella Nails & Spa | women | APPLICATION_PENDING | OWNER | Aya Zoubi | +962789000033 |
+| Sharp Look Barbers | men | APPLICATION_REJECTED | OWNER | Laith Fayez | +962789000034 |
 
 ## Beauty clinics, the salon for men and women and the tattoo studio (§5.19, §5.23, SRV-174, SRV-183)
 
@@ -97,6 +119,6 @@ Every clinic and the tattoo studio serve men and women (`BOTH`); Unity Salon is 
 
 Its own address and map point in its Amman area, weekly hours (one day off), phone, the salon's services at its own prices, staff with skills and working days, one closure day and one staff leave (both after the booked period), about 45–55 bookings from 4 weeks ago to 10 days ahead (at least one per open day, so today or tomorrow always has appointments when the seed runs) in every status — PENDING, APPROVED, COMPLETED, NO_SHOW, REJECTED, CANCELLED_BY_CUSTOMER / SALON, AUTO_CANCELLED — with companions and brides (women's branches), their online payments, refunds and ledger lines, 15–30 reviews (approved, pending and rejected; salon and staff), and the notifications the owner, the branch manager and the customers would have received. Ratings and customer counts are recomputed from the stored reviews and bookings after each run.
 
-Other salons (`joury`, `classic` live; `nour` offline; `fade` incomplete; `bella` pending; `sharp` rejected) keep one (main) branch; their staff use `+96278900xxxx` numbers in seed order. Customers: 12 women and 12 men, `+962799000001` … `+962799000024` (a few are blocked or pending deletion on purpose).
+Joury Ladies Salon, Classic Cuts Jubeiha, Nour Hair Studio, Fade Masters, Bella Nails & Spa and Sharp Look Barbers keep one (main) branch. Customers: 12 women and 12 men, `+962799000001` … `+962799000024` (a few are blocked or pending deletion on purpose).
 
 Names and numbers are stable: the seed is deterministic, and new demo branches are only ever appended. The dates move with the day the seed first ran.

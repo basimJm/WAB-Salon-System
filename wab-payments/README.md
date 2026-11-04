@@ -1,6 +1,8 @@
 # @wab/payments
 
-Gateway-independent payments for WAB projects. **HyperPay (ACI OPP / COPYandPAY)** is the first gateway; any other gateway is one adapter behind the same port. Money is always integer fils (1 JOD = 1000 fils). No business rules live here.
+> **Status (2026-11-04): built but not used.** Online payment is paused: no gateway is chosen, HyperPay is only a candidate, and WAB-Server does not depend on this package (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev). The apps offer pay on arrival and show online payment as "coming soon".
+
+Gateway-independent payments for WAB projects. **HyperPay (ACI OPP / COPYandPAY)** is the first adapter built; any other gateway is one adapter behind the same port. Money is always integer fils (1 JOD = 1000 fils). No business rules live here.
 
 ## Quick start
 
