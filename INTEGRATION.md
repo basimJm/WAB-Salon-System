@@ -8,20 +8,20 @@
 |---|---|---|---|---|---|
 | `server` | `WAB-Server/` | The only owner of business rules, data and money flow; serves three REST namespaces + Socket.IO | `server` | `WAB-Server/docs/WAB_Server_Tasks.md` (SRV-) | `WAB-Server/.claude/{session,memory,Integration}.md` |
 | `admin` | `WAB-Admin-Dashboard/` | Full visibility and control for WAB staff (approvals, bookings, money, content, analytics) | `admin` | `WAB-Admin-Dashboard/docs/WAB_Admin_Tasks.md` (ADM-) | `WAB-Admin-Dashboard/.claude/…` |
-| `customer` | `WAB-Mobile-Customer/` | Customers discover salons and book (self + 5 companions, brides) | `customer` | `WAB-Mobile-Customer/docs/WAB_Customer_Tasks.md` (CUS-) | `WAB-Mobile-Customer/.claude/…` |
-| `merchant` | `WAB-Mobile-Salon/` | Salons register, get approved, manage the salon, answer booking requests in real time | `merchant` | `WAB-Mobile-Salon/docs/WAB_Merchant_Tasks.md` (MER-) | `WAB-Mobile-Salon/.claude/…` |
+| `customer` | `WAB-Mobile-Customer/` | Customers discover salons, clinics and tattoo studios and book (self + 5 companions, brides, tattoo design image) | `customer` | `WAB-Mobile-Customer/docs/WAB_Customer_Tasks.md` (CUS-) | `WAB-Mobile-Customer/.claude/…` |
+| `merchant` | `WAB-Mobile-Salon/` | Businesses register, get approved, manage branches and teams, answer booking requests in real time, book for customers, close finished bookings | `merchant` | `WAB-Mobile-Salon/docs/WAB_Merchant_Tasks.md` (MER-) | `WAB-Mobile-Salon/.claude/…` |
 | `payments` | `wab-payments/` | Gateway-independent payments (Node for the server, KMP launcher for the customer app) | `server` | `wab-payments/docs/WAB_Package_Payments_Tasks.md` (PAY-) | `wab-payments/.claude/…` |
 | `otp` | `wab-otp/` | Phone-ownership proof: WhatsApp OTP codes (server-generated, delivered by ARQAM OTP) + signed single-use `otpToken` + OTP abuse limits | `server` | `wab-otp/docs/WAB_Package_OTP_Tasks.md` (OTP-) | `wab-otp/.claude/…` |
 | `notifications` | `wab-notifications/` | Push (FCM) + email (SMTP) behind one interface — **built** | `server` | `wab-notifications/docs/WAB_Package_Notifications_Tasks.md` (NOT-) | `wab-notifications/.claude/…` |
-| `analytics` | `wab-analytics/` | Server events + analytics queries (Mongo now, BigQuery later) | `server` | `wab-analytics/docs/WAB_Package_Analytics_Tasks.md` (ANA-) | `wab-analytics/.claude/…` |
-| `storage` | `wab-storage/` | Presigned uploads, confirmation, CDN and signed URLs, image variants | `server` | `wab-storage/docs/WAB_Package_Storage_Tasks.md` (STO-) | `wab-storage/.claude/…` |
+| `analytics` | `wab-analytics/` | Server events + analytics queries. Built but **not used**: the server keeps its own MongoDB events, BigQuery dropped (owner 2026-10-19) | `server` | `wab-analytics/docs/WAB_Package_Analytics_Tasks.md` (ANA-) | `wab-analytics/.claude/…` |
+| `storage` | `wab-storage/` | Presigned uploads, confirmation, public and signed URLs, image variants on Cloudflare R2 (AWS S3 as fallback) | `server` | `wab-storage/docs/WAB_Package_Storage_Tasks.md` (STO-) | `wab-storage/.claude/…` |
 
 Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched master → PR into the master (never `main`) → the owner merges each master into `main`. If a master is behind `main`, merge `main` into it by PR first. The SDKs ship with the server, so they use `server`.
 
 ## 2. System map
 ```
                  ┌──────────────────────────────── Firebase ────────────────────────────────┐
-                 │ FCM  ·  Analytics + Crashlytics → BigQuery  (phone OTP: ARQAM→WhatsApp)  │
+                 │ FCM  ·  Analytics + Crashlytics  (apps only; phone OTP: ARQAM→WhatsApp)  │
                  └──────▲───────────────────────────▲──────────────────────────▲─────────────┘
                         │          push tokens      │        events (apps only)│
  ┌──────────────────────┴────┐  ┌───────────────────┴──────┐  ┌────────────────┴──────────────┐
@@ -38,7 +38,7 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
  └──────┬───────────────┬────────────────┬──────────────────┬──────────────────┬─────────────────┘
         │ wab-otp       │ wab-storage    │ wab-notifications│ wab-payments     │ wab-analytics
         ▼               ▼                ▼                  ▼                  ▼
-   Firebase Admin    AWS S3 + CDN     FCM + Gmail SMTP    Gateway (HyperPay?)  Mongo + BigQuery
+   ARQAM→WhatsApp    Cloudflare R2    FCM + Gmail SMTP    Paused (no gateway)  Own Mongo events
 ```
 
 ## 3. Contracts (the wire format every client builds against)
@@ -53,21 +53,20 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
 2. **Gaps are tasks, not guesses.** A client that needs something the contract lacks adds/asks for an `SRV-` row (Stage N = admin gaps, Stage O = merchant gaps) and marks its own row `BLOCKED` on it; `tasks.py set SRV-xxx DONE` flips it back to `TODO`.
 3. **Status changes propagate both ways:** every task row lists its cross-project dependencies in *Needs* / *Server*; `scripts/tasks.py` updates dependents when a dependency is done and rebuilds §7. Changing a status by hand without the script is the only way to break the map — do not.
 
-## 5. Integration edges and their state (2026-10-18)
+## 5. Integration edges and their state (2026-11-04)
 | Edge | Contract | State | Next task(s) |
 |---|---|---|---|
-| Admin → Server `/admin/v1` | `openapi.admin.json` (116 ops, all consumed) | Mock transport on fixtures; real client ready; dev switch waits for a deployed API | ADM-079 ← SRV-011 |
-| Admin ↔ Server Socket.IO `/admin` | BUSINESS_DOMAIN §7 | Client done; server emits 2 of 6 events | SRV-124 |
-| Admin needs beyond the contract | Appendix D G1–G11 | Server tasks created | SRV-117…SRV-127 → ADM-068…077 |
-| Customer → Server `/customer/v1` | `openapi.customer.json` (51 ops) | No client code yet; contract complete for the PRD | CUS-006, CUS-009 … |
-| Customer → `wab-payments` KMP | `PaymentLauncher` port | Not started | PAY-010/011 → CUS-047; PAY-015 → CUS-062 |
-| Merchant → Server `/merchant/v1` | `openapi.merchant.json` (71 ops) | No client code; 6 gaps found | SRV-129…SRV-134 → MER-042/043/049/050 |
-| Server → `wab-notifications` | `providers/notifier` | **Live** (`NOTIFIER_PROVIDER=real`, T-123) | NOT-010 publish → SRV-112 |
-| Server → `wab-otp` | `providers/otp` | `arqam` (ARQAM OTP over WhatsApp) or `fake` (recorded codes, dev fixed code) | OTP-011 → SRV-153; OTP-012 → SRV-158 |
-| Server → `wab-storage` | `providers/storage` | Server has its own S3 code; SDK not started | STO-001…010 → SRV-112 |
-| Server → `wab-payments` Node | `providers/payments` | Fake | PAY-001…012 → SRV-092 |
-| Server → `wab-analytics` | `providers/analytics` | Mongo events in server; BigQuery not started | ANA-001…010 → SRV-110 |
-| Deployment (dev API, Atlas, Redis, domain) | — | Owner handles | SRV-011, SRV-116 → ADM-079, CUS-060, MER-054 |
+| Admin → Server `/admin/v1` | `openapi.admin.json` 1.16.0 (164 ops) | **Live** against the hosted dev API and the local stack | SRV-162…168 → ADM-100…106 |
+| Admin ↔ Server Socket.IO `/admin` | BUSINESS_DOMAIN §7 | **Live**, all events emitted (SRV-124) | — |
+| Customer → Server `/customer/v1` | `openapi.customer.json` 1.13.0 (52 ops) | **Live** (`DATA_SOURCE=remote`) | CUS-061/063 owner inputs |
+| Customer → `wab-payments` KMP | `PaymentLauncher` port | SDK built; **paused**, no gateway chosen | SRV-092 → CUS-047, CUS-062 |
+| Merchant → Server `/merchant/v1` | `openapi.merchant.json` 1.13.0 (106 ops) | **Live** (`DATA_SOURCE=remote`) | MER-004 → MER-012, MER-055/056 |
+| Server → `wab-notifications` | `providers/notifier` | **Live** as a local package (`NOTIFIER_PROVIDER=real`) | NOT-010 publish, NOT-011 App Password |
+| Server → `wab-otp` | `providers/otp` | **Live** as a local package: `arqam` (ARQAM OTP over WhatsApp) or `fake` (dev fixed code) | SRV-159 owner ARQAM setup |
+| Server → `wab-storage` | `providers/storage` | **Live** as a local package: `cloudflare-r2` (active), `real` = AWS S3 fallback, `fake` | STO-010 publish; hosted dev R2 keys (owner) |
+| Server → `wab-payments` Node | `providers/payments` | Not used: `disabled` in production, `fake` in dev | SRV-092 (gateway, owner) |
+| Server → `wab-analytics` | none | Not used: the server keeps its own MongoDB events; BigQuery dropped (owner 2026-10-19) | SRV-110, ADM-074…077 stay PENDING |
+| Deployment | — | Hosted dev API on Render (owner); production hosting, domain, Atlas tier open | SRV-011, SRV-116, SRV-152 |
 | Firebase app registrations | — | Customer registered; merchant apps not | MER-004 (owner) |
 
 ### 5a. Business types: salons and clinics (owner decisions 2026-10-29, BUSINESS_DOMAIN §5.19)
@@ -88,7 +87,7 @@ Branch flow: task branch `feat/<prefix>-NNN-<key>` from the freshly fetched mast
 
 ## 6. Definition of "integration ready" (per part) and release order
 - Implements the current contract snapshot; DTO sync test green; every error code has AR + EN handling; mock and real behind one interface, switched by config; realtime and push payloads parsed with fixture tests; no hardcoded URLs or keys; dev and prod configs present.
-- Order: server dev deployment (SRV-011) → admin remote switch (ADM-079) → customer remote (CUS-060) → merchant remote (MER-054) → SDK swaps (SRV-034/092/110/112) → end-to-end flows (booking request CUS→SRV→MER, payment, refund, push) → release tasks (CUS-066/067, MER-059/060, ADM-083).
+- Order: production deployment (SRV-011) → SDK publish (SRV-112) → payments once a gateway is chosen (SRV-092) → end-to-end flows (booking request CUS→SRV→MER, payment, refund, push) → release tasks (CUS-066/067, MER-059/060, ADM-083).
 
 ## 7. Live board
 <!-- BOARD:START -->
