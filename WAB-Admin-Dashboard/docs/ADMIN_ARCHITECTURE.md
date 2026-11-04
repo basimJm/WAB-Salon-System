@@ -33,7 +33,7 @@ Imports point inward only. `presentation` never imports `data`; it reaches repos
 
 ## 3. Contract tooling
 
-The server publishes `WAB-Server/docs/api/openapi.admin.json` (the contract of record until `contracts/` exists, ADR-0001). `npm run api:sync` snapshots it into `contract/` and generates `src/data/contract/generated/dto.ts` (lazy zod factories and inferred types) and `operations.ts` (method, path, tag, flags per operation). `npm run api:check` and `tests/contract.test.ts` fail when the snapshot is older than the server file. Handwritten response types are not allowed.
+The server publishes `WAB-Server/docs/api/openapi.admin.json` (the contract of record; there is no `contracts/` folder, ADR-0001). `npm run api:sync` snapshots it into `contract/` and generates `src/data/contract/generated/dto.ts` (lazy zod factories and inferred types) and `operations.ts` (method, path, tag, flags per operation). `npm run api:check` and `tests/contract.test.ts` fail when the snapshot is older than the server file. Handwritten response types are not allowed.
 
 ## 4. Error model
 
@@ -49,4 +49,4 @@ Four variants: `dev-debug`, `dev-release`, `prod-debug`, `prod-release` (`vite -
 
 ## 7. Quality gates (there is no GitHub CI, ADR-0002)
 
-`npm run verify` = typecheck, lint (zero warnings; complexity, params, depth, no-deprecated), format, unit tests with a coverage floor, env check, hardcoded-value and 300-line scan, layer rules. Before a push also: the four builds, `npm run check:size`, e2e and a browser check (`.claude/rules.md` §6, §8).
+`npm run verify` = typecheck, lint (zero warnings; complexity, params, depth, no-deprecated), format, unit tests with a coverage floor, env check, hardcoded-value and 300-line scan, layer rules. Before a push also: the four builds, `npm run check:size` and a browser check (`.claude/rules.md` §6, §8); e2e only when the owner asks.
