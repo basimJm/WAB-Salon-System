@@ -395,7 +395,8 @@
 
 ### T-153 — Every PRD, BRD, Design Script and integration file matches the current business (owner request 2026-11-04)
 - Project: repo root + every project's `docs/` and `.claude/Integration.md`
-- Branch: `docs/sync-all-requirements` (from `server`; reaches the other masters through `server` → `main` → masters)
+- Branch: `docs/sync-all-requirements`
+- Flow: from `server`; reaches the other masters through `server` → `main` → masters
 - Status: IN PROGRESS
 - Acceptance criteria:
   - [ ] Customer, merchant and admin PRD + BRD + Design Script describe branches, the three business types, merged discovery, business-made bookings, closing, WhatsApp OTP through ARQAM, R2 storage, paused payments; screen and requirement IDs unchanged, new ones take the next free number
