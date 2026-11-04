@@ -4,16 +4,19 @@
 | Field | Value |
 |---|---|
 | Document | BRD — `wab-payments` package |
-| Version | 1.0 |
-| Date | October 2026 |
-| Repository | Separate repository `wab-payments` |
+| Version | 1.1 (status: built, not used; payments paused) |
+| Date | 2026-11-04 |
+| Repository | Monorepo folder `wab-payments/` |
 | Deliverables | **Node.js package (TypeScript, npm)** + **Kotlin Multiplatform library (Maven)** |
-| Consumers | WAB backend (server part); WAB Customer app (KMP part); future projects |
-| Related | Backend BRD, Customer App PRD (S16 Booking Flow), Admin PRD (Finance) |
+| Consumers | None today. Designed for the WAB backend (server part) and the WAB Customer app (KMP part) when payments resume; future projects |
+| Related | Backend BRD, Customer App PRD (S16 Booking Flow), Admin PRD (Finance). Root `BUSINESS_DOMAIN.md` holds the rules; this package holds none of the business rules |
+| Status | **Built, not used** (see below) |
 
 ---
 
 ## 1. Executive Summary
+**Status (2026-11-04): built but not used.** Online payment is paused: no gateway is chosen, HyperPay is only a candidate, and WAB-Server does not depend on this package (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev). The apps offer pay on arrival and show online payment as "coming soon". The requirements below describe the package as designed and built.
+
 `wab-payments` is a reusable payment library that hides the payment gateway behind a stable **interface (abstraction)**. The backend and the mobile app call only the interface; the concrete gateway (HyperPay is the first candidate, not final) is an implementation inside the package. Changing the gateway must not require changes in the backend's business code or in the apps — only a new implementation, configuration and a package version bump.
 
 It is the only package with **both** a server part and a mobile (KMP) part, because the payment UI is presented on the device while verification, refunds and webhooks happen on the server.
@@ -21,9 +24,9 @@ It is the only package with **both** a server part and a mobile (KMP) part, beca
 ---
 
 ## 2. Business Context
-- Customers pay a **deposit** (salon-defined %) or the **full amount** online, or choose pay-on-arrival (no package involvement).
-- **Phase 1 (now):** all online payments are collected into the **platform's** gateway account; **refunds are automatic** through the gateway from the platform account; **payouts to salons are manual** (recorded by admin). Gateway fees are deducted from salon payouts.
-- **Phase 2 (future):** each salon becomes a **sub-merchant** (marketplace / split payments) and money settles **directly** to the salon's bank account; refunds come from the salon's balance. The package must be designed so Phase 2 is an extension, not a rewrite.
+- Designed: customers pay a **deposit** (business-defined %) or the **full amount** online, or choose pay-on-arrival (no package involvement). Today only pay-on-arrival is offered.
+- **Phase 1 (designed):** all online payments are collected into the **platform's** gateway account; **refunds are automatic** through the gateway from the platform account; **payouts to businesses are manual** (recorded by admin). Gateway fees are deducted from business payouts.
+- **Phase 2 (future):** each business becomes a **sub-merchant** (marketplace / split payments) and money settles **directly** to the business's bank account; refunds come from the business's balance. The package must be designed so Phase 2 is an extension, not a rewrite.
 - A failed payment must **never** create a booking; a payment must **never** be charged twice.
 
 ---
@@ -134,7 +137,7 @@ It is the only package with **both** a server part and a mobile (KMP) part, beca
 ## 10. Open Items
 | # | Item |
 |---|---|
-| 1 | Final gateway selection (must support Jordan, JOD, mobile SDKs, refunds API, webhooks; ideally marketplace for Phase 2) |
+| 1 | Gateway selection, an open owner decision; payments stay paused until then (must support Jordan, JOD, mobile SDKs, refunds API, webhooks; ideally marketplace for Phase 2) |
 | 2 | Supported card schemes and local methods |
 | 3 | Phase 2 timeline and commission policy (zero now) |
 | 4 | Package registry (GitHub Packages assumed) |

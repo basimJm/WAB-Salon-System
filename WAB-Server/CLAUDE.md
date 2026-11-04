@@ -30,7 +30,7 @@
   | Service | Business logic and orchestration; throws typed errors | Know about `req`/`res` |
   | Repository | The only code that queries MongoDB; returns plain typed objects | Contain business rules |
   | Schema | Mongoose schema, indexes and types exactly as in `BUSINESS_DOMAIN.md` | Contain business logic |
-- External services (payments, OTP, push and email, storage, analytics) are used only through the `wab-*` package interfaces, injected into services so they can be faked in tests.
+- External services are used only through the ports in `src/providers`, injected into services so they can be faked in tests. `@wab/otp`, `@wab/storage` and `@wab/notifications` back the real ones; payments are paused (no gateway, `wab-payments` not used) and analytics are the server's own MongoDB events (`wab-analytics` not used).
 
 ## 3. Separate Customer, Merchant and Admin Modules
 - There are three namespaces, each with its own router root, token scope and modules. A token from one scope never works on another.
@@ -55,7 +55,7 @@ src/
   models/                   # Mongoose schemas (shared by all namespaces)
   repositories/             # data access per collection
   domain/                   # shared business logic used by more than one namespace
-  providers/                # interfaces to external services (OTP, storage, notifier, payments, analytics) + in-repo fakes; selected by `*_PROVIDER=fake|real`
+  providers/                # interfaces to external services (OTP, storage, notifier, payments, analytics) + in-repo fakes; selected by `OTP_PROVIDER=fake|arqam`, `STORAGE_PROVIDER=fake|real|cloudflare-r2`, `NOTIFIER_PROVIDER=fake|real`, `PAYMENT_PROVIDER=fake|disabled` (analytics: MongoDB, no key)
   modules/customer|merchant|admin/<feature>/
   jobs/, sockets/           # BullMQ processors and Socket.IO handlers (same layering: thin handler → service)
   utils/                    # ALL shared helpers: errors/, response/, i18n/, money/, time/, pagination/, logger/, async/
@@ -84,7 +84,7 @@ Every endpoint returns one of two shapes, built only by the helpers in `utils/re
 ## 7. Arabic and English for Every Response
 - Read `Accept-Language` (`ar` | `en`; default `ar`) in middleware, and localize every `message` and every validation detail.
 - Add every new message key to **both** `ar.json` and `en.json`. A unit test fails if a key is missing from either file or if any value is empty.
-- Content stored in two languages (service names, salon descriptions, content pages, notifications) is saved as `{ ar, en }`:
+- Merchant-entered text (business descriptions, location text) is stored as entered. Content stored in two languages (service names, content pages, notifications) is saved as `{ ar, en }`:
   - customer and merchant responses return the requested language;
   - admin responses return both, so the admin can edit them.
 - Notifications and push messages are localized to the recipient's saved language, not the language of the request.

@@ -15,7 +15,7 @@
 ## 0. Per task (nothing else is read up front)
 
 1. `python3 scripts/tasks.py next admin` → the task row (ID, branch from `origin/admin`, needs, server dependencies, notes). Root rules/roles/hooks, this file, the admin rules/role, session and memory are already in context.
-2. Only the `docs/WAB_Admin_PRD.md` page (A00–A29) and `docs/WAB_Admin_BRD.md` ids the row names, the Design Script section and the matching `design/` file for UI work (grep the heading, read that range).
+2. Only the `docs/WAB_Admin_PRD.md` page (A00–A31) and `docs/WAB_Admin_BRD.md` ids the row names, the Design Script section and the matching `design/` file for UI work (grep the heading, read that range).
 3. `docs/ADMIN_ARCHITECTURE.md` / `docs/adr/` only when the task changes a layer or makes an Appendix C decision; `.claude/Integration.md` when it touches the API, realtime or the mock; `BUSINESS_DOMAIN.md` sections the row names.
 
 ## 1. The Rules (non-negotiable)

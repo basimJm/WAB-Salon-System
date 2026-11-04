@@ -597,6 +597,7 @@ Default templates: MANAGER = all grantable branch permissions (BOOKINGS_*, SALON
 | booking.reminder_1h / reminder_15m | ✔ | ✔ assigned staff (1h) | — |
 | booking.pending_30m | ✔ | ✔ (RESPOND) | — |
 | salon.audience_widened (owner widened to BOTH, §5.19) | — | ✔ owner (confirmation) | ✔ |
+| salon.audience_changed (admin narrowed the audience), salon.edited_by_admin, salon.deletion_rejected | — | ✔ owner | — |
 | booking.completed (rate) / no_show | ✔ (rate: registered only) | — | — |
 | booking.created_by_merchant (§5.20) | ✔ if registered ("Booked by …") | — | — |
 | booking.close_reminder (every interval after the end, §5.21) | — | ✔ assigned staff + OPERATE | — |

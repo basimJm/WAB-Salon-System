@@ -11,6 +11,8 @@
 - Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
+**Status (2026-11-04): built but not used.** WAB-Server does not depend on this package: it records its own events in MongoDB (`serverEvents`) and has no analytics provider. BigQuery was dropped by the owner on 2026-10-19 (SRV-110, SRV-127 and ADM-074…077 stay PENDING as dropped). The apps send screens and actions to Firebase Analytics and crashes to Crashlytics. The code and this document are kept for a later decision.
+
 One interface to (1) record server-side events (MongoDB) and (2) query analytics for the admin panel (MongoDB + BigQuery exports of Firebase Analytics/Crashlytics): overview, traffic, events explorer, funnels, cohorts, search analytics, payments/errors, user journeys incl. guest↔user identity links, report data, alert evaluation helpers; with caching and cost guards.
 
 ## Who you are when you work here

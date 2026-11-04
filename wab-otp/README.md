@@ -65,7 +65,7 @@ Failures **throw** `OtpError` (`code`, `retryable`, `details` without secrets). 
 | ARQAM URL    | any (`baseUrl` for a local mock)                                             | https only                                                         |
 | proof verify | `provider: 'fake'` (`fakeProof(phone)`) or `'signed'`                        | `'signed'` or `'custom'`                                           |
 
-Other channels: `createSmsOtp({ ..., sms: { vendor, templates } })`, or any `OtpChannel` with `createCodeOtp({ ..., channel })`. Behind a proxy: pass `arqam.fetch`.
+Other channels: any `OtpChannel` with `createCodeOtp({ ..., channel })`; a vendor-neutral SMS adapter also exists (`createSmsOtp({ ..., sms: { vendor, templates } })`, fake vendor only). WAB does not use it: ARQAM over WhatsApp is WAB's only real channel, with no SMS fallback. Behind a proxy: pass `arqam.fetch`.
 
 ## Develop
 

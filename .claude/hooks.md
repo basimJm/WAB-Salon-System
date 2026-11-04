@@ -21,7 +21,7 @@ Review the full branch diff (`git diff origin/<master>...HEAD` plus uncommitted 
 Checklist (every item "yes" or justified):
 - **Software Engineer:** correct; minimal scope; Clean Architecture layers; strong typing; errors handled; no duplication; no hardcoded values; no secrets; efficient queries/indexes; logs without sensitive data.
 - **Mobile Engineer:** (if mobile or an API for mobile is touched) RTL+LTR, AR+EN strings in resources, light/dark, loading/empty/error states, accessibility, lifecycle/permissions, matches PRD screen + design.
-- **Solution Architect:** API namespace/scope correct; contract regenerated and committed (server `npm run docs`; clients re-synced) and affected tasks named; integrations via `wab-*` ports; business rules from `CLAUDE.md` §5 respected; config-driven; Phase 2 payments not blocked.
+- **Solution Architect:** API namespace/scope correct; contract regenerated and committed (server `npm run docs`; clients re-synced) and affected tasks named; integrations via `wab-*` ports; business rules from `CLAUDE.md` §4 respected; config-driven; Phase 2 payments not blocked.
 - **QA Engineer:** acceptance criteria listed; each has a unit test; edge cases covered; all tests/build/lint green; no regression in callers; browser/simulator check done for UI.
 
 Record in the task block of the **project's** `.claude/session.md`:

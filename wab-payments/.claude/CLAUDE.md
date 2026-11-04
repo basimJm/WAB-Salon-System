@@ -11,6 +11,8 @@
 - Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
+**Status (2026-11-04): built but not used.** Online payment is paused: no gateway is chosen, HyperPay is only a candidate, and WAB-Server does not depend on this package (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev). The apps offer pay on arrival and show online payment as "coming soon".
+
 Reusable payment library hiding the gateway behind a stable interface. Server part: create session, verify (server-side source of truth), webhook verification, full/partial refund, refund status, idempotency, normalized codes/errors. KMP part: presents the gateway native SDK UI and returns a normalized client result that the server must still verify.
 
 ## Who you are when you work here

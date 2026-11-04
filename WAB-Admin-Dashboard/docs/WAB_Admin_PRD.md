@@ -64,7 +64,7 @@ React 19, TypeScript strict, Vite, React Router, TanStack Query, zod, i18next; V
 - **Lockout:** 5 failed logins → locked for 15 minutes (`admin.maxFailedLogins`, `admin.lockSec`).
 - **Session:** idle sign-out after 2 days of inactivity (owner 2026-10-26; `admin.sessionIdleSec` = 172800) with a warning dialog first; the refresh token keeps an active session going. The session is kept in memory and in this tab's `sessionStorage`: a page reload keeps it, closing the tab ends it; never `localStorage`.
 - Admin profile (A30): change password, change email (with verification), alert email recipients.
-- **Not built yet:** alert email on new-device login.
+- A sign-in from a new IP address emails the admin's alert addresses (best effort: a failed email never blocks the sign-in).
 
 ---
 

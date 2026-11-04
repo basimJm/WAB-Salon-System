@@ -16,7 +16,6 @@
 
 - BRANCHING (user rule, `.claude/rules.md` §3.8): `server` = master branch for server work, created from `main`. Server task branches start from `origin/server` and PRs target `server`; the user merges `server` → `main`. Restart the cloud branch `claude/busy-johnson-2rch94` from `origin/server` after each merge; sync `main` into `server` by PR when `main` moves (customer-app work lands there).
 - `WAB-Server/docs/WAB_Server_Tasks.md` = ordered small tasks SRV-001…116 (status TODO/PENDING/IN REVIEW/DONE). One task = one branch `feat/srv-NNN-<key>`; next task starts only after previous is merged to `main`; PENDING (owner info / missing SDK) tasks are skipped, not blocking.
-- `WAB-Server/BRD.md` is legacy and superseded (4-digit OTP, Cloudinary, old paths) — do not implement.
 - Cloud runner: Node 22, `redis-server` present, no `mongod`/docker daemon → unit tests use fakes; externals sit behind interfaces with fake providers.
 - SRV-001 done: `WAB-Server` has package.json (TS 5.9, jest 30/ts-jest 29, eslint 9 + typescript-eslint 8, prettier), `npm run typecheck|lint|format:check|build|test`; layout list in `src/constants/layout.ts`. TypeScript 7 exists on npm but tooling peers need <6.1 → stay on 5.9.
 - SRV-002 done: `loadConfig()` in `src/config` (zod 4 schema in `env.schema.ts`; names/defaults in `src/constants/env.ts`); add new env keys to schema AND `.env.example` (test enforces). Real env overrides `.env.<NODE_ENV>`.

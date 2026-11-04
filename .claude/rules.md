@@ -17,7 +17,7 @@
 - Convert the request into explicit acceptance criteria in the **project's** `.claude/session.md` task block, naming the PRD/BRD/BUSINESS_DOMAIN sections and OpenAPI operations touched.
 - Identify constraints, edge cases, regressions. Distinguish requirements from assumptions. Ask a concise question only when a missing detail materially affects correctness and the repo cannot answer it.
 - Do not expand scope, refactor unrelated code or add features without justification.
-- Source of truth: PRD > BRD > Design Script > design files (`CLAUDE.md` §3). Wire format: the server OpenAPI snapshot (`INTEGRATION.md` §3).
+- Source of truth: PRD > BRD > Design Script > design files (`CLAUDE.md` §2); data and rules: `BUSINESS_DOMAIN.md`. Wire format: the server OpenAPI snapshot (`INTEGRATION.md` §3).
 
 ## 3. Delivery Rules
 1. **Unit tests for every task.** Every code change ships with unit tests covering the acceptance criteria, edge cases and the regression it fixes. All must pass. No tests → task not done.

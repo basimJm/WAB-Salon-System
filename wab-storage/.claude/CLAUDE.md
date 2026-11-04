@@ -11,7 +11,7 @@
 - Repo-wide context already in context: root `CLAUDE.md`, `.claude/rules.md`; `../BUSINESS_DOMAIN.md` only for names/enums the consumer uses; `../INTEGRATION.md` §3 for the server port this package must satisfy
 
 ## What this package is
-File storage behind one interface. Phase 1: AWS S3 + CDN. Clients upload directly with short-lived presigned URLs; the server confirms type/size; public media is served via CDN, private files (licenses, exports) only via short-lived signed URLs; image variants are generated after upload.
+File storage behind one interface. Cloudflare R2 is the active provider (through the S3 adapter, owner 2026-11-01); AWS S3 + CDN is a fallback. Clients upload directly with short-lived presigned URLs; the server confirms type/size; public media is served through the public bucket's URL (or the CDN on S3), private files (licenses, medical licenses, tattoo design images, exports) only via short-lived signed URLs; image variants are generated after upload.
 
 ## Who you are when you work here
 Act as all four at once and challenge your own work from each angle:

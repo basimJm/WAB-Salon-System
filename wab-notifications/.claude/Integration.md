@@ -7,14 +7,14 @@
 | Package | `wab-notifications` |
 | Type | Node.js package (TypeScript, ESM + CJS + `.d.ts`), server only |
 | BRD | `docs/WAB_Package_Notifications_BRD.md` |
-| Version | 0.1.0 |
+| Version | 0.2.0 |
 | Node | >= 22, TypeScript strict |
-| Server counterpart in WAB | `WAB-Server/src/providers/notifier` (same request/result shapes; fake only until wired) |
+| Server counterpart in WAB | `WAB-Server/src/providers/notifier` (same request/result shapes; `NOTIFIER_PROVIDER=real` delegates to this package, `fake` in dev/test) |
 
 ## 1. Purpose and boundaries
 Delivers **push** (FCM, customer + merchant apps) and **email** (SMTP) behind one interface. The caller decides recipients, language and content; this package validates, de-duplicates, delivers, retries transient failures and tells the caller which device tokens are dead.
 
-**Not in this package:** recipient selection, preferences, schedules, the in-app inbox, SMS (`wab-otp`), WhatsApp, marketing email.
+**Not in this package:** recipient selection, preferences, schedules, the in-app inbox, SMS, WhatsApp (phone OTP codes go through `wab-otp`: ARQAM OTP over WhatsApp), marketing email.
 
 ## 2. Architecture
 ```
@@ -84,7 +84,7 @@ Invalid options throw `NotificationError(NOTIFY_CONFIG_INVALID)` at creation, na
 
 **Email sender (owner decision):** WAB sends from `basim.abusnaimeh@gmail.com` (Gmail SMTP). It is consumer config (`EMAIL_FROM_ADDRESS`), never hardcoded in the SDK. On Gmail `SMTP_USER` must be this same account (Gmail rewrites any other From), and `SMTP_PASS` must be a Google **App Password** for it (2-Step Verification on; Google Account → Security → App passwords). Never put the password in git or in chat — set it as an environment variable or secret. Limits: 500 messages per rolling 24 h, 100 recipients per message.
 
-**Suggested WAB-Server env keys** (when `NOTIFIER_PROVIDER=real` is wired): `FCM_SERVICE_ACCOUNT_JSON`, `FCM_PROJECT_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS`.
+**WAB-Server env keys** (`NOTIFIER_PROVIDER=real`): `FCM_SERVICE_ACCOUNT_JSON`, `FCM_PROJECT_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS`.
 
 ## 5. Status and result mapping (every vendor status handled)
 **FCM per token** (`messaging/*`): success → `SENT` · `registration-token-not-registered`, `invalid-registration-token`, and `invalid-argument` whose message says "registration token" (what real FCM returns for a malformed token) → `INVALID_TOKEN` (returned in `invalidTokens`) · `internal-error`, `server-unavailable`, `unknown-error`, `message-rate-exceeded`, `device-message-rate-exceeded`, `topics-message-rate-exceeded`, `quota-exceeded` → retried per token with backoff, then `FAILED` · `invalid-argument` / `invalid-payload` / `payload-size-limit-exceeded` → `FAILED` for that token; if **every** token in a batch is refused for the payload → throws `NOTIFY_PAYLOAD_INVALID` · auth codes (`authentication-error`, `third-party-auth-error`, `mismatched-credential`, `invalid-apns-credentials`, `app/invalid-credential`) → throws `NOTIFY_AUTH_FAILED` immediately · any other code → `FAILED` and a warning is logged.
@@ -140,7 +140,7 @@ const notifier = createNotifier({
 const { invalidTokens } = await notifier.sendPush({ target: { tokens }, message, idempotencyKey: `booking:${id}:requested` });
 // remove invalidTokens from your database
 ```
-**WAB-Server adoption (separate task):** implement its `Notifier` interface by delegating to this package (same shapes), set `NOTIFIER_PROVIDER=real`, map `NotificationError` → `ExternalServiceError`, remove returned `invalidTokens` from `installations`.
+**WAB-Server adoption (done, T-123):** its `Notifier` interface delegates to this package (same shapes) with `NOTIFIER_PROVIDER=real`; it maps `NotificationError` → `ExternalServiceError` and removes returned `invalidTokens` from `installations`.
 
 ## 11. Open questions / assumed-missing requirements
 - **Opened/delivered receipts** come from the apps, not FCM — event contract with `wab-analytics` still to define (`onEvent` currently reports sent/failed counts only).
@@ -168,7 +168,7 @@ NOT-01…07, NOT-10…14 ✅ (see §3–§6, §9). NOT-08 ✅ (sender name/addre
 | Templates ar/en: ADMIN_2FA, ALERT, REPORT_READY | ✅ |
 | Unit tests + coverage gate, loop test, package smoke, real-FCM dev smoke | ✅ |
 | README + Integration.md | ✅ |
-| WAB-Server wiring (`NOTIFIER_PROVIDER=real`) | ⬜ (server task) |
+| WAB-Server wiring (`NOTIFIER_PROVIDER=real`) | ✅ T-123 |
 | Email HTTP-API adapter (Brevo/Resend/SES) | ⬜ (only if needed) |
 | Mailpit / Gmail real-send verification | ⬜ (needs local sink / App Password) |
 
