@@ -142,7 +142,7 @@ Each package exposes an **interface (abstraction)** and one or more **provider i
 | ID | Requirement |
 |---|---|
 | BE-20 | Home aggregate in one response: banners, Explore, Recommended, Book again, Near you, unread notifications count (BE-25). |
-| BE-21 | Business search combining text + filters (all selected services offered, sum of selected service prices within range, minimum rating, recommended) + nearest sorting within the admin-configured radius (default 10 km), paginated. One card per business, built from its nearest bookable branch. **Not built yet:** Atlas Search for the text part (SRV-059); a server "open now" filter (the app filters loaded pages on the device). |
+| BE-21 | Business search combining text + filters (all selected services offered, sum of selected service prices within range, minimum rating, recommended, open now) + nearest sorting within the admin-configured radius (default 10 km), paginated. One card per business, built from its nearest bookable branch. **Not built yet:** Atlas Search for the text part (SRV-059). |
 | BE-22 | Open/closed status and today's hours computed per branch in Asia/Amman, honoring exceptional closures. |
 | BE-23 | Favorites, reviews (pending until admin approval), business and staff ratings kept independent. The business rating covers all branches; each review carries its branch as a label (§5.11). |
 | BE-24 | **Gender never filters discovery** (§5.22): every LIVE business of every type and audience is listed for everyone on home, nearest, Recommended, favorites, deep links and search; gender is asked only in guest setup and registration. Cards and details return type and audience. The `gender` parameter of the home operation selects banners only. |
