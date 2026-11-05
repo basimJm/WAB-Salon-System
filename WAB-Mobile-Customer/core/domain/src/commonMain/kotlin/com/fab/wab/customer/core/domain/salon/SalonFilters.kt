@@ -16,7 +16,8 @@ enum class GeneralFilter { RECOMMENDED, NEAREST }
 /**
  * All active filters of S04 / S05; combined with the search text in one query (PRD S04 "AND"). BUSINESS_DOMAIN §5.22:
  * nothing filters by the customer's gender unless [gender] is chosen here (Men = audience MALE or BOTH, Women = FEMALE or
- * BOTH); [businessTypes] empty = every type; [openNow] is applied on the device (the contract has no open-now filter).
+ * BOTH); [businessTypes] empty = every type; [openNow] matches when any bookable branch is open now in Asia/Amman
+ * (BUSINESS_DOMAIN §5.17, §5.3) and is sent to the server, never filtered on the device.
  */
 data class SalonFilters(
     val services: List<ServiceRef> = emptyList(),

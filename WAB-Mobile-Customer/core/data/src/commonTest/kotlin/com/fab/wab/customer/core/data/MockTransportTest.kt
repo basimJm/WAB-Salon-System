@@ -73,6 +73,16 @@ class MockTransportTest {
     }
 
     @Test
+    fun openNowFiltersTheSalonsFixtureLikeTheServer() = runTest {
+        val everyone = client.get("https://mock/customer/v1/salons")
+        assertTrue(everyone.bodyAsText().contains("\"id\""), "the plain fixture keeps every salon")
+        val response = client.get("https://mock/customer/v1/salons?openNow=true")
+        val body = response.bodyAsText()
+        assertTrue(body.contains("\"isOpenNow\": true") || body.contains("\"isOpenNow\":true"))
+        assertTrue(!body.contains("\"isOpenNow\": false") && !body.contains("\"isOpenNow\":false"), "CUS-110: dev mock honours openNow (§5.17)")
+    }
+
+    @Test
     fun unknownPathsAnswerNotFoundEnvelope() = runTest {
         val response = client.get("https://mock/customer/v1/not-in-contract")
         assertEquals(HttpStatusCode.NotFound, response.status)
