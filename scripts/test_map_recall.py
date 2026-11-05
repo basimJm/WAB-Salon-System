@@ -137,16 +137,16 @@ class RealRepoBudgetTest(unittest.TestCase):
 class RecallTest(Repo):
     def setUp(self):
         super().setUp()
-        self.write("docs/knowledge/facts.md", "ARQAM sends the OTP code\nunrelated line\n")
-        self.write("app/docs/App_BRD.md", "## OTP\nthe code arrives\nARQAM is the sender of the OTP\n")
+        self.write("docs/knowledge/facts.md", "Gateway sends the OTP code\nunrelated line\n")
+        self.write("app/docs/App_BRD.md", "## OTP\nthe code arrives\nGateway is the sender of the OTP\n")
 
     def test_lines_with_every_word_rank_first(self):
-        results = recall.search(self.root, ["arqam", "otp"])
+        results = recall.search(self.root, ["gateway", "otp"])
         self.assertTrue(results[0].startswith("docs/knowledge/facts.md:1:"), results)
         self.assertEqual(3, len(results))
 
     def test_results_name_the_file_and_line(self):
-        self.assertIn("app/docs/App_BRD.md:3: ARQAM is the sender of the OTP", recall.search(self.root, ["sender"]))
+        self.assertIn("app/docs/App_BRD.md:3: Gateway is the sender of the OTP", recall.search(self.root, ["sender"]))
 
     def test_nothing_found_gives_nothing(self):
         self.assertEqual([], recall.search(self.root, ["zzzz"]))

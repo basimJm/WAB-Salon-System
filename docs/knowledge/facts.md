@@ -20,3 +20,4 @@
 
 ## Open owner inputs (block integration)
 - Platform domain, payment gateway + sandbox, DigitalOcean product + managed Redis, Atlas tier, error-tracking tool, package registry (GitHub Packages assumed), merchant Firebase registrations + APNs, store accounts/signing, shared `core/*` between the two KMP apps.
+- Feature line (T-154b, 2026-11-05): `scripts/line.py` + `qa.py` + `usage.py`, config in `.claude/projects.json` (`line`, `kinds`), rule in `.claude/rules.md` §3.15. Measured on "Open now" (SRV-189 + CUS-110): thin worker starts at 6.8k tokens (10.5–12.4k with its card), 198 requests, 7.7M tokens, $2.28 + two stopped workers of unknown cost; uninterrupted workers read 2.1M and 3.0M from cache against the 1M target (missed); a fresh worker finished what a 100k-context one had reached for $0.19. Export to `design/*.dc.html` stays manual: the line's workers have no Artifact tool and that bundled format has no exporter here (no round trip was tried).
