@@ -27,7 +27,7 @@ Read: BUSINESS_DOMAIN §5.3, §5.17; `src/domain/search/search.service.ts`, `src
 
 ## Module: customer
 Tasks: CUS-110
-Read: BUSINESS_DOMAIN §5.17; `docs/WAB_Customer_App_PRD.md` S04 (grep `^### S04`, read that range)
+Read: BUSINESS_DOMAIN §5.17; `docs/WAB_Customer_App_PRD.md` S04 (grep `^### S04`, read that range); `feature/salons/data/.../remote/SalonQueryParams.kt`, `feature/salons/presentation/.../controller/vm/AllSalonsViewModel.kt`, `core/data/.../mock/MockTransport.kt`, `core/domain/.../salon/SalonFilters.kt`
 - [ ] Generated DTOs and the API client carry `openNow` from `scripts/api_sync.py`; generated files are not edited by hand
 - [ ] Turning the chip on sends `openNow=true` and reloads from page 1; turning it off drops the parameter and reloads
 - [ ] No filtering of loaded pages by open state remains in the search flow
