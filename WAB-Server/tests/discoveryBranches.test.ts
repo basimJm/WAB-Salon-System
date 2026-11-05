@@ -208,6 +208,77 @@ describe('search: one card per salon (§5.17)', () => {
   });
 });
 
+describe('open now filter (§5.17, with isOpenNow §5.3)', () => {
+  it('matches a business when any bookable branch is open now', async () => {
+    const { items } = await search.search({
+      query: { gender: 'FEMALE', openNow: true },
+      params: page,
+    });
+    // Hifa's and Glow's bookable branches are all open at 11:00 Amman time.
+    expect(items.map((c) => c.name).sort()).toEqual(['Glow', 'Hifa']);
+  });
+
+  it('a branch that is open but not bookable does not make its business match', async () => {
+    const shut = new Types.ObjectId();
+    const allOff = week('10:00').map((d) => ({ ...(d as Record<string, unknown>), isOff: true }));
+    m.salons.docs.push(salon(shut, 'Shut'));
+    m.branches.docs.push(
+      // Bookable, but off every day.
+      branch(new Types.ObjectId(), shut, 'Weekend', ABDOUN, { weeklySchedule: allOff }),
+      // Open right now, but not bookable (CLOSED status).
+      branch(new Types.ObjectId(), shut, 'Shuttered', ABDOUN, { status: 'CLOSED' }),
+    );
+    const { items } = await search.search({
+      query: { gender: 'FEMALE', openNow: true },
+      params: page,
+    });
+    expect(items.map((c) => c.name)).not.toContain('Shut');
+  });
+
+  it('leaves out a business whose bookable branches are all closed (closure)', async () => {
+    m.closures.docs.push(
+      {
+        _id: new Types.ObjectId(),
+        salonId: hifa,
+        branchId: ids.hifaAbdoun,
+        from: '2026-10-12',
+        to: '2026-10-12',
+        reason: 'x',
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: hifa,
+        branchId: ids.hifaSweifieh,
+        from: '2026-10-12',
+        to: '2026-10-12',
+        reason: 'x',
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: hifa,
+        branchId: ids.hifaIrbid,
+        from: '2026-10-12',
+        to: '2026-10-12',
+        reason: 'x',
+      },
+    );
+    const { items } = await search.search({
+      query: { gender: 'FEMALE', openNow: true },
+      params: page,
+    });
+    expect(items.map((c) => c.name)).toEqual(['Glow']);
+  });
+
+  it('combines with the other filters and applies before paging', async () => {
+    const { items, meta } = await search.search({
+      query: { gender: 'FEMALE', openNow: true, q: 'Glow' },
+      params: page,
+    });
+    expect(items.map((c) => c.name)).toEqual(['Glow']);
+    expect(meta.total).toBe(1);
+  });
+});
+
 describe('nearest list: one entry per branch (§5.17)', () => {
   it('lists every bookable branch in the radius by distance, titled "Salon - Branch"', async () => {
     const { items, meta } = await search.nearestBranches({

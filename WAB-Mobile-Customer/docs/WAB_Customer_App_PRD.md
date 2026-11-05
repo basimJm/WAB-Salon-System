@@ -454,7 +454,6 @@ App start
 2. **Search bar (sticky):** real editable input (hint: "Salons, clinics, tattoo studios or services") + **Filter icon** button next to it, with the number of active filters.
 5. **Type lens:** chips All · Salons · Clinics · Tattoo. Selecting one sets exactly that type; several types can be chosen in S05.
 6. **Quick chips:** Open now · Nearest · 4★ & up · Price. Open now, Nearest and 4★ toggle their filter; Price opens S05.
-   - Not built yet: Open now filters the pages already loaded on the device; the contract has no open-now filter.
 7. **Typed suggestions** (`GET /salons/suggestions`, debounced, following the lens and the gender filter): **Services**, each with the number of places offering it, then **Places**; every row shows its type label. A service becomes a service filter; a place opens S07.
 8. **Recent searches:** the last 8 search texts, kept on the device, with **Clear**. A tap searches again.
 3. **Active filter chips row** (FlowRow) — one chip per active filter (type, gender, each selected service, price range, general filter, rating, open now). Each chip has an **×** to remove it.

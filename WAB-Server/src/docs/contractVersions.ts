@@ -15,9 +15,9 @@ export const CONTRACT_VERSIONS: Readonly<
     note: 'SRV-174: error codes BUSINESS_TYPE_MISMATCH, AUDIENCE_CHANGE_NOT_ALLOWED, BRIDE_NOT_ALLOWED; schemas BusinessType/Audience (no client row)',
   },
   customer: {
-    version: '1.13.0',
-    sha256: '92ca7c8a190dcd5f094a11f337818cb8f370644d6a6ff12d32d5e42679785e41',
-    note: 'SRV-185: booking rows source (MERCHANT = Booked by the business) + createdBy (always null for customers) (CUS-104)',
+    version: '1.14.0',
+    sha256: '95d990f4f45e7105f39c40d5f3dfc6bd28d0ae14f5b4acb910183c2fc45add45',
+    note: 'CUS-110: GET /customer/v1/salons gains optional openNow boolean filter',
   },
   merchant: {
     version: '1.13.0',

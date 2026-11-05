@@ -189,6 +189,42 @@ describe('GET /customer/v1/salons', () => {
     expect(byName['Closed']).toMatchObject({ isOpenNow: false, todayHours: null });
   });
 
+  it('"open now" (openNow=true) keeps businesses open now; day-offs and closures are left out', async () => {
+    addSalon('DayOff', { weeklySchedule: week(['MON']) });
+    const closed = addSalon('Closed');
+    closuresM.docs.push({
+      _id: new Types.ObjectId(),
+      salonId: new Types.ObjectId(closed),
+      from: '2026-10-12',
+      to: '2026-10-13',
+      reason: 'Trip',
+    });
+    addSalon('Open');
+    expect(await names('gender=FEMALE&openNow=true')).toEqual(['Open']);
+  });
+
+  it('openNow=false or omitted filters nothing, same as before', async () => {
+    addSalon('DayOff', { weeklySchedule: week(['MON']) });
+    addSalon('Open');
+    expect((await names('gender=FEMALE')).sort()).toEqual(['DayOff', 'Open']);
+    expect((await names('gender=FEMALE&openNow=false')).sort()).toEqual(['DayOff', 'Open']);
+  });
+
+  it('openNow applies before paging: page contents and total count only matching businesses', async () => {
+    addSalon('DayOff', { weeklySchedule: week(['MON']) });
+    for (let i = 0; i < 3; i += 1) addSalon(`Open${String(i)}`);
+    const res = await request(app).get('/customer/v1/salons?gender=FEMALE&openNow=true&pageSize=2');
+    expect(bodyOf(res).meta?.total).toBe(3);
+    expect(bodyOf(res).data).toHaveLength(2);
+  });
+
+  it('openNow combines with the other filters (rating here)', async () => {
+    addSalon('OpenLowRating', { rating: { avg: 2, count: 1 } });
+    addSalon('OpenHighRating', { rating: { avg: 5, count: 1 } });
+    addSalon('ClosedHighRating', { weeklySchedule: week(['MON']), rating: { avg: 5, count: 1 } });
+    expect(await names('gender=FEMALE&openNow=true&minRating=4')).toEqual(['OpenHighRating']);
+  });
+
   it('searches by name or location text, case-insensitively, treating the text literally', async () => {
     addSalon('Glow Beauty');
     addSalon('Barbie Nails', { searchText: 'Barbie Nails Irbid' });
@@ -340,6 +376,12 @@ describe('GET /customer/v1/salons', () => {
           .set('Authorization', 'Bearer junk')
       ).status,
     ).toBe(401);
+  });
+
+  it('rejects a non-boolean openNow', async () => {
+    expect((await request(app).get('/customer/v1/salons?gender=FEMALE&openNow=yes')).status).toBe(
+      400,
+    );
   });
 
   it('answers 503 when unconfigured', async () => {
