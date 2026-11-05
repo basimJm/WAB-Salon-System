@@ -172,5 +172,23 @@ class StopReview(unittest.TestCase):
         self.assertFalse(is_source_file(".claude/hooks/guard_git.py"))
 
 
+class SessionStartTest(unittest.TestCase):
+    def test_prints_branch_map_and_open_tasks(self):
+        import session_start
+        text = session_start.build("feat/x", "## System map", "### T-1 Work\n- Status: IN PROGRESS\n### T-2 Old\n- Status: DONE\n")
+        self.assertIn("Branch: feat/x", text)
+        self.assertIn("## System map", text)
+        self.assertIn("T-1 Work [IN PROGRESS]", text)
+        self.assertNotIn("T-2", text)
+
+    def test_warns_on_a_protected_branch(self):
+        import session_start
+        self.assertIn("protected branch", session_start.build("main", "", ""))
+
+    def test_a_failed_map_still_gives_a_session_header(self):
+        import session_start
+        self.assertNotIn("System map", session_start.build("feat/x", "", ""))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

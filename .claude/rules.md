@@ -1,15 +1,16 @@
 # WAB — Mandatory Rules (all projects, every task)
 
-> Enforced by `CLAUDE.md` imports and `.claude/settings.json` hooks. Project folders may add stricter rules; they never relax these. Updated 2026-10-18 (one verification loop, per-project session/memory, backlog tool).
+> Read on demand; the hard rules are in `CLAUDE.md`, and `.claude/settings.json` hooks enforce them. Project folders may add stricter rules; they never relax these. Updated 2026-10-18 (one verification loop, per-project session/memory, backlog tool).
 
 ## 1. Token Efficiency (read once, work from the task row)
-- **Auto-loaded files are never read with a tool.** Root `CLAUDE.md`, `.claude/{rules,roles,hooks,session,memory}.md` and the project's `CLAUDE.md` + `.claude/{session,memory}.md` are already in context on every turn. Do not `cat`/Read them; do not re-read them "to be sure".
+- **The picture comes from the map.** Session start prints `scripts/map.py`; `CLAUDE.md`, `.claude/memory.md` and the project's `CLAUDE.md` + `.claude/{session,memory}.md` are already loaded. Details: `python3 scripts/recall.py <words>`, then read only those lines. `tasks.py check` fails when a loaded file grows past its budget (`.claude/projects.json`).
+- **Sessions stay short:** every request resends the whole context, so long sessions are the biggest cost. One task per session, `/clear` after a merge.
 - **Backlogs are read only through the tool.** `python3 scripts/tasks.py next <project>` gives the one task to do (ID, title, branch, needs, notes, session file); `show <ID>`, `blocked`, `board`, `check`. Never open a `*_Tasks.md` file whole; never list all tasks.
 - **Requirements by section.** A task row names its PRD screens/sections and OpenAPI operations; read only those headings (`grep -n "^### S07"` then `sed -n`), never a PRD/BRD/design script whole. `design/*.dc.html` are visual reference only, opened for UI tasks.
 - **One project per session.** Work inside one project folder so only its `CLAUDE.md`/session/memory load. Cross-project facts live in `INTEGRATION.md` (read §1–§5 once when a task touches two projects) and in root `memory.md`.
 - Start by inspecting `git status`, the relevant files and the existing implementation; search for symbols before opening files; read only needed ranges; never re-read files you just wrote.
 - Avoid dumping build logs, dependency trees or generated files into context. Prefer one quiet gate command (`sh scripts/gate.sh` admin, `npm run verify` server/SDKs, `scripts/ci/run_local_checks.sh` apps) and read only its summary.
-- Keep each project's `.claude/session.md` to the current task + the last 2 blocks and `.claude/memory.md` to durable facts (both are loaded on every turn in that project). Root `session.md` is an index only.
+- Each project's `.claude/session.md` holds only the task in progress; merged blocks go to `docs/knowledge/session-archive.md`. `.claude/memory.md` holds only what every session needs; other facts go to `docs/knowledge/facts.md`.
 - Use `/clear` between unrelated tasks and `/compact` when continuing a long task.
 
 ## 2. Understand Requirements Before Coding
@@ -26,7 +27,7 @@
 4. **One verification loop before push** (`Loops: 1/1`, owner decision 2026-10-18): re-check every acceptance criterion once, covering requirements coverage, edge cases/errors/security/no-hardcode, and tests/build/lint green + PRD/BRD consistency. Record it in the project's `session.md`.
 5. **Four-role review before push** (`.claude/hooks.md` §2). Record `Review: PASSED`. Fix every blocking finding first.
 6. **Status through the tool, both sides at once.** When a task starts: `python3 scripts/tasks.py set <ID> "IN PROGRESS"`; PR open: `IN REVIEW`; merged: `DONE`. The tool unblocks dependents in other projects and rebuilds the board in `INTEGRATION.md`; commit those file changes with the task. A contract change names the affected client tasks in the task block.
-7. **Keep the project's `session.md` and `memory.md` current** (`.claude/hooks.md` §3); root `session.md` index line updated when a project's current task changes; root `memory.md` only for cross-project facts.
+7. **Keep the project's `session.md` current** (`.claude/hooks.md` §3). Durable facts go to `docs/knowledge/facts.md`; `memory.md` only for what every session needs.
 8. Never commit secrets; never edit `.env*` files without explicit permission.
 9. **Admin gate is local (no admin CI):** before every push `sh scripts/gate.sh` (verify, four variant builds, `check:size`) green, plus the browser UI check of `WAB-Admin-Dashboard/.claude/rules.md` §6 before every commit; e2e only when the owner asks (decision 2026-10-14).
 10. **Autonomous backlog flow (owner grant 2026-10-14).** After the gate is green: push, open the PR into the master, merge it (merge commit), return to the updated master and start the next backlog task, until the backlog has no ready task. Stop only on `PENDING`/`BLOCKED` tasks and report them. If the owner says stop, stop.
