@@ -161,7 +161,7 @@ Added 2026-10-25 (Owner decisions 2026-10-25, `BUSINESS_DOMAIN.md` §3.3a, §5.2
 | CUS-107 | Wording and labels for every business type (PRD "Not built yet" notes, T-153): neutral AR + EN texts instead of "salon" (onboarding page 1, location dialog, not-available message, reviews empty text, S14 search hint and empty text, S18 first step, S19 hint, S20 texts, S21 `profile_register_salon`); Near you empty text from the server radius instead of a fixed 10 km; type label on S06 cards | `fix/cus-107-type-wording` | — | TODO |  |
 | CUS-108 | Book again preselects the booked services (BUSINESS_DOMAIN §5.22; `salonServiceIds` are already mapped; S03, S14) | `feat/cus-108-book-again-services` | — | TODO |  |
 | CUS-109 | S05 with several types chosen lists only the catalog of those types; review form on S07/S08/S09 picks the branch (BUSINESS_DOMAIN §5.11) | `fix/cus-109-filter-review-branch` | — | TODO |  |
-| CUS-110 | "Open now" chip uses the server filter instead of filtering the loaded pages (BUSINESS_DOMAIN §5.17; S04) | `fix/cus-110-open-now` | SRV-189 | BLOCKED | Waits for SRV-189 |
+| CUS-110 | "Open now" chip uses the server filter instead of filtering the loaded pages (BUSINESS_DOMAIN §5.17; S04) | `fix/cus-110-open-now` | SRV-189 | DONE | Waits for SRV-189 unblocked by SRV-189 on 2026-11-05 |
 | CUS-111 | S16: a men's or women's salon that does not fit the account holder shows a clear message before the flow starts and handles `GENDER_MISMATCH` (BUSINESS_DOMAIN §12 point 11) | `fix/cus-111-holder-gender` | SRV-190 | BLOCKED | Waits for SRV-190 |
 
 ## 4. Traceability (PRD screen → task)
