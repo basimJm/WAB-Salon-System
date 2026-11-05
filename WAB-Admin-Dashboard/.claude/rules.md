@@ -2,7 +2,7 @@
 
 > These rules add to the root `CLAUDE.md`, the root `.claude/*.md` and `WAB-Admin-Dashboard/CLAUDE.md`. They never relax them; if two rules conflict, the stricter one wins. **This `.claude/` folder is where admin-level rules live: add or change admin rules here, not in scattered notes.**
 >
-> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, one real verification loop, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read both at the start of every session; the admin rules below only add to them.
+> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, one real verification loop, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read them when you start coding here; the admin rules below only add to them.
 
 ## 0. Token budget (applies to every admin task; root `rules.md` §1 stays the parent rule)
 

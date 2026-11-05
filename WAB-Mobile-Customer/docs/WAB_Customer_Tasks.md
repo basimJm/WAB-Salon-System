@@ -125,7 +125,7 @@
 | CUS-077 | S16 step 6 booking verification (OTP → verify-otp → create) + S17 hand-off, pay on arrival only; FCM token stored at startup | `feat/cus-077-booking-verify` | CUS-076 | DONE | Online payment stays CUS-047 (PAY-011) |
 | CUS-078 | Dev deep-link host = `wab-server-dev.onrender.com` (server SRV-135 serves App Links / Universal Links files) | `feat/cus-078-dev-app-links` | CUS-077 | DONE | Owner sets Render env + deploys |
 | CUS-079 | iOS signing: apply the entitlements file (push, Associated Domains, App Attest were never signed in), team + free-account entitlements via git-ignored Local.xcconfig | `fix/cus-079-ios-signing` | CUS-078 | DONE | Found while preparing a device run 2026-10-21 |
-| CUS-080 | iOS dev API base URL escaped in xcconfig (`//` = comment) + iOS dev on the real dev server | `fix/cus-080-ios-dev-api-url` | CUS-079 | IN REVIEW | Owner report 2026-10-22 |
+| CUS-080 | iOS dev API base URL escaped in xcconfig (`//` = comment) + iOS dev on the real dev server | `fix/cus-080-ios-dev-api-url` | CUS-079 | DONE | Owner report 2026-10-22 |
 | CUS-081 | Liquid Glass (iOS 26 style) across the app: `AppGlassSurface` base primitive, glass tokens light/dark, cards, fields, buttons, tabs, floating tab bar + rail | `feat/cus-081-liquid-glass` | CUS-080 | DONE | Owner request 2026-10-22 |
 
 ## Phase 6 — Salon branches
