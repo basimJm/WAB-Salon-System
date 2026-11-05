@@ -417,3 +417,17 @@
 - Tests: `scripts/test_tasks.py` + `scripts/test_map_recall.py`, hook tests, `SYSTEM_SETUP` tests (72), admin + server docs tests and prettier, customer + merchant policy checks and policy tests: green. `KMP_TEMPLATE` end-to-end test fails the same way on clean `server` (not from this branch; separate task offered)
 - Loops: 1/1 — loaded files measured: root ~16k → ~1.4k tokens, module 9–18k → ~750; found and fixed: admin `.claude/Integration.md` failed prettier since T-153, template `tasks.py` must equal the live one, SDK session/memory files over budget, SRV-135 + CUS-080 stuck IN REVIEW though merged
 - Review: PASSED (SE ✔ (stdlib only, hook falls back when the map fails), Mobile N/A, Architect ✔ (map is generated, nothing to go stale or conflict; old section citations point at the moved files), QA ✔ (tests above)) — DEVIATIONS: plan said a committed `.claude/MAP.md`; the hook prints it live instead, so it cannot go stale or conflict. Not yet measured in a real new session. `.claude/session.md` index table removed: the map replaces it
+
+### T-154b — Light feature line (plan steps 0, 2, 3, 4a)
+- Branch: `chore/t-154b-feature-line`
+- Status: IN REVIEW (no PR yet)
+- Plan: `/Users/basimabusnaimeh/.claude/plans/stateful-singing-bengio.md`
+- Acceptance criteria:
+  - [x] Step 0: thin worker starts at 6,848 tokens (10.5–12.4k with its card); guard hook fires; `gh`, `git commit`, `git merge` refused
+  - [x] Steps 2 + 3: `scripts/line.py`, `usage.py`, `qa.py`, `features/` template and prompts, config in `.claude/projects.json`
+  - [x] Step 4a: "Open now" ran and merged (PRs 660–663): 198 requests, 7.7M tokens, $2.28 + two stopped workers of unknown cost; cache read 2.1M and 3.0M (the 3.0M worker was stopped at its cap), 1M target missed
+  - [x] Open items moved to T-154c: 4b, step 5, Phase 2
+- Tests: 85 in `test_tasks`, `test_map_recall`, `test_line`, `test_qa_usage` + 28 hook + 72 `SYSTEM_SETUP`: green; `tasks.py check`: only the known `CUS-047`
+- Loops: 1/1 — independent re-read of line.py, qa.py, usage.py and REPORT numbers (match `usage.py`); fixed with tests: docs worker output merged unchecked, failed smoke check did not stop the merge, drift left a stale `Review: PASSED` and could not be re-synced
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔), one independent reviewer agent, not the author. Not verified: step 0 numbers (taken from the earlier measurement); a real `claude -p` run after the fixes (tests use a fake claude and gh); a worker can still bypass its deny list through `python3`/`node`/`find` (documented as guardrails, not a sandbox); `src/{debug,devDebug}/google-services.json` of the merchant left in, inert
+- Notes: `line.py status`/`report` refuse once the packet's tasks are DONE. No browser, emulator, iOS build or cross-API smoke
