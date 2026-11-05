@@ -57,6 +57,9 @@ if role == "contract" and not plan.get("no_change"):
     spec.write_text(json.dumps({"version": "2", "openNow": True}))
 if role == "docs":
     Path("BUSINESS_DOMAIN.md").write_text(Path("BUSINESS_DOMAIN.md").read_text() + "\nOpen now.\n")
+    if plan.get("also_code"):
+        Path("server").mkdir(exist_ok=True)
+        Path("server/sneaky.ts").write_text("// not a document\n")
 if role in ("worker", "fix") and not plan.get("no_code"):
     Path("src").mkdir(exist_ok=True); Path("test").mkdir(exist_ok=True)
     Path("src/feature.ts").write_text(f"// {role} {n}\n")
@@ -153,7 +156,7 @@ def registry() -> dict:
             "prompts_dir": "prompts", "packet_file": "PACKET.md", "packet_template": "PACKET_TEMPLATE.md",
             "report_file": "REPORT.md", "coordination_file": "coordination.json", "worktrees_dir": ".claude/worktrees",
             "hook_settings": ".claude/settings.json", "worker_hooks": ["PreToolUse", "PostToolUse"],
-            "review_checklist": ".claude/hooks.md", "session_archive": "docs/knowledge/session-archive.md",
+            "review_checklist": ".claude/hooks.md", "session_archive": "docs/knowledge/session-archive.md", "docs_suffixes": [".md"],
             "claude_bin": "claude", "gh_bin": "gh", "worker_env": {"CLAUDE_CODE_DISABLE_CLAUDE_MDS": "1"},
             "permission_mode": "acceptEdits", "parallel": 2, "max_fix_rounds": 2, "packet_max_tokens": 1500,
             "fail_tail_lines": 10, "po_diff_max_chars": 5000, "po_diff_exclude": ["**/docs/api/**"],
@@ -414,6 +417,36 @@ class Pipeline(LineCase):
         self.assertFalse(checks[0]["ok"])
         self.assertEqual(run.load_status("customer")["state"], line.FAILED)
 
+    def test_drift_retracts_the_pass_and_a_rerun_copies_the_contract_again(self):
+        run = self.packet()
+        run.run()
+        spec = run.worktree_of("server") / "server" / "docs" / "api" / "openapi.customer.json"
+        spec.write_text(json.dumps({"version": "3"}))
+        run.coordinate(run.load_packet())
+        session = run.worktree_of("customer") / "customer" / ".claude" / "session.md"
+        self.assertNotIn("Review: PASSED", session.read_text(), "a pass that no longer holds is not left on the branch")
+        self.assertNotIn("Loops: 1/1", session.read_text())
+        self.assertEqual(self.sh("status", "--short", cwd=run.worktree_of("customer")), "", "the retraction is committed")
+        with self.assertRaises(line.LineError):
+            run.merge()
+        self.assertEqual(run.run(), 0, "the re-run copies the server's files again and passes")
+        self.assertIn('"version": "3"', (run.worktree_of("customer") / "server" / "docs" / "api" / "openapi.customer.json").read_text())
+        self.assertEqual(session.read_text().count("Review: PASSED"), 1, "one block per branch, not a stale one beside a new one")
+        self.assertEqual(run.failed_checks(), [])
+
+    def test_a_failed_cross_module_check_fails_the_run_the_report_and_the_merge(self):
+        registry = json.loads((self.root / ".claude" / "projects.json").read_text())
+        registry["line"]["smoke"] = [{"name": "api smoke", "run": "echo smoke-tail; exit 1"}]
+        (self.root / ".claude" / "projects.json").write_text(json.dumps(registry))
+        run = self.packet()
+        self.assertEqual(run.run(), 1, "every module passed, the smoke check did not")
+        self.assertEqual(run.failed_checks(), ["api smoke"])
+        self.assertIn("a cross-module check failed", (run.dir / "REPORT.md").read_text())
+        with self.assertRaises(line.LineError) as caught:
+            run.merge()
+        self.assertIn("api smoke", str(caught.exception))
+        self.assertEqual(self.gh_calls(), [])
+
 
 class Merging(LineCase):
     def test_merge_ships_through_the_guard_and_wraps_up_once_per_master(self):
@@ -438,6 +471,17 @@ class Merging(LineCase):
         self.assertIn("Merged: https://example.test/pull/1, https://example.test/pull/2", self.remote_file("m-server", "features/open-now/REPORT.md"))
         self.assertFalse(run.worktree_of("server").exists(), "worktrees go away after the merge")
         self.assertFalse((run.dir / "PACKET.md").exists(), "untracked copies would make the next pull fail")
+
+    def test_a_docs_worker_that_changes_more_than_documents_stops_the_wrap_up(self):
+        self.scenario({"line-open-now-wrapup-m-server.docs": {"also_code": True}})
+        run = self.packet()
+        self.assertEqual(run.run(), 0)
+        with self.assertRaises(line.LineError) as caught:
+            run.merge()
+        self.assertIn("server/sneaky.ts", str(caught.exception))
+        heads = [c[c.index("--head") + 1] for c in self.gh_calls() if c[:2] == ["pr", "create"]]
+        self.assertFalse([h for h in heads if "wrapup" in h], "nothing unreviewed reaches a master")
+        self.assertNotIn("sneaky.ts", self.sh("--git-dir", str(self.origin), "ls-tree", "-r", "--name-only", "m-server", cwd=self.tmp))
 
     def test_a_failed_merge_is_retried_without_a_second_pr(self):
         run = self.packet(PACKET.replace("`GET /items?openNow=true`", "none"))

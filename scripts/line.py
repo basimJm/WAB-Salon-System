@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / ".claude" / "hooks"))
 import _common  # noqa: E402
 from guard_git import violation as guard_violation  # noqa: E402
-from qa import run_qa, run_shell  # noqa: E402
+from qa import changed_on_branch, run_qa, run_shell  # noqa: E402
 from tasks import CHARS_PER_TOKEN, Backlogs, repo_root  # noqa: E402
 from usage import Meter, stats_dict  # noqa: E402
 
@@ -50,6 +50,8 @@ IMPORT_LINE_RE = re.compile(r"^@\S+\n?", re.M)
 REVIEW_SECTION_RE = re.compile(r"^## 2\..*?(?=^## )", re.M | re.S)
 REVIEW_ITEM_RE = re.compile(r"^- \*\*.+$", re.M)
 UNAVAILABLE_STATES = ("PENDING", "DONE", "CANCELLED")
+RETRACTED_LOOPS = "- Loops: 0/1"
+RETRACTED_REVIEW = "- Review: PENDING"
 WAITING, PASS, FAILED, RUNNING, MERGED = "WAITING", "PASS", "FAILED", "RUNNING", "MERGED"
 PO_SCHEMA = {
     "type": "object",
@@ -555,8 +557,24 @@ class Line:
                  f"- Review: PASSED (one reviewer through the four roles, model {self.settings['roles']['po']['model']}) — {status['po']['summary']}\n"
                  f"- Notes: {self.settings['not_covered_note']}\n")
         path = worktree / project["session"]
-        path.write_text(path.read_text(encoding="utf-8").rstrip() + "\n" + block, encoding="utf-8")
+        text = path.read_text(encoding="utf-8")
+        earlier = _common.task_block(status["branch"], text)  # a re-run replaces its block; two would contradict each other
+        if earlier:
+            text = text.replace(f"### {earlier}", "")
+        path.write_text(text.rstrip() + "\n" + block, encoding="utf-8")
         self.commit(worktree, f"{part.tasks[0]}: task block after QA and review")
+
+    def retract_block(self, packet: Packet, status: dict, module: str) -> None:
+        """A pass that no longer holds must not stay on the branch as `Loops: 1/1` and `Review: PASSED`."""
+        worktree = Path(status["worktree"])
+        path = worktree / self.registry["projects"][module]["session"]
+        text = path.read_text(encoding="utf-8")
+        block = _common.task_block(status["branch"], text)
+        if not block:
+            return
+        pending = re.sub(r"(?m)^- Review:.*$", RETRACTED_REVIEW, re.sub(r"(?m)^- Loops:.*$", RETRACTED_LOOPS, block))
+        path.write_text(text.replace(block, pending), encoding="utf-8")
+        self.commit(worktree, f"{packet.modules[module].tasks[0]}: task block retracted, the contract changed after the review")
 
     # ---- the whole feature ---------------------------------------------------------------------------------------
     def run(self, only: list[str] | None = None) -> int:
@@ -575,7 +593,7 @@ class Line:
         self.coordinate(packet)
         path = self.write_report(packet)
         print(f"Report: {path.relative_to(self.root)}")
-        return 0 if all(s["state"] == PASS for s in statuses) else 1
+        return 0 if all(s["state"] == PASS for s in statuses) and not self.failed_checks() else 1
 
     def coordinate(self, packet: Packet) -> list[dict]:
         """No model: every client holds the server's contract, then the cross-module smoke commands when configured."""
@@ -591,14 +609,24 @@ class Line:
                 checks.append({"name": f"contract: {module}", "ok": not drift, "detail": ", ".join(drift)})
                 if drift:
                     status = self.load_status(module)
+                    status["contract_synced"] = False  # the next run copies the server's files again
                     if status["state"] == PASS:
+                        self.retract_block(packet, status, module)
                         self.fail(status, "contract differs from the server: " + ", ".join(drift))
+                    else:
+                        self.save_status(status)
         for smoke in self.settings["smoke"]:
             ok, tail = run_shell(smoke["run"], self.root, smoke.get("env"), self.settings["timeouts_seconds"]["qa"], self.settings["fail_tail_lines"])
             checks.append({"name": smoke["name"], "ok": ok, "detail": tail})
         self.run_dir.mkdir(parents=True, exist_ok=True)
         (self.run_dir / self.settings["coordination_file"]).write_text(json.dumps(checks, indent=2, ensure_ascii=False), encoding="utf-8")
         return checks
+
+    def failed_checks(self) -> list[str]:
+        """Names of the cross-module checks of the last run that failed; a smoke command that fails stops the merge too."""
+        path = self.run_dir / self.settings["coordination_file"]
+        checks = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else []
+        return [check["name"] for check in checks if not check["ok"]]
 
     def status_lines(self, packet: Packet) -> list[str]:
         lines = []
@@ -625,7 +653,7 @@ class Line:
         coordination_path = self.run_dir / self.settings["coordination_file"]
         coordination = json.loads(coordination_path.read_text(encoding="utf-8")) if coordination_path.is_file() else []
         checks = [f"- {'PASS' if c['ok'] else 'FAIL'} {c['name']}{': ' + c['detail'] if c['detail'] else ''}" for c in coordination] or ["- none ran"]
-        text = "\n".join([f"# {self.feature}: line report", "", f"**{self.report_headline(statuses)}**", "", *rows, "",
+        text = "\n".join([f"# {self.feature}: line report", "", f"**{self.report_headline(statuses, bool(self.failed_checks()))}**", "", *rows, "",
                           "## Failed", *failed, "", "## You decide", *decide, "", "## Across modules", *checks, "",
                           "## Not covered by any check here", *[f"- {note}" for note in self.settings["not_covered_report"]], ""])
         self.dir.mkdir(parents=True, exist_ok=True)
@@ -634,12 +662,12 @@ class Line:
         return path
 
     @staticmethod
-    def report_headline(statuses: dict[str, dict]) -> str:
+    def report_headline(statuses: dict[str, dict], checks_failed: bool = False) -> str:
         states = [s["state"] for s in statuses.values()]
         if states and all(state == MERGED for state in states):
             return "Merged: " + ", ".join(s["pr"] for s in statuses.values())
         if states and all(state in (PASS, MERGED) for state in states):
-            return "Every module passed; ready for `line.py merge`."
+            return "Not ready: a cross-module check failed." if checks_failed else "Every module passed; ready for `line.py merge`."
         return "Not ready: nothing was merged." if MERGED not in states else "Partly merged: run `line.py merge` again after fixing the failure."
 
     # ---- merge: the script, never a worker ---------------------------------------------------------------------------
@@ -649,6 +677,8 @@ class Line:
         waiting = [m for m in modules if self.load_status(m)["state"] not in (PASS, MERGED)]
         if waiting:
             raise LineError("not merged, these modules did not pass: " + ", ".join(waiting))
+        if self.failed_checks():
+            raise LineError("not merged, these cross-module checks failed: " + ", ".join(self.failed_checks()))
         self.git(self.root, "fetch", "origin")
         for module in modules:
             status = self.load_status(module)
@@ -714,7 +744,7 @@ class Line:
             for task_id in task_ids:
                 self.set_status(worktree, task_id)
             if index == 0:
-                self.write_records(packet, status, worktree)
+                self.write_records(packet, status, worktree, master)
             new = self.check_problems(worktree) - known
             if new:
                 raise LineError("tasks.py check after the wrap-up: " + "; ".join(sorted(new)))
@@ -735,7 +765,7 @@ class Line:
         if done.returncode != 0:
             raise LineError(f"tasks.py set {task_id} DONE: {done.stdout.strip()} {done.stderr.strip()}")
 
-    def write_records(self, packet: Packet, status: dict, worktree: Path) -> None:
+    def write_records(self, packet: Packet, status: dict, worktree: Path, master: str) -> None:
         target = worktree / self.dir.relative_to(self.root)
         target.mkdir(parents=True, exist_ok=True)
         for name in (self.settings["packet_file"], self.settings["report_file"]):
@@ -745,6 +775,9 @@ class Line:
             result = self.run_agent(status, "docs", worktree, worktree, self.prompt_file("docs"), prompt)
             if not result.ok:
                 raise LineError(f"docs worker: {result.reason}")
+            stray = [f for f in changed_on_branch(worktree, f"origin/{master}") if not f.endswith(tuple(self.settings["docs_suffixes"]))]
+            if stray:  # this branch is merged without QA or a review, so only documents may be in it
+                raise LineError("docs worker changed more than documents: " + ", ".join(stray))
 
     def drop_local_records(self) -> None:
         """The packet and report now live on the master; untracked copies here would make the next pull fail."""

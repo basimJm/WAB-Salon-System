@@ -216,6 +216,9 @@
     ],
     "review_checklist": ".claude/hooks.md",
     "session_archive": "docs/knowledge/session-archive.md",
+    "docs_suffixes": [
+      ".md"
+    ],
     "claude_bin": "claude",
     "gh_bin": "gh",
     "worker_env": {
