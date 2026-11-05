@@ -625,14 +625,22 @@ class Line:
         coordination_path = self.run_dir / self.settings["coordination_file"]
         coordination = json.loads(coordination_path.read_text(encoding="utf-8")) if coordination_path.is_file() else []
         checks = [f"- {'PASS' if c['ok'] else 'FAIL'} {c['name']}{': ' + c['detail'] if c['detail'] else ''}" for c in coordination] or ["- none ran"]
-        passed = bool(statuses) and all(s["state"] in (PASS, MERGED) for s in statuses.values())
-        text = "\n".join([f"# {self.feature}: line report", "", f"**{'Every module passed; ready for `line.py merge`.' if passed else 'Not ready: nothing was merged.'}**", "", *rows, "",
+        text = "\n".join([f"# {self.feature}: line report", "", f"**{self.report_headline(statuses)}**", "", *rows, "",
                           "## Failed", *failed, "", "## You decide", *decide, "", "## Across modules", *checks, "",
                           "## Not covered by any check here", *[f"- {note}" for note in self.settings["not_covered_report"]], ""])
         self.dir.mkdir(parents=True, exist_ok=True)
         path = self.dir / self.settings["report_file"]
         path.write_text(text, encoding="utf-8")
         return path
+
+    @staticmethod
+    def report_headline(statuses: dict[str, dict]) -> str:
+        states = [s["state"] for s in statuses.values()]
+        if states and all(state == MERGED for state in states):
+            return "Merged: " + ", ".join(s["pr"] for s in statuses.values())
+        if states and all(state in (PASS, MERGED) for state in states):
+            return "Every module passed; ready for `line.py merge`."
+        return "Not ready: nothing was merged." if MERGED not in states else "Partly merged: run `line.py merge` again after fixing the failure."
 
     # ---- merge: the script, never a worker ---------------------------------------------------------------------------
     def merge(self) -> int:

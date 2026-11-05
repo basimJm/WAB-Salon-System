@@ -435,7 +435,7 @@ class Merging(LineCase):
         self.assertIn("Open now.", self.remote_file("m-server", "BUSINESS_DOMAIN.md"), "one docs worker, after the merge")
         self.assertEqual(len([c for c in self.calls() if c["role"] == "docs"]), 1)
         self.assertIn("Any bookable branch", self.remote_file("m-server", "features/open-now/PACKET.md"))
-        self.assertIn("line report", self.remote_file("m-server", "features/open-now/REPORT.md"))
+        self.assertIn("Merged: https://example.test/pull/1, https://example.test/pull/2", self.remote_file("m-server", "features/open-now/REPORT.md"))
         self.assertFalse(run.worktree_of("server").exists(), "worktrees go away after the merge")
         self.assertFalse((run.dir / "PACKET.md").exists(), "untracked copies would make the next pull fail")
 
