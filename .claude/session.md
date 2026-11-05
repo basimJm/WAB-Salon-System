@@ -2,21 +2,24 @@
 
 > Only open repo-level task blocks live here. The hook prints open tasks at session start; finished blocks go to `docs/knowledge/session-archive.md`.
 
-### T-154a — The whole picture at session start, small loaded files (owner request 2026-11-05)
-- Branch: `chore/t-154-feature-line`
-- Status: IN REVIEW
-- Acceptance criteria (plan step 1):
-  - [x] `scripts/map.py` prints the system and each module from real state (system ~660 tokens, module ~370–450; budget test on the real repo)
-  - [x] `scripts/recall.py` finds details as `path:line`; budgets in `tasks.py check` (`.claude/projects.json`)
-  - [x] Long files moved to on-demand files: `docs/knowledge/`, `<project>/docs/ENGINEERING_RULES.md`; short `CLAUDE.md`, `session.md`, `memory.md`; session-start hook prints the map
-- Tests: `scripts/test_tasks.py` + `scripts/test_map_recall.py`, hook tests, `SYSTEM_SETUP` tests (72), admin + server docs tests and prettier, customer + merchant policy checks and policy tests: green. `KMP_TEMPLATE` end-to-end test fails the same way on clean `server` (not from this branch; separate task offered)
-- Loops: 1/1 — loaded files measured: root ~16k → ~1.4k tokens, module 9–18k → ~750; found and fixed: admin `.claude/Integration.md` failed prettier since T-153, template `tasks.py` must equal the live one, SDK session/memory files over budget, SRV-135 + CUS-080 stuck IN REVIEW though merged
-- Review: PASSED (SE ✔ (stdlib only, hook falls back when the map fails), Mobile N/A, Architect ✔ (map is generated, nothing to go stale or conflict; old section citations point at the moved files), QA ✔ (tests above)) — DEVIATIONS: plan said a committed `.claude/MAP.md`; the hook prints it live instead, so it cannot go stale or conflict. Not yet measured in a real new session. `.claude/session.md` index table removed: the map replaces it
-
-### T-154b — Light feature line (plan steps 0, 2–5, then SYSTEM_SETUP)
-- Branch: `chore/t-154b-feature-line`
+### T-154c — Feature line: first new feature, local model, SYSTEM_SETUP
+- Branch: `chore/t-154c-feature-line`
 - Status: TODO
-- Plan: `/Users/basimabusnaimeh/.claude/plans/stateful-singing-bengio.md`
-- Blocked until the owner runs `claude auth login`: step 0 measures a thin worker's start size; above 15k tokens, stop and report.
+- Acceptance criteria:
+  - [ ] Step 4b: a new feature across server, admin, customer and merchant through `line.py` (the owner brings one)
+  - [ ] Step 5: optional local-model worker
+  - [ ] Phase 2 `SYSTEM_SETUP`: PAUSED by the owner 2026-11-05, parked on `wip/t-154b-system-setup`
+  - [ ] Review leftovers (non-blocking): reviewer failure starts a fix worker; diff cut at 30k chars; hooks read from the worktree; wrap-up push unguarded
 - Loops: 0/1
 - Review: PENDING
+
+### T-155 — Round 21: MER-092, T-154b and Open now reach every master; clean change list (owner request 2026-11-05)
+- Branch: `chore/sync-masters-into-main-21`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] Merged: SRV-189 (#660), CUS-110 (#661), wrap-ups (#662, #663), MER-092 (#664), T-154b; statuses set; new rows CUS-112, MER-093
+  - [x] Change list empty: `.DS_Store` untracked, `marketing/` and the customer debug manifest ignored, vendored `.claude/skills/` tracked (T-144)
+  - [x] Not merged: `wip/t-154b-system-setup` (paused by the owner), PR #330 (owner decision pending)
+- Tests: `scripts/test_tasks.py`, `test_map_recall.py`, `test_line.py`, `test_qa_usage.py`, hook tests, `tasks.py check` (only the known CUS-047 note), server prettier: run before this commit
+- Loops: 1/1 — checks above re-run after the merges; every master compared with `main` after the fast-forward
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog statuses and ignore rules only; product code was reviewed in its own blocks. Fast-forward of the masters on the owner's explicit request ("pull masters from the main")

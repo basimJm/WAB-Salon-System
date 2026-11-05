@@ -4,6 +4,7 @@ import com.fab.wab.merchant.app.analytics.SessionAnalyticsSync
 import com.fab.wab.merchant.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
+import com.fab.wab.merchant.app.push.InstallationSync
 import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.analytics.NoOpAnalyticsTracker
 import com.fab.wab.merchant.core.common.AppEnvironment
@@ -35,6 +36,7 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -154,6 +156,29 @@ class MainViewModelTest {
     fun permissionsAreReFetchedOnAppStart() = runTest(UnconfinedTestDispatcher()) {
         viewModel()
         assertEquals(1, refreshes)
+    }
+
+    @Test
+    fun theInstallationSyncStartsWithTheViewModelAndFollowsTheSession() = runTest(UnconfinedTestDispatcher()) {
+        val session = MutableStateFlow<SessionState>(SessionState.Guest)
+        var syncs = 0
+        MainViewModel(
+            appConfigRepository = FakeAppConfigRepository(AppResult.Success(READY_CONFIG)),
+            appSettings = settings,
+            appearanceSettings = AppearanceSettings(settings),
+            sessionTimeOut = sessionTimeOut,
+            environment = environment,
+            sessionAnalyticsSync = SessionAnalyticsSync(MutableStateFlow(SessionState.Guest), NoOpAnalyticsTracker, FakeCrashReporter()),
+            permissionsSync = permissionsSync,
+            accountEvents = RealtimeAccountEvents(FakeRealtimeClient(), permissionsSync, sessionStore),
+            testScope = backgroundScope,
+            errorText = { CONFIG_ERROR_TEXT },
+            session = session,
+            installationSync = InstallationSync(session, MutableSharedFlow()) { syncs += 1 },
+        )
+        assertEquals(0, syncs, "MER-092: a guest does not register the device")
+        session.value = SessionState.SignedIn(MemberProfile("m1", "s1", "Rami", MemberRole.OWNER))
+        assertEquals(1, syncs, "MER-092: the FCM token reaches the backend after sign-in, not only inside the login call")
     }
 
     @Test

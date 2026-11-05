@@ -1,5 +1,6 @@
 package com.fab.wab.merchant.core.realtime.socketio
 
+import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
 import com.fab.wab.merchant.core.realtime.RealtimeClient
 import com.fab.wab.merchant.core.realtime.RealtimeConfig
 import com.fab.wab.merchant.core.realtime.RealtimeDefaults
@@ -24,13 +25,18 @@ private const val CODE_UNAUTHORIZED = "UNAUTHORIZED"
 
 /**
  * Socket.IO v4 over one WebSocket: Engine.IO open → namespace connect with the access token → events.
- * Answers pings, treats a silent server as dropped, reconnects with backoff while [connect] is wanted and stops on
- * `UNAUTHORIZED` (the app reconnects after the next refresh / foreground).
+ * Answers pings, treats a silent server as dropped, reconnects with backoff while [connect] is wanted. An
+ * `UNAUTHORIZED` handshake (the 15 min access token expired while the app was closed or in the background) is
+ * answered with one [refreshAfterUnauthorized] (the shared single-flight refresh) and a reconnect with the new
+ * token (MER-092); the client stops only when the backend rejects the refresh token or refuses the fresh token too,
+ * and retries with backoff while the refresh could not reach the backend.
  */
 class SocketIoRealtimeClient(
     private val config: RealtimeConfig,
     private val transport: RealtimeTransport,
     private val accessToken: suspend () -> String?,
+    /** Exchanges the refresh token after [accessToken]'s value (the argument) was refused; stores the new pair. */
+    private val refreshAfterUnauthorized: suspend (rejectedAccessToken: String) -> TokenRefreshResult,
     private val scope: CoroutineScope,
     private val protocol: SocketIoProtocol = SocketIoProtocol(),
     private val handshakeTimeoutMs: Long = RealtimeDefaults.HANDSHAKE_TIMEOUT_MS,
@@ -56,6 +62,8 @@ class SocketIoRealtimeClient(
 
     private suspend fun runUntilStopped() {
         var attempt = 0
+        // The access token a refresh just produced: refused again at the handshake means the account, not the age.
+        var refreshedToken: String? = null
         while (true) {
             statusState.value = if (attempt == 0) RealtimeStatus.Connecting else RealtimeStatus.Reconnecting
             val token = accessToken()
@@ -65,10 +73,28 @@ class SocketIoRealtimeClient(
             }
             when (runSession(token)) {
                 SessionEnd.Unauthorized -> {
-                    statusState.value = RealtimeStatus.Unauthorized
-                    return
+                    if (token == refreshedToken) {
+                        statusState.value = RealtimeStatus.Unauthorized
+                        return
+                    }
+                    when (val refreshed = refreshAfterUnauthorized(token)) {
+                        is TokenRefreshResult.Refreshed -> {
+                            refreshedToken = refreshed.tokens.accessToken
+                            attempt = 0
+                        }
+                        TokenRefreshResult.Rejected -> {
+                            statusState.value = RealtimeStatus.Unauthorized
+                            return
+                        }
+                        TokenRefreshResult.Unavailable -> {
+                            statusState.value = RealtimeStatus.Reconnecting
+                            delay(reconnectDelayMs(attempt))
+                            attempt += 1
+                        }
+                    }
                 }
                 SessionEnd.Dropped -> {
+                    refreshedToken = null
                     statusState.value = RealtimeStatus.Reconnecting
                     delay(reconnectDelayMs(attempt))
                     attempt += 1

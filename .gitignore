@@ -21,3 +21,10 @@ __pycache__/
 *firebase-adminsdk*.json
 *service-account*.json
 .claude/worktrees/
+
+# Line runs: status files and worker logs
+features/*/run/
+
+# Local only: not part of the product (owner tools, device-run settings)
+marketing/
+WAB-Mobile-Customer/androidApp/src/devDebug/AndroidManifest.xml

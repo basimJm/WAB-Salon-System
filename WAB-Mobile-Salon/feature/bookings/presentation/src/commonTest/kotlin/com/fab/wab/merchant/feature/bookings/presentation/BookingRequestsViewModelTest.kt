@@ -21,6 +21,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
@@ -147,6 +148,7 @@ class BookingRequestsViewModelTest {
         requests.emit("r3")
         val back = viewModel.state.first()
         assertTrue(back.visible, "a new request brings the queue back")
+        assertEquals(plays + 1, alert.plays, "MER-092: and its sound plays again")
         assertEquals(listOf("r2", "r3"), back.queue.map { it.summary.id })
         viewModel.onEvent(UiAction.OnAccept)
         viewModel.onEvent(UiAction.OnDone)
@@ -238,6 +240,53 @@ class BookingRequestsViewModelTest {
         assertTrue(viewModel.state.first().queue.isEmpty())
         requests.emit("r1")
         assertTrue(viewModel.state.first().queue.isEmpty())
+    }
+
+    @Test
+    fun aFailedDetailsFetchDoesNotLoseTheRequestForTheSession() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = viewModel()
+        repository.detailsById.remove("r1")
+        repository.detailsResult = AppResult.Error(AppError.NetworkError("offline"))
+        requests.emit("r1")
+        assertTrue(viewModel.state.first().queue.isEmpty(), "nothing to show yet")
+        assertEquals(0, alert.plays)
+        repository.detailsById["r1"] = details("r1")
+        requests.emit("r1")
+        assertEquals(listOf("r1"), viewModel.state.first().queue.map { it.summary.id }, "the retried event queues it")
+        assertEquals(1, alert.plays)
+        requests.emit("r1")
+        assertEquals(1, viewModel.state.first().queue.size, "once fetched, a repeat is ignored again")
+    }
+
+    @Test
+    fun aRequestFetchedTwiceAtOnceIsQueuedOnce() = runTest(UnconfinedTestDispatcher()) {
+        val gate = CompletableDeferred<Unit>()
+        repository.detailsGate = gate
+        repository.pages[1] = listOf(summary("r1"))
+        val viewModel = viewModel()
+        requests.emit("r1")
+        assertTrue(viewModel.state.first().queue.isEmpty(), "both fetches are waiting on the network")
+        gate.complete(Unit)
+        assertEquals(listOf("r1"), viewModel.state.first().queue.map { it.summary.id })
+        assertEquals(1, repository.detailsCalls, "the second trigger did not fetch again")
+        assertEquals(1, alert.plays)
+    }
+
+    @Test
+    fun aNewRequestWhileTheSheetIsClosedWithOthersQueuedShowsItAndPlaysItsSound() = runTest(UnconfinedTestDispatcher()) {
+        repository.detailsById["r3"] = details("r3")
+        val viewModel = viewModel()
+        requests.emit("r1")
+        requests.emit("r2")
+        viewModel.onEvent(UiAction.OnAccept)
+        viewModel.onEvent(UiAction.OnDone)
+        assertTrue(!viewModel.state.first().visible)
+        val before = alert.plays
+        requests.emit("r3")
+        assertTrue(viewModel.state.first().visible)
+        assertEquals(before + 1, alert.plays)
+        requests.emit("r3")
+        assertEquals(before + 1, alert.plays, "a repeat of the same request is silent")
     }
 
     private companion object {

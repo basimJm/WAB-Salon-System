@@ -34,6 +34,7 @@ const jod = z
   .string()
   .refine((v) => isJodString(v))
   .transform((v) => parseJod(v));
+const flag = z.enum(['true', 'false']).transform((v) => v === 'true');
 
 export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
   .extend({
@@ -54,6 +55,11 @@ export const searchQuerySchema = paginationQuery(APP_PAGE_SIZE)
     lat: z.coerce.number().min(-LATITUDE_LIMIT).max(LATITUDE_LIMIT).optional(),
     lng: z.coerce.number().min(-LONGITUDE_LIMIT).max(LONGITUDE_LIMIT).optional(),
     sort: z.enum(SEARCH_SORTS).optional(),
+    /**
+     * "Open now" chip (§5.17, with `isOpenNow` from §5.3): the business has at least one
+     * bookable branch open now in Asia/Amman. Omitted or `false`: no filter.
+     */
+    openNow: flag.optional(),
   })
   .refine((q) => (q.lat === undefined) === (q.lng === undefined), {
     path: ['lat'],

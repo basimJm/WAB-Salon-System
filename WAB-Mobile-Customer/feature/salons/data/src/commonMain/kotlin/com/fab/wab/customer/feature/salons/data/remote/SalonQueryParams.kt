@@ -19,8 +19,10 @@ internal object SalonQueryKeys {
     const val LAT = "lat"
     const val LNG = "lng"
     const val SORT = "sort"
+    const val OPEN_NOW = "openNow"
     const val GENERAL_RECOMMENDED = "RECOMMENDED"
     const val SORT_NEAREST = "NEAREST"
+    const val TRUE = "true"
     /** Several business types travel as one comma list. */
     const val LIST_SEPARATOR = ","
 }
@@ -38,7 +40,7 @@ internal fun SalonFilters.scopeParams(): List<Pair<String, String>> = buildList 
 internal fun SalonFilters.priceBoundsParams(): List<Pair<String, String>> =
     scopeParams() + services.map { SalonQueryKeys.SERVICE_IDS to it.id }
 
-/** Every filter of one `GET /salons` page; `openNow` stays on the device (no contract filter). */
+/** Every filter of one `GET /salons` page; `openNow` matches any bookable branch open now (BUSINESS_DOMAIN §5.17). */
 internal fun SalonQuery.toParams(): List<Pair<String, String>> = buildList {
     add(SalonQueryKeys.PAGE to page.toString())
     add(SalonQueryKeys.PAGE_SIZE to pageSize.toString())
@@ -58,4 +60,5 @@ internal fun SalonQuery.toParams(): List<Pair<String, String>> = buildList {
         add(SalonQueryKeys.LAT to it.latitude.toString())
         add(SalonQueryKeys.LNG to it.longitude.toString())
     }
+    if (filters.openNow) add(SalonQueryKeys.OPEN_NOW to SalonQueryKeys.TRUE)
 }

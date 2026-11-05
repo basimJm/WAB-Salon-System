@@ -60,8 +60,6 @@ sealed interface AllSalonsContract {
         val showSuggestions: Boolean get() = suggesting && text.isNotBlank() && !suggestions.isEmpty
         val suggestionRows: List<SuggestionRow> get() = if (showSuggestions) suggestions.rows() else emptyList()
         val showRecent: Boolean get() = text.isBlank() && recent.isNotEmpty()
-        /** "Open now" is applied on the device: the contract has no open-now filter. */
-        val visibleSalons: List<SalonSummary> get() = if (filters.openNow) salons.filter { it.isOpenNow } else salons
     }
 
     sealed interface UiAction {

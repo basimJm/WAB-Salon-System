@@ -58,8 +58,15 @@ class BookingRequestsViewModel(
     testScope: CoroutineScope? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(), testScope) {
 
-    /** Every id already queued or answered here: a repeated socket event or push never re-opens it. */
+    /**
+     * Every id whose details were fetched here (queued, answered or not pending): a repeated socket event or push never
+     * re-opens it. An id enters only after a successful fetch (MER-092): a failed fetch used to lose that request for
+     * the whole session.
+     */
     private val seen = mutableSetOf<String>()
+
+    /** Ids being fetched right now, so the socket event and the push of one request do not queue it twice. */
+    private val fetching = mutableSetOf<String>()
 
     /** The request on screen and when it appeared, for `request_shown` (once each) and the response time. */
     private var shownId: String? = null
@@ -132,12 +139,21 @@ class BookingRequestsViewModel(
     private fun canAct(): Boolean = uiState.value.let { it.current != null && !it.accepting && !it.rejecting && it.handledBy == null }
 
     private suspend fun enqueue(id: String) {
-        if (!seen.add(id)) return
-        val details = (deps.repository.details(id) as? AppResult.Success)?.data
-        if (details == null || details.summary.status != BookingStatus.PENDING) return
-        if (!deps.memberScope().accepts(details.summary.branch?.id)) return
-        val wasHidden = uiState.value.queue.isEmpty() || uiState.value.snoozed
-        // A new request brings a closed queue back on screen (real time, PRD M10).
+        if (id in seen || !fetching.add(id)) return
+        try {
+            val details = (deps.repository.details(id) as? AppResult.Success)?.data ?: return
+            seen.add(id)
+            if (details.summary.status != BookingStatus.PENDING) return
+            if (!deps.memberScope().accepts(details.summary.branch?.id)) return
+            queueNew(details)
+        } finally {
+            fetching.remove(id)
+        }
+    }
+
+    /** A new request brings a hidden sheet back with its sound (real time, PRD M10); on a visible one it only counts. */
+    private fun queueNew(details: BookingDetails) {
+        val wasHidden = !uiState.value.visible
         updateState { copy(queue = queue + details, snoozed = false) }
         if (wasHidden) alertForCurrent()
     }
