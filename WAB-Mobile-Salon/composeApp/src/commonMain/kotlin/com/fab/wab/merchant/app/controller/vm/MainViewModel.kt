@@ -5,6 +5,7 @@ import com.fab.wab.merchant.app.analytics.SessionAnalyticsSync
 import com.fab.wab.merchant.app.controller.contract.MainContract.SideEffect
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiAction
 import com.fab.wab.merchant.app.controller.contract.MainContract.UiState
+import com.fab.wab.merchant.app.push.InstallationSync
 import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.common.AppEnvironment
 import com.fab.wab.merchant.core.domain.AppError
@@ -37,7 +38,7 @@ import kotlinx.coroutines.launch
 
 private const val STATE_SUBSCRIPTION_MS = 5_000L
 
-/** App shell: launch gate from the config call (PRD M01, M26), appearance flows, analytics user sync, session expiry. */
+/** App shell: launch gate from the config call (PRD M01, M26), appearance flows, analytics and push-token sync, session expiry. */
 class MainViewModel(
     private val appConfigRepository: AppConfigRepository,
     private val appSettings: AppSettings,
@@ -51,12 +52,15 @@ class MainViewModel(
     private val errorText: suspend (AppError) -> String = ::appErrorText,
     session: Flow<SessionState> = emptyFlow(),
     private val refreshSalon: suspend () -> Unit = {},
+    installationSync: InstallationSync? = null,
 ) : BaseViewModel<UiState, UiAction, SideEffect>(initialState = UiState(appVersion = environment.appVersion), testScope) {
 
     private var storeUrl: String? = null
 
     init {
         sessionAnalyticsSync.start(scope)
+        // MER-092: the FCM token reaches the backend at every start and token refresh while signed in, not only at login.
+        installationSync?.start(scope)
         // PRD §3: permissions are re-fetched on app start (Home refresh and the PERMISSIONS_UPDATED push call it too).
         scope.launch { permissionsSync.refresh() }
         accountEvents.start(scope) { emitSideEffect(SideEffect.AccessRevoked) }

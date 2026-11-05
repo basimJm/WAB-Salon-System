@@ -2,9 +2,12 @@ package com.fab.wab.merchant.app.di
 
 import com.fab.wab.merchant.app.controller.vm.MainViewModel
 import com.fab.wab.merchant.app.permission.AlertsPermissionViewModel
+import com.fab.wab.merchant.app.push.InstallationSync
 import com.fab.wab.merchant.app.realtime.RealtimeAccountEvents
 import com.fab.wab.merchant.core.domain.salon.SalonRepository
 import com.fab.wab.merchant.core.domain.session.SessionStore
+import com.fab.wab.merchant.core.firebase.PushTokenProvider
+import com.fab.wab.merchant.feature.auth.domain.usecase.SyncInstallationUseCase
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -22,6 +25,11 @@ val viewModelModule = module {
             accountEvents = RealtimeAccountEvents(client = get(), permissionsSync = get(), sessionStore = get()),
             session = get<SessionStore>().state,
             refreshSalon = { get<SalonRepository>().refresh() },
+            installationSync = InstallationSync(
+                session = get<SessionStore>().state,
+                tokenUpdates = get<PushTokenProvider>().tokenUpdates,
+                sync = { get<SyncInstallationUseCase>()() },
+            ),
         )
     }
     viewModel { (answersRequests: Boolean) ->
