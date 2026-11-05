@@ -1,5 +1,7 @@
 package com.fab.wab.merchant.core.realtime
 
+import com.fab.wab.merchant.core.domain.auth.AuthTokens
+import com.fab.wab.merchant.core.domain.auth.TokenRefreshResult
 import com.fab.wab.merchant.core.realtime.socketio.SocketIoRealtimeClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -17,6 +19,7 @@ private const val OPEN_FRAME = """0{"sid":"s1","pingInterval":100,"pingTimeout":
 private const val CONNECTED_FRAME = """40/merchant,{"sid":"n1"}"""
 private const val UNAUTHORIZED_FRAME = """44/merchant,{"message":"UNAUTHORIZED","data":{"code":"UNAUTHORIZED"}}"""
 private const val EVENT_FRAME = """42/merchant,["booking.updated",{"id":"b1"}]"""
+private const val REQUEST_FRAME = """42/merchant,["booking.requested",{"id":"b2"}]"""
 private const val PING_BUDGET_MS = 150L
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -25,12 +28,31 @@ class SocketIoRealtimeClientTest {
     private val transport = FakeTransport()
     private var token: String? = "access-1"
 
+    /** The access tokens the client presented for a refresh (the ones the server refused), in order. */
+    private val refreshed = mutableListOf<String>()
+
+    /** What the backend answers to a refresh; the stored token is rotated like the real coordinator does. */
+    private var refreshOutcome: (rejected: String) -> TokenRefreshResult = { rejected ->
+        val next = "access-${refreshed.size + 1}"
+        token = next
+        TokenRefreshResult.Refreshed(AuthTokens(next, "refresh-${refreshed.size}"))
+    }
+
     private fun TestScope.client() = SocketIoRealtimeClient(
         config = RealtimeConfig("https://api.example"),
         transport = transport,
         accessToken = { token },
+        refreshAfterUnauthorized = { rejected ->
+            refreshed += rejected
+            refreshOutcome(rejected)
+        },
         scope = backgroundScope,
     )
+
+    private fun FakeConnection.handshakeAnswers(vararg frames: String) {
+        push(OPEN_FRAME)
+        frames.forEach(::push)
+    }
 
     @Test
     fun handshakeConnectsAndDeliversEvents() = runTest {
@@ -60,21 +82,113 @@ class SocketIoRealtimeClientTest {
     }
 
     @Test
-    fun unauthorizedStopsWithoutRetry() = runTest {
+    fun anExpiredTokenIsRefreshedOnceAndTheSocketReconnectsWithTheNewTokenAndDeliversTheRequest() = runTest {
+        val client = client()
+        val received = mutableListOf<RealtimeEvent>()
+        backgroundScope.launch { client.events.collect { received += it } }
+        client.connect()
+        testScheduler.runCurrent()
+        transport.connections[0].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(listOf("access-1"), refreshed, "the refused token is what the refresh is told")
+        assertEquals(2, transport.connections.size, "reconnects at once, no backoff after a successful refresh")
+        assertTrue(transport.connections[0].closed)
+        transport.connections[1].handshakeAnswers(CONNECTED_FRAME, REQUEST_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(listOf("""40/merchant,{"token":"access-2"}"""), transport.connections[1].sent)
+        assertEquals(RealtimeStatus.Connected, client.status.value)
+        assertEquals(RealtimeEvents.BOOKING_REQUESTED, received.single().name, "the live request is delivered after the refresh")
+        assertEquals(1, refreshed.size)
+    }
+
+    @Test
+    fun aRejectedRefreshStopsTheClientUntilTheNextConnect() = runTest {
+        refreshOutcome = { TokenRefreshResult.Rejected }
         val client = client()
         client.connect()
         testScheduler.runCurrent()
-        transport.connections.single().push(OPEN_FRAME)
-        transport.connections.single().push(UNAUTHORIZED_FRAME)
+        transport.connections.single().handshakeAnswers(UNAUTHORIZED_FRAME)
         testScheduler.runCurrent()
         assertEquals(RealtimeStatus.Unauthorized, client.status.value)
         testScheduler.advanceTimeBy(RealtimeDefaults.RECONNECT_MAX_DELAY_MS * 2)
         assertEquals(1, transport.connections.size)
+        assertEquals(1, refreshed.size)
         token = null
         client.connect()
         testScheduler.runCurrent()
         assertEquals(RealtimeStatus.Unauthorized, client.status.value)
         assertEquals(1, transport.connections.size)
+        assertEquals(1, refreshed.size, "no stored token: nothing to refresh")
+    }
+
+    @Test
+    fun aRefreshThatCannotReachTheBackendRetriesWithBackoffInsteadOfStopping() = runTest {
+        var reachable = false
+        refreshOutcome = { rejected ->
+            if (reachable) {
+                token = "access-2"
+                TokenRefreshResult.Refreshed(AuthTokens("access-2", "refresh-2"))
+            } else {
+                TokenRefreshResult.Unavailable
+            }
+        }
+        val client = client()
+        client.connect()
+        testScheduler.runCurrent()
+        transport.connections[0].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Reconnecting, client.status.value)
+        assertEquals(1, transport.connections.size)
+        reachable = true
+        testScheduler.advanceTimeBy(RealtimeDefaults.RECONNECT_BASE_DELAY_MS + 1)
+        testScheduler.runCurrent()
+        transport.connections[1].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(listOf("access-1", "access-1"), refreshed)
+        assertEquals(3, transport.connections.size)
+        transport.connections[2].handshakeAnswers(CONNECTED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Connected, client.status.value)
+        assertEquals("""40/merchant,{"token":"access-2"}""", transport.connections[2].sent.single())
+    }
+
+    @Test
+    fun aFreshTokenRefusedAgainStopsInsteadOfLoopingOnRefreshes() = runTest {
+        val client = client()
+        client.connect()
+        testScheduler.runCurrent()
+        transport.connections[0].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        transport.connections[1].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Unauthorized, client.status.value)
+        testScheduler.advanceTimeBy(RealtimeDefaults.RECONNECT_MAX_DELAY_MS * 2)
+        assertEquals(2, transport.connections.size)
+        assertEquals(1, refreshed.size)
+    }
+
+    @Test
+    fun aLaterExpiryAfterAHealthySessionRefreshesAgain() = runTest {
+        val client = client()
+        client.connect()
+        testScheduler.runCurrent()
+        transport.connections[0].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        transport.connections[1].handshakeAnswers(CONNECTED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Connected, client.status.value)
+        transport.connections[1].dropFromServer()
+        testScheduler.runCurrent()
+        testScheduler.advanceTimeBy(RealtimeDefaults.RECONNECT_BASE_DELAY_MS + 1)
+        testScheduler.runCurrent()
+        // The stored token expired while the socket lived: the next handshake is refused and refreshed once more.
+        transport.connections[2].handshakeAnswers(UNAUTHORIZED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(listOf("access-1", "access-2"), refreshed)
+        assertEquals(4, transport.connections.size)
+        transport.connections[3].handshakeAnswers(CONNECTED_FRAME)
+        testScheduler.runCurrent()
+        assertEquals(RealtimeStatus.Connected, client.status.value)
     }
 
     @Test

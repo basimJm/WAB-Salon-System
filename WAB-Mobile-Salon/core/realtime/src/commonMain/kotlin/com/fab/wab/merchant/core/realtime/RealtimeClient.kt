@@ -45,7 +45,10 @@ enum class RealtimeStatus {
     Connecting,
     Connected,
 
-    /** The server refused the access token; the client stops until the app connects again with a fresh one. */
+    /**
+     * The server refused the access token and the refresh gave no usable one (rejected, or the new token was refused
+     * too); the client stops until the app connects again.
+     */
     Unauthorized,
 
     /** Transport or server failure; the client keeps retrying with backoff while a connection is wanted. */

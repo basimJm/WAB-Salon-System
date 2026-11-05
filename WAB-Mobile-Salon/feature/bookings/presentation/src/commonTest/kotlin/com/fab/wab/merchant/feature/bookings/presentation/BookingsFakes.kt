@@ -16,6 +16,7 @@ import com.fab.wab.merchant.feature.bookings.domain.model.ResponseReason
 import com.fab.wab.merchant.feature.bookings.domain.model.StaffRef
 import com.fab.wab.merchant.feature.bookings.domain.repository.BookingsRepository
 import kotlin.time.Instant
+import kotlinx.coroutines.CompletableDeferred
 
 internal val START = Instant.parse("2026-10-22T10:00:00Z")
 internal val SARA = StaffRef("s1", "Sara")
@@ -73,8 +74,12 @@ internal class FakeBookingsRepository : BookingsRepository {
         return listError ?: AppResult.Success(pages[page].orEmpty())
     }
 
+    /** While set, `details` waits for it: lets a test overlap two fetches of one request. */
+    var detailsGate: CompletableDeferred<Unit>? = null
+
     override suspend fun details(bookingId: String): AppResult<BookingDetails> {
         detailsCalls += 1
+        detailsGate?.await()
         return detailsById[bookingId]?.let { AppResult.Success(it) } ?: detailsResult
     }
 
