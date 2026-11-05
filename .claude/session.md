@@ -21,10 +21,10 @@
   - [x] Step 0: real thin worker starts at 6,848 tokens (target 10k; 10.5–12.4k with its card), reviewer 3,078; guard hook fires; `gh`, `git commit`, `git merge` refused
   - [x] Steps 2 + 3: `scripts/line.py`, `usage.py`, `qa.py`, `features/` template and prompts, config in `.claude/projects.json`
   - [x] Step 4a: "Open now" ran for real and merged: PRs 660 (SRV-189), 661 (CUS-110), 662 + 663 (wrap-up). 198 requests, 7.7M tokens, $2.28 + two stopped workers of unknown cost. Uninterrupted workers read 2.1M and 3.0M from cache: 1M target missed
-  - [ ] Step 4b: first new feature across all four modules: not run, needs a feature from the owner
-  - [ ] Step 5: optional local-model worker: not done (the plan says later and optional)
+  - [ ] Step 4b: a new feature across all four modules: not run, needs one from the owner
+  - [ ] Step 5: optional local-model worker: not done (plan: later)
   - [ ] Phase 2 `SYSTEM_SETUP`: **PAUSED by the owner 2026-11-05.** Parked unmerged on `wip/t-154b-system-setup`
 - Tests: `scripts/test_tasks.py`, `test_map_recall.py`, `test_qa_usage.py`, `test_line.py` (82) and hook tests green; `SYSTEM_SETUP` tests (75) green on the parked content
-- Loops: 0/1 — missing: no deliberate re-check of every criterion on this final diff; it cannot close while 4b and Phase 2 are open
-- Review: PENDING — missing: the four-role review of this branch's diff. Done so far: read the SRV-189 and CUS-110 diffs before their merge
+- Loops: 0/1 — missing: the re-check of every criterion on the final diff; 4b and Phase 2 are open
+- Review: PENDING — missing: the four-role review of this branch's diff. Done: read the SRV-189 and CUS-110 diffs before merging
 - Notes: known defect: `line.py status` and `report` refuse once the packet's tasks are DONE; `REPORT.md` was regenerated through the report code directly. Batching prompt and format step not yet run on a full worker. CUS-110 not opened in an emulator; no iOS build, no cross-API smoke
