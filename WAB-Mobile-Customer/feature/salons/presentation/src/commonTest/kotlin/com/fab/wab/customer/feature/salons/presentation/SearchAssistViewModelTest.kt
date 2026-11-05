@@ -100,8 +100,11 @@ class SearchAssistViewModelTest {
         assertEquals(SearchQuickDefaults.TOP_RATED_MIN, harness.search.queries.last().filters.minRating)
         val before = harness.search.queries.size
         vm.onEvent(UiAction.OnQuickChip(QuickChip.OPEN_NOW))
-        assertEquals(before, harness.search.queries.size, "open now filters on the device, no request")
-        assertTrue(vm.state.value.visibleSalons.all { it.isOpenNow })
+        assertEquals(before + 1, harness.search.queries.size, "open now reloads from the server (CUS-110)")
+        assertTrue(harness.search.queries.last().filters.openNow)
+        assertEquals(1, harness.search.queries.last().page, "reload starts from page 1")
+        vm.onEvent(UiAction.OnQuickChip(QuickChip.OPEN_NOW))
+        assertFalse(harness.search.queries.last().filters.openNow, "turning it off drops the filter and reloads")
         vm.onEvent(UiAction.OnQuickChip(QuickChip.PRICE))
         assertIs<SideEffect.OpenFilters>(harness.effects.last())
         vm.onEvent(UiAction.OnLensSelect(BusinessType.TATTOO))

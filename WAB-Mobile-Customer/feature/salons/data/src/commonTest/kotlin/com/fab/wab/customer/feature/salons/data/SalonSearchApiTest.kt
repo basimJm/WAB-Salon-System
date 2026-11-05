@@ -78,6 +78,14 @@ class SalonSearchApiTest {
     }
 
     @Test
+    fun openNowOnSendsTheParamAndOffOmitsIt() = runTest {
+        SalonSearchApi(client).search(SalonQuery(filters = SalonFilters(openNow = true)))
+        assertEquals("true", requested!!.parameters["openNow"], "CUS-110: any bookable branch open now (§5.17)")
+        SalonSearchApi(client).search(SalonQuery(filters = SalonFilters(openNow = false)))
+        assertNull(requested!!.parameters["openNow"], "no parameter when off: results as today")
+    }
+
+    @Test
     fun priceRangeWorksWithoutServices() = runTest {
         SalonSearchApi(client).search(SalonQuery(filters = SalonFilters(priceRange = PriceRange("5", "40"))))
         val p = requested!!.parameters
