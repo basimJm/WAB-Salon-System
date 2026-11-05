@@ -89,12 +89,12 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
                 modifier = Modifier.fillMaxSize(),
             ) {
                 when {
-                    state.loading && state.visibleSalons.isEmpty() -> SalonsShimmer()
+                    state.loading && state.salons.isEmpty() -> SalonsShimmer()
                     state.salons.isEmpty() && (state.offline || state.error != null) -> DiscoveryPlaceholderView(
                         placeholder = if (state.offline) DiscoveryPlaceholder.Offline else DiscoveryPlaceholder.ServerError,
                         onRetry = { onAction(UiAction.OnRetry) },
                     )
-                    state.loaded && state.visibleSalons.isEmpty() -> DiscoveryPlaceholderView(
+                    state.loaded && state.salons.isEmpty() -> DiscoveryPlaceholderView(
                         placeholder = DiscoveryPlaceholder.Empty(
                             title = stringResource(Res.string.salons_empty),
                             body = stringResource(Res.string.salons_empty_body),
@@ -102,7 +102,7 @@ fun AllSalonsScreen(state: UiState, onAction: (UiAction) -> Unit, onBack: () -> 
                         onRetry = { onAction(UiAction.OnRetry) },
                     )
                     else -> AppPagedList(
-                        items = state.visibleSalons,
+                        items = state.salons,
                         itemKey = { it.id },
                         hasMore = state.hasMore,
                         loadingMore = state.loadingMore,

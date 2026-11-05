@@ -108,7 +108,7 @@ class AllSalonsViewModel(
         emitSideEffect(SideEffect.OpenFilters(uiState.value.filters))
     }
 
-    /** A new filter set: "Open now" alone is applied on the device, everything else reloads the first page. */
+    /** A new filter set (including "Open now", BUSINESS_DOMAIN §5.17): always reloads from the first page. */
     private fun applyFilters(filters: SalonFilters) {
         val previous = uiState.value.filters
         if (filters == previous) return
@@ -117,7 +117,7 @@ class AllSalonsViewModel(
             track(SalonsAnalytics.ACTION_BUSINESS_TYPE, SalonsAnalytics.PARAM_VALUE to codes)
         }
         updateState { copy(filters = filters) }
-        if (filters.copy(openNow = previous.openNow) != previous) load()
+        load()
     }
 
     private fun quickChip(chip: QuickChip) {
