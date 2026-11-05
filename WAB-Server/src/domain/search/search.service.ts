@@ -88,6 +88,8 @@ export interface SearchQuery {
   readonly lat?: number | undefined;
   readonly lng?: number | undefined;
   readonly sort?: SearchSort | undefined;
+  /** "Open now" chip (§5.17, with `isOpenNow` §5.3): ≥1 bookable branch open now in Asia/Amman. */
+  readonly openNow?: boolean | undefined;
 }
 
 /** Which salons are currently recommended for an audience (placements arrive with SRV-066). */
@@ -250,6 +252,48 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
     return bySalon;
   };
 
+  /**
+   * Candidate ids with ≥1 bookable branch open now in Asia/Amman (§5.17, `isOpenNow` §5.3); a
+   * branch that is open but not bookable (closed status or incomplete) does not count. Without
+   * branch wiring the salon is its own single place.
+   */
+  const openNowSalons = async (candidates: readonly Entity<SalonRaw>[]): Promise<string[]> => {
+    if (candidates.length === 0) return [];
+    const ids = candidates.map((s) => s.id);
+    const timeZone = await settings.get('timezone');
+    const date = localDateOf(now(), timeZone);
+    if (deps.branches === undefined) {
+      const ranges = await closures.findMany({ salonId: { $in: ids }, to: { $gte: date } });
+      return candidates
+        .filter(
+          (s) =>
+            todaysHours(
+              s.weeklySchedule,
+              ranges.filter((r) => r.salonId === s.id),
+              now(),
+              timeZone,
+            ).isOpenNow,
+        )
+        .map((s) => s.id);
+    }
+    const bySalon = await bookableBranches(ids);
+    const ranges = await closures.findMany({ salonId: { $in: ids }, to: { $gte: date } });
+    const open: string[] = [];
+    for (const [salonId, branches] of bySalon) {
+      const isOpen = branches.some(
+        (b) =>
+          todaysHours(
+            b.weeklySchedule,
+            ranges.filter((r) => r.branchId === b.id),
+            now(),
+            timeZone,
+          ).isOpenNow,
+      );
+      if (isOpen) open.push(salonId);
+    }
+    return open;
+  };
+
   const card = (input: {
     salon: Entity<SalonRaw>;
     place: { branch: Entity<BranchRaw>; distanceKm: number | null } | null;
@@ -392,6 +436,24 @@ export const createSearchService = (deps: SearchDeps): SearchService => {
         allowed = allowed === undefined ? ids : allowed.filter((id) => ids.includes(id));
       }
       if (allowed !== undefined && allowed.length === 0) return empty;
+
+      if (query.openNow === true) {
+        // Candidates under every other filter (gender, type, text, rating), geo excluded: that
+        // restriction is distance, not a schedule, and is applied further down.
+        const base: QueryFilter<SalonRaw> = {
+          state: 'LIVE',
+          'completeness.isComplete': true,
+          ...audienceCondition(query.gender),
+          ...typeCondition(query.businessTypes),
+          ...(allowed === undefined ? {} : { _id: { $in: allowed } }),
+          ...(query.minRating === undefined ? {} : { 'rating.avg': { $gte: query.minRating } }),
+          ...(query.q === undefined || query.q === ''
+            ? {}
+            : { searchText: { $regex: escapeRegex(query.q), $options: 'i' } }),
+        };
+        allowed = await openNowSalons(await salons.findMany(base));
+        if (allowed.length === 0) return empty;
+      }
 
       const here =
         query.lat === undefined || query.lng === undefined
