@@ -213,9 +213,7 @@ describe('GET /customer/v1/salons', () => {
   it('openNow applies before paging: page contents and total count only matching businesses', async () => {
     addSalon('DayOff', { weeklySchedule: week(['MON']) });
     for (let i = 0; i < 3; i += 1) addSalon(`Open${String(i)}`);
-    const res = await request(app).get(
-      '/customer/v1/salons?gender=FEMALE&openNow=true&pageSize=2',
-    );
+    const res = await request(app).get('/customer/v1/salons?gender=FEMALE&openNow=true&pageSize=2');
     expect(bodyOf(res).meta?.total).toBe(3);
     expect(bodyOf(res).data).toHaveLength(2);
   });
@@ -381,9 +379,9 @@ describe('GET /customer/v1/salons', () => {
   });
 
   it('rejects a non-boolean openNow', async () => {
-    expect(
-      (await request(app).get('/customer/v1/salons?gender=FEMALE&openNow=yes')).status,
-    ).toBe(400);
+    expect((await request(app).get('/customer/v1/salons?gender=FEMALE&openNow=yes')).status).toBe(
+      400,
+    );
   });
 
   it('answers 503 when unconfigured', async () => {

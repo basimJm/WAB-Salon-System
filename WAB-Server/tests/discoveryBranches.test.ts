@@ -237,9 +237,30 @@ describe('open now filter (§5.17, with isOpenNow §5.3)', () => {
 
   it('leaves out a business whose bookable branches are all closed (closure)', async () => {
     m.closures.docs.push(
-      { _id: new Types.ObjectId(), salonId: hifa, branchId: ids.hifaAbdoun, from: '2026-10-12', to: '2026-10-12', reason: 'x' },
-      { _id: new Types.ObjectId(), salonId: hifa, branchId: ids.hifaSweifieh, from: '2026-10-12', to: '2026-10-12', reason: 'x' },
-      { _id: new Types.ObjectId(), salonId: hifa, branchId: ids.hifaIrbid, from: '2026-10-12', to: '2026-10-12', reason: 'x' },
+      {
+        _id: new Types.ObjectId(),
+        salonId: hifa,
+        branchId: ids.hifaAbdoun,
+        from: '2026-10-12',
+        to: '2026-10-12',
+        reason: 'x',
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: hifa,
+        branchId: ids.hifaSweifieh,
+        from: '2026-10-12',
+        to: '2026-10-12',
+        reason: 'x',
+      },
+      {
+        _id: new Types.ObjectId(),
+        salonId: hifa,
+        branchId: ids.hifaIrbid,
+        from: '2026-10-12',
+        to: '2026-10-12',
+        reason: 'x',
+      },
     );
     const { items } = await search.search({
       query: { gender: 'FEMALE', openNow: true },
