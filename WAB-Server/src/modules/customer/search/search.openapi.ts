@@ -49,7 +49,7 @@ export const registerCustomerSearchDocs = (registry: OpenAPIRegistry): void => {
     path: base,
     tags: ['Salon search'],
     summary:
-      'Search LIVE businesses of every type and audience (§5.22): type lens `businessType` (one or several), optional `gender` filter (businesses serving it: own audience or BOTH), name text, ALL selected services offered, price range (of their sum with services, else of any active service; JOD strings), minimum rating, recommended (each type in the admin order)',
+      'Search LIVE businesses of every type and audience (§5.22): type lens `businessType` (one or several), optional `gender` filter (businesses serving it: own audience or BOTH), name text, ALL selected services offered, price range (of their sum with services, else of any active service; JOD strings), minimum rating, recommended (each type in the admin order), `openNow` (any bookable branch open now in Asia/Amman, §5.3/§5.17)',
     description:
       'Public; a valid customer token only adds `isFavorite`. Combined filters are all applied (AND). Ordered by rating. Booking still applies the audience rule (§5.19).',
     security: [],
