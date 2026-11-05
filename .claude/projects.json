@@ -195,7 +195,7 @@
     }
   },
   "line": {
-    "_comment": "scripts/line.py, qa.py and usage.py. Roles: model, dollar cap passed to the CLI, token cap enforced by the script on whatever plan. Workers keep the enforcing hooks (worker_hooks); QA and the review replace the Stop hook.",
+    "_comment": "scripts/line.py, qa.py and usage.py. Roles: model, dollar cap passed to the CLI, token cap enforced by the script on whatever plan. Workers keep the enforcing hooks (worker_hooks); QA and the review replace the Stop hook. The allow and deny lists are guardrails, not a sandbox: a worker may run python3 and node, so packets must come from the owner.",
     "contract_module": "server",
     "contract_glob": "docs/api/openapi.*.json",
     "scope_exempt": [
@@ -304,7 +304,6 @@
       "node:*",
       "python3:*",
       "./gradlew:*",
-      "sh:*",
       "ls:*",
       "find:*",
       "git status:*",

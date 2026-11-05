@@ -702,9 +702,11 @@ class Line:
         masters = list(dict.fromkeys(self.registry["projects"][m]["master"] for m in modules))
         task_ids = [t for m in modules for t in packet.modules[m].tasks]
         for index, master in enumerate(masters):
+            status = self.load_status(f"wrapup-{master}")
+            if status["state"] == MERGED:
+                continue
             branch = f"chore/line-{self.feature}-wrapup-{master}"
             worktree = self.ensure_worktree(self.root / self.settings["worktrees_dir"] / f"line-{self.feature}-wrapup-{master}", branch, master)
-            status = self.load_status(f"wrapup-{master}")
             known = self.check_problems(worktree)
             for module in modules:
                 if self.registry["projects"][module]["master"] == master:
