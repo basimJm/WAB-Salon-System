@@ -5,7 +5,7 @@ Session start prints the live system map (`scripts/map.py`). **Do not read files
 **WAB** is a marketplace in Jordan: customers book (self + up to 5 companions) at salons, beauty clinics and tattoo studios; businesses manage branches, staff and services and answer requests in real time; admin controls everything from a web panel. Arabic default + English; JOD in integer fils; UTC stored, Asia/Amman shown. Online payment is paused: every booking is pay on arrival.
 
 ## Hard rules
-1. Task branch from the project's master (`git branch --no-track <name> origin/<master>`). Never commit or push to `main` or a master; never force-push; never `--no-verify`; never disable hooks.
+1. Task branch from the project's master (`git branch --no-track <name> origin/<master>`). Never commit or push to `main` or a master; never force-push; never `--no-verify`; never disable hooks (line workers: `.claude/rules.md` §3.15).
 2. Unit tests with every code change. No hardcoded values. No secrets. Never edit or source `.env*`.
 3. Data and rules: `BUSINESS_DOMAIN.md`. Behaviour: PRD > BRD > Design Script > design files. Wire format: `WAB-Server/docs/api/openapi.*.json`. A conflict or an open business rule: ask, never guess.
 4. Say plainly when a rule was not applied. Never write `Loops: 1/1` or `Review: PASSED` for a check that did not happen.
@@ -13,6 +13,8 @@ Session start prints the live system map (`scripts/map.py`). **Do not read files
 
 ## Task flow
 `python3 scripts/tasks.py next <project>` → branch → `tasks.py set <ID> "IN PROGRESS"` → task block in the project's `.claude/session.md` → implement + tests → project gate → one verification loop → four-role review → PR into the master → merge → `tasks.py set <ID> DONE`.
+
+A feature across modules: `python3 scripts/line.py new <name>`, fill the packet with the owner, `line.py run <name>`, `line.py merge <name>`. QA alone: `scripts/qa.py <project>`. Token numbers: `scripts/usage.py`.
 
 ## Read on demand, once, only when needed
 - Before your first code edit in a project: `<project>/docs/ENGINEERING_RULES.md`.

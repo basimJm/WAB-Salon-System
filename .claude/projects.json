@@ -147,7 +147,7 @@
   },
   "kinds": {
     "server": {
-      "setup": "npm ci --no-audit --no-fund",
+      "setup": "npm ci --no-audit --no-fund && npm run ensure-sdks",
       "qa": [
         {
           "name": "verify",
@@ -193,12 +193,6 @@
   },
   "line": {
     "_comment": "scripts/line.py, qa.py and usage.py. Roles: model, dollar cap passed to the CLI, token cap enforced by the script on whatever plan. Workers keep the enforcing hooks (worker_hooks); QA and the review replace the Stop hook.",
-    "order": [
-      "server",
-      "admin",
-      "merchant",
-      "customer"
-    ],
     "contract_module": "server",
     "contract_glob": "docs/api/openapi.*.json",
     "scope_exempt": [
@@ -246,7 +240,7 @@
       "contract": {
         "model": "sonnet",
         "budget_usd": 1.5,
-        "max_tokens": 800000,
+        "max_tokens": 1500000,
         "tools": [
           "Read",
           "Edit",
@@ -258,7 +252,7 @@
       "worker": {
         "model": "sonnet",
         "budget_usd": 4,
-        "max_tokens": 2000000,
+        "max_tokens": 3000000,
         "tools": [
           "Read",
           "Edit",
@@ -270,7 +264,7 @@
       "fix": {
         "model": "sonnet",
         "budget_usd": 2,
-        "max_tokens": 1000000,
+        "max_tokens": 1500000,
         "tools": [
           "Read",
           "Edit",
@@ -282,7 +276,7 @@
       "po": {
         "model": "sonnet",
         "budget_usd": 0.75,
-        "max_tokens": 200000,
+        "max_tokens": 300000,
         "tools": [
           "Read",
           "Grep"
@@ -291,7 +285,7 @@
       "docs": {
         "model": "sonnet",
         "budget_usd": 1,
-        "max_tokens": 500000,
+        "max_tokens": 800000,
         "tools": [
           "Read",
           "Edit",

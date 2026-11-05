@@ -140,6 +140,10 @@ class Reporting(unittest.TestCase):
         found = usage.transcripts_dir(Path("/Users/x/my.repo_1"), {"CLAUDE_CONFIG_DIR": "/c"})
         self.assertEqual(found, Path("/c/projects/-Users-x-my-repo-1"))
 
+    def test_money_never_shows_an_unknown_cost_as_zero(self):
+        self.assertEqual(usage.money(None), "cost unknown")
+        self.assertEqual(usage.money(1.5), "$1.50")
+
     def test_verdict_says_when_a_target_is_missed(self):
         self.assertIn("OK", usage.verdict(10, 10))
         self.assertIn("MISSED", usage.verdict(11, 10))

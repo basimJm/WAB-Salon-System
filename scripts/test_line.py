@@ -110,7 +110,7 @@ PACKET = """# Feature: open-now
 - Any bookable branch open now counts.
 
 ## Contract
-`GET /salons?openNow=true`
+`GET /items?openNow=true`
 
 ## Design
 none
@@ -145,7 +145,7 @@ def registry() -> dict:
                          "backlog": "customer/docs/tasks.md", "session": "customer/.claude/session.md"},
         },
         "line": {
-            "order": ["server", "customer"], "contract_module": "server", "contract_glob": "docs/api/openapi.*.json",
+            "contract_module": "server", "contract_glob": "docs/api/openapi.*.json",
             "scope_exempt": ["server/docs/api/openapi.*.json"], "features_dir": "features", "run_dir": "run",
             "prompts_dir": "prompts", "packet_file": "PACKET.md", "packet_template": "PACKET_TEMPLATE.md",
             "report_file": "REPORT.md", "coordination_file": "coordination.json", "worktrees_dir": ".claude/worktrees",
@@ -348,6 +348,19 @@ class Pipeline(LineCase):
         self.assertIn("over the cap", status["reason"])
         self.assertEqual(run.load_status("server")["state"], line.PASS, "one module's failure stays its own")
 
+    def test_a_stopped_worker_keeps_its_work_cost_is_unknown_and_the_retry_is_told(self):
+        self.scenario({"customer.worker": {"burn": 90000}})
+        run = self.packet()
+        run.run()
+        step = run.load_status("customer")["steps"][0]
+        self.assertIsNone(step["cost_usd"], "a stopped agent reports no cost; zero would be a lie")
+        self.assertIn("+?", "\n".join(run.status_lines(run.load_packet())))
+        self.scenario({})
+        self.assertEqual(run.run(), 0)
+        retry = [c for c in self.calls() if c["role"] == "worker" and c["cwd"].endswith("/customer")][-1]
+        self.assertIn("## Already on this branch", retry["prompt"])
+        self.assertEqual(run.load_status("customer")["state"], line.PASS)
+
     def test_budget_error_from_the_cli_fails_the_module(self):
         self.scenario({"customer.worker": {"error": "error_max_budget_usd"}})
         run = self.packet()
@@ -368,7 +381,7 @@ class Pipeline(LineCase):
         self.assertIn("did not change", run.load_status("server")["reason"])
 
     def test_no_contract_change_skips_the_contract_step(self):
-        run = self.packet(PACKET.replace("`GET /salons?openNow=true`", "none"))
+        run = self.packet(PACKET.replace("`GET /items?openNow=true`", "none"))
         self.assertEqual(run.run(), 0)
         self.assertNotIn("contract", [c["role"] for c in self.calls()])
 
@@ -416,7 +429,7 @@ class Merging(LineCase):
         self.assertFalse((run.dir / "PACKET.md").exists(), "untracked copies would make the next pull fail")
 
     def test_guard_refuses_a_branch_without_a_verified_block(self):
-        run = self.packet(PACKET.replace("`GET /salons?openNow=true`", "none"))
+        run = self.packet(PACKET.replace("`GET /items?openNow=true`", "none"))
         run.run()
         session = run.worktree_of("server") / "server" / ".claude" / "session.md"
         session.write_text(session.read_text().replace("Review: PASSED", "Review: PENDING"))
@@ -457,7 +470,7 @@ class PacketRules(LineCase):
         self.assertTrue(any("two pages" in p for p in self.problems(PACKET + "x" * 7000)))
 
     def test_unknown_module_task_and_foreign_task(self):
-        self.assertTrue(any("not a module" in p for p in self.problems(PACKET + "\n## Module: admin\nTasks: SRV-001\n- [ ] x\n")))
+        self.assertTrue(any("unknown module" in p for p in self.problems(PACKET + "\n## Module: admin\nTasks: SRV-001\n- [ ] x\n")))
         self.assertTrue(any("unknown task SRV-999" in p for p in self.problems(PACKET.replace("Tasks: SRV-001", "Tasks: SRV-999"))))
         self.assertTrue(any("belongs to customer" in p for p in self.problems(PACKET.replace("Tasks: SRV-001", "Tasks: CUS-001"))))
 
@@ -465,7 +478,7 @@ class PacketRules(LineCase):
         self.assertTrue(any("no acceptance criteria" in p for p in self.problems(PACKET.replace("- [ ] The chip sends the filter\n", ""))))
 
     def test_dependency_outside_the_packet_blocks_it(self):
-        only_customer = re.sub(r"## Module: server.*?(?=## Module: customer)", "", PACKET, flags=re.S).replace("`GET /salons?openNow=true`", "none")
+        only_customer = re.sub(r"## Module: server.*?(?=## Module: customer)", "", PACKET, flags=re.S).replace("`GET /items?openNow=true`", "none")
         self.assertTrue(any("waits for SRV-001" in p for p in self.problems(only_customer)))
 
     def test_contract_change_needs_the_contract_module(self):
@@ -489,7 +502,7 @@ class PacketRules(LineCase):
             self.assertNotIn("Bash", role["tools"]) if role is settings["roles"]["po"] else self.assertIn("Bash", role["tools"])
         for rule in ("Bash(git push:*)", "Bash(git merge:*)", "Bash(gh:*)", "Read(**/.env*)", "Edit(**/.env*)"):
             self.assertIn(rule, settings["denied"])
-        for name in settings["order"]:
+        for name in backlogs.projects:
             self.assertIn(backlogs.projects[name]["kind"], backlogs.registry["kinds"])
         self.assertIsNotNone(line.REVIEW_SECTION_RE.search((REPO / settings["review_checklist"]).read_text(encoding="utf-8")))
 

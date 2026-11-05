@@ -40,6 +40,8 @@ SECTION_RE = re.compile(r"^## +(.+?) *$", re.M)
 MODULE_PREFIX = "module:"
 REQUIRED_SECTIONS = ("Decisions", "Contract", "Design", "Docs")
 NONE_VALUE = "none"
+MODULE_TOKEN = "<module>"
+FEATURE_TOKEN = "<feature>"
 KILL_GRACE_SECONDS = 10
 TASKS_RE = re.compile(r"^Tasks: *(.+)$", re.M)
 CRITERION_RE = re.compile(r"^- \[[ x]\] +(.+)$", re.M)
@@ -48,7 +50,7 @@ IMPORT_LINE_RE = re.compile(r"^@\S+\n?", re.M)
 REVIEW_SECTION_RE = re.compile(r"^## 2\..*?(?=^## )", re.M | re.S)
 REVIEW_ITEM_RE = re.compile(r"^- \*\*.+$", re.M)
 UNAVAILABLE_STATES = ("PENDING", "DONE", "CANCELLED")
-PASS, FAILED, RUNNING, MERGED = "PASS", "FAILED", "RUNNING", "MERGED"
+WAITING, PASS, FAILED, RUNNING, MERGED = "WAITING", "PASS", "FAILED", "RUNNING", "MERGED"
 PO_SCHEMA = {
     "type": "object",
     "properties": {"verdict": {"enum": ["PASS", "FAIL"]}, "gaps": {"type": "array", "items": {"type": "string"}},
@@ -108,8 +110,8 @@ def packet_problems(packet: Packet, backlogs: Backlogs, settings: dict) -> list[
         problems.append("no ## Module: section")
     in_packet = {task for part in packet.modules.values() for task in part.tasks}
     for name, part in packet.modules.items():
-        if name not in settings["order"]:
-            problems.append(f"{name}: not a module of the line ({', '.join(settings['order'])})")
+        if name not in backlogs.projects:
+            problems.append(f"{name}: unknown module ({', '.join(backlogs.projects)})")
             continue
         if not part.tasks:
             problems.append(f"{name}: no `Tasks:` line")
@@ -158,7 +160,11 @@ class AgentResult:
     reason: str = ""
     text: str = ""
     structured: dict | None = None
-    cost_usd: float = 0.0
+
+
+def cost_text(steps: list[dict]) -> str:
+    known = sum(s.get("cost_usd") or 0 for s in steps)
+    return f"${known:.2f}{'+?' if any(s.get('cost_usd') is None for s in steps) else ''}"
 
 
 def read_result(log_path: Path) -> dict:
@@ -246,14 +252,17 @@ class Line:
         return packet
 
     def ordered(self, packet: Packet, only: list[str] | None = None) -> list[str]:
-        return [m for m in self.settings["order"] if m in packet.modules and (not only or m in only)]
+        """The contract module first, because everything builds on it; then the registry's order."""
+        first = self.settings["contract_module"]
+        order = [first] + [name for name in self.registry["projects"] if name != first]
+        return [m for m in order if m in packet.modules and (not only or m in only)]
 
     def create_packet(self) -> Path:
         if self.packet_path.exists():
             raise LineError(f"already exists: {self.packet_path.relative_to(self.root)}")
         template = self.root / self.settings["features_dir"] / self.settings["packet_template"]
         self.dir.mkdir(parents=True, exist_ok=True)
-        self.packet_path.write_text(template.read_text(encoding="utf-8").replace("__FEATURE__", self.feature), encoding="utf-8")
+        self.packet_path.write_text(template.read_text(encoding="utf-8").replace(FEATURE_TOKEN, self.feature), encoding="utf-8")
         return self.packet_path
 
     # ---- status files --------------------------------------------------------------------------------------------
@@ -264,7 +273,7 @@ class Line:
         path = self.status_path(module)
         if path.is_file():
             return json.loads(path.read_text(encoding="utf-8"))
-        return {"module": module, "state": RUNNING, "reason": "", "steps": [], "qa": [], "po": {}, "decide": [], "pr": ""}
+        return {"module": module, "state": WAITING, "reason": "", "steps": [], "qa": [], "po": {}, "decide": [], "pr": ""}
 
     def save_status(self, status: dict) -> None:
         with self.save_lock:
@@ -330,11 +339,11 @@ class Line:
         result = read_result(log_path)
         reason = stopped or ("" if code == 0 and result.get("subtype") == "success" and not result.get("is_error")
                              else f"{result.get('subtype') or 'no result'} (exit {code})")
-        cost = float(result.get("total_cost_usd") or 0)
+        cost = result.get("total_cost_usd")  # a stopped agent never reports it: unknown, not zero
         status["steps"].append({"role": role_name, "model": role["model"], "ok": not reason, "reason": reason, "cost_usd": cost,
                                 "log": log_path.name, **stats_dict(meter.stats())})
         self.save_status(status)
-        return AgentResult(not reason, reason, str(result.get("result") or ""), result.get("structured_output"), cost)
+        return AgentResult(not reason, reason, str(result.get("result") or ""), result.get("structured_output"))
 
     def module_map(self, module: str) -> str:
         done = subprocess.run([sys.executable, str(self.root / "scripts" / "map.py"), module], cwd=self.root, capture_output=True, text=True)
@@ -350,8 +359,13 @@ class Line:
                   "## Contract\n" + packet.sections["Contract"], "## Design\n" + packet.sections["Design"], "## Your part\n" + part.body]
         return "\n\n".join(blocks + ([status_note] if status_note else []))
 
+    def earlier_work(self, worktree: Path, master: str) -> str:
+        """A retry or a later phase starts on what is committed; saying so is cheaper than letting it find out."""
+        stat = self.git(worktree, "diff", "--stat", f"origin/{master}...HEAD")
+        return f"## Already on this branch\nContinue from this; do not redo it.\n{stat}" if stat else ""
+
     def worker_system(self, module: str) -> str:
-        return self.prompt_file("worker").replace("__MODULE__", self.registry["projects"][module]["title"])
+        return self.prompt_file("worker").replace(MODULE_TOKEN, self.registry["projects"][module]["title"])
 
     def blocked(self, status: dict, result: AgentResult) -> bool:
         """A worker that hit an open business rule asks instead of guessing; the question goes to the owner's page."""
@@ -379,7 +393,7 @@ class Line:
         if not self.setup(status, module, worktree):
             return status
         result = self.run_agent(status, "contract", worktree / project["dir"], worktree, self.worker_system(module),
-                                self.prompt_file("contract") + "\n\n" + self.card(packet, module))
+                                self.prompt_file("contract") + "\n\n" + self.card(packet, module, self.earlier_work(worktree, project["master"])))
         self.commit(worktree, f"{packet.modules[module].tasks[0]}: contract for {self.feature}")
         if self.blocked(status, result):
             return status
@@ -453,7 +467,7 @@ class Line:
             return status
         system = self.worker_system(module)
         if not status.get("implemented"):
-            result = self.run_agent(status, "worker", cwd, worktree, system, self.card(packet, module))
+            result = self.run_agent(status, "worker", cwd, worktree, system, self.card(packet, module, self.earlier_work(worktree, project["master"])))
             self.commit(worktree, f"{part.tasks[0]}: {self.feature}")
             if self.blocked(status, result):
                 return status
@@ -583,7 +597,7 @@ class Line:
             status = self.load_status(module)
             qa = " ".join(("+" if s["ok"] else "x") + s["name"] for s in status["qa"]) or "not run"
             lines.append(f"{module}: {status['state']} qa[{qa}] po[{status['po'].get('verdict', 'not run')}] "
-                         f"${sum(s.get('cost_usd', 0) for s in status['steps']):.2f}{(' - ' + status['reason'].splitlines()[0]) if status['reason'] else ''}")
+                         f"{cost_text(status['steps'])}{(' - ' + status['reason'].splitlines()[0]) if status['reason'] else ''}")
         return lines
 
     def write_report(self, packet: Packet) -> Path:
@@ -596,7 +610,7 @@ class Line:
             starts = [s.get("start_context", 0) for s in steps]
             rows.append(f"| {module} | {', '.join(packet.modules[module].tasks)} | {status['state']} | {qa} | {status['po'].get('verdict', 'not run')} | "
                         f"{sum(s.get('requests', 0) for s in steps)} | {max(starts, default=0)} | {sum(s.get('cache_read', 0) for s in steps)} | "
-                        f"${sum(s.get('cost_usd', 0) for s in steps):.2f} |")
+                        f"{cost_text(steps)} |")
         failed = [f"- **{m}**: {s['reason']}" for m, s in statuses.items() if s["state"] == FAILED] or ["- nothing"]
         decide = [f"- {m}: {q}" for m, s in statuses.items() for q in s["decide"]] or ["- nothing"]
         coordination_path = self.run_dir / self.settings["coordination_file"]

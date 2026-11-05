@@ -1,6 +1,6 @@
-# Feature: __FEATURE__
+# Feature: <feature>
 
-> Two pages at most: this is all the workers get. Run `python3 scripts/line.py check __FEATURE__`.
+> Two pages at most: this is all the workers get. Run `python3 scripts/line.py check <feature>`.
 
 ## Decisions
 - What was decided with the owner, one line each. An open rule goes here as a question and stops the line.

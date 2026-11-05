@@ -15,8 +15,17 @@
 
 ### T-154b — Light feature line (plan steps 0, 2–5, then SYSTEM_SETUP)
 - Branch: `chore/t-154b-feature-line`
-- Status: TODO
+- Status: IN PROGRESS
 - Plan: `/Users/basimabusnaimeh/.claude/plans/stateful-singing-bengio.md`
-- Blocked until the owner runs `claude auth login`: step 0 measures a thin worker's start size; above 15k tokens, stop and report.
+- Acceptance criteria:
+  - [x] Step 0: thin worker measured with this line's real flags: start 6,848 tokens (target 10k), reviewer 3,078; guard hook fires; `gh`, `git commit`, `git merge` refused on their own
+  - [x] Step 2: `scripts/line.py`, `scripts/usage.py`, `features/PACKET_TEMPLATE.md`, prompts, config in `.claude/projects.json`
+  - [x] Step 3: `scripts/qa.py` over each module's gate by project kind
+  - [ ] Step 4a: real trial on two modules, "Open now" (SRV-189 + CUS-110), measured with `usage.py`
+  - [ ] Step 4b: first new feature across all four modules (needs a feature from the owner)
+  - [ ] Step 5: optional local-model worker (the plan says later and optional)
+  - [ ] Phase 2: `SYSTEM_SETUP` templates, docs and tests carry the new layer, no source-system names
+- Tests: `scripts/test_line.py` (28), `scripts/test_qa_usage.py` (22): green with a fake `claude` and `gh`; the real trial is still running
 - Loops: 0/1
 - Review: PENDING
+- Notes: `WAB-Server` had no `verify` script though its `CLAUDE.md` names it; added

@@ -103,6 +103,10 @@ def approx(number: int) -> str:
     return f"{number / 1_000:.1f}k" if number >= 1_000 else str(number)
 
 
+def money(amount: float | None) -> str:
+    return "cost unknown" if amount is None else f"${amount:.2f}"
+
+
 def verdict(value: int, target: int) -> str:
     return f"target <= {approx(target)}: {'OK' if value <= target else 'MISSED'}"
 
@@ -172,10 +176,10 @@ def summary_lines(root: Path, registry: dict, sessions: int, feature: str | None
         lines.append(f"- {row['feature']}/{row['module']} {row['role']} ({row.get('model', '?')}): {row.get('requests', 0)} requests, "
                      f"start {approx(row.get('start_context', 0))} ({verdict(row.get('start_context', 0), targets['worker_start'])}), "
                      f"cache read {approx(row.get('cache_read', 0))} ({verdict(row.get('cache_read', 0), targets['worker_cache_read'])}), "
-                     f"${row.get('cost_usd', 0):.2f}{'' if row.get('ok') else ' FAILED: ' + str(row.get('reason', ''))}")
+                     f"{money(row.get('cost_usd'))}{'' if row.get('ok') else ' FAILED: ' + str(row.get('reason', ''))}")
     if rows:
         lines.append(f"Total: {approx(sum(r.get('total_tokens', 0) for r in rows))} tokens through the model, "
-                     f"${sum(r.get('cost_usd', 0) for r in rows):.2f}")
+                     f"{money(sum(r.get('cost_usd') or 0 for r in rows))}{' + unknown' if any(r.get('cost_usd') is None for r in rows) else ''}")
     return lines
 
 
