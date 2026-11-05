@@ -1,6 +1,6 @@
 # wab-payments — Integration (technical implementation document)
 
-> Not used by the server (owner decision 2026-10-19): WAB-Server no longer depends on this package.
+> **Status (2026-11-04): built but not used.** Online payment is paused: no gateway is chosen, HyperPay is only a candidate, and WAB-Server does not depend on this package (`PAYMENT_PROVIDER=disabled` in production, `fake` in dev). The apps offer pay on arrival and show online payment as "coming soon".
 
 > Single source of truth for **how this package is built and how any project uses it**. Updated after every commit/push that changes the implementation (Rules.md §14). Status legend: ✅ done · 🚧 in progress · ⬜ not started.
 
@@ -11,7 +11,7 @@
 | BRD | `docs/WAB_Package_Payments_BRD.md` |
 | Version | 0.1.0 (Node part implemented; KMP part in `kmp/`) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
-| Server counterpart in WAB | `WAB-Server/src/providers/payments` (interface already in WAB-Server, fake only today) |
+| Server counterpart in WAB | `WAB-Server/src/providers/payments` (`fake` in dev/test, `disabled` in production; this package is not used) |
 
 ## 1. Purpose and boundaries
 Zero duplicate charges, server-side verification before any booking, automatic trackable refunds, full traceability (raw gateway response kept for logs), gateway-independent and method-independent. Phase 2 (sub-merchants, split settlement) is an extension of the same port (`destinations`, `subMerchantId` optional fields).
@@ -102,7 +102,7 @@ Keep-alive HTTP agent; idempotency check before network call; timeouts and bound
 const payments = createPayments({ environment: "dev", provider: "fake", currency: "JOD" });
 const s = await payments.createSession({ idempotencyKey, amountFils: 12500, reference: bookingDraftId });
 ```
-How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode (`*_PROVIDER=real`) with this package; the interface is already compatible (see §3).
+How WAB-Server would adopt it when the owner chooses a gateway: add a real mode to `PAYMENT_PROVIDER` (today only `fake|disabled`) in `WAB-Server/src/providers/payments` over this package; the interface is already compatible (see §3).
 
 ## 11. Open questions / assumed-missing requirements
 - Gateway not final (HyperPay candidate): credentials, webhook format/header, 3DS flow, refund API specifics unknown.
@@ -124,7 +124,7 @@ How WAB-Server adopts it: replace `WAB-Server/src/providers/payments` real mode 
 | KMP library: ports, fake/mock launchers, native bridge launcher | ✅ (JVM-verified common code) |
 | KMP Android HyperPay bridge / iOS Swift bridge | ✅ written, NOT compiled |
 | Unit tests + coverage gate / loop test / README / consumer smoke test | ✅ |
-| WAB-Server integration (`PAYMENT_PROVIDER=real`, SRV-092) | ✅ |
+| WAB-Server integration (SRV-092) | ⬜ paused (owner 2026-10-19; `PAYMENT_PROVIDER=fake|disabled`) |
 | Registry publish (npm `@wab/payments`, Maven `com.wab:payments*`) | ⬜ prepared, owner runs it (`CHANGELOG.md`, `kmp/PUBLISHING.md`) |
 
 ## 13. Changelog

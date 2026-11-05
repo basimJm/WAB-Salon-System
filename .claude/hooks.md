@@ -7,7 +7,7 @@ Two layers work together:
 ## 1. Automated Hooks
 | Event | Script | What it does |
 |---|---|---|
-| `SessionStart` | `session_start.py` | Prints branch, open tasks from every session file (root + projects, via `.claude/projects.json`) and the `tasks.py` reminder. |
+| `SessionStart` | `session_start.py` | Prints branch, the live map (`scripts/map.py`, with the module of the working folder) and open tasks from every session file. |
 | `UserPromptSubmit` | `prompt_reminder.py` | Adds a one-line reminder of the rules to every request. |
 | `PreToolUse` (Bash) | `guard_git.py` | **Blocks** commits on `main`, any push to `main`, force pushes, `--no-verify`, and pushing a branch whose task block (in any session file) lacks `Loops: 1/1` and `Review: PASSED`. |
 | `PostToolUse` (Edit/Write) | `check_hardcoded.py` | **Flags** hardcoded secrets, URLs, IPs and ports in source files; move them to config/constants. |
@@ -21,7 +21,7 @@ Review the full branch diff (`git diff origin/<master>...HEAD` plus uncommitted 
 Checklist (every item "yes" or justified):
 - **Software Engineer:** correct; minimal scope; Clean Architecture layers; strong typing; errors handled; no duplication; no hardcoded values; no secrets; efficient queries/indexes; logs without sensitive data.
 - **Mobile Engineer:** (if mobile or an API for mobile is touched) RTL+LTR, AR+EN strings in resources, light/dark, loading/empty/error states, accessibility, lifecycle/permissions, matches PRD screen + design.
-- **Solution Architect:** API namespace/scope correct; contract regenerated and committed (server `npm run docs`; clients re-synced) and affected tasks named; integrations via `wab-*` ports; business rules from `CLAUDE.md` §5 respected; config-driven; Phase 2 payments not blocked.
+- **Solution Architect:** API namespace/scope correct; contract regenerated and committed (server `npm run docs`; clients re-synced) and affected tasks named; integrations via `wab-*` ports; business rules from `CLAUDE.md` §4 respected; config-driven; Phase 2 payments not blocked.
 - **QA Engineer:** acceptance criteria listed; each has a unit test; edge cases covered; all tests/build/lint green; no regression in callers; browser/simulator check done for UI.
 
 Record in the task block of the **project's** `.claude/session.md`:
@@ -32,12 +32,12 @@ Record in the task block of the **project's** `.claude/session.md`:
 ## 3. Task Workflow (every task)
 1. `python3 scripts/tasks.py next <project>` → the task row (ID, branch, needs, notes). Read only the PRD sections and operations it names.
 2. `git fetch origin && git branch --no-track <branch> origin/<master> && git checkout <branch>`; `python3 scripts/tasks.py set <ID> "IN PROGRESS"`.
-3. Add the task block to the project's `.claude/session.md` (template below) with acceptance criteria; keep only the current + last 2 blocks there.
+3. Add the task block to the project's `.claude/session.md` (template below) with acceptance criteria; it holds only the task in progress.
 4. Implement + unit tests. Run the project's gate.
 5. One verification loop → `Loops: 1/1`.
 6. Four-role review (§2) → `Review: PASSED`.
 7. Commit (including the backlog/board changes), push, open the PR into the master, merge when the gate is green (rules §3.10), `tasks.py set <ID> DONE`, commit the status change on the master through the PR flow of the next task or a `docs/` branch.
-8. Durable facts → the project's `.claude/memory.md` (short); cross-project facts → root `memory.md`; one-line update of the project's row in root `session.md`.
+8. Move the merged block to the project's `docs/knowledge/session-archive.md`. Durable facts → `docs/knowledge/facts.md`; `.claude/memory.md` only for what every session needs.
 
 ### Task block template (project `.claude/session.md`)
 ```

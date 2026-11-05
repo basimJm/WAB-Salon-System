@@ -1,5 +1,7 @@
 # @wab/analytics
 
+> **Status (2026-11-04): built but not used.** WAB-Server does not depend on this package: it records its own events in MongoDB (`serverEvents`) and has no analytics provider. BigQuery was dropped by the owner on 2026-10-19 (SRV-110, SRV-127 and ADM-074…077 stay PENDING as dropped). The apps send screens and actions to Firebase Analytics and crashes to Crashlytics. The code and this document are kept for a later decision.
+
 Provider-independent **server events** and **analytics queries** for WAB projects: record events, link app installations to accounts, and query counts, funnels, cohorts, user journeys and an overview. MongoDB holds the server events, BigQuery serves the Firebase Analytics / Crashlytics exports. Every backend sits behind a small port, so another store or warehouse is one adapter.
 
 Technical details, options, error codes and the event contract: `.claude/Integration.md`.
@@ -27,7 +29,9 @@ const funnel = await analytics.funnel({
 });
 ```
 
-## Production (MongoDB + BigQuery + Redis cache)
+## Production setup of the package (MongoDB + BigQuery + Redis cache)
+
+Not in use in WAB (see the status above); this documents the adapter.
 
 ```ts
 const analytics = createAnalytics({

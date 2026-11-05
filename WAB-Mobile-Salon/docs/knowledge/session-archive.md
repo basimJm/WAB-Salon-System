@@ -1,0 +1,89 @@
+# WAB-Mobile-Salon — Session
+
+> Loaded on every turn while working in this folder. Keep the current task block + the last 2 blocks; move older blocks nowhere (git history keeps them). Next task: `python3 scripts/tasks.py next merchant`. Status changes: `tasks.py set <ID> <STATUS>`. Cross-project view: root `.claude/session.md` and `INTEGRATION.md`.
+
+## Integration status (one glance)
+- Scaffolded (MER-001) with `KMP_TEMPLATE` from the customer app: all modules, design system (flat, design files as drawn since MER-074), sample feature; rules copied in MER-003 (until then `WAB-Mobile-Customer/CLAUDE.md` applies).
+- Consumes `/merchant/v1` (merchant contract 1.9.0 since MER-080, salons + clinics `businessType` / `audience`; 1.6.0 MER-075, staff photos + paid at salon; 1.5.0 MER-070, WhatsApp OTP; 1.4.0 MER-068; 1.3.0 added dashboard, reviews, statistics, my account consumed by MER-050/042/043/049); MER-004 Firebase registrations = owner.
+- Real-time booking requests: socket + FCM data message, Android overlay / iOS time-sensitive actions (MER-012, MER-028…030).
+
+## Current task
+
+### MER-086 — Close finished bookings (owner 2026-11-03)
+
+- Branch: `feat/mer-086-close-bookings` (from `feat/mer-085-new-booking`; batch MER-084…086)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.21; SRV-186; `GET /merchant/v1/bookings?tab=TO_CLOSE`, `POST …/bookings/{id}/complete|no-show`):
+  - [x] Bookings tab "To close" (`TO_CLOSE`, between Today and Past) with AR + EN label and empty state
+  - [x] `booking.close_reminder` / `booking.close_overdue` parsed (`bookingId`, `reference`, `actions=COMPLETED,NO_SHOW`; missing actions = both)
+  - [x] Android: a close push reaching `onMessageReceived` in the background → notification (channel "Bookings to close") with Completed / No-show (broadcast to `RequestActionReceiver`), tap = booking details; the outcome replaces it ("marked completed / no-show", "already closed", or "could not update — tap to open")
+  - [x] iOS: category `BOOKING_CLOSE` (Completed / No-show, background) registered with the request category; the action answers in the background, the outcome replaces the alert, the fallback publishes the booking link
+  - [x] `CloseBookingUseCase`: reads the details' server `actions` first (permission + own-staff rule), not allowed → open details, final status / ALREADY_HANDLED / INVALID_TRANSITION → already closed, other failures → open details; never retries
+  - [x] A tapped close push opens the booking details (`bookings/<id>` on the web base; the server's relative `deepLink` is not accepted by the link store)
+  - [x] Assigned staff: the details screen shows COMPLETE / NO_SHOW whenever the server sends them (test)
+- Tests: `CloseBookingUseCaseTest` (5), `BookingClosePushTest` (5: parse, non-close, identifiers, tap link, outcome texts), `BookingsViewModelTest` (TO_CLOSE query), `BookingDetailsViewModelTest` (+1 own staff COMPLETE / NO_SHOW); `./gradlew testAndroidHostTest` green (all modules); `:androidApp:assembleDevDebug` and `:composeApp:compileKotlinIosSimulatorArm64` green; `policy_checks.py all` ok
+- Loops: 1/1 — batch loop (MER-084…086): re-read §5.21 against the tab, push parsing/routing and the details actions; `testAndroidHostTest` all modules green (691 tests), `:androidApp:assembleDevDebug` + iOS compile green. Found: close pushes have no iOS category / are not data-only on Android → server follow-up SRV-187
+- Review: PASSED (SE ✔ (close use case checks the server actions first, no blind retry), Mobile ✔ (Android notification actions + iOS category; deep-link fallback), Architect ✔ (needs SRV-187 for the push shape), QA ✔ (payload/routing + tab tests)) — DEVIATIONS: no device run (rules §3.13, end of backlog); no Home "To close (n)" shortcut; 5 tabs not checked at 200% font
+- Notes: DEVIATIONS — the server sends close reminders as VISIBLE pushes without an iOS `actionCategory`: on iOS the actions appear only once the server sets `aps.category = BOOKING_CLOSE` (server follow-up), and on Android a visible push in the background is drawn by the system without actions (the actionable notification shows only when the message reaches the app: data-only delivery); in the foreground the usual in-app banner shows. Android 12+ blocks opening an activity from a notification action, so the "open details" fallback is the replaced notification's tap. No "To close (n)" shortcut on Home. A fifth tab in `AppSegmentedTabs` (designed for 2–4) not measured at 200 % font scale. Detekt and the device run deferred to the batch / end of backlog.
+
+### MER-085 — New booking for a customer (owner 2026-11-03)
+
+- Branch: `feat/mer-085-new-booking` (from `feat/mer-084-tattoo`; batch MER-084…086)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.20; SRV-185; merchant contract 1.13.0 `getCustomersLookup`, `postBookings`, `getSalonServices`, `getTeamMembers`):
+  - [x] `Permission.BOOKINGS_CREATE` (16 keys; MANAGER template = 13); team editor group + AR/EN copy; mock presets (owner, manager)
+  - [x] "New booking" button on the bookings screen only with `BOOKINGS_CREATE` (live from the session; hidden, not disabled)
+  - [x] Form: phone (`AppPhoneField` + country picker, trunk zero dropped) → Check → lookup; registered: first name shown, nothing asked; not registered (or blocked without name): name (≤ 50) + gender Men/Women required; a changed number needs a new check
+  - [x] One person: active salon services multi-select (every page) with total duration + JOD total (integer fils), staff "Any available" (no `staffId`) or a provider, date today..+90 days, start every 15 min (today only future slots), Asia/Amman → UTC ISO `start`
+  - [x] Tattoo studio: optional design image per person (picker → `BOOKING_REFERENCE` upload → `referenceImageKey`); `UploadPurpose.BOOKING_REFERENCE` added
+  - [x] Branch: owner sends the branch chosen in the bookings switcher (`BranchScope.filter`), branch members send none; server errors (BRANCH_REQUIRED, SLOT_TAKEN, SLOT_UNAVAILABLE, STAFF_NOT_ELIGIBLE, GENDER_MISMATCH, ACCOUNT_BLOCKED, VALIDATION_ERROR …) shown through `appErrorText`
+  - [x] Success: form closes, the new booking's details open, "Booking created" banner
+  - [x] Lists: "Created by the business" on MERCHANT cards; details: "Created by the business · <member>" and "No WAB account" for `customer.id == null` (call/WhatsApp kept, the phone is always there); `source`/`createdBy`/nullable customer id mapped
+  - [x] Mock mode: generated fixtures answer lookup + create; `patchCustomerLookup` makes `791234567` a registered customer (Rana), every other number unknown; create returns `id-1` (the details fixture answers any id)
+- Tests: `NewBookingViewModelTest` (10: load, registered / unregistered / invalid phone / lookup error, services totals, 90-day dates, submit success → OpenBooking, submit error → error text, tattoo design upload + key), `BookingsViewModelTest` (+1 permission entry), `NewBookingMappersTest` (3: body with customer/persons/UTC start/staff null, registered body, lookup/services/created), `BookingMappersTest` (+1 source/createdBy/no account), `NewBookingRulesTest` (3), `MockLookupTest` (2); `PermissionsTest`/`MockWorldTest` counts 16/13; `RealApplicationFixturesTest` excludes BOOKINGS_CREATE (captured before 1.13.0). `./gradlew testAndroidHostTest` green (all modules); `policy_checks.py all` ok
+- Loops: 1/1 — batch loop: re-read §5.20 against lookup, required name/gender, body building (Amman → UTC, any staff = no id), branch rule, errors, source labels; unit tests green (see MER-086)
+- Review: PASSED (SE ✔ (domain/data/presentation slices, mapper tested), Mobile ✔ (AR/EN strings, permission-gated entry), Architect ✔ (contract 1.13.0 ops only), QA ✔ (VM + mapper + rules tests)) — DEVIATIONS: main person only (no companions/bride), times every 15 min without an availability endpoint (server refuses busy slots), salon-level services list, no device run yet
+- Notes: DEVIATIONS — companions not supported (one main person only; the contract allows up to `maxCompanions`); no bride toggle; start times are every 15-minute slot of the day (no merchant availability endpoint, the server refuses closed/busy slots with SLOT_UNAVAILABLE / SLOT_TAKEN); services from `GET /salon/services` (salon level, not per branch); entry only on the bookings screen (not home); no previews (feature screens have none); detekt, device run (AR/EN, light/dark) deferred to the batch / end of backlog.
+
+### MER-084 — Tattoo studios in the merchant app (owner 2026-11-03)
+
+- Branch: `feat/mer-084-tattoo` (batch MER-084…086; commit per task, next branches from this one)
+- Status: IN REVIEW (committed, not pushed)
+- Acceptance criteria (BUSINESS_DOMAIN §5.23, §5.19; SRV-183; merchant contract 1.13.0):
+  - [x] `./gradlew apiSync` → merchant 1.13.0 (TATTOO, `referenceImageUrl`, `source`/`createdBy`, new endpoints)
+  - [x] `BusinessType.TATTOO`; `BusinessKind.of(TATTOO, …)` = BOTH, `isTattoo`, no bride, no widening, no catalog gender
+  - [x] Registration: Salon / Clinic / Tattoo studio cards (icon per type), tattoo = no audience question ("serve both" note), trade license only (no medical license rule, not sent); resubmission keeps the type; audience sent for salons only
+  - [x] Wording: hub label + title, profile name label, type note, catalog note for tattoo studios (AR + EN); mock world preset "Tattoo studio"
+  - [x] Booking details: per person "Design image" (signed URL, `AppImage` fitted, card image height, medium shape)
+  - [x] Mock fixtures (`core/data/fixtures/remote` + dashboard mock) carry `source`/`createdBy`/`referenceImageUrl` (the contract marks them required)
+- Tests: `BusinessKindTest` (+1 tattoo), `RegistrationRulesTest` (+1 tattoo), `BookingMappersTest` (design URL mapped; DTO fixtures updated); `./gradlew testAndroidHostTest` green (all modules)
+- Loops: 1/1 — batch loop: re-read §5.23 against type rules, registration, wording, design image; unit tests green (see MER-086)
+- Review: PASSED (SE ✔, Mobile ✔ (AR/EN wording, RTL-safe), Architect ✔, QA ✔) — DEVIATION: no device run yet (end of backlog)
+- Notes: detekt, device run deferred to the batch / end of backlog (rules §3.13).
+
+## Last blocks
+
+### MER-083 — Clinic regression + salon-or-clinic wording
+- Branch: `fix/mer-083-clinic-regression`
+- Status: DONE (PR #604)
+- Acceptance criteria (owner 2026-10-30 "fix customer and merchant ... make loop test for customer merchant and admin test full flow regression"; BUSINESS_DOMAIN §5.19; operations `POST /merchant/v1/auth/*`, merchant bookings approve):
+  - [x] Regression on the local stack (server with SRV-179): clinic owner (Glow Aesthetic Clinic, demo `+962789020001`, fake OTP) signs in; the customer's clinic booking WAB-C5EC9K (CUS-101 journey) arrives as a new request sheet (person, Botox, Ahmad, 31/10 11:00, 120 JOD, pay on arrival) and Accept shows "booking accepted"
+  - [x] Texts seen before sign-in or by any member no longer say "salon" only: login welcome/subtitle, register entry, OTP register mode, not-registered dialog, inactive, access removed, notifications permission (AR + EN)
+- Tests: full gate (Terminal panel): policy_checks all ok, run_detekt.sh 0 findings, `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green; device (emulator-5554, dev debug against the local stack, AR): login screen shows the new texts
+- Loops: 1/1 — re-ran the device journey after the text change (login → OTP → home with the request); string-only change, no logic to unit-test (DEVIATION: no new unit test; policy I-checks cover AR/EN key parity)
+- Review: PASSED (SE ✔ (strings only), Mobile ✔ (AR natural wording, RTL unchanged), Architect ✔ (no contract change), QA ✔ (gate green; cross-app journey customer → merchant))
+- Notes: KNOWN (not fixed): on the first cold start right after install the splash took ~10 s and the logo slot stayed empty for several seconds (debug build, fresh install); later starts are normal. DEVICE SETUP (local only, never committed): `local.properties` `DEV_API_BASE_URL=http://10.0.2.2:4000`, untracked `androidApp/src/devDebug/AndroidManifest.xml`.
+
+### MER-082 — Animated brand logo on the launch/config screen
+- Branch: `feat/mer-082-animated-logo`
+- Status: DONE (PR #604)
+- Acceptance criteria (owner 2026-10-29 "do the same for merchant", same as CUS-100; PRD M01 splash; no API change):
+  - [x] Native splash untouched; only the logo of the config screen (`SplashScreen`) becomes the owner's Lottie `files/wab_logo_splash.json` (unmodified), tile 108 dp as the design
+  - [x] Played once in `AppTheme.motion.logoReveal` (2000 ms, same as customer) and held on its last frame
+  - [x] `LaunchGateContent` leaves the splash only when config is known AND the logo finished (`UiState.logoShown`, `OnLogoAnimationFinished`); static logo until parsed; parse failure finishes at once
+  - [x] Compottie 2.1.0 (Compose 1.10.3 / Kotlin 2.3.20, same as customer)
+  - [x] Tests: `AnimatedLogoTest` (speed), `MainViewModelTest` (splash waits for logo; logo alone does not leave before config)
+- Tests: policy_checks all ok; run_detekt.sh clean (after wrapping one KDoc line); `./gradlew testAndroidHostTest :androidApp:assembleDevDebug :composeApp:linkDebugFrameworkIosSimulatorArm64` green; device: emulator-5554 dev debug cold start → navy tile, W stroke tracing, then Login (~2 s); no crash
+- Loops: 1/1 — re-checked every criterion; found and fixed: detekt MaxLineLength on the LaunchGateContent KDoc, wrong backlog dependency (MER-008 → MER-019)
+- Review: PASSED (SE ✔, Mobile ✔, Architect ✔, QA ✔) — port of CUS-100 into the merchant design system (own package, token, test); no literals; brand mark not mirrored in RTL; content description kept; no contract change
+- Notes: DEVIATIONS: iOS checked by the framework link only (no simulator run); one cold-start frame showed the logo slot empty for a moment before even the static fallback drew; dark mode not captured separately.

@@ -2,7 +2,7 @@
 
 > These rules add to the root `CLAUDE.md`, the root `.claude/*.md` and `WAB-Admin-Dashboard/CLAUDE.md`. They never relax them; if two rules conflict, the stricter one wins. **This `.claude/` folder is where admin-level rules live: add or change admin rules here, not in scattered notes.**
 >
-> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, one real verification loop, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read both at the start of every session; the admin rules below only add to them.
+> **Always adhere to the WAB-level files, in every admin task, without exception:** `/Users/basimabusnaimeh/WAB/.claude/rules.md` (token efficiency, requirements first, delivery rules 1-14: tests, branch from `origin/admin` checked before the first edit, no hardcoding, one real verification loop, four-role review, honest reporting of deviations) and `/Users/basimabusnaimeh/WAB/.claude/roles.md` (the four roles and the working agreement). Read them when you start coding here; the admin rules below only add to them.
 
 ## 0. Token budget (applies to every admin task; root `rules.md` §1 stays the parent rule)
 
@@ -69,7 +69,7 @@ Green unit tests are not enough for a UI project. **Before every commit** (not o
 1. **Build and run the project:** build the variant the change affects, serve it (`npm run dev`, or `vite preview --mode <variant> --outDir dist/<variant>` for a built variant) and open it in a real browser (the preinstalled Chromium through Playwright; locally `PW_CHROMIUM_PATH=<chromium>`).
 2. **Use it like an admin:** click through every screen, state and behaviour the change touches, in Arabic RTL and English LTR, light and dark, phone / tablet / desktop widths, portrait and landscape. Exercise loading, empty, error, validation and success states.
 3. **Console and network clean:** zero errors and zero warnings in the browser console, no failed or unexpected requests.
-4. **Match the requirements, not just the code:** compare what you see with the PRD page (A00–A29), the BRD ids, the task row in `docs/WAB_Admin_Tasks.md`, the Design Script and the matching file in `design/`, and with `BUSINESS_DOMAIN.md` (field names, enums, state machines, permissions, error codes, JOD and Asia/Amman rules). Behaviour follows the PRD (PRD wins over the design). Fix every mismatch or record it as an open item in `session.md`; never silently accept it.
+4. **Match the requirements, not just the code:** compare what you see with the PRD page (A00–A31), the BRD ids, the task row in `docs/WAB_Admin_Tasks.md`, the Design Script and the matching file in `design/`, and with `BUSINESS_DOMAIN.md` (field names, enums, state machines, permissions, error codes, JOD and Asia/Amman rules). Behaviour follows the PRD (PRD wins over the design). Fix every mismatch or record it as an open item in `session.md`; never silently accept it.
 5. **Make it repeatable:** turn what you verified by hand into Playwright e2e assertions (`e2e/`), and keep screenshots of the checked screens in the scratchpad.
 6. **Say it:** the commit/PR body states what was opened and compared (screens, widths, languages, themes) and the result. A UI change committed without this check is not done.
 

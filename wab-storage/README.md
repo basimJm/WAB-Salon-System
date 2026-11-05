@@ -1,15 +1,17 @@
 # @wab/storage
 
 Provider-independent file storage for WAB projects: presigned direct uploads, confirmation by the
-real file content, public CDN URLs, short-lived signed URLs for private files, server-side
-read/write/delete and image variants. Adapters: `s3` (AWS S3, MinIO, DigitalOcean Spaces),
-`local-fs` (dev on localhost) and `memory` (tests). No WAB business rules live here.
+real file content, public URLs, short-lived signed URLs for private files, server-side
+read/write/copy/delete and image variants. Adapters: `r2` (Cloudflare R2, the provider WAB uses),
+`s3` (AWS S3 + CDN, WAB's fallback; also MinIO), `local-fs` (dev on localhost) and `memory`
+(tests). No WAB business rules live here.
 
 ## Install
 
-Published as a private package on GitHub Packages. Add `@wab:registry=https://npm.pkg.github.com`
-to the consumer's `.npmrc` (token via `NPM_TOKEN`, never committed), then `npm install @wab/storage`.
-Until the first publish, WAB-Server depends on it through `"@wab/storage": "file:../wab-storage"`.
+Not published yet: WAB-Server depends on it through `"@wab/storage": "file:../wab-storage"`.
+The registry is an open owner decision (GitHub Packages assumed): add
+`@wab:registry=https://npm.pkg.github.com` to the consumer's `.npmrc` (token via `NPM_TOKEN`, never
+committed), then `npm install @wab/storage`.
 
 ## Quick start
 
@@ -18,9 +20,9 @@ import { createStorage } from '@wab/storage';
 
 const storage = createStorage({
   environment: 'prod',
-  provider: 's3',
-  s3: { region, publicBucket, privateBucket }, // credentials: IAM role, or { accessKeyId, secretAccessKey }
-  cdn: { baseUrl: cdnBaseUrl }, // https in prod
+  provider: 'r2',
+  r2: { accountId, publicBucket, privateBucket, credentials }, // S3 fallback: provider 's3' + s3: { region, publicBucket, privateBucket }
+  cdn: { baseUrl: publicBaseUrl }, // the public bucket's https URL (or the CDN for S3)
 });
 
 // 1. The server hands the client a short-lived upload URL (the key is always server-generated).
@@ -48,7 +50,7 @@ if (result.status === 'CONFIRMED') await storage.createVariants(key); // x_thumb
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `createUploadUrl({key, visibility, contentType, maxBytes, expiresInSec})` | Presigned `PUT`, pinned to the content type                                                                  |
 | `confirmUpload({key, visibility, contentType, maxBytes})`                 | `CONFIRMED` or `REJECTED` (`NOT_FOUND`, `EMPTY`, `TYPE_MISMATCH`, `TOO_LARGE`); rejected objects are deleted |
-| `getPublicUrl(key)`                                                       | CDN URL (pure)                                                                                               |
+| `getPublicUrl(key)`                                                       | Public URL (pure)                                                                                            |
 | `getSignedUrl({key, expiresInSec})`                                       | Short-lived URL for a private object (S3 presign or CloudFront)                                              |
 | `read(key)` / `write({key, body, contentType, visibility})`               | Server-side bytes (e.g. variants); `read` returns `null` when missing                                        |
 | `delete(keys)`                                                            | Any number of keys, batched, missing keys ignored                                                            |
@@ -60,7 +62,7 @@ Retryable errors (rate limit, timeout, network, 5xx) are retried with capped bac
 ## Environments
 
 - **dev:** `provider: 'memory'` (tests), `'local-fs'` (+ `createLocalFsHandler` to serve uploads on localhost) or `'s3'` with `endpoint` + `forcePathStyle` for MinIO; `ensureDevBuckets(options)` creates the buckets.
-- **prod:** `provider: 's3'`, https CDN, separate public/private buckets; the memory and local-fs adapters are refused at start-up with a `StorageError` that names the field.
+- **prod:** `provider: 'r2'` (or `'s3'`), https public URL or CDN, separate public/private buckets; the memory and local-fs adapters are refused at start-up with a `StorageError` that names the field.
 
 ## Testing your code
 

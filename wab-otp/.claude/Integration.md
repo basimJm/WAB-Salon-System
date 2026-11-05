@@ -158,7 +158,7 @@ One HTTPS call per code (bounded `timeoutMs`, `AbortSignal.timeout`); one Redis 
 | ARQAM channel (send, error mapping, retry + wait hint, idempotency, timeout, account, delivery history) | ✅ |
 | Signed single-use proof + `provider: 'signed'` | ✅ |
 | Code stores memory + Redis | ✅ |
-| SMS channel (no vendor chosen) | ✅ |
+| SMS channel adapter (no vendor; not used by WAB, which has no SMS fallback) | ✅ |
 | Firebase verifier | removed in 0.2.0 |
 | Meta WhatsApp Cloud API channel | removed in 0.3.0 |
 | Unit tests + coverage gate, loop test, smoke | ✅ |

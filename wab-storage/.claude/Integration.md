@@ -9,10 +9,10 @@
 | BRD | `docs/WAB_Package_Storage_BRD.md` |
 | Version | 0.2.0 (SDK built; Cloudflare R2 via the S3 adapter; real AWS/R2/MinIO/CloudFront calls not verified — see §11) |
 | Node | >= 22, TypeScript strict, ESM + CJS builds |
-| Server counterpart in WAB | `WAB-Server/src/providers/storage` (interface already in WAB-Server, fake only today) |
+| Server counterpart in WAB | `WAB-Server/src/providers/storage` (`real.ts` over this SDK: `STORAGE_PROVIDER=cloudflare-r2` active, `real` = AWS S3 fallback, `fake` in tests) |
 
 ## 1. Purpose and boundaries
-Presigned upload (purpose-restricted, server-generated keys), upload confirmation (existence, real type by magic bytes, size; rejected objects deleted), public CDN URLs, short-lived signed URLs for private objects, read/write, single/bulk delete, image variants (thumb 320 px, medium 960 px, WebP).
+Presigned upload (purpose-restricted, server-generated keys), upload confirmation (existence, real type by magic bytes, size; rejected objects deleted), public URLs (R2 public bucket domain, or CDN on S3), short-lived signed URLs for private objects, read/write, single/bulk delete, image variants (thumb 320 px, medium 960 px, WebP).
 
 **Not in this package:** Video transcoding, antivirus, deciding file ownership/permissions (backend).
 
@@ -92,7 +92,7 @@ Common codes for every package: `CONFIG_INVALID`, `VALIDATION_FAILED`, `AUTH_FAI
 
 ## 7. Environments
 - **dev (localhost):** MinIO on `localhost:9000` through the s3 adapter, or `local-fs`; URLs built from a local base URL.
-- **prod:** S3 with IAM credentials, separate public/private buckets, CDN https domain; fake/local refused.
+- **prod:** R2 (active in WAB) or S3 with IAM credentials (fallback), separate public/private buckets, https public URL or CDN; fake/local refused.
 
 ## 8. Performance notes
 Reuse one S3 client; presigning is local (no network); stream large bodies; bulk delete in batches of 1 000; variants generated off the request path; read capped by size.
@@ -107,7 +107,7 @@ Reuse one S3 client; presigning is local (no network); stream large bodies; bulk
 const storage = createStorage({ environment: "dev", provider: "s3", s3: { endpoint, region, publicBucket, privateBucket, credentials }, cdn: { baseUrl } });
 const t = await storage.createUploadUrl({ key, visibility: "PUBLIC", contentType: "image/jpeg", maxBytes, expiresInSec });
 ```
-How WAB-Server adopts it (done, branch `feat/srv-112-storage-real`): dependency `"@wab/storage": "file:../wab-storage"`, adapter `WAB-Server/src/providers/storage/real.ts` (settings -> SDK options; SDK errors -> `ExternalServiceError` 502/503, caller errors -> `RangeError`; the SDK's `EMPTY` rejection maps to the server's `TYPE_MISMATCH`), env keys `S3_*`, `CDN_BASE_URL`, `CLOUDFRONT_*`. The server keeps its own sharp-based variants (same `_thumb.webp` / `_medium.webp` naming), so `createVariants` is optional for it.
+How WAB-Server adopts it (done): dependency `"@wab/storage": "file:../wab-storage"`, adapter `WAB-Server/src/providers/storage/real.ts` (settings -> SDK options; SDK errors -> `ExternalServiceError` 502/503, caller errors -> `RangeError`; the SDK's `EMPTY` rejection maps to the server's `TYPE_MISMATCH`), env keys `STORAGE_PROVIDER=cloudflare-r2` + `R2_*` (active), fallback `STORAGE_PROVIDER=real` + `S3_*`, `CDN_BASE_URL`, `CLOUDFRONT_*`. The server keeps its own sharp-based variants (same `_thumb.webp` / `_medium.webp` naming), so `createVariants` is optional for it.
 
 ## 11. Open questions / assumed-missing requirements
 - Video duration limit (60 s) needs media probing — not available from S3 metadata.
@@ -133,7 +133,8 @@ How WAB-Server adopts it (done, branch `feat/srv-112-storage-real`): dependency 
 | Image variants (sharp behind `ImageProcessor`) | ✅ STO-007 |
 | MinIO dev mode (`ensureDevBuckets`) + upload fixtures + adapter parity | ✅ STO-008 |
 | Unit tests + coverage gate, loop test, package smoke, README | ✅ STO-009 |
-| Publish `@wab/storage` + WAB-Server `STORAGE_PROVIDER=real` | 🚧 STO-010 |
+| WAB-Server on the SDK (`STORAGE_PROVIDER=cloudflare-r2`, fallback `real`) | ✅ SRV-180 |
+| Publish `@wab/storage` to the registry | 🚧 STO-010 (registry is an open owner decision) |
 
 Implementation notes: `createStorage(options)` returns `Storage` = port + `createVariants/variantKey/variantKeys` (variants are layered over any adapter). `RejectionReason` = `NOT_FOUND | EMPTY | TYPE_MISMATCH | TOO_LARGE`. Keys are unique across the public and private locations: `read` tries public then private, `delete` removes from both. Size cannot be enforced by a presigned PUT (SigV4 cannot bind `content-length-range`), so `maxBytes` is enforced at confirm (object rejected and deleted); the content type is signed into the URL.
 

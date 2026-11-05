@@ -4,17 +4,18 @@
 | Field | Value |
 |---|---|
 | Document | BRD — `wab-notifications` package |
-| Version | 1.0 |
-| Date | October 2026 |
-| Repository | Separate repository `wab-notifications` |
+| Version | 1.1 (one Firebase project per environment; status) |
+| Date | 2026-11-04 |
+| Repository | Monorepo folder `wab-notifications/` |
 | Deliverable | **Node.js package (TypeScript, npm)** — server only |
 | Consumers | WAB backend (customer/merchant push, admin email alerts, admin 2FA email, promotional campaigns); future projects |
-| Related | Backend BRD, Customer PRD (§10), Merchant PRD (§11, M10), Admin PRD (A25, A27) |
+| Related | Backend BRD, Customer PRD (§10), Merchant PRD (§11, M10), Admin PRD (A25, A27). Root `BUSINESS_DOMAIN.md` §8 holds the rules; this package holds none of the business rules |
+| Status | Built and wired in WAB-Server (`NOTIFIER_PROVIDER=real`, `file:../wab-notifications`) |
 
 ---
 
 ## 1. Executive Summary
-`wab-notifications` delivers messages through pluggable channels behind one **interface**. Phase 1 channels: **Push via Firebase Cloud Messaging (FCM)** for the customer and merchant apps (one Firebase project, 4 app registrations), and **Email via Nodemailer + Gmail SMTP** for admin alerts and admin 2FA codes. The backend decides *who* gets *what* and *when*; the package handles *how* it is delivered and reports delivery results.
+`wab-notifications` delivers messages through pluggable channels behind one **interface**. Its two channels: **Push via Firebase Cloud Messaging (FCM)** for the customer and merchant apps (one Firebase project per environment, 4 app registrations), and **Email via Nodemailer + Gmail SMTP** for admin alerts and admin 2FA codes. The backend decides *who* gets *what* and *when*; the package handles *how* it is delivered and reports delivery results.
 
 ---
 
@@ -58,7 +59,7 @@ Notifications drive the core experience: booking status changes, reminders (1 h 
 ### 4.2 Out of Scope
 - Deciding recipients, permissions, user preferences, schedules (backend: notification service + BullMQ jobs).
 - Storing the in-app notifications list (backend database).
-- SMS (OTP is in `wab-otp`), WhatsApp messaging.
+- SMS and WhatsApp messaging. Phone OTP codes are delivered by `wab-otp` through ARQAM OTP over WhatsApp; this package sends neither.
 - Customer/merchant marketing emails (not planned).
 
 ---
