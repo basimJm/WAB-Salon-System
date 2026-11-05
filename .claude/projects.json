@@ -148,6 +148,7 @@
   "kinds": {
     "server": {
       "setup": "npm ci --no-audit --no-fund && npm run ensure-sdks",
+      "autofix": "npm run format",
       "qa": [
         {
           "name": "verify",
@@ -162,6 +163,7 @@
     "web": {
       "setup": "npm ci --no-audit --no-fund",
       "contract_sync": "npm run api:sync",
+      "autofix": "npm run format",
       "qa": [
         {
           "name": "gate",
@@ -183,6 +185,7 @@
     },
     "sdk": {
       "setup": "npm ci --no-audit --no-fund",
+      "autofix": "npm run format",
       "qa": [
         {
           "name": "verify",

@@ -94,6 +94,9 @@ if args[:2] == ["pr", "create"]:
     prs.write_text(json.dumps(data))
     print(url)
 elif args[:2] == ["pr", "merge"]:
+    if (state / "fail_merge").exists():
+        (state / "fail_merge").unlink()
+        sys.exit("merge refused")
     pr = data[args[2]]
     with tempfile.TemporaryDirectory() as tmp:
         run = lambda *a: subprocess.run(["git", *a], cwd=tmp, check=True, capture_output=True)
@@ -135,7 +138,7 @@ def registry() -> dict:
         "board_file": "INTEGRATION.md",
         "statuses": ["TODO", "IN PROGRESS", "IN REVIEW", "DONE", "PENDING", "BLOCKED", "CANCELLED"],
         "owner_input_markers": ["user input"],
-        "kinds": {"server": {"qa": [{"name": "server gate", "run": "test ! -e QA_FAIL || (echo qa-tail-line; exit 1)"}]},
+        "kinds": {"server": {"autofix": "git log -1 --format=%s > /dev/null && echo formatted > formatted.txt", "qa": [{"name": "server gate", "run": "test ! -e QA_FAIL || (echo qa-tail-line; exit 1)"}]},
                   "kmp": {"contract_sync": "cp ../server/docs/api/openapi.customer.json generated.json",
                           "qa": [{"name": "app gate", "run": "test ! -e QA_FAIL || (echo qa-tail-line; exit 1)"}]}},
         "projects": {
@@ -309,6 +312,14 @@ class Pipeline(LineCase):
         roles = [c["role"] for c in self.calls() if c["cwd"].endswith("/server")]
         self.assertLess(roles.index("fix"), roles.index("po"), "the model reviews only green code")
 
+    def test_formatting_is_fixed_by_the_script_and_committed_before_qa(self):
+        run = self.packet()
+        self.assertEqual(run.run(), 0)
+        worktree = run.worktree_of("server")
+        self.assertEqual((worktree / "server" / "formatted.txt").read_text().strip(), "formatted")
+        self.assertIn("SRV-001: format", self.sh("log", "--format=%s", cwd=worktree))
+        self.assertEqual(self.sh("status", "--short", cwd=worktree), "")
+
     def test_review_gap_goes_to_a_fix_worker_and_is_reviewed_again(self):
         self.scenario({"customer.po": {"verdicts": [{"verdict": "FAIL", "gaps": ["chip.kt: no test"], "summary": "gap"},
                                                     {"verdict": "PASS", "gaps": [], "summary": "fine now"}]}})
@@ -427,6 +438,17 @@ class Merging(LineCase):
         self.assertIn("line report", self.remote_file("m-server", "features/open-now/REPORT.md"))
         self.assertFalse(run.worktree_of("server").exists(), "worktrees go away after the merge")
         self.assertFalse((run.dir / "PACKET.md").exists(), "untracked copies would make the next pull fail")
+
+    def test_a_failed_merge_is_retried_without_a_second_pr(self):
+        run = self.packet(PACKET.replace("`GET /items?openNow=true`", "none"))
+        self.assertEqual(run.run(), 0)
+        (self.state / "fail_merge").write_text("once")
+        with self.assertRaises(line.LineError):
+            run.merge()
+        self.assertEqual(run.load_status("server")["state"], line.PASS, "not merged, not recorded as merged")
+        self.assertEqual(run.merge(), 0)
+        heads = [c[c.index("--head") + 1] for c in self.gh_calls() if c[:2] == ["pr", "create"]]
+        self.assertEqual(heads.count("feat/srv-001-open"), 1)
 
     def test_guard_refuses_a_branch_without_a_verified_block(self):
         run = self.packet(PACKET.replace("`GET /items?openNow=true`", "none"))

@@ -148,6 +148,8 @@ def worker_rows(features: Path, feature: str | None) -> list[dict]:
             status = json.loads(status_file.read_text(encoding="utf-8"))
         except ValueError:
             continue
+        if not isinstance(status, dict):  # the run folder also holds the list of cross-module checks
+            continue
         for step in status.get("steps", []):
             rows.append({"feature": status_file.parent.parent.name, "module": status.get("module", status_file.stem), **step})
     return rows

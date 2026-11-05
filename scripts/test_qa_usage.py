@@ -173,6 +173,7 @@ class Reporting(unittest.TestCase):
                     "start_context": 12000, "cache_read": 900, "total_tokens": 5000}
             (run / "server.json").write_text(json.dumps({"module": "server", "steps": [step]}))
             (run / "broken.json").write_text("{")
+            (run / "coordination.json").write_text(json.dumps([{"name": "contract: customer", "ok": True, "detail": ""}]))
             registry_data = {"projects": {}, "line": {"usage_targets": self.TARGETS, "features_dir": "features"}}
             text = "\n".join(usage.summary_lines(root, registry_data, 1, "f"))
             self.assertIn("f/server worker (sonnet)", text)

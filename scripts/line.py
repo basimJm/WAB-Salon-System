@@ -497,12 +497,21 @@ class Line:
         """QA first, without a model; the PO is called only for green code. Returns what is wrong, or ''."""
         base = f"origin/{status['master']}"
         with self.qa_lock:  # gates share Gradle and ports, and they cost no tokens: one at a time
+            self.autofix(packet, module, worktree)
             result = run_qa(self.registry, module, worktree, base)
         status["qa"] = result.as_dict()
         self.save_status(status)
         if not result.ok:
             return f"QA step `{result.failure.name}` failed:\n{result.failure.tail}"
         return self.review(packet, status, module, worktree)
+
+    def autofix(self, packet: Packet, module: str, worktree: Path) -> None:
+        """Formatting is a script's job: a fix worker for it costs tokens and teaches nothing. A failure shows up in QA."""
+        project = self.registry["projects"][module]
+        command = self.registry["kinds"][project["kind"]].get("autofix")
+        if command:
+            run_shell(command, worktree / project["dir"], None, self.settings["timeouts_seconds"]["setup"], self.settings["fail_tail_lines"])
+            self.commit(worktree, f"{packet.modules[module].tasks[0]}: format")
 
     def review(self, packet: Packet, status: dict, module: str, worktree: Path) -> str:
         """One shot per round: criteria and diff in, a verdict out. Anything but a clean PASS is not a pass."""
@@ -654,7 +663,7 @@ class Line:
             raise LineError(f"{module}: {reason}")
         self.git(worktree, "push", "-u", "origin", branch)
         part = packet.modules[module]
-        status["pr"] = self.open_and_merge(branch, status["master"], f"{part.tasks[0]}: {self.feature}", self.pr_body(status, part))
+        self.open_and_merge(status, branch, status["master"], f"{part.tasks[0]}: {self.feature}", self.pr_body(status, part))
         status["state"] = MERGED
         self.save_status(status)
 
@@ -664,18 +673,20 @@ class Line:
                 f"## Checks\nQA: {', '.join(s['name'] for s in status['qa'])}. Review: {status['po']['summary']}\n\n"
                 f"Not covered: {self.settings['not_covered_note']}\n\n{self.settings['pr_footer']}")
 
-    def open_and_merge(self, branch: str, master: str, title: str, body: str) -> str:
+    def open_and_merge(self, status: dict, branch: str, master: str, title: str, body: str) -> None:
+        """The PR is remembered as soon as it exists, so a failed merge can be retried without opening a second one."""
         gh = self.settings["gh_bin"]
         timeout = self.settings["timeouts_seconds"]["git"]
-        created = subprocess.run([gh, "pr", "create", "--base", master, "--head", branch, "--title", title, "--body", body],
-                                 cwd=self.root, capture_output=True, text=True, timeout=timeout)
-        if created.returncode != 0:
-            raise LineError(f"gh pr create: {created.stderr.strip()}")
-        url = created.stdout.strip().splitlines()[-1]
-        merged = subprocess.run([gh, "pr", "merge", url, "--merge"], cwd=self.root, capture_output=True, text=True, timeout=timeout)
+        if not status.get("pr"):
+            created = subprocess.run([gh, "pr", "create", "--base", master, "--head", branch, "--title", title, "--body", body],
+                                     cwd=self.root, capture_output=True, text=True, timeout=timeout)
+            if created.returncode != 0:
+                raise LineError(f"gh pr create: {created.stderr.strip()}")
+            status["pr"] = created.stdout.strip().splitlines()[-1]
+            self.save_status(status)
+        merged = subprocess.run([gh, "pr", "merge", status["pr"], "--merge"], cwd=self.root, capture_output=True, text=True, timeout=timeout)
         if merged.returncode != 0:
-            raise LineError(f"gh pr merge {url}: {merged.stderr.strip()}")
-        return url
+            raise LineError(f"gh pr merge {status['pr']}: {merged.stderr.strip()}")
 
     def wrap_up(self, packet: Packet, modules: list[str]) -> None:
         """Statuses, the board and the docs once, after the merges, so parallel branches never fight over them."""
@@ -699,7 +710,7 @@ class Line:
                 raise LineError("tasks.py check after the wrap-up: " + "; ".join(sorted(new)))
             if self.commit(worktree, f"{self.feature}: statuses, board and docs after the merge"):
                 self.git(worktree, "push", "-u", "origin", branch)
-                status["pr"] = self.open_and_merge(branch, master, f"{self.feature}: statuses, board and docs", f"Wrap-up of feature line `{self.feature}`: no product code.\n\n{self.settings['pr_footer']}")
+                self.open_and_merge(status, branch, master, f"{self.feature}: statuses, board and docs", f"Wrap-up of feature line `{self.feature}`: no product code.\n\n{self.settings['pr_footer']}")
             status.update(state=MERGED, branch=branch)
             self.save_status(status)
         self.remove_worktrees(modules, masters)
