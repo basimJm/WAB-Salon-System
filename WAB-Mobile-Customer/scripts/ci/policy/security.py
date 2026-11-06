@@ -8,12 +8,15 @@ from pathlib import Path
 from .files import Config, iter_files, rel
 from .model import Violation
 
-MANIFEST, PLIST, GRADLE, SECRET_FILE = "S001", "S002", "S003", "S004"
+MANIFEST, PLIST, GRADLE, SECRET_FILE, FCM_REGISTRATION = "S001", "S002", "S003", "S004", "S005"
 _ANDROID = "{http://schemas.android.com/apk/res/android}"
 _COMPONENTS = ("activity", "activity-alias", "service", "receiver", "provider")
 _INSECURE_REPO = re.compile(r"allowInsecureProtocol\s*=\s*true|url\s*=?\s*\(?\s*uri\(\s*\"http://|url\s*=\s*\"http://")
 _SIGNING_SECRET = re.compile(r"(?:storePassword|keyPassword)\s*=\s*\"[^\"$]+\"")
 _DYNAMIC_VERSION = re.compile(r'=\s*"[^"]*(?:\+|latest|SNAPSHOT|\[|\()[^"]*"|version\s*=\s*"[^"]*(?:\+|latest|SNAPSHOT)')
+_FCM_VERSION = re.compile(r'^\s*firebaseMessaging\s*=\s*"(\d+)', re.MULTILINE)
+_FCM_FLAG = "firebase_messaging_installation_id_enabled"
+_FCM_FLAG_FROM_MAJOR = 26
 _SECRET_FILES = ("*.jks", "*.keystore", "*.p12", "*.pem", "*.pfx", ".env", ".env.*", "local.properties", "service-account*.json", "*.mobileprovision")
 
 
@@ -50,6 +53,18 @@ def check_gradle(path: str, text: str) -> list[Violation]:
     return found
 
 
+def check_fcm_registration(manifest_path: str, catalog_text: str, manifest_text: str) -> list[Violation]:
+    """firebase-messaging 26+ makes `register()` throw `API disabled` unless the manifest opts in: no device then gets a token."""
+    version = _FCM_VERSION.search(catalog_text)
+    if version is None or int(version.group(1)) < _FCM_FLAG_FROM_MAJOR:
+        return []
+    app = ET.fromstring(manifest_text).find("application") if manifest_text else None
+    flags = [] if app is None else [m for m in app.findall("meta-data") if m.get(f"{_ANDROID}name") == _FCM_FLAG]
+    if any(m.get(f"{_ANDROID}value") == "true" for m in flags):
+        return []
+    return [Violation(manifest_path, 1, FCM_REGISTRATION, f"firebase-messaging {version.group(1)}+ needs <meta-data {_FCM_FLAG}=\"true\"> in the application")]
+
+
 def _tracked_files(config: Config) -> list[Path]:
     """Files git tracks under the project root; falls back to a directory walk outside a git checkout."""
     try:
@@ -72,6 +87,10 @@ def check(config: Config) -> list[Violation]:
     for extra in ("gradle/libs.versions.toml", "settings.gradle.kts", "build.gradle.kts"):
         if (config.root / extra).exists():
             found += check_gradle(extra, (config.root / extra).read_text(encoding="utf-8"))
+    catalog, manifest = config.root / "gradle/libs.versions.toml", config.root / "androidApp/src/main/AndroidManifest.xml"
+    if catalog.exists():
+        found += check_fcm_registration(rel(config, manifest), catalog.read_text(encoding="utf-8"),
+                                        manifest.read_text(encoding="utf-8") if manifest.exists() else "")
     for path in _tracked_files(config):
         if path.is_file() and any(fnmatch.fnmatch(path.name, pattern) for pattern in _SECRET_FILES):
             found.append(Violation(rel(config, path), 1, SECRET_FILE, "secret/credential file must not be committed"))

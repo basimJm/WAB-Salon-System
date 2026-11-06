@@ -20,7 +20,9 @@ enum class InstallationTrigger { Launch, SessionChange, LanguageChange, PushToke
 /**
  * Keeps `PUT /installations` current: at launch, when the session signs in or out (link / unlink), when the
  * language changes and whenever Firebase refreshes the push token. Calls are serialized; failures are silent and
- * the next trigger retries (nothing user-facing depends on it).
+ * the next trigger retries (nothing user-facing depends on it). A token equal to the one before is not a refresh:
+ * reading the token inside the sync can publish it again, and without this a sync would trigger the next one without
+ * end (CUS-113).
  */
 class InstallationSyncer(
     private val sync: SyncInstallationUseCase,
@@ -40,7 +42,7 @@ class InstallationSyncer(
     fun triggers(): Flow<InstallationTrigger> = merge(
         session.map { it.isSignedIn }.distinctUntilChanged().drop(1).map { InstallationTrigger.SessionChange },
         language.distinctUntilChanged().drop(1).map { InstallationTrigger.LanguageChange },
-        pushTokens.map { InstallationTrigger.PushTokenRefresh },
+        pushTokens.distinctUntilChanged().map { InstallationTrigger.PushTokenRefresh },
     ).onStart { emit(InstallationTrigger.Launch) }
 
     private suspend fun perform(trigger: InstallationTrigger) = lock.withLock {

@@ -12,9 +12,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
+/** A runaway sync loop would reach this; the test then fails on its count instead of hanging. */
+private const val RUNAWAY_SYNCS = 50
 
 private class RecordingInstallations : InstallationsRepository {
     val registered = mutableListOf<Pair<InstallationInfo, String>>()
@@ -63,6 +67,45 @@ class InstallationSyncerTest {
         pushTokens.emit("fcm-2")
         assertEquals(InstallationTrigger.PushTokenRefresh, syncer.performed.last())
         assertEquals(4, installations.registered.size)
+    }
+
+    @Test
+    fun theSameTokenTwiceRefreshesOnceAndANewTokenRefreshesAgain() = runTest(UnconfinedTestDispatcher()) {
+        val syncer = syncer()
+        syncer.start(backgroundScope)
+        pushTokens.emit("fcm-2")
+        pushTokens.emit("fcm-2")
+        assertEquals(listOf(InstallationTrigger.Launch, InstallationTrigger.PushTokenRefresh), syncer.performed)
+        pushTokens.emit("fcm-3")
+        assertEquals(3, installations.registered.size)
+        pushTokens.emit("fcm-3")
+        assertEquals(3, installations.registered.size)
+    }
+
+    @Test
+    fun aSyncThatRepublishesTheSameTokenEndsAfterThatTokensSync() = runTest(UnconfinedTestDispatcher()) {
+        // The relay replays its latest token, and reading the token during a sync publishes it again (the CUS-113 loop).
+        val relay = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 1)
+        val syncer = InstallationSyncer(
+            sync = SyncInstallationUseCase(
+                installations,
+                { info.also { if (installations.registered.size < RUNAWAY_SYNCS) relay.tryEmit("fcm-1") } },
+                language,
+            ),
+            session = session,
+            language = language,
+            pushTokens = relay,
+        )
+        syncer.start(backgroundScope)
+        advanceUntilIdle()
+        assertEquals(
+            listOf(InstallationTrigger.Launch, InstallationTrigger.PushTokenRefresh),
+            syncer.performed,
+            "launch, then the token it published; the republished copies are the same token",
+        )
+        relay.tryEmit("fcm-1")
+        advanceUntilIdle()
+        assertEquals(2, installations.registered.size, "a later republish of the same token does not sync")
     }
 
     @Test
