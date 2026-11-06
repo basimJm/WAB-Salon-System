@@ -2,6 +2,7 @@ package com.fab.wab.merchant.core.firebase
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import com.fab.wab.merchant.core.analytics.AnalyticsBackend
 import com.fab.wab.merchant.core.analytics.AnalyticsEvent
 import com.fab.wab.merchant.core.analytics.AnalyticsValue
@@ -12,25 +13,40 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
+import kotlin.coroutines.cancellation.CancellationException
 
 /** How long [AndroidPushTokenProvider.currentToken] waits for `onRegistered` after `register()`. */
 private const val REGISTRATION_TIMEOUT_MS = 15_000L
+
+private const val TAG = "FCM"
 
 class AndroidPushTokenProvider(
     private val messaging: FirebaseMessaging = FirebaseMessaging.getInstance(),
 ) : PushTokenProvider {
     // FCM 26: `register()` replaces the deprecated `getToken()`; the token arrives in the messaging service's
-    // `onRegistered`, which publishes it to [PushTokenRelay] (replay 1, so an earlier token is returned at once).
-    // A placeholder Firebase config (no valid API key yet) raises IllegalArgumentException: no token, no crash.
-    override suspend fun currentToken(): String? = try {
-        messaging.register().awaitResult()
-        withTimeoutOrNull(REGISTRATION_TIMEOUT_MS) { PushTokenRelay.tokenUpdates.first() } ?: existingToken()
-    } catch (expected: IOException) {
-        null
-    } catch (expected: IllegalStateException) {
-        null
-    } catch (expected: IllegalArgumentException) {
-        null
+    // `onRegistered`, which publishes it to [PushTokenRelay] (replay 1). A token the relay already holds is returned
+    // without another `register()`: every call publishes again, and the installation sync reads this once per sync (MER-094).
+    // A failure (no valid Firebase config, `API disabled` without the manifest flag, no network) is logged, never silent.
+    override suspend fun currentToken(): String? {
+        PushTokenRelay.latest?.let { return it }
+        return try {
+            messaging.register().awaitResult()
+            withTimeoutOrNull(REGISTRATION_TIMEOUT_MS) { PushTokenRelay.tokenUpdates.first() } ?: existingToken()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (failure: IOException) {
+            logFailure(failure)
+        } catch (failure: IllegalStateException) {
+            logFailure(failure)
+        } catch (failure: IllegalArgumentException) {
+            logFailure(failure)
+        }
+    }
+
+    /** Class and message only: the message of a Firebase failure explains what to fix, and it never holds a token. */
+    private fun logFailure(failure: Exception): String? {
+        Log.w(TAG, "Push token registration failed: ${failure.javaClass.name}: ${failure.message}")
+        return null
     }
 
     override val tokenUpdates: SharedFlow<String> get() = PushTokenRelay.tokenUpdates
