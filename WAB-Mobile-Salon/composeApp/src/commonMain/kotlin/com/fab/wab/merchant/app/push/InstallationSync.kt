@@ -20,8 +20,10 @@ import kotlinx.coroutines.flow.onStart
  * pushing to a dead token, and a new booking request never arrived while the app was in the background.
  *
  * While a member is signed in it runs [sync] (`PUT /installations`) once when the app starts or the member signs in,
- * and again for every token in [tokenUpdates]; the relay replays the latest token, so a start with a known token
- * syncs twice (the PUT is idempotent). A guest never syncs, and signing out cancels a sync still in flight.
+ * and again for every token in [tokenUpdates] that differs from the one before; the relay replays the latest token, so
+ * a start with a known token syncs twice (the PUT is idempotent). The same token is never synced twice in a row:
+ * reading the token inside [sync] can publish it again, and without this a sync would trigger the next one without end
+ * (MER-094: 152 PUTs in 90 s). A guest never syncs, and signing out cancels a sync still in flight.
  */
 class InstallationSync(
     private val session: Flow<SessionState>,
@@ -35,7 +37,10 @@ class InstallationSync(
             .flatMapLatest { signedIn -> if (signedIn) syncWhileSignedIn() else emptyFlow() }
             .launchIn(scope)
 
-    /** Inside the `flatMapLatest` branch, so signing out cancels a sync in flight; a token that arrives meanwhile syncs next. */
-    private fun syncWhileSignedIn(): Flow<Unit> =
-        tokenUpdates.map { }.onStart { emit(Unit) }.conflate().onEach { sync() }
+    /**
+     * Inside the `flatMapLatest` branch, so signing out cancels a sync in flight and signing in again starts afresh;
+     * a token that arrives meanwhile syncs next. The start is a `null` token, so any first token differs from it.
+     */
+    private fun syncWhileSignedIn(): Flow<String?> =
+        tokenUpdates.map<String, String?> { it }.onStart { emit(null) }.distinctUntilChanged().conflate().onEach { sync() }
 }

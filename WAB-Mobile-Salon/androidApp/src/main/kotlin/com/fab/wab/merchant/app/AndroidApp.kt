@@ -28,6 +28,7 @@ class AndroidApp : Application() {
 
         // FCM token: register (FCM 26) and store it; MyFirebaseMessagingService.onRegistered also stores later refreshes.
         // Resolved on the IO scope so creating the settings store and Firebase Messaging stays off the main thread.
+        // A failed registration is logged by AndroidPushTokenProvider (tag FCM) with its exception class and message.
         appScope.launch {
             val appSettings: AppSettings = getKoin().get()
             val pushTokens: PushTokenProvider = getKoin().get()
@@ -36,7 +37,7 @@ class AndroidApp : Application() {
                 appSettings.setFcmToken(token)
                 Log.d(FCM_TAG, "Token stored")
             } else {
-                Log.w(FCM_TAG, "No FCM token (Firebase not configured or registration failed)")
+                Log.w(FCM_TAG, "No FCM token stored; the registration failure is logged just before")
             }
         }
     }

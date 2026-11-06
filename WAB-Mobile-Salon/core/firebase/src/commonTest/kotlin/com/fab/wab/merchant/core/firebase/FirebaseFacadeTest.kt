@@ -16,6 +16,14 @@ class FirebaseFacadeTest {
     }
 
     @Test
+    fun pushTokenRelayExposesTheLatestTokenWithoutCollecting() {
+        PushTokenRelay.publish("token-1")
+        assertEquals("token-1", PushTokenRelay.latest)
+        PushTokenRelay.publish("token-2")
+        assertEquals("token-2", PushTokenRelay.latest)
+    }
+
+    @Test
     fun fakeAppInstanceIdIsScriptable() = runTest {
         val provider = FakeAppInstanceIdProvider()
         assertEquals(FakeAppInstanceIdProvider.DEFAULT_APP_INSTANCE_ID, provider.appInstanceId())
