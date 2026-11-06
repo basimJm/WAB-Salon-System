@@ -15,6 +15,9 @@ object PushTokenRelay {
     private val updates = MutableSharedFlow<String>(replay = 1, extraBufferCapacity = 1)
     val tokenUpdates: SharedFlow<String> = updates.asSharedFlow()
 
+    /** The latest token published in this process, or null before the first one. */
+    val latest: String? get() = updates.replayCache.firstOrNull()
+
     fun publish(token: String) {
         updates.tryEmit(token)
     }
