@@ -1,7 +1,0 @@
-dist
-coverage
-node_modules
-docs
-.claude
-package-lock.json
-*.md
