@@ -2,13 +2,13 @@
 
 > Only open repo-level task blocks live here. The hook prints open tasks at session start; finished blocks go to `docs/knowledge/session-archive.md`.
 
-### T-154c — Feature line: first new feature, local model, SYSTEM_SETUP
+### T-154c — Feature line: first new feature, local model
 - Branch: `chore/t-154c-feature-line`
 - Status: TODO
 - Acceptance criteria:
   - [ ] Step 4b: a new feature across server, admin, customer and merchant through `line.py` (the owner brings one)
   - [ ] Step 5: optional local-model worker
-  - [ ] Phase 2 `SYSTEM_SETUP`: PAUSED by the owner 2026-11-05, parked on `wip/t-154b-system-setup`
+  - [x] Phase 2 `SYSTEM_SETUP`: moved to its own repository, github.com/basimJm/system_setup (T-155)
   - [ ] Review leftovers (non-blocking): reviewer failure starts a fix worker; diff cut at 30k chars; hooks read from the worktree; wrap-up push unguarded
 - Loops: 0/1
 - Review: PENDING
@@ -23,3 +23,14 @@
 - Tests: `scripts/test_tasks.py`, `test_map_recall.py`, `test_line.py`, `test_qa_usage.py`, hook tests, `tasks.py check` (only the known CUS-047 note), server prettier: run before this commit
 - Loops: 1/1 — checks above re-run after the merges; every master compared with `main` after the fast-forward
 - Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — merges, backlog statuses and ignore rules only; product code was reviewed in its own blocks. Fast-forward of the masters on the owner's explicit request ("pull masters from the main")
+
+### T-155 — Remove SYSTEM_SETUP: it lives in its own repository now
+- Branch: `chore/t-155-remove-system-setup`
+- Status: IN REVIEW
+- Acceptance criteria:
+  - [x] `.claude/tools/SYSTEM_SETUP` is gone (1638 files); its home is github.com/basimJm/system_setup (public, MIT)
+  - [x] No file outside the session archive points at it; `docs/knowledge/facts.md` says where it went
+  - [x] Root checks: `scripts/test_*.py` 85 OK, `.claude/hooks/test_hooks.py` OK. `tasks.py check` exits 1 only on CUS-047
+        (BLOCKED with every dependency DONE), the same on `server` before this change; not touched here
+- Loops: 1/1
+- Review: PASSED (SE ✔, Mobile N/A, Architect ✔, QA ✔) — deletion only; one reference updated, one fact added
